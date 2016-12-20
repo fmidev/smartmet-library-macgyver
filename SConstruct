@@ -2,7 +2,7 @@
 # SConstruct for building Macgyver
 #
 # Usage:
-#       scons [-j 4] [-Q] [debug=1|profile=1] [objdir=<path>] smartmet_macgyver.so|lib
+#       scons [-j 4] [-Q] [debug=1|profile=1] [objdir=<path>] smartmet-macgyver.so|lib
 #             [windows_boost_path=<path>]
 #
 # Notes:
@@ -21,7 +21,7 @@
 import os.path, os
 
 Help(""" 
-    Usage: scons [-j 4] [-Q] [debug=1|profile=1] [objdir=<path>] smartmet_macgyver.so|lib
+    Usage: scons [-j 4] [-Q] [debug=1|profile=1] [objdir=<path>] smartmet-macgyver.so|lib
     
     Or just use 'make release|debug|profile', which point right back to us.
 """) 
@@ -163,4 +163,4 @@ for fn in Glob("source/*.cpp"):
 
 out_postfix= WINDOWS and (DEBUG and "_debug" or "_release") or ""
 
-env.SharedLibrary( "smartmet_macgyver"+out_postfix, objs )
+env.SharedLibrary( "smartmet-macgyver"+out_postfix, objs )

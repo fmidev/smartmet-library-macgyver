@@ -1,4 +1,7 @@
-LIB = macgyver
+SUBNAME = macgyver
+LIB = smartmet-$(SUBNAME)
+SPEC = smartmet-library-$(SUBNAME)
+INCDIR = smartmet/$(SUBNAME)
 
 # Using 'scons' for building (make clean|release|debug|profile)
 #
@@ -32,16 +35,14 @@ objdir = obj
 
 rpmsourcedir=/tmp/$(shell whoami)/rpmbuild
 
-rpmerr = "There's no spec file ($(LIB).spec). RPM wasn't created. Please make a spec file or copy and rename it into $(LIB).spec"
-
-rpmversion := $(shell grep "^Version:" $(LIB).spec | cut -d" " -f2 | tr . _)
-rpmrelease := $(shell grep "^Release:" $(LIB).spec | cut -d" " -f2 | tr . _)
+rpmversion := $(shell grep "^Version:" $(SPEC).spec | cut -d" " -f2 | tr . _)
+rpmrelease := $(shell grep "^Release:" $(SPEC).spec | cut -d" " -f2 | tr . _)
 
 rpmexcludevcs := $(shell tar --help | grep -m 1 -o -- '--exclude-vcs')
 
 # What to install
 
-SOFILE        = libsmartmet_$(LIB).so
+SOFILE        = libsmartmet-$(SUBNAME).so
 
 # How to install. Note: Must be 0755 for shared libraries, or the
 # package will require itself!
@@ -77,11 +78,11 @@ format:
 	clang-format -i -style=file include/*.h source/*.cpp test/*.cpp
 
 install:
-	@mkdir -p $(includedir)/$(LIB)
+	@mkdir -p $(includedir)/$(INCDIR)
 	@list=`cd include && ls -1 *.h`; \
 	for hdr in $$list; do \
-	  echo $(INSTALL_DATA) include/$$hdr $(includedir)/$(LIB)/$$hdr; \
-	  $(INSTALL_DATA) include/$$hdr $(includedir)/$(LIB)/$$hdr; \
+	  echo $(INSTALL_DATA) include/$$hdr $(includedir)/$(INCDIR)/$$hdr; \
+	  $(INSTALL_DATA) include/$$hdr $(includedir)/$(INCDIR)/$$hdr; \
 	done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(SOFILE) $(libdir)/$(SOFILE)
@@ -89,24 +90,17 @@ install:
 test:
 	$(MAKE) -C test $@
 
-html:
-	mkdir -p /data/local/html/lib/$(LIB)
-	doxygen $(LIB).dox
-
 rpm: clean
-	if [ -e $(LIB).spec ]; \
+	if [ -e $(SPEC).spec ]; \
 	then \
 	  mkdir -p $(rpmsourcedir) ; \
-	  tar $(rpmexcludevcs) -C ../ -cf $(rpmsourcedir)/libsmartmet-$(LIB).tar $(LIB) ; \
-	  gzip -f $(rpmsourcedir)/libsmartmet-$(LIB).tar ; \
-	  TAR_OPTIONS=--wildcards rpmbuild -ta $(rpmsourcedir)/libsmartmet-$(LIB).tar.gz ; \
-	  rm -f $(rpmsourcedir)/libsmartmet-$(LIB).tar.gz ; \
+	  tar $(rpmexcludevcs) -C ../ -cf $(rpmsourcedir)/$(SPEC).tar $(SUBNAME) ; \
+	  gzip -f $(rpmsourcedir)/$(SPEC).tar ; \
+	  TAR_OPTIONS=--wildcards rpmbuild -ta $(rpmsourcedir)/$(SPEC).tar.gz ; \
+	  rm -f $(rpmsourcedir)/$(SPEC).tar.gz ; \
 	else \
-	  echo $(rpmerr); \
+	  echo $(SPEC).spec file missing; \
 	fi;
-
-tag:
-	cvs -f tag 'libsmartmet-$(LIB)-$(rpmversion)-$(rpmrelease)' .
 
 cppcheck:
 	cppcheck -DUNIX -I include -I $(includedir) source
@@ -116,9 +110,9 @@ headertest:
 	@echo
 	@for hdr in $(HDRS); do \
 	echo $$hdr; \
-	echo "#include \"$$hdr\"" > /tmp/$(LIB).cpp; \
-	echo "int main() { return 0; }" >> /tmp/$(LIB).cpp; \
-	$(CC) $(CFLAGS) $(INCLUDES) -o /dev/null /tmp/$(LIB).cpp $(LIBS); \
+	echo "#include \"$$hdr\"" > /tmp/$(SUBNAME).cpp; \
+	echo "int main() { return 0; }" >> /tmp/$(SUBNAME).cpp; \
+	$(CC) $(CFLAGS) $(INCLUDES) -o /dev/null /tmp/$(SUBNAME).cpp $(LIBS); \
 	done
 
 analysis:

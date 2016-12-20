@@ -1,9 +1,11 @@
-%define LIBNAME macgyver
+%define DIRNAME macgyver
+%define LIBNAME smartmet-%{DIRNAME}
+%define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
-Name: libsmartmet-%{LIBNAME}
-Version: 16.9.30
+Name: %{SPECNAME}
+Version: 16.12.20
 Release: 1%{?dist}.fmi
-License: FMI
+License: MIT
 Group: Development/Libraries
 URL: http://www.weatherproof.fi
 Source0: %{name}.tar.gz
@@ -17,7 +19,9 @@ BuildRequires: cppformat-devel >= 2.0
 Requires: cppformat >= 2.0
 Requires: ctpp2
 Requires: libicu >= 50.1
-Provides: %{LIBNAME}
+Provides: %{SPECNAME}
+Obsoletes: libsmartmet_macgyver < 16.12.20
+Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
 
 %description
 FMI MacGyver library
@@ -25,13 +29,13 @@ FMI MacGyver library
 %prep
 rm -rf $RPM_BUILD_ROOT
 
-%setup -q -n %{LIBNAME}
+%setup -q -n %{DIRNAME}
  
 %build
 make %{_smp_mflags}
 
 %install
-%makeinstall includedir=%{buildroot}%{_includedir}/smartmet
+%makeinstall
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -41,20 +45,24 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(0775,root,root,0775)
-%{_libdir}/libsmartmet_macgyver.so
+%{_libdir}/libsmartmet-%{DIRNAME}.so
 
-%package -n libsmartmet-%{LIBNAME}-devel
+%package -n %{SPECNAME}-devel
 Summary: FMI MacGyver library development files
-Provides: %{LIBNAME}-devel
+Provides: %{SPECNAME}-devel
+Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
-%description -n libsmartmet-%{LIBNAME}-devel
+%description -n %{SPECNAME}-devel
 FMI MacGyver library development files
 
-%files -n libsmartmet-%{LIBNAME}-devel
+%files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
-%{_includedir}/smartmet/%{LIBNAME}
+%{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Dec 20 2016 Mika Heiskanen <mika.heiskanen@fmi.fi> - 16.12.20-1.fmi
+- Switched to open source naming conventions
+
 * Fri Sep 30 2016 Mika Heiskanen <mika.heiskanen@fmi.fi> - 16.9.30-1.fmi
 - ThreadPool now catches all exceptions to prevent program termination
 
