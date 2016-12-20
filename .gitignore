@@ -1,0 +1,6 @@
+*~
+.sconsign.dblite
+obj/
+*Test
+lib*.so
+
