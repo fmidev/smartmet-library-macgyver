@@ -27,7 +27,7 @@ else
 endif
 
 bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include/smartmet
+includedir = $(PREFIX)/include
 sharedir = $(PREFIX)/share/smartmet
 objdir = obj
 
