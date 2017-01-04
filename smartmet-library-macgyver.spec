@@ -7,7 +7,7 @@ Version: 16.12.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
-URL: http://www.weatherproof.fi
+URL: https://github.com/fmidev/smartmet-library-macgyver
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost-devel
