@@ -16,6 +16,7 @@ BuildRequires: smartmet-timezones >= 13.10.22
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: cppformat-devel >= 2.0
+BuildRequires: scons
 Requires: cppformat >= 2.0
 Requires: ctpp2
 Requires: libicu >= 50.1
