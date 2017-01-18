@@ -14,8 +14,8 @@ CC = g++
 CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=c++11 $(MAINFLAGS)
 INCLUDES = -I ../include -I /usr/include/smartmet
 
-LIBS = ../libsmartmet_macgyver.so \
-	-lcppformat \
+LIBS = ../libsmartmet-macgyver.so \
+	-lfmt \
 	-lboost_locale \
 	-lboost_date_time \
 	-lboost_thread
@@ -35,5 +35,5 @@ test: $(PROG)
 	done; \
 	$$ok
 
-$(PROG) : % : %.cpp ../libsmartmet_macgyver.so
+$(PROG) : % : %.cpp ../libsmartmet-macgyver.so
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
