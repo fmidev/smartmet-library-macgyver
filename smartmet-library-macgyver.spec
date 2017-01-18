@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 16.12.20
+Version: 17.1.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,9 +15,9 @@ BuildRequires: imake
 BuildRequires: smartmet-timezones >= 13.10.22
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
-BuildRequires: cppformat-devel >= 2.0
+BuildRequires: fmt-devel
 BuildRequires: scons
-Requires: cppformat >= 2.0
+Requires: fmt
 Requires: ctpp2
 Requires: libicu >= 50.1
 Provides: %{SPECNAME}
@@ -61,6 +61,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jan 18 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.18-1.fmi
+- Upgraded from cppformat to fmt
+
 * Tue Dec 20 2016 Mika Heiskanen <mika.heiskanen@fmi.fi> - 16.12.20-1.fmi
 - Switched to open source naming conventions
 

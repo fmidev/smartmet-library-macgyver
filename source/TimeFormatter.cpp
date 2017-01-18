@@ -11,7 +11,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
-#include <cppformat/format.h>
+#include <fmt/format.h>
 
 #include <stdexcept>
 

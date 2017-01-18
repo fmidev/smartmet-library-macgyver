@@ -142,7 +142,7 @@ env.Append( LIBS = [ "boost_filesystem",
                      "boost_date_time",
                      "boost_regex",
                      "boost_system",
-		     "cppformat",
+		     "fmt",
                      "ctpp2",
                      "pthread",
                      "rt"

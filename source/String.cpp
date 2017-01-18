@@ -1,5 +1,5 @@
 #include "String.h"
-#include <cppformat/format.h>                 // cppformat
+#include <fmt/format.h>
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
@@ -77,11 +77,10 @@ float stof(const std::string& str)
   std::string::const_iterator begin = str.begin(), end = str.end();
   if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))
     if (begin == end)
-	  {
-		if(std::isfinite(result))
-		  return boost::numeric_cast<float>(result);
-		throw std::invalid_argument("Infinite numbers are not allowed: '" + str + "' in Fmi::stof");
-	  }
+    {
+      if (std::isfinite(result)) return boost::numeric_cast<float>(result);
+      throw std::invalid_argument("Infinite numbers are not allowed: '" + str + "' in Fmi::stof");
+    }
   throw std::invalid_argument("Fmi::stof failed to convert '" + str + "' to float");
 }
 
@@ -91,11 +90,10 @@ double stod(const std::string& str)
   std::string::const_iterator begin = str.begin(), end = str.end();
   if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))
     if (begin == end)
-	  {
-		if(std::isfinite(result))
-		  return result;
-		throw std::invalid_argument("Infinite numbers are not allowed: '" + str + "' in Fmi::stod");
-	  }
+    {
+      if (std::isfinite(result)) return result;
+      throw std::invalid_argument("Infinite numbers are not allowed: '" + str + "' in Fmi::stod");
+    }
   throw std::invalid_argument("Fmi::stod failed to convert '" + str + "' to double");
 }
 
