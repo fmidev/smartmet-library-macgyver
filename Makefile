@@ -31,10 +31,6 @@ includedir = $(PREFIX)/include
 sharedir = $(PREFIX)/share/smartmet
 objdir = obj
 
-# rpm variables
-
-rpmsourcedir=/tmp/$(shell whoami)/rpmbuild
-
 rpmversion := $(shell grep "^Version:" $(SPEC).spec | cut -d" " -f2 | tr . _)
 rpmrelease := $(shell grep "^Release:" $(SPEC).spec | cut -d" " -f2 | tr . _)
 
@@ -91,10 +87,9 @@ test:
 rpm: clean
 	if [ -e $(SPEC).spec ]; \
 	then \
-	  mkdir -p $(rpmsourcedir) ; \
-	  tar -czvf $(rpmsourcedir)/$(SPEC).tar.gz --transform "s,^,$(SPEC)/," * ; \
-	  rpmbuild -ta $(rpmsourcedir)/$(SPEC).tar.gz ; \
-	  rm -f $(rpmsourcedir)/$(SPEC).tar.gz ; \
+	  tar -czvf $(SPEC).tar.gz --transform "s,^,$(SPEC)/," * ; \
+	  rpmbuild -ta $(SPEC).tar.gz ; \
+	  rm -f $(SPEC).tar.gz ; \
 	else \
 	  echo $(SPEC).spec file missing; \
 	fi;
