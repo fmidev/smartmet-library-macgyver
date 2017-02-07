@@ -12,7 +12,7 @@ DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
 CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=c++11 $(MAINFLAGS)
-INCLUDES = -I ../include -I /usr/include/smartmet
+INCLUDES = -I ../macgyver -I /usr/include/smartmet
 
 LIBS = ../libsmartmet-macgyver.so \
 	-lfmt \

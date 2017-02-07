@@ -3,16 +3,9 @@ LIB = smartmet-$(SUBNAME)
 SPEC = smartmet-library-$(SUBNAME)
 INCDIR = smartmet/$(SUBNAME)
 
-# Using 'scons' for building (make clean|release|debug|profile)
-#
-#
-# To build serially (helps get the error messages right): make debug SCONS_FLAGS=""
-
-SCONS_FLAGS=-j 6
-
 # Installation directories
 
-prosessor := $(shell uname -p)
+processor := $(shell uname -p)
 
 ifeq ($(origin PREFIX), undefined)
   PREFIX = /usr
@@ -20,7 +13,7 @@ else
   PREFIX = $(PREFIX)
 endif
 
-ifeq ($(prosessor), x86_64)
+ifeq ($(processor), x86_64)
   libdir = $(PREFIX)/lib64
 else
   libdir = $(PREFIX)/lib
@@ -28,61 +21,137 @@ endif
 
 bindir = $(PREFIX)/bin
 includedir = $(PREFIX)/include
-sharedir = $(PREFIX)/share/smartmet
+datadir = $(PREFIX)/share
 objdir = obj
 
-rpmversion := $(shell grep "^Version:" $(SPEC).spec | cut -d" " -f2 | tr . _)
-rpmrelease := $(shell grep "^Release:" $(SPEC).spec | cut -d" " -f2 | tr . _)
+# Compiler options
+
+DEFINES = -DUNIX -D_REENTRANT
+
+ifeq ($(CXX), clang++)
+
+ FLAGS = \
+	-std=c++11 -fPIC -MD \
+	-Weverything \
+	-Wno-c++98-compat \
+	-Wno-float-equal \
+	-Wno-padded \
+	-Wno-missing-prototypes
+
+ INCLUDES = \
+	-isystem $(includedir) \
+	-isystem $(includedir)/smartmet
+
+else
+
+ FLAGS = -std=c++11 -fdiagnostics-color=always -fPIC -MD -Wall -W -Wno-unused-parameter
+
+ FLAGS_DEBUG = \
+	-Wcast-align \
+	-Winline \
+	-Wno-multichar \
+	-Wno-pmf-conversions \
+	-Woverloaded-virtual  \
+	-Wpointer-arith \
+	-Wcast-qual \
+	-Wredundant-decls \
+	-Wwrite-strings \
+	-Wno-sign-promo \
+	-Wno-unknown-pragmas
+
+ FLAGS_RELEASE = -Wuninitialized
+
+ INCLUDES = \
+	-I$(includedir) \
+	-I$(includedir)/smartmet \
+	$(pkg-config --cflags icu-i18n) \
+
+endif
+
+# Compile options in detault, debug and profile modes
+
+CFLAGS         = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
+CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -O0 -g
+CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
+
+LIBS = -L$(libdir) \
+	-lboost_date_time \
+	-lboost_filesystem \
+	-lboost_thread \
+	-lboost_regex \
+	-lboost_system \
+	$(pkg-config --libs icu-i18n) \
+	-lfmt \
+	-lctpp2 \
+	-lpthread -lrt
 
 # What to install
 
-SOFILE        = libsmartmet-$(SUBNAME).so
+LIBFILE = libsmartmet-$(SUBNAME).so
 
-# How to install. Note: Must be 0755 for shared libraries, or the
-# package will require itself!
+# How to install
 
-INSTALL_PROG = install -m 0755
-INSTALL_DATA = install -m 0664
+INSTALL_PROG = install -p -m 775
+INSTALL_DATA = install -p -m 664
+
+# Compile option overrides
+
+ifneq (,$(findstring debug,$(MAKECMDGOALS)))
+  CFLAGS = $(CFLAGS_DEBUG)
+endif
+
+ifneq (,$(findstring profile,$(MAKECMDGOALS)))
+  CFLAGS = $(CFLAGS_PROFILE)
+endif
+
+# Compilation directories
+
+vpath %.cpp $(SUBNAME)
+vpath %.h $(SUBNAME)
+
+# The files to be compiled
+
+SRCS = $(wildcard $(SUBNAME)/*.cpp)
+HDRS = $(wildcard $(SUBNAME)/*.h)
+OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
+
+INCLUDES := -Iinclude $(INCLUDES)
 
 .PHONY: test rpm
 
-#
 # The rules
-#
-SCONS_FLAGS += objdir=$(objdir)
 
-all release:
-	scons $(SCONS_FLAGS) $(SOFILE)
+all: objdir $(LIBFILE)
+debug: all
+release: all
+profile: all
 
-$(SOFILE):
-	scons $(SCONS_FLAGS) $@
-
-debug:
-	scons $(SCONS_FLAGS) debug=1 $(SOFILE)
-
-profile:
-	scons $(SCONS_FLAGS) profile=1 $(SOFILE)
+$(LIBFILE): $(OBJS)
+	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
 
 clean:
-	@#scons -c objdir=$(objdir)
-	-rm -f $(SOFILE) *~ source/*~ include/*~
-	-rm -rf $(objdir)
+	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
+	rm -rf $(objdir)
 
 format:
-	clang-format -i -style=file include/*.h source/*.cpp test/*.cpp
+	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
 
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
-	@list=`cd include && ls -1 *.h`; \
+	@list='$(HDRS)'; \
 	for hdr in $$list; do \
-	  echo $(INSTALL_DATA) include/$$hdr $(includedir)/$(INCDIR)/$$hdr; \
-	  $(INSTALL_DATA) include/$$hdr $(includedir)/$(INCDIR)/$$hdr; \
+	  HDR=$$(basename $$hdr); \
+	  echo $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
+	  $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
 	done
 	@mkdir -p $(libdir)
-	$(INSTALL_PROG) $(SOFILE) $(libdir)/$(SOFILE)
+	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
 test:
-	$(MAKE) -C test $@
+	+cd test && make test
+
+objdir:
+	@mkdir -p $(objdir)
 
 rpm: clean
 	if [ -e $(SPEC).spec ]; \
@@ -94,21 +163,10 @@ rpm: clean
 	  echo $(SPEC).spec file missing; \
 	fi;
 
-cppcheck:
-	cppcheck -DUNIX -I include -I $(includedir) source
+.SUFFIXES: $(SUFFIXES) .cpp
 
-headertest:
-	@echo "Checking self-sufficiency of each header:"
-	@echo
-	@for hdr in $(HDRS); do \
-	echo $$hdr; \
-	echo "#include \"$$hdr\"" > /tmp/$(SUBNAME).cpp; \
-	echo "int main() { return 0; }" >> /tmp/$(SUBNAME).cpp; \
-	$(CC) $(CFLAGS) $(INCLUDES) -o /dev/null /tmp/$(SUBNAME).cpp $(LIBS); \
-	done
-
-analysis:
-	@for f in source/*.cpp; do cmd="clang++ --analyze -I include -DUNIX -DFMI_COMPRESSION -DBOOST -DBOOST_IOSTREAMS_NO_LIB $$f"; echo $$cmd; $$cmd; done; rm *.plist
+obj/%.o: %.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)
