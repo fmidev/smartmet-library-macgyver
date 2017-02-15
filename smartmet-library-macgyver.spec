@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 17.1.18
+Version: 17.2.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -22,6 +22,8 @@ Requires: libicu >= 50.1
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
+Obsoletes: libsmartmet-macgyver < 16.12.20
+Obsoletes: libsmartmet-macgyver-debuginfo < 16.12.20
 
 %description
 FMI MacGyver library
@@ -60,6 +62,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Feb 15 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.15-1.fmi
+- Fixed obsoletes-fields
+
 * Wed Jan 18 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.18-1.fmi
 - Upgraded from cppformat to fmt
 
