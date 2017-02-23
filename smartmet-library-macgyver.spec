@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 17.2.15
+Version: 17.2.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -62,6 +62,15 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Feb 22 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.22-1.fmi
+- Added NearTreeLatLon::SurfaceLength
+
+* Sat Feb 18 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.18-1.fmi
+- NearTreeLatLon is now templated based on the type of the ID
+
+* Fri Feb 17 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.17-1.fmi
+- Added a coordinate object for efficient nearest neighbour searches with latlon coordinates
+
 * Wed Feb 15 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.15-1.fmi
 - Fixed obsoletes-fields
 

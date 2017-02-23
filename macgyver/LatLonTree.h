@@ -9,6 +9,10 @@
  * NOT THREAD SAFE! Insert all points first and flush, after that accessing
  * is thread safe.
  *
+ * Note: Using NearTreeLatLon objects in a normal NearTree is potentially
+ *       much faster if there are a lot of searches, since the number of
+ *       trigonometric functions is much smalled than using GeoDistance.
+ *
  */
 // ======================================================================
 
