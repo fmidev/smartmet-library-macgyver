@@ -7,11 +7,8 @@
 
 #pragma once
 
-#if defined(_WIN32) || defined(WIN32)
-#define _USE_MATH_DEFINES
-#endif
-#include <cmath>
 #include <boost/array.hpp>
+#include <cmath>
 
 namespace Fmi
 {

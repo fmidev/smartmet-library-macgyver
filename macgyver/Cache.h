@@ -1,22 +1,10 @@
+
 // ======================================================================
 /*!
  * \brief Tagged multi-strategy caching in multithreaded environment
  */
 // ======================================================================
 #pragma once
-
-#if defined(_WIN32) || defined(WIN32)
-#define _USE_MATH_DEFINES
-#endif
-#include <cmath>
-#include <map>
-#include <set>
-#include <utility>
-#include <limits>
-#include <ctime>
-#include <sstream>
-#include <iterator>
-#include <fstream>
 
 #include <boost/noncopyable.hpp>
 #include <boost/bimap.hpp>
@@ -34,6 +22,16 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
+
+#include <cmath>
+#include <map>
+#include <set>
+#include <utility>
+#include <limits>
+#include <ctime>
+#include <sstream>
+#include <iterator>
+#include <fstream>
 
 // #ifndef NDEBUG
 #if 0
