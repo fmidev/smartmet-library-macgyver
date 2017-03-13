@@ -5,13 +5,16 @@
 // ======================================================================
 
 #include "TimeFormatter.h"
-#include "String.h"
+#include "StringUtil.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 #include <fmt/format.h>
+#if defined(_WIN32) || defined(WIN32)
+#include <fmt/printf.h>
+#endif
 
 #include <stdexcept>
 

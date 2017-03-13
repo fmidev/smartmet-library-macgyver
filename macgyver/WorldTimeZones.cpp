@@ -11,17 +11,11 @@
 // ======================================================================
 
 #include "WorldTimeZones.h"
-#include "String.h"
+#include "StringUtil.h"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#ifdef UNIX
 #include <stdint.h>
-#else
-// stdint.h -headeria ei ole visual c++:ssa
-typedef unsigned long uint32_t;
-typedef unsigned short uint16_t;
-#endif
 
 #include <set>
 

@@ -5,7 +5,7 @@
 // ======================================================================
 
 #include "TimeZones.h"
-#include "String.h"
+#include "StringUtil.h"
 #include "WorldTimeZones.h"
 
 #include <memory>

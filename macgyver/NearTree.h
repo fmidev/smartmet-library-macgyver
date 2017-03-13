@@ -95,12 +95,15 @@
 
 #pragma once
 
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <algorithm>
-#include <cmath>
 #include <map>
 #include <vector>
 

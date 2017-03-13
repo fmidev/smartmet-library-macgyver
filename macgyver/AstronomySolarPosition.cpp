@@ -17,18 +17,16 @@
  * License:
  *       UNKNOWN (not stated in JavaScript)
  */
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
 #include "AstronomyJulianTime.h"
 
 #include <vector>
-#ifdef UNIX
-#include <cmath>
-#else
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
 
 using namespace std;
 using boost::posix_time::not_a_date_time;

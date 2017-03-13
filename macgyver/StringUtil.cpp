@@ -1,10 +1,16 @@
-#include "String.h"
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+#include "StringUtil.h"
 #include <fmt/format.h>
+#if defined(_WIN32) || defined(WIN32)
+#include <fmt/printf.h>
+#endif
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <cmath>
 #include <stdexcept>
 
 namespace Fmi
@@ -21,6 +27,10 @@ std::string to_string(int value) { return fmt::sprintf("%d", value); }
 std::string to_string(long value) { return fmt::sprintf("%ld", value); }
 std::string to_string(unsigned int value) { return fmt::sprintf("%u", value); }
 std::string to_string(unsigned long value) { return fmt::sprintf("%lu", value); }
+#if defined(_WIN32) || defined(WIN32)
+std::string to_string(size_t value) { return fmt::sprintf("%zu", value); }
+std::string to_string(time_t value) { return fmt::sprintf("%zd", value); }
+#endif
 std::string to_string(float value) { return fmt::sprintf("%g", value); }
 std::string to_string(double value) { return fmt::sprintf("%g", value); }
 std::string to_string(const char* fmt, int value) { return fmt::sprintf(fmt, value); }

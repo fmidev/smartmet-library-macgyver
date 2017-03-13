@@ -21,6 +21,11 @@
 
 #pragma once
 
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
 

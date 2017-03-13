@@ -1,3 +1,8 @@
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+
 #include "Stat.h"
 
 #include <boost/foreach.hpp>
@@ -10,7 +15,6 @@
 #include <iterator>
 #include <stdexcept>
 #include <numeric>
-#include <cmath>
 
 namespace Fmi
 {
