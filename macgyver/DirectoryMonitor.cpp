@@ -119,11 +119,7 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
       {
         if (hasregex)
         {
-#if defined(_WIN32) || defined(WIN32)
           if (boost::regex_match(it->path().filename().string(), pattern))
-#else
-          if (boost::regex_match(it->path().filename().c_str(), pattern))
-#endif
           {
             std::time_t t = fs::last_write_time(it->path());
             contents.insert(Contents::value_type(it->path(), t));
