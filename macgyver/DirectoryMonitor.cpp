@@ -46,7 +46,7 @@
 // ======================================================================
 
 #include "DirectoryMonitor.h"
-#include "StringUtil.h"
+#include "StringConversion.h"
 
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
