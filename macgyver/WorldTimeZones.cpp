@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <stdint.h>
+#include <cstdint>
 
 #include <set>
 
