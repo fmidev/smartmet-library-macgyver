@@ -1,11 +1,11 @@
 #include "HelmertTransformation.h"
+#include <boost/math/constants/constants.hpp>
 #include <cstdio>
 #include <sstream>
 #include <stdexcept>
 
 #ifdef _MSC_VER
 #define __PRETTY_FUNCTION__ BOOST_CURRENT_FUNCTION
-#define M_PI 3.14159265358979323846
 #endif
 
 Fmi::HelmertTransformation::HelmertTransformation() : m(1), ex(0), ey(0), ez(0), tx(0), ty(0), tz(0)
@@ -124,7 +124,7 @@ std::string Fmi::get_fmi_sphere_towgs84_proj4_string(
     double lon,
     enum Fmi::HelmertTransformation::FmiSphereConvScalingType scaling_type)
 {
-  const double AS = 180.0 * 3600.0 / M_PI;
+  const double AS = 180.0 * 3600.0 / boost::math::constants::pi<double>();
   Fmi::HelmertTransformation conv;
   conv.set_fmi_sphere_to_reference_ellipsoid_conv(
       r, lat, lon, Fmi::ReferenceEllipsoid::wgs84, scaling_type);
