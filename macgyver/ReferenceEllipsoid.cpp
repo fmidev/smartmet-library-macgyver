@@ -1,6 +1,9 @@
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include "ReferenceEllipsoid.h"
 #include <algorithm>
-#include <cmath>
 
 const Fmi::ReferenceEllipsoid Fmi::ReferenceEllipsoid::wgs84(6378137.0, 1.0 / 298.257223563);
 

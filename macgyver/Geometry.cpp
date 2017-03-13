@@ -4,9 +4,11 @@
  * \brief Namespace Fmi::Geometry
  */
 // ======================================================================
-
-#include "Geometry.h"
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
 #include <cmath>
+#include "Geometry.h"
 #include <algorithm>
 
 namespace Fmi

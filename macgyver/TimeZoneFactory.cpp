@@ -5,7 +5,7 @@
 // ======================================================================
 
 #include "TimeZoneFactory.h"
-#include "String.h"
+#include "StringUtil.h"
 #include "WorldTimeZones.h"
 
 #ifdef FMI_MULTITHREAD

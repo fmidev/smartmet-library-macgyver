@@ -1,3 +1,8 @@
+#if defined(_WIN32) || defined(WIN32)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
 #include "boost/date_time/posix_time/posix_time_types.hpp"
@@ -5,15 +10,8 @@
 #include "boost/date_time/local_time_adjustor.hpp"
 #include "boost/date_time/c_local_time_adjustor.hpp"
 
-#include <math.h>
 #include <limits>
 #include <vector>
-#ifdef UNIX
-#include <cmath>
-#else
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
 
 using namespace std;
 using boost::posix_time::time_duration;
