@@ -28,6 +28,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
+#include <boost/math/constants/constants.hpp>
 
 namespace Fmi
 {
@@ -35,8 +36,8 @@ namespace Astronomy
 {
 #define INTDIV(x) (x)
 
-inline double rad2deg(double rad) { return rad * (180.0 / M_PI); }
-inline double deg2rad(double deg) { return deg * (M_PI / 180.0); }
+inline double rad2deg(double rad) { return rad * boost::math::constants::radian<double>(); }
+inline double deg2rad(double deg) { return deg * boost::math::constants::degree<double>(); }
 inline double sin_deg(double deg) { return sin(deg2rad(deg)); }
 inline double cos_deg(double deg) { return cos(deg2rad(deg)); }
 inline double tan_deg(double deg) { return tan(deg2rad(deg)); }
