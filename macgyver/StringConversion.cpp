@@ -1,16 +1,16 @@
-#if defined(_WIN32) || defined(WIN32)
-#define _USE_MATH_DEFINES
-#endif
-#include <cmath>
 #include "StringConversion.h"
+
 #include <fmt/format.h>
 #if defined(_WIN32) || defined(WIN32)
 #include <fmt/printf.h>
 #endif
+
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/spirit/include/qi.hpp>
+
+#include <cmath>
 #include <stdexcept>
 
 namespace Fmi
