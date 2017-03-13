@@ -5,7 +5,7 @@
 // ======================================================================
 
 #include "CsvReader.h"
-#include "StringUtil.h"
+#include "StringConversion.h"
 #include <boost/algorithm/string.hpp>
 #include <cctype>
 #include <fstream>

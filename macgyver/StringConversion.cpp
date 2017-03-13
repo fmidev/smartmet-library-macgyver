@@ -2,7 +2,7 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <cmath>
-#include "StringUtil.h"
+#include "StringConversion.h"
 #include <fmt/format.h>
 #if defined(_WIN32) || defined(WIN32)
 #include <fmt/printf.h>

@@ -5,7 +5,7 @@
 // ======================================================================
 
 #include "TimeFormatter.h"
-#include "StringUtil.h"
+#include "StringConversion.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
