@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 17.2.22
+Version: 17.3.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -62,6 +62,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Mar 14 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.3.14-1.fmi
+- Fixed to compile on Windows
+
 * Wed Feb 22 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.22-1.fmi
 - Added NearTreeLatLon::SurfaceLength
 
