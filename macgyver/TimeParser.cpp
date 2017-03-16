@@ -6,7 +6,6 @@
 
 #include "TimeParser.h"
 #include "TimeParserDefinitions.h"
-#include "Cast.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -890,8 +889,8 @@ boost::posix_time::ptime parse_http(const std::string& str)
         {
           throw std::runtime_error("");
         }
-        dd = number_cast<unsigned short>(parts[1]);
-        yy = number_cast<unsigned short>(parts[3]);
+        dd = std::stoul(parts[1]);
+        yy = std::stoul(parts[3]);
         mm = get_short_month(parts[2]);
         hms = parts[4];
         break;
@@ -904,8 +903,8 @@ boost::posix_time::ptime parse_http(const std::string& str)
         {
           throw std::runtime_error("");
         }
-        dd = number_cast<unsigned short>(parts[1].substr(0, 2));
-        yy = number_cast<unsigned short>(parts[1].substr(7, 2));
+        dd = std::stoul(parts[1].substr(0, 2));
+        yy = std::stoul(parts[1].substr(7, 2));
         yy += (yy < 50 ? 2000 : 1900);
         mm = get_short_month(parts[1].substr(3, 3));
         hms = parts[2];
@@ -917,8 +916,8 @@ boost::posix_time::ptime parse_http(const std::string& str)
         {
           throw std::runtime_error("");
         }
-        dd = number_cast<unsigned short>(parts[2]);
-        yy = number_cast<unsigned short>(parts[4]);
+        dd = std::stoul(parts[2]);
+        yy = std::stoul(parts[4]);
         mm = get_short_month(parts[1]);
         hms = parts[3];
         break;
@@ -927,9 +926,9 @@ boost::posix_time::ptime parse_http(const std::string& str)
         throw std::runtime_error("Invalid HTTP date: " + str);
     }
 
-    hh = number_cast<unsigned short>(hms.substr(0, 2));
-    mi = number_cast<unsigned short>(hms.substr(3, 2));
-    ss = number_cast<unsigned short>(hms.substr(6, 2));
+    hh = std::stoul(hms.substr(0, 2));
+    mi = std::stoul(hms.substr(3, 2));
+    ss = std::stoul(hms.substr(6, 2));
 
     boost::posix_time::ptime t(boost::gregorian::date(yy, mm, dd),
                                boost::posix_time::hours(hh) + boost::posix_time::minutes(mi) +
