@@ -2,4 +2,4 @@
 obj/
 *Test
 lib*.so
-
+compile_commands.json
