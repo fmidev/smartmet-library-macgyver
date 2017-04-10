@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 17.3.16
+Version: 17.4.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -62,6 +62,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Apr 10 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.10-1.fmi
+- Added WorkQueue by Mario Lang: https://blind.guru/simple_cxx11_workqueue.html
+
 * Thu Mar 16 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.3.16-1.fmi
 - Removed Cast.h which was deprecated in 2015
 
