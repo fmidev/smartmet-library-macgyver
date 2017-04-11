@@ -1,11 +1,14 @@
 /*
  * Original by Mario Lang: https://blind.guru/simple_cxx11_workqueue.html
  *
- * Merely renamed distributor to WorkQueue to follow FMI conventions on class names.
+ * - renamed distributor to WorkQueue to follow FMI conventions
+ * - added missing <algorithm> include
+ * - added missing std:: in front of for_each
  */
 
 #pragma once
 
+#include <algorithm>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -20,7 +23,7 @@ class WorkQueue : std::mutex, std::condition_variable
   Queue queue;
   struct : std::vector<std::thread>
   {
-    void join() { for_each(begin(), end(), mem_fun_ref(&value_type::join)); }
+    void join() { std::for_each(begin(), end(), mem_fun_ref(&value_type::join)); }
   } threads;
 
   using lock_guard = std::lock_guard<std::mutex>;
@@ -50,6 +53,7 @@ class WorkQueue : std::mutex, std::condition_variable
       wait(lock);
     queue.emplace(std::forward<Args>(args)...);
     notify_one();
+    return *this;
   }
 
   ~WorkQueue()
