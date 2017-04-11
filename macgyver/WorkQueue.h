@@ -1,9 +1,8 @@
 /*
  * Original by Mario Lang: https://blind.guru/simple_cxx11_workqueue.html
  *
- * - renamed distributor to WorkQueue to follow FMI conventions
- * - added missing <algorithm> include
- * - added missing std:: in front of for_each
+ * Merely renamed distributor to WorkQueue to follow FMI conventions on class
+ * names.
  */
 
 #pragma once
@@ -74,7 +73,13 @@ class WorkQueue : std::mutex, std::condition_variable
     {
       if (not queue.empty())
       {
-        Type item{std::move(queue.front())};
+        // clang++ version
+        // Type item{std::move(queue.front())};
+
+        // Works in clang++ and g++ 4.8.5:
+        Type item;
+        std::swap(item, queue.front());
+
         queue.pop();
         notify_one();
         lock.unlock();
