@@ -1,9 +1,4 @@
-/*
- * Original by Mario Lang: https://blind.guru/simple_cxx11_workqueue.html
- *
- * Merely renamed distributor to WorkQueue to follow FMI conventions on class
- * names.
- */
+// Mostly based on https://blind.guru/simple_cxx11_workqueue.html
 
 #pragma once
 
@@ -18,16 +13,6 @@
 template <typename Type, typename Queue = std::queue<Type>>
 class WorkQueue : std::mutex, std::condition_variable
 {
-  bool done = false;
-  Queue queue;
-  struct : std::vector<std::thread>
-  {
-    void join() { std::for_each(begin(), end(), mem_fun_ref(&value_type::join)); }
-  } threads;
-
-  using lock_guard = std::lock_guard<std::mutex>;
-  using unique_lock = std::unique_lock<std::mutex>;
-
  public:
   template <typename Function>
   WorkQueue(Function &&function, unsigned int concurrency = std::thread::hardware_concurrency())
@@ -55,16 +40,31 @@ class WorkQueue : std::mutex, std::condition_variable
     return *this;
   }
 
-  ~WorkQueue()
+  void join_all()
   {
     lock();
-    done = true;
-    notify_all();
-    unlock();
-    threads.join();
+    if (!done)
+    {
+      done = true;
+      notify_all();
+      unlock();
+      threads.join();
+    }
   }
 
+  ~WorkQueue() { join_all(); }
+
  private:
+  bool done = false;
+  Queue queue;
+  struct : std::vector<std::thread>
+  {
+    void join() { std::for_each(begin(), end(), mem_fun_ref(&value_type::join)); }
+  } threads;
+
+  using lock_guard = std::lock_guard<std::mutex>;
+  using unique_lock = std::unique_lock<std::mutex>;
+
   template <typename Function>
   void consume(Function process)
   {
@@ -73,13 +73,13 @@ class WorkQueue : std::mutex, std::condition_variable
     {
       if (not queue.empty())
       {
-        // clang++ version
-        // Type item{std::move(queue.front())};
-
-        // Works in clang++ and g++ 4.8.5:
+#if 0
+		// doesn't work in g++ 4.8.5
+        Type item{std::move(queue.front())};
+#else
         Type item;
         std::swap(item, queue.front());
-
+#endif
         queue.pop();
         notify_one();
         lock.unlock();
