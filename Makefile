@@ -57,7 +57,8 @@ else
 	-Wredundant-decls \
 	-Wwrite-strings \
 	-Wno-sign-promo \
-	-Wno-unknown-pragmas
+	-Wno-unknown-pragmas \
+	-Wno-inline
 
  FLAGS_RELEASE = -Wuninitialized
 
