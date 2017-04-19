@@ -10,6 +10,8 @@
 #include <thread>
 #include <vector>
 
+namespace Fmi
+{
 template <typename Type, typename Queue = std::queue<Type>>
 class WorkQueue : std::mutex, std::condition_variable
 {
@@ -97,3 +99,5 @@ class WorkQueue : std::mutex, std::condition_variable
     }
   }
 };
+
+}  // namespace Fmi
