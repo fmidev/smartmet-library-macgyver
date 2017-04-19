@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 17.4.10
+Version: 17.4.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -62,6 +62,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Apr 19 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.19-1.fmi
+- Added WorkQueue::join_all
+
 * Mon Apr 10 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.10-1.fmi
 - Added WorkQueue by Mario Lang: https://blind.guru/simple_cxx11_workqueue.html
 
