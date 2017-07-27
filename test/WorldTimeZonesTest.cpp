@@ -8,8 +8,7 @@ using namespace std;
 
 namespace WorldTimeZonesTest
 {
-const char* db = "/smartmet/share/gis/shapepacks/timezone.shz";
-// const char * db = "/smartmet/src/cpp/bin/shapetools/out2.shz";
+const char* db = "/usr/share/smartmet/timezones/timezone.shz";
 
 // ----------------------------------------------------------------------
 
@@ -38,8 +37,8 @@ void finland()
   if (ret != "Europe/Helsinki") TEST_FAILED("Should get Europe/Helsinki for Inari, not " + ret);
 
   ret = tq.zone_name(19.94, 60.09);
-  if (ret != "Europe/Helsinki")
-    TEST_FAILED("Should get Europe/Helsinki for Maarianhamina, not " + ret);
+  if (ret != "Europe/Mariehamn")
+    TEST_FAILED("Should get Europe/Mariehamn for Maarianhamina, not " + ret);
 
   ret = tq.zone_name(28.85, 61.18);
   if (ret != "Europe/Helsinki") TEST_FAILED("Should get Europe/Helsinki for Imatra, not " + ret);

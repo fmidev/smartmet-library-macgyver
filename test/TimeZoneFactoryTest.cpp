@@ -6,8 +6,8 @@
 // ======================================================================
 
 #include "TimeZoneFactory.h"
-#include <regression/tframe.h>
 #include <boost/lexical_cast.hpp>
+#include <regression/tframe.h>
 #include <iostream>
 #include <string>
 
@@ -169,6 +169,23 @@ void zone_name_from_coordinate()
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Test a coordinate in the Atlantic ocean
+ */
+// ----------------------------------------------------------------------
+
+void ocean()
+{
+  using boost::lexical_cast;
+  using boost::local_time::time_zone_ptr;
+
+  string tz = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(-47, 30);
+  if (tz != "Etc/GMT-3") TEST_FAILED("-46,30 string should be Etc/GMT-3, not " + tz);
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+/*!
  * The actual test suite
  */
 // ----------------------------------------------------------------------
@@ -183,6 +200,7 @@ class tests : public tframe::tests
     TEST(time_zone_from_coordinate);
     TEST(time_zone_from_string);
     TEST(zone_name_from_coordinate);
+    TEST(ocean);
   }
 };
 
