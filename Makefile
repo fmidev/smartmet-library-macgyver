@@ -149,7 +149,7 @@ install:
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
 test:
-	+cd test && make test
+	$(MAKE) -C $@ test
 
 objdir:
 	@mkdir -p $(objdir)
