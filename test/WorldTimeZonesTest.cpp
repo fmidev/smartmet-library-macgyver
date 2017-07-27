@@ -1,8 +1,8 @@
-#include <regression/tframe.h>
 #include "WorldTimeZones.h"
+#include <regression/tframe.h>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -174,6 +174,21 @@ void russia()
 
 // ----------------------------------------------------------------------
 
+void ocean()
+{
+  Fmi::WorldTimeZones tq(db);
+
+  string ret;
+
+  ret = tq.zone_name(-47, 30);
+  if (ret != "Etc/GMT-3")
+    TEST_FAILED("Should get Etc/GMT-3 for coordinate -47,20 in the Atlantic, not " + ret);
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
 // The actual test driver
 class tests : public tframe::tests
 {
@@ -188,6 +203,7 @@ class tests : public tframe::tests
     TEST(denmark);
     TEST(estonia);
     TEST(russia);
+    TEST(ocean);
   }
 
 };  // class tests
