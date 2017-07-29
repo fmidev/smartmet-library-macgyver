@@ -48,6 +48,20 @@ class TemplateFormatter : public boost::noncopyable
   int process(CTPP::CDT& hash, std::ostream& output_stream, std::ostream& log_stream);
 
   /**
+ *  @brief Generate an output data from template on the base of provided values in the hash
+ *
+ *  @param hash A hash with values to use for generating output
+ *  @param output_stream an output stream where to write formatter output to.
+ *  @param log_stream an output stream where to write formatter log messages to.
+ *  @param log_level the logging level.
+ *  @return the value returned by CTPP::VM::Run()
+ */
+  int process(CTPP::CDT& hash,
+              std::ostream& output_stream,
+              std::ostream& log_stream,
+              int log_level);
+
+  /**
    *  @brief Load a template for output generation
    *
    *  @param file_name a name of template file to load

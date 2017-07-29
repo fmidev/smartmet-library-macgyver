@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 17.4.19
-Release: 2%{?dist}.fmi
+Version: 17.7.29
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -62,6 +62,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jul 28 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.7.29-1.fmi
+- Added possibility to specify logging level for TemplateFormatter
+
 * Wed Apr 19 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.19-2.fmi
 - Fixed WorkQueue to be in namespace Fmi
 
