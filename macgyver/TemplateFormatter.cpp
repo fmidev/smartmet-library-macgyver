@@ -77,24 +77,7 @@ int Fmi::TemplateFormatter::process(CTPP::CDT& hash,
                                     std::ostream& output_stream,
                                     std::ostream& log_stream)
 {
-  // Create output collector for provided output stream
-  TemplateFormatter::OutputCollector output_collector(output_stream);
-
-  // Create virtual machine for template processing
-  CTPP::VM tmp_vm(&syscall_factory, 4096, 4096, 0x40000000, CTPP2_LOG_WARNING);
-
-  // Create logger for writing log messages to the output stream
-  TemplateFormatter::Logger logger(log_stream, CTPP2_LOG_WARNING);
-
-  // Get data to run on CTPP2 virtual machine
-  const CTPP::VMMemoryCore* p_memory_core = loader->GetCore();
-
-  // Initialize CTPP2 virtual machine for output formatting.
-  tmp_vm.Init(p_memory_core, &output_collector, &logger);
-
-  // Finally process the template and generate output
-  UINT_32 iIP = 0;
-  return tmp_vm.Run(p_memory_core, &output_collector, iIP, hash, &logger);
+  return process(hash, output_stream, log_stream, CTPP2_LOG_WARNING);
 }
 
 /*
