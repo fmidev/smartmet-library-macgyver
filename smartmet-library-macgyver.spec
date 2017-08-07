@@ -10,6 +10,7 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: imake
 BuildRequires: smartmet-timezones >= 13.10.22
