@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 17.7.29
+Version: 17.8.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -14,13 +14,14 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: imake
-BuildRequires: smartmet-timezones >= 13.10.22
+BuildRequires: smartmet-timezones >= 17.4.12
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel
+Buildrequires: boost-devel
 Requires: fmt
 Requires: ctpp2
-Requires: libicu >= 50.1
+Requires: libicu >= 50.1.2
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -64,6 +65,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Aug 28 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.8.28-1.fmi
+- Upgrade to boost 1.65
+
 * Fri Jul 28 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.7.29-1.fmi
 - Added possibility to specify logging level for TemplateFormatter
 
