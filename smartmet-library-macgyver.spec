@@ -22,6 +22,11 @@ Buildrequires: boost-devel
 Requires: fmt
 Requires: ctpp2
 Requires: libicu >= 50.1.2
+Requires: boost-date-time
+Requires: boost-filesystem
+Requires: boost-thread
+Requires: boost-regex
+Requires: boost-system
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
