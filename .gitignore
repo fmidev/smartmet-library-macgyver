@@ -1,4 +1,5 @@
 *~
+doc/
 obj/
 *Test
 lib*.so
