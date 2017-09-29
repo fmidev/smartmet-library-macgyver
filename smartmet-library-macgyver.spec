@@ -60,6 +60,8 @@ rm -rf $RPM_BUILD_ROOT
 %package -n %{SPECNAME}-devel
 Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
+Requires: %{SPECNAME}
+Requires: ctpp2-devel
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
