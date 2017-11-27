@@ -10,12 +10,27 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
-
-#include <stdexcept>
+#include <boost/regex.hpp>
 #include <cctype>
+#include <stdexcept>
+
+#pragma message("Remove prettyprint!")
+#include <prettyprint.hpp>
 
 namespace
 {
+boost::regex iso8601_weeks{"^P(\\d+)W$"};
+boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
+#if 0
+boost::regex iso8601_long{
+    "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
+    "S)?$"};
+#endif
+
+boost::regex iso8601_long{
+    "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?(T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
+    "S)?)?$"};
+
 boost::posix_time::ptime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
 {
   unsigned int hour = 0, minute = 0, second = 0;
@@ -121,7 +136,7 @@ boost::posix_time::ptime buildFromOffset(boost::posix_time::time_duration offset
 
   return boost::posix_time::ptime(now.date(), tnow + offset);
 }
-}
+}  // namespace
 
 namespace Fmi
 {
@@ -254,8 +269,7 @@ bool looks_offset(const std::string& str)
   if (str.empty()) return false;
 
   if (str == "0" || (str.size() == 2 && str[0] == '0') ||  // 0m, 0h etc
-      str[0] == '+' ||
-      str[0] == '-')
+      str[0] == '+' || str[0] == '-')
     return true;
   else
     return false;
@@ -561,8 +575,9 @@ boost::posix_time::ptime parse_offset(const std::string& str)
 /*!
  * \brief Parse a time duration
  *
- * Allowed formats:
+ * Allowed formats include ISO8601 and for historical reasons simple offsets
  *
+ *     ISO8601  (P<n>...)
  *     0		(zero offset)
  *     0m,0h... (zero offset with units)
  *     -+NNNN	(offset in minutes)
@@ -576,9 +591,13 @@ boost::posix_time::ptime parse_offset(const std::string& str)
 
 boost::posix_time::time_duration parse_duration(const std::string& str)
 {
-  typedef std::string::const_iterator iterator;
-
   if (str.empty()) throw std::runtime_error("Trying to parse an empty string as a time duration");
+
+  if (str[0] == 'P') return parse_iso_duration(str);
+
+  // Old time duration format
+
+  typedef std::string::const_iterator iterator;
 
   OffsetParser<iterator> theParser;
   TimeOffset target;
@@ -644,6 +663,54 @@ boost::posix_time::time_duration parse_duration(const std::string& str)
   {
     throw std::runtime_error("Parse failed for input: " + str);
   }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Parse an ISO8601 time duration
+ *
+ * - https://en.wikipedia.org/wiki/ISO_8601#Durations
+ * - https://stackoverflow.com/questions/23886140/parse-iso-8601-durations
+ */
+//----------------------------------------------------------------------
+
+boost::posix_time::time_duration parse_iso_duration(const std::string& str)
+{
+  boost::smatch match;
+
+  if (boost::regex_search(str, match, iso8601_weeks))
+  {
+    int n = std::stoi(match[1]);
+    return boost::posix_time::hours(7 * 24 * n);
+  }
+
+  if (boost::regex_search(str, match, iso8601_long))
+  {
+    // years, months, days, tmp , hours, minutes, seconds
+    std::vector<int> vec{0, 0, 0, -1, 0, 0, 0};
+
+    for (size_t i = 1; i < match.size(); ++i)
+    {
+      if (match[i].matched && i != 4)
+      {
+        std::string str = match[i];
+        str.pop_back();
+        vec[i - 1] = std::stoi(str);
+      }
+    }
+
+    if (vec[1] < 0 || vec[1] > 12)
+      throw std::runtime_error("Invalid month value in time duration " + str);
+    if (vec[4] < 0 || vec[4] > 24)
+      throw std::runtime_error("Invalid hour value in time duration " + str);
+
+    // Year length 365 and month length 30 are arbitrary choices here
+
+    return boost::posix_time::hours(365 * 24 * vec[0] + 30 * 24 * vec[1] + 24 * vec[2]) +
+           boost::posix_time::time_duration(vec[4], vec[5], vec[6], 0);
+  }
+
+  throw std::runtime_error("Unable to parse ISO8601 time duration from '" + str + "'");
 }
 
 // ----------------------------------------------------------------------
@@ -995,7 +1062,7 @@ boost::local_time::local_date_time make_time(const boost::gregorian::date& date,
   }
   return dt;
 }
-}
-}  // namespace Fmi::TimeParser
+}  // namespace TimeParser
+}  // namespace Fmi
 
 // ======================================================================

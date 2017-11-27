@@ -666,6 +666,53 @@ void parse_duration()
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Parse ISO8601 durations
+ */
+// ----------------------------------------------------------------------
+
+void parse_iso_duration()
+{
+  using namespace Fmi;
+  using namespace boost::posix_time;
+  using namespace boost::gregorian;
+
+  time_duration res;
+
+  res = TimeParser::parse_iso_duration("P2W");
+  if (res != hours(7 * 2 * 24))
+    TEST_FAILED("Failed to parse P2W correctly, got " + to_simple_string(res));
+
+  res = TimeParser::parse_iso_duration("P1D");
+  if (res != hours(24)) TEST_FAILED("Failed to parse P1D correctly, got " + to_simple_string(res));
+
+  res = TimeParser::parse_iso_duration("P2D");
+  if (res != hours(2 * 24))
+    TEST_FAILED("Failed to parse P2D correctly, got " + to_simple_string(res));
+
+  res = TimeParser::parse_iso_duration("PT0H");
+  if (res != seconds(0))
+    TEST_FAILED("Failed to parse PT0H correctly, got " + to_simple_string(res));
+
+  res = TimeParser::parse_iso_duration("PT1M");
+  if (res != minutes(1))
+    TEST_FAILED("Failed to parse PT1M correctly, got " + to_simple_string(res));
+
+  res = TimeParser::parse_iso_duration("PT10M");
+  if (res != minutes(10))
+    TEST_FAILED("Failed to parse PT10M correctly, got " + to_simple_string(res));
+
+  res = TimeParser::parse_iso_duration("PT3H");
+  if (res != hours(3)) TEST_FAILED("Failed to parse PT3H correctly, got " + to_simple_string(res));
+
+  res = TimeParser::parse_iso_duration("P1DT10H20M30S");
+  if (res != hours(24) + hours(10) + minutes(20) + seconds(30))
+    TEST_FAILED("Failed to parse P1DT10H20M30S correctly, got " + to_simple_string(res));
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Test time format recognizition
  */
 // ----------------------------------------------------------------------
@@ -857,6 +904,7 @@ class tests : public tframe::tests
     TEST(looks);
     TEST(looks_utc);
     TEST(parse_duration);
+    TEST(parse_iso_duration);
   }
 };
 

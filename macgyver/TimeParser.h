@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 
 namespace Fmi
@@ -53,7 +53,9 @@ boost::local_time::local_date_time make_time(const boost::gregorian::date& day,
                                              const boost::local_time::time_zone_ptr& zone);
 
 boost::posix_time::time_duration parse_duration(const std::string& str);
-}
-}
+
+boost::posix_time::time_duration parse_iso_duration(const std::string& str);
+}  // namespace TimeParser
+}  // namespace Fmi
 
 // ======================================================================
