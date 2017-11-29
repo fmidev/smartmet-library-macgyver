@@ -14,9 +14,6 @@
 #include <cctype>
 #include <stdexcept>
 
-#pragma message("Remove prettyprint!")
-#include <prettyprint.hpp>
-
 namespace
 {
 boost::regex iso8601_weeks{"^P(\\d+)W$"};
