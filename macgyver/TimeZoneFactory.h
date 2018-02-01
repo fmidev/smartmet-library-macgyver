@@ -31,18 +31,13 @@ class TimeZoneFactory
     return obj;
   }
 
- private:
-  // These are private so that a thread cannot change the database
-  // and assume it is not immediately changed by the other thread.
-  // Now they are only used for lazy initialization once an actual
-  // requext arrives.
-
   void set_region_file(const std::string& file);
   void set_coordinate_file(const std::string& file);
 
+ private:
   // Implementation hiding
-  class Pimple;
-  std::unique_ptr<Pimple> itsPimple;
+  class Impl;
+  std::unique_ptr<Impl> mImpl;
 
   TimeZoneFactory();
   ~TimeZoneFactory();

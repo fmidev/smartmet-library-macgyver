@@ -4,7 +4,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 18.2.1
-Release: 2%{?dist}.fmi
+Release: 3%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -72,6 +72,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Feb  1 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.1-3.fmi
+- Fixed TimeZoneFactory to be thread safe
+
 * Thu Feb  1 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.1-2.fmi
 - Avoid more exceptions when parsing times
 

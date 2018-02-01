@@ -17,17 +17,17 @@
 
 using namespace std;
 
-static std::string& default_regions =
-    *new std::string("/usr/share/smartmet/timezones/date_time_zonespec.csv");
-static std::string& default_coordinates =
-    *new std::string("/usr/share/smartmet/timezones/timezone.shz");
-
 namespace Fmi
 {
+static const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
+static const char* default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
+
 #ifdef FMI_MULTITHREAD
 typedef boost::shared_mutex MutexType;
 typedef boost::shared_lock<MutexType> ReadLock;
 typedef boost::unique_lock<MutexType> WriteLock;
+typedef boost::upgrade_lock<MutexType> UpgradeReadLock;
+typedef boost::upgrade_to_unique_lock<MutexType> UpgradeWriteLock;
 #else
 struct MutexType
 {
@@ -40,6 +40,14 @@ struct WriteLock
 {
   WriteLock(const MutexType& /* mutex */) {}
 };
+struct UpgradeReadLock
+{
+  UpgradeReadLock(const MutexType& /* mutex */) {}
+};
+struct UpgradeWriteLock
+{
+  UpgradeWriteLock(const MutexType& /* mutex */) {}
+};
 #endif
 
 // ----------------------------------------------------------------------
@@ -48,20 +56,41 @@ struct WriteLock
  */
 // ----------------------------------------------------------------------
 
-class TimeZoneFactory::Pimple
+class TimeZoneFactory::Impl
 {
  public:
-  // database for tz names
-  string itsRegionsFile;
-  std::unique_ptr<boost::local_time::tz_database> itsRegions;
-  MutexType itsRegionsMutex;
+  void load_default_regions();
+  void load_default_coordinates();
 
-  // database for coordinates to tz conversion
-  string itsCoordinatesFile;
-  std::unique_ptr<WorldTimeZones> itsCoordinates;
-  MutexType itsCoordinatesMutex;
+  mutable MutexType mRegionsMutex;
+  mutable MutexType mCoordinatesMutex;
 
-};  // Pimple
+  std::unique_ptr<WorldTimeZones> mCoordinates;
+  std::unique_ptr<boost::local_time::tz_database> mRegions;
+};
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Load the default regions file while having a lock
+ */
+// ----------------------------------------------------------------------
+
+void TimeZoneFactory::Impl::load_default_regions()
+{
+  mRegions.reset(new boost::local_time::tz_database());
+  mRegions->load_from_file(default_regions);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Load the default coordinates file while having a lock
+ */
+// ----------------------------------------------------------------------
+
+void TimeZoneFactory::Impl::load_default_coordinates()
+{
+  mCoordinates.reset(new WorldTimeZones(default_coordinates));
+}
 
 // ----------------------------------------------------------------------
 /*!
@@ -69,7 +98,7 @@ class TimeZoneFactory::Pimple
  */
 // ----------------------------------------------------------------------
 
-TimeZoneFactory::TimeZoneFactory() : itsPimple(new Pimple()) {}
+TimeZoneFactory::TimeZoneFactory() : mImpl(new Impl()) {}
 
 // ----------------------------------------------------------------------
 /*!
@@ -77,27 +106,7 @@ TimeZoneFactory::TimeZoneFactory() : itsPimple(new Pimple()) {}
  */
 // ----------------------------------------------------------------------
 
-TimeZoneFactory::~TimeZoneFactory()
-{
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Set the time zone database filename
- */
-// ----------------------------------------------------------------------
-
-void TimeZoneFactory::set_region_file(const string& file)
-{
-  WriteLock lock(itsPimple->itsRegionsMutex);
-
-  // Double checked locking pattern
-  if (itsPimple->itsRegionsFile == file) return;
-
-  itsPimple->itsRegionsFile = file;
-  itsPimple->itsRegions.reset(new boost::local_time::tz_database());
-  itsPimple->itsRegions->load_from_file(itsPimple->itsRegionsFile);
-}
+TimeZoneFactory::~TimeZoneFactory() {}
 
 // ----------------------------------------------------------------------
 /*!
@@ -107,13 +116,21 @@ void TimeZoneFactory::set_region_file(const string& file)
 
 void TimeZoneFactory::set_coordinate_file(const string& file)
 {
-  WriteLock lock(itsPimple->itsCoordinatesMutex);
+  WriteLock lock(mImpl->mCoordinatesMutex);
+  mImpl->mCoordinates.reset(new WorldTimeZones(file));
+}
 
-  // Double checked locking pattern
-  if (itsPimple->itsCoordinatesFile == file) return;
+// ----------------------------------------------------------------------
+/*!
+ * \brief Set the time region database filename
+ */
+// ----------------------------------------------------------------------
 
-  itsPimple->itsCoordinatesFile = file;
-  itsPimple->itsCoordinates.reset(new WorldTimeZones(file));
+void TimeZoneFactory::set_region_file(const string& file)
+{
+  WriteLock lock(mImpl->mRegionsMutex);
+  mImpl->mRegions.reset(new boost::local_time::tz_database());
+  mImpl->mRegions->load_from_file(file);
 }
 
 // ----------------------------------------------------------------------
@@ -124,10 +141,14 @@ void TimeZoneFactory::set_coordinate_file(const string& file)
 
 vector<string> TimeZoneFactory::region_list()
 {
-  if (itsPimple->itsRegions == 0) set_region_file(default_regions);
+  UpgradeReadLock lock(mImpl->mRegionsMutex);
+  if (!mImpl->mRegions)
+  {
+    UpgradeWriteLock lock2(lock);
+    mImpl->load_default_regions();
+  }
 
-  ReadLock lock(itsPimple->itsRegionsMutex);
-  return itsPimple->itsRegions->region_list();
+  return mImpl->mRegions->region_list();
 }
 
 // ----------------------------------------------------------------------
@@ -138,12 +159,15 @@ vector<string> TimeZoneFactory::region_list()
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const string& id)
 {
-  if (itsPimple->itsRegions == 0) set_region_file(default_regions);
+  UpgradeReadLock lock(mImpl->mRegionsMutex);
+  if (!mImpl->mRegions)
+  {
+    UpgradeWriteLock lock2(lock);
+    mImpl->load_default_regions();
+  }
 
-  ReadLock lock(itsPimple->itsRegionsMutex);
-
-  boost::local_time::time_zone_ptr ptr = itsPimple->itsRegions->time_zone_from_region(id);
-  if (ptr == 0) throw runtime_error("TimeZoneFactory does not recognize region '" + id + "'");
+  boost::local_time::time_zone_ptr ptr = mImpl->mRegions->time_zone_from_region(id);
+  if (!ptr) throw runtime_error("TimeZoneFactory does not recognize region '" + id + "'");
   return ptr;
 }
 
@@ -155,13 +179,16 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const st
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const string& desc)
 {
-  if (itsPimple->itsRegions == 0) set_region_file(default_regions);
-
-  ReadLock lock(itsPimple->itsRegionsMutex);
+  UpgradeReadLock lock(mImpl->mRegionsMutex);
+  if (!mImpl->mRegions)
+  {
+    UpgradeWriteLock lock2(lock);
+    mImpl->load_default_regions();
+  }
 
   // Try region name at first
-  boost::local_time::time_zone_ptr ptr = itsPimple->itsRegions->time_zone_from_region(desc);
-  if (ptr == 0)
+  boost::local_time::time_zone_ptr ptr = mImpl->mRegions->time_zone_from_region(desc);
+  if (!ptr)
   {
     // Region name not found: try POSIX TZ description (may throw exception)
     ptr.reset(new boost::local_time::posix_time_zone(desc));
@@ -178,11 +205,16 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const st
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(float lon, float lat)
 {
-  if (itsPimple->itsCoordinates == 0) set_coordinate_file(default_coordinates);
+  UpgradeReadLock lock(mImpl->mCoordinatesMutex);
+  if (!mImpl->mCoordinates)
+  {
+    UpgradeWriteLock lock2(lock);
+    mImpl->load_default_coordinates();
+  }
 
-  string tz = itsPimple->itsCoordinates->zone_name(lon, lat);
+  string tz = mImpl->mCoordinates->zone_name(lon, lat);
   boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
-  if (ptr == 0)
+  if (!ptr)
     throw runtime_error("TimeZoneFactory could not convert given coordinate " +
                         Fmi::to_string(lon) + "," + Fmi::to_string(lat) +
                         " to a valid time zone name");
@@ -198,9 +230,13 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(floa
 
 std::string TimeZoneFactory::zone_name_from_coordinate(float lon, float lat)
 {
-  if (itsPimple->itsCoordinates == 0) set_coordinate_file(default_coordinates);
-
-  return itsPimple->itsCoordinates->zone_name(lon, lat);
+  UpgradeReadLock lock(mImpl->mCoordinatesMutex);
+  if (!mImpl->mCoordinates)
+  {
+    UpgradeWriteLock lock2(lock);
+    mImpl->load_default_coordinates();
+  }
+  return mImpl->mCoordinates->zone_name(lon, lat);
 }
 
 }  // namespace Fmi
