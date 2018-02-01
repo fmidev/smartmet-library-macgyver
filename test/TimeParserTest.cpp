@@ -554,6 +554,92 @@ void parse_http()
  */
 // ----------------------------------------------------------------------
 
+void try_parse_offset()
+{
+  using namespace Fmi;
+  using namespace boost::posix_time;
+  using namespace boost::gregorian;
+
+  // Now rounded to closest minute
+  ptime now = second_clock::universal_time();
+  time_duration tnow = now.time_of_day();
+  int secs = tnow.seconds();
+  if (secs >= 30)
+    now += seconds(60 - secs);
+  else
+    now -= seconds(secs);
+
+  ptime res, ok;
+
+  res = TimeParser::try_parse_offset("0");
+  if (res - now != minutes(0))
+    TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("0m");
+  if (res - now != minutes(0))
+    TEST_FAILED("Failed to parse 0m correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("0h");
+  if (res - now != minutes(0))
+    TEST_FAILED("Failed to parse 0h correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("0d");
+  if (res - now != minutes(0))
+    TEST_FAILED("Failed to parse 0d correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("+1");
+  if (res - now != minutes(1))
+    TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("+10m");
+  if (res - now != minutes(10))
+    TEST_FAILED("Failed to parse +10m correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("+3h");
+  if (res - now != hours(3))
+    TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("-24h");
+  if (now - res != hours(24))
+    TEST_FAILED("Failed to parse -24h correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("+2d");
+  if (res - now != hours(48))
+    TEST_FAILED("Failed to parse +2d correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("+2y");
+  if (res - now != hours(2 * 365 * 24))
+    TEST_FAILED("Failed to parse +2y correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("+2w");
+  if (res - now != hours(2 * 24 * 7))
+    TEST_FAILED("Failed to parse +2w correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("+2H");
+  if (res - now != hours(2))
+    TEST_FAILED("Failed to parse +2H correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("1");
+  if (!res.is_not_a_date_time())
+    TEST_FAILED("Should have failed to parse 1 as an offset, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset(" 123 ");
+  if (!res.is_not_a_date_time())
+    TEST_FAILED("Should have failed to parse ' 123 ' as an offset, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_offset("-a");
+  if (!res.is_not_a_date_time())
+    TEST_FAILED("Should have failed to parse '-a' as an offset, got " + to_simple_string(res));
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Parse offsets
+ */
+// ----------------------------------------------------------------------
+
 void parse_offset()
 {
   using namespace Fmi;
@@ -618,6 +704,56 @@ void parse_offset()
   res = TimeParser::parse("+2H");
   if (res - now != hours(2))
     TEST_FAILED("Failed to parse +2H correctly, got " + to_simple_string(res));
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Parse durations
+ */
+// ----------------------------------------------------------------------
+
+void try_parse_duration()
+{
+  using namespace Fmi;
+  using namespace boost::posix_time;
+  using namespace boost::gregorian;
+
+  time_duration res, ok;
+
+  res = TimeParser::try_parse_duration("0");
+  if (res != seconds(0)) TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration("+1");
+  if (res != minutes(1)) TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration("+10m");
+  if (res != minutes(10))
+    TEST_FAILED("Failed to parse +10m correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration("+3h");
+  if (res != hours(3)) TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration("-24h");
+  if (res != hours(-24))
+    TEST_FAILED("Failed to parse -24h correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration("+2d");
+  if (res != hours(2 * 24))
+    TEST_FAILED("Failed to parse +2d correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration("+2W");
+  if (res != hours(7 * 2 * 24))
+    TEST_FAILED("Failed to parse +2W correctly, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration("123");
+  if (!res.is_not_a_date_time())
+    TEST_FAILED("Should have failed to parse 123 as duration, got " + to_simple_string(res));
+
+  res = TimeParser::try_parse_duration(" -123 ");
+  if (!res.is_not_a_date_time())
+    TEST_FAILED("Should have failed to parse ' -123' as duration, got " + to_simple_string(res));
 
   TEST_PASSED();
 }
@@ -893,16 +1029,18 @@ class tests : public tframe::tests
     TEST(parse_wintertime);
     TEST(parse_summertime);
     TEST(parse_timestamp);
+    TEST(try_parse_iso);
     TEST(parse_iso);
     TEST(parse_fmi);
-    TEST(try_parse_iso);
     TEST(parse_sql);
     TEST(parse_epoch);
     TEST(parse);
     TEST(parse_http);
+    TEST(try_parse_offset);
     TEST(parse_offset);
     TEST(looks);
     TEST(looks_utc);
+    TEST(try_parse_duration);
     TEST(parse_duration);
     TEST(parse_iso_duration);
   }
