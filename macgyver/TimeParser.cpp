@@ -803,16 +803,11 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
   }
 
   {
-    try
+    auto ret = try_parse_offset(str);
+    if (!ret.is_not_a_date_time())
     {
-      boost::posix_time::ptime ret;
-      ret = parse_offset(str);
       matchedParser = OFFSET;
       return ret;
-    }
-    catch (std::runtime_error&)
-    {
-      // Simply pass to the next parser
     }
   }
 
