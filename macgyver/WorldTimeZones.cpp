@@ -12,10 +12,10 @@
 
 #include "WorldTimeZones.h"
 #include "StringConversion.h"
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
 #include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
 #include <set>
 
@@ -44,7 +44,7 @@ uint16_t read_attr(std::size_t thePos, char *theData)
   std::size_t offset = thePos * (sizeof(uint32_t) + sizeof(uint16_t)) + sizeof(uint32_t);
   return *reinterpret_cast<uint16_t *>(theData + offset);
 }
-}
+}  // namespace
 
 namespace Fmi
 {
@@ -66,7 +66,8 @@ WorldTimeZones::~WorldTimeZones() { delete[] itsData; }
 const std::string &WorldTimeZones::zone_name(float lon, float lat) const
 {
   if (lon < itsLon1 || lon > itsLon2 || lat < itsLat1 || lat > itsLat2)
-    throw std::runtime_error("Invalid lon-lat given to WorldTimeZones::zone_name");
+    throw std::runtime_error("Invalid lon-lat given to WorldTimeZones::zone_name: " +
+                             Fmi::to_string(lon) + "," + Fmi::to_string(lat));
 
   // Calculate the index of the coordinate
 
