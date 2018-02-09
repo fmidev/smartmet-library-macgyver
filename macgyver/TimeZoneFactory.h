@@ -15,6 +15,7 @@
 
 namespace Fmi
 {
+// C++14: [[deprecated("Please use TimeZones instead")]]
 class TimeZoneFactory
 {
  public:
