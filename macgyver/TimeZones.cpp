@@ -27,12 +27,11 @@ namespace Fmi
 class TimeZones::Pimple
 {
  public:
-  Pimple(const std::string& regionsFile, const std::string coordinatesFile)
+  Pimple(const std::string& regionsFile, const std::string& coordinatesFile)
       : itsRegions(), itsCoordinates(coordinatesFile)
   {
     itsRegions.load_from_file(regionsFile);
   }
-
   boost::local_time::tz_database itsRegions;
   WorldTimeZones itsCoordinates;
 
@@ -93,11 +92,9 @@ boost::local_time::time_zone_ptr TimeZones::time_zone_from_string(const string& 
 {
   // Try region name at first
   boost::local_time::time_zone_ptr ptr = itsPimple->itsRegions.time_zone_from_region(desc);
-  if (!ptr)
-  {
-    // Region name not found: try POSIX TZ description (may throw exception)
-    ptr.reset(new boost::local_time::posix_time_zone(desc));
-  }
+
+  // Try POSIX TZ description (may throw) if region name is unknown
+  if (!ptr) ptr.reset(new boost::local_time::posix_time_zone(desc));
 
   return ptr;
 }

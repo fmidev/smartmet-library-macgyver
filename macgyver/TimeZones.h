@@ -20,6 +20,8 @@ class TimeZones
   ~TimeZones();
   TimeZones();
   TimeZones(const std::string& regionFile, const std::string& coordinateFile);
+  TimeZones& operator=(const TimeZones& other) = delete;
+  TimeZones(const TimeZones& other) = delete;
 
   std::vector<std::string> region_list() const;
 
