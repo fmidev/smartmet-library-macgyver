@@ -7,11 +7,7 @@
 #include "TimeZoneFactory.h"
 #include "StringConversion.h"
 #include "WorldTimeZones.h"
-
-#ifdef FMI_MULTITHREAD
-#include <boost/thread.hpp>
-#endif
-
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -22,34 +18,6 @@ namespace Fmi
 static const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
 static const char* default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
 
-#ifdef FMI_MULTITHREAD
-typedef boost::shared_mutex MutexType;
-typedef boost::shared_lock<MutexType> ReadLock;
-typedef boost::unique_lock<MutexType> WriteLock;
-typedef boost::upgrade_lock<MutexType> UpgradeReadLock;
-typedef boost::upgrade_to_unique_lock<MutexType> UpgradeWriteLock;
-#else
-struct MutexType
-{
-};
-struct ReadLock
-{
-  ReadLock(const MutexType& /* mutex */) {}
-};
-struct WriteLock
-{
-  WriteLock(const MutexType& /* mutex */) {}
-};
-struct UpgradeReadLock
-{
-  UpgradeReadLock(const MutexType& /* mutex */) {}
-};
-struct UpgradeWriteLock
-{
-  UpgradeWriteLock(const MutexType& /* mutex */) {}
-};
-#endif
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Implementation hiding pimple
@@ -59,37 +27,27 @@ struct UpgradeWriteLock
 class TimeZoneFactory::Impl
 {
  public:
-  void load_default_regions();
-  void load_default_coordinates();
+  Impl();
 
-  mutable MutexType mRegionsMutex;
-  mutable MutexType mCoordinatesMutex;
-
-  std::unique_ptr<WorldTimeZones> mCoordinates;
-  std::unique_ptr<boost::local_time::tz_database> mRegions;
+  std::unique_ptr<WorldTimeZones> m_Coordinates;
+  std::unique_ptr<boost::local_time::tz_database> m_Regions;
 };
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Load the default regions file while having a lock
+ * \brief Implementation details constructor
+ *
+ * Note: Since we're using the static singleton pattern this makes everything
+ * thread safe.
  */
 // ----------------------------------------------------------------------
 
-void TimeZoneFactory::Impl::load_default_regions()
+TimeZoneFactory::Impl::Impl()
 {
-  mRegions.reset(new boost::local_time::tz_database());
-  mRegions->load_from_file(default_regions);
-}
+  m_Regions.reset(new boost::local_time::tz_database());
+  m_Regions->load_from_file(default_regions);
 
-// ----------------------------------------------------------------------
-/*!
- * \brief Load the default coordinates file while having a lock
- */
-// ----------------------------------------------------------------------
-
-void TimeZoneFactory::Impl::load_default_coordinates()
-{
-  mCoordinates.reset(new WorldTimeZones(default_coordinates));
+  m_Coordinates.reset(new WorldTimeZones(default_coordinates));
 }
 
 // ----------------------------------------------------------------------
@@ -98,7 +56,7 @@ void TimeZoneFactory::Impl::load_default_coordinates()
  */
 // ----------------------------------------------------------------------
 
-TimeZoneFactory::TimeZoneFactory() : mImpl(new Impl()) {}
+TimeZoneFactory::TimeZoneFactory() : m_Impl(new Impl()) {}
 
 // ----------------------------------------------------------------------
 /*!
@@ -116,8 +74,7 @@ TimeZoneFactory::~TimeZoneFactory() {}
 
 void TimeZoneFactory::set_coordinate_file(const string& file)
 {
-  WriteLock lock(mImpl->mCoordinatesMutex);
-  mImpl->mCoordinates.reset(new WorldTimeZones(file));
+  std::cerr << "Warning: TimeZOneFactor::set_coordinate_file is deprecated\n" << std::flush;
 }
 
 // ----------------------------------------------------------------------
@@ -128,9 +85,7 @@ void TimeZoneFactory::set_coordinate_file(const string& file)
 
 void TimeZoneFactory::set_region_file(const string& file)
 {
-  WriteLock lock(mImpl->mRegionsMutex);
-  mImpl->mRegions.reset(new boost::local_time::tz_database());
-  mImpl->mRegions->load_from_file(file);
+  std::cerr << "Warning: TimeZoneFactory::set_region_file is deprecated\n" << std::flush;
 }
 
 // ----------------------------------------------------------------------
@@ -139,17 +94,7 @@ void TimeZoneFactory::set_region_file(const string& file)
  */
 // ----------------------------------------------------------------------
 
-vector<string> TimeZoneFactory::region_list()
-{
-  UpgradeReadLock lock(mImpl->mRegionsMutex);
-  if (!mImpl->mRegions)
-  {
-    UpgradeWriteLock lock2(lock);
-    mImpl->load_default_regions();
-  }
-
-  return mImpl->mRegions->region_list();
-}
+vector<string> TimeZoneFactory::region_list() { return m_Impl->m_Regions->region_list(); }
 
 // ----------------------------------------------------------------------
 /*!
@@ -159,14 +104,7 @@ vector<string> TimeZoneFactory::region_list()
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const string& id)
 {
-  UpgradeReadLock lock(mImpl->mRegionsMutex);
-  if (!mImpl->mRegions)
-  {
-    UpgradeWriteLock lock2(lock);
-    mImpl->load_default_regions();
-  }
-
-  boost::local_time::time_zone_ptr ptr = mImpl->mRegions->time_zone_from_region(id);
+  boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(id);
   if (!ptr) throw runtime_error("TimeZoneFactory does not recognize region '" + id + "'");
   return ptr;
 }
@@ -179,15 +117,8 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const st
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const string& desc)
 {
-  UpgradeReadLock lock(mImpl->mRegionsMutex);
-  if (!mImpl->mRegions)
-  {
-    UpgradeWriteLock lock2(lock);
-    mImpl->load_default_regions();
-  }
-
   // Try region name at first
-  boost::local_time::time_zone_ptr ptr = mImpl->mRegions->time_zone_from_region(desc);
+  boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(desc);
   if (!ptr)
   {
     // Region name not found: try POSIX TZ description (may throw exception)
@@ -205,14 +136,7 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const st
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(float lon, float lat)
 {
-  UpgradeReadLock lock(mImpl->mCoordinatesMutex);
-  if (!mImpl->mCoordinates)
-  {
-    UpgradeWriteLock lock2(lock);
-    mImpl->load_default_coordinates();
-  }
-
-  string tz = mImpl->mCoordinates->zone_name(lon, lat);
+  string tz = m_Impl->m_Coordinates->zone_name(lon, lat);
   boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
   if (!ptr)
     throw runtime_error("TimeZoneFactory could not convert given coordinate " +
@@ -230,13 +154,19 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(floa
 
 std::string TimeZoneFactory::zone_name_from_coordinate(float lon, float lat)
 {
-  UpgradeReadLock lock(mImpl->mCoordinatesMutex);
-  if (!mImpl->mCoordinates)
-  {
-    UpgradeWriteLock lock2(lock);
-    mImpl->load_default_coordinates();
-  }
-  return mImpl->mCoordinates->zone_name(lon, lat);
+  return m_Impl->m_Coordinates->zone_name(lon, lat);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return the TimeZoneFactory instance
+ */
+// ----------------------------------------------------------------------
+
+TimeZoneFactory& TimeZoneFactory::instance()
+{
+  static TimeZoneFactory obj;
+  return obj;
 }
 
 }  // namespace Fmi

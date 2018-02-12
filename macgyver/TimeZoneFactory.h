@@ -2,7 +2,6 @@
 /*!
  * \file
  * \brief Interface of (thread safe) singleton TimeZoneFactory
- * \deprecated Please use TimeZones instead.
  */
 // ======================================================================
 
@@ -15,7 +14,6 @@
 
 namespace Fmi
 {
-// C++14: [[deprecated("Please use TimeZones instead")]]
 class TimeZoneFactory
 {
  public:
@@ -26,19 +24,16 @@ class TimeZoneFactory
   boost::local_time::time_zone_ptr time_zone_from_coordinate(float lon, float lat);
   std::string zone_name_from_coordinate(float lon, float lat);
 
-  static TimeZoneFactory& instance()
-  {
-    static TimeZoneFactory obj;
-    return obj;
-  }
+  static TimeZoneFactory& instance();
 
+  // NO LONGER SUPPORTED, THESE JUST PRINT WARNINGS!
   void set_region_file(const std::string& file);
   void set_coordinate_file(const std::string& file);
 
  private:
   // Implementation hiding
   class Impl;
-  std::unique_ptr<Impl> mImpl;
+  std::unique_ptr<Impl> m_Impl;
 
   TimeZoneFactory();
   ~TimeZoneFactory();

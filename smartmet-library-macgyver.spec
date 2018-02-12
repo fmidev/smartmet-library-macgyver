@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.2.9
+Version: 18.2.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -72,6 +72,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Feb 12 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.12-1.fmi
+- Made TimeZoneFactory a thread safe C++11 singleton without extra locking
+
 * Fri Feb  9 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.9-1.fmi
 - Disable copying of TimeZones to prevent incorrect code
 
