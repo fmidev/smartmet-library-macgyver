@@ -6,9 +6,9 @@
 #define BOOST_SPIRIT_DEBUG
 #endif
 
-#include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/optional.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 #include <string>
 
@@ -67,8 +67,8 @@ struct TimeStamp
 
   TimeZoneOffset tz;
 };
-}
-}
+}  // namespace TimeParser
+}  // namespace Fmi
 
 // Adapt structs, so they behave like boost::fusion::vector's
 
@@ -293,5 +293,5 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
 
   qi::rule<Iterator, TimeStamp()> isostamp;
 };
-}
-}
+}  // namespace TimeParser
+}  // namespace Fmi
