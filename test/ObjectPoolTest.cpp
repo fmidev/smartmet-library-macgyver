@@ -1,6 +1,6 @@
-#include <iostream>
-#include <boost/test/included/unit_test.hpp>
 #include "ObjectPool.h"
+#include <boost/test/included/unit_test.hpp>
+#include <iostream>
 
 using namespace boost::unit_test;
 
@@ -26,7 +26,7 @@ struct TestStruct
 };
 
 boost::shared_ptr<TestStruct> create1() { return boost::shared_ptr<TestStruct>(new TestStruct); }
-}
+}  // namespace
 
 BOOST_AUTO_TEST_CASE(test_single_object_reuse)
 {

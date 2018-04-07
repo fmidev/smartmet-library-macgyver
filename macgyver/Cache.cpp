@@ -422,5 +422,5 @@ bool FileCache::getKey(const std::string& directory, const std::string& filename
 
   return true;
 }
-}
-}
+}  // namespace Cache
+}  // namespace Fmi

@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "NearTree.h"
 #include "Geometry.h"
+#include "NearTree.h"
 
 namespace Fmi
 {

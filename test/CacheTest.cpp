@@ -1,13 +1,13 @@
 #include "Cache.h"
 
-#include <iostream>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
 #include <regression/tframe.h>
+#include <ctime>
+#include <iostream>
 #include <list>
 #include <string>
-#include <ctime>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/thread.hpp>
 
 using namespace std;
 using namespace Fmi::Cache;
@@ -22,7 +22,7 @@ void insert_and_expire(T& theMap, U&& theKey, V&& theValue)
   theMap.insert(theKey, theValue, theKey);
   theMap.expire(theKey);
 }
-}
+}  // namespace
 
 struct custom_type
 {
@@ -78,12 +78,18 @@ void testfilecacheorder()
   FileCache cache(testdir, 100);
 
   std::vector<std::pair<std::size_t, std::string> > input = {
-      {100, "zero"}, {200, "first"}, {999, "second"}, {1202, "five hundred"},
+      {100, "zero"},
+      {200, "first"},
+      {999, "second"},
+      {1202, "five hundred"},
   };
 
   std::vector<std::size_t> correct_order = {
 
-      200, 100, 1202, 999,
+      200,
+      100,
+      1202,
+      999,
 
   };
 
@@ -487,7 +493,7 @@ class tests : public tframe::tests
     TEST(testevictionvector);
   }
 };
-}
+}  // namespace CacheTest
 
 int main(void)
 {

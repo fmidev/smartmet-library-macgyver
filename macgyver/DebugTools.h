@@ -30,4 +30,4 @@ class ScopedTimer
   std::string time_str;
   double start;
 };
-}
+}  // namespace Fmi

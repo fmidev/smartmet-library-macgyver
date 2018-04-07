@@ -6,8 +6,8 @@
 // ======================================================================
 
 #include "TimeZones.h"
-#include <regression/tframe.h>
 #include <boost/lexical_cast.hpp>
+#include <regression/tframe.h>
 #include <iostream>
 #include <string>
 
@@ -188,7 +188,7 @@ class tests : public tframe::tests
   }
 };
 
-}  // namespace Edge
+}  // namespace TimeZonesTest
 
 //! The main program
 int main(void)

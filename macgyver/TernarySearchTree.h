@@ -99,8 +99,7 @@ inline TernarySearchTree<T>::~TernarySearchTree()
 // ----------------------------------------------------------------------
 
 template <typename T>
-inline TernarySearchTree<T>::TernarySearchTree()
-    : root(NULL), count(0)
+inline TernarySearchTree<T>::TernarySearchTree() : root(NULL), count(0)
 {
 }
 

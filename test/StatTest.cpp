@@ -7,8 +7,8 @@
 
 #include "Stat.h"
 #include <regression/tframe.h>
-#include <string>
 #include <cmath>
+#include <string>
 
 using std::string;
 using namespace Fmi::Stat;
@@ -764,7 +764,7 @@ class tests : public tframe::tests
   }
 };
 
-}  // namespace CharsetToolsTest
+}  // namespace StatTest
 
 //! The main program
 int main(void)

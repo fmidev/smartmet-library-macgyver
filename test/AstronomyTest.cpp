@@ -1,6 +1,6 @@
 /*
-* Solar calculations - selftests
-*/
+ * Solar calculations - selftests
+ */
 
 #include "Astronomy.h"
 #include "TimeParser.h"
@@ -100,7 +100,7 @@ static void prepare_test_data()
   const boost::gregorian::date OCT_7_2013(2013, 10, 7);
 
   /* HELSINKI 2008-Jun-18 15:34:07
-  */
+   */
   test_data.push_back(test_data_t("Helsinki",
                                   "Europe/Helsinki",
                                   LON_E(24, 58, 0),
@@ -117,7 +117,7 @@ static void prepare_test_data()
                                   time_duration(18, 55, 27)));
 
   /* Utsjoki kesäaurinko / kaamos / jotain väliltä
-  */
+   */
   test_data.push_back(
       test_data_t("Utsjoki 1",
                   "Europe/Helsinki",
@@ -218,11 +218,11 @@ static void prepare_test_data()
                   time_duration(12, 21, 32),
                   time_duration(0, 39, 19)));
 
-/* Boost DST does NOT work right with historic dates; Finland did NOT
- * have DST in 1970 (or the CSV file does not reflect this).
- *
- * If 'have DST' is set in NOAA page, the results match.
- */
+  /* Boost DST does NOT work right with historic dates; Finland did NOT
+   * have DST in 1970 (or the CSV file does not reflect this).
+   *
+   * If 'have DST' is set in NOAA page, the results match.
+   */
 
 #if 0
     test_data.push_back( test_data_t(
@@ -242,7 +242,7 @@ static void prepare_test_data()
 #endif
 
   /* London, no DST
-  */
+   */
   test_data.push_back(test_data_t("Lontoo",
                                   "Europe/London",
                                   LON_W(0, 10, 0),
@@ -259,7 +259,7 @@ static void prepare_test_data()
                                   time_duration(7, 55, 11)));
 
   /* Chicago, IL (-6 hrs, DST)
-  */
+   */
   test_data.push_back(test_data_t("Chicago (-6)",
                                   "America/Chicago",
                                   LON_W(87, 39, 0),
@@ -276,7 +276,7 @@ static void prepare_test_data()
                                   time_duration(15, 13, 25)));
 
   /* Bombay, India (+5:30 hrs)
-  */
+   */
   test_data.push_back(test_data_t("Mumbai (+5:30)",
                                   "Asia/Calcutta",
                                   LON_E(72, 50, 0),
@@ -293,16 +293,16 @@ static void prepare_test_data()
                                   time_duration(13, 16, 14)));
 
   /* Kiribati (+14 time zone)
-  *
-  * NOTE: NOAA web pages don't take > +-12hr time zones. The reference values
-  *       have been calculated with UTC setup and -1 day:
-  *
-  *       azel.html:
-  *           Offset to UTC:      0
-  *           Daylight saving:    no
-  *           Date:               Jun 17th 2008
-  *           Time:               18:00:00 (= 8am at UTC+14)
-  */
+   *
+   * NOTE: NOAA web pages don't take > +-12hr time zones. The reference values
+   *       have been calculated with UTC setup and -1 day:
+   *
+   *       azel.html:
+   *           Offset to UTC:      0
+   *           Daylight saving:    no
+   *           Date:               Jun 17th 2008
+   *           Time:               18:00:00 (= 8am at UTC+14)
+   */
   test_data.push_back(
       test_data_t("Kiribati (+14)",
                   "Pacific/Kiritimati",
@@ -337,7 +337,7 @@ static void prepare_test_data()
                                   time_duration(24, 0, 0)));
 
   /* Honolulu, HI (-10 hrs, no DST)
-  */
+   */
   test_data.push_back(test_data_t("Honolulu (-10)",
                                   "Pacific/Honolulu",
                                   LON_W(157, 51, 0),
@@ -354,7 +354,7 @@ static void prepare_test_data()
                                   time_duration(13, 25, 50)));
 
   /* Namaka, Fidzi (+12 hours, DST)
-  */
+   */
 
   test_data.push_back(test_data_t("Namaka (+12)",
                                   "Pacific/Fiji",
@@ -440,7 +440,7 @@ static void prepare_test_data()
   }
 
 /*
-*/
+ */
 int main(int argc, const char **argv)
 {
   unsigned fails = 0;

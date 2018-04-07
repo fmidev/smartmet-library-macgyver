@@ -7,17 +7,16 @@
 
 #include "Astronomy.h"
 #include "TimeZoneFactory.h"
-#include <regression/tframe.h>
-#include <boost/lexical_cast.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"  //include all types plus i/o
 #include <boost/algorithm/string.hpp>
+#include <boost/date_time/local_time/local_time.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <regression/tframe.h>
 #include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "boost/date_time/posix_time/posix_time.hpp"  //include all types plus i/o
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/foreach.hpp>
 
 using namespace std;
 using boost::local_time::time_zone_ptr;
@@ -1357,8 +1356,9 @@ void lunar_time_t_struct()
       "EEST")
   {
     stringstream ss;
-    ss << ldt << " moon rise- and settimes in Utsjoki should be 2008-Jul-07 09:57:00 EEST "
-                 "not-a-date-time 2008-Jul-07 00:08:00 EEST 2008-Jul-07 23:43:00 EEST not "
+    ss << ldt
+       << " moon rise- and settimes in Utsjoki should be 2008-Jul-07 09:57:00 EEST "
+          "not-a-date-time 2008-Jul-07 00:08:00 EEST 2008-Jul-07 23:43:00 EEST not "
        << ss_out.str();
     TEST_FAILED(ss.str());
   }
@@ -1470,7 +1470,7 @@ class tests : public tframe::tests
   }
 };
 
-}  // namespace Edge
+}  // namespace MoonRiseSetTest
 
 //! The main program
 int main(void)

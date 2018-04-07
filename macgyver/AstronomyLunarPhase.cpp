@@ -21,14 +21,14 @@
 #include "Astronomy.h"
 #include "AstronomyJulianTime.h"
 
-#include <vector>
 #include <cmath>
+#include <vector>
 
 using namespace std;
-using boost::posix_time::not_a_date_time;
 using boost::gregorian::date;
-using boost::local_time::time_zone_ptr;
 using boost::local_time::local_date_time;
+using boost::local_time::time_zone_ptr;
+using boost::posix_time::not_a_date_time;
 using boost::posix_time::ptime;
 
 namespace Fmi

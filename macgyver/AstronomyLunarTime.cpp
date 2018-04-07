@@ -1,21 +1,21 @@
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
-#include <boost/date_time/c_local_time_adjustor.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include <cmath>
 #include <limits>
 #include <vector>
-#include <cmath>
 
 using namespace std;
-using boost::posix_time::time_duration;
-using boost::posix_time::not_a_date_time;
 using boost::gregorian::date;
-using boost::local_time::time_zone_ptr;
 using boost::local_time::local_date_time;
+using boost::local_time::time_zone_ptr;
+using boost::posix_time::not_a_date_time;
 using boost::posix_time::ptime;
+using boost::posix_time::time_duration;
 
 /*=== Public interface =====================*/
 

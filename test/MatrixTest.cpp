@@ -6,8 +6,8 @@
 // ======================================================================
 
 #include "Matrix.h"
-#include <iostream>
 #include <regression/tframe.h>
+#include <iostream>
 #include <string>
 
 using namespace std;
@@ -156,7 +156,7 @@ class tests : public tframe::tests
   }
 };
 
-}  // namespace Edge
+}  // namespace MatrixTest
 
 //! The main program
 int main(void)

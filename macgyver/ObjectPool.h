@@ -1,10 +1,10 @@
 #pragma once
 
-#include <list>
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+#include <list>
 
 namespace Fmi
 {
@@ -71,6 +71,7 @@ class ObjectPool : virtual protected boost::noncopyable
    *   @brief Update pool status: release extra unused objects if found
    */
   void update() { find_unused(); }
+
  private:
   boost::shared_ptr<ObjectType> find_unused()
   {
@@ -112,4 +113,4 @@ class ObjectPool : virtual protected boost::noncopyable
   boost::function0<boost::shared_ptr<ObjectType> > create_new;
   const std::size_t num_keep;
 };
-}
+}  // namespace Fmi

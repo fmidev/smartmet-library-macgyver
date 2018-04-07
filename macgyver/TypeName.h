@@ -43,7 +43,7 @@ inline std::string get_type_name(const Type* x)
  *  @brief Returns type name of an thrown object when called inside the catch block
  */
 std::string current_exception_type();
-}
+}  // namespace Fmi
 
 // Works with Visual Studio too
 #define METHOD_NAME (Fmi::get_type_name(this) + "::" + __FUNCTION__)

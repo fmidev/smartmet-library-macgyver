@@ -204,7 +204,7 @@ class tests : public tframe::tests
   }
 };
 
-}  // namespace Edge
+}  // namespace TimeZoneFactoryTest
 
 //! The main program
 int main(void)

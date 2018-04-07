@@ -516,8 +516,7 @@ NearTree<T, F>::~NearTree()
 // ----------------------------------------------------------------------
 
 template <typename T, typename F>
-NearTree<T, F>::NearTree()
-    : impl(new Impl())
+NearTree<T, F>::NearTree() : impl(new Impl())
 {
 }
 

@@ -44,6 +44,7 @@ class Matrix
   size_type height() const { return itsHeight; }
   size_type rows() const { return itsHeight; }
   size_type columns() const { return itsWidth; }
+
  private:
   size_type itsWidth;
   size_type itsHeight;
@@ -82,8 +83,7 @@ inline Matrix<T, S>::Matrix(const Matrix& other)
 // ----------------------------------------------------------------------
 
 template <typename T, bool S>
-inline Matrix<T, S>::Matrix()
-    : itsWidth(0), itsHeight(0), itsData()
+inline Matrix<T, S>::Matrix() : itsWidth(0), itsHeight(0), itsData()
 {
 }
 

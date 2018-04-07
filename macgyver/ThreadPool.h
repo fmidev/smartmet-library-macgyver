@@ -7,15 +7,15 @@
 // ======================================================================
 
 #pragma once
-#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/functional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/bind.hpp>
+#include <boost/thread.hpp>
 
-#include <stdexcept>
 #include <iostream>
 #include <queue>
+#include <stdexcept>
 
 namespace Fmi
 {
@@ -102,6 +102,7 @@ class Worker : public boost::enable_shared_from_this<Worker<Executor> >
   IteratorType getLocation() { return itsLocation; }
   void interrupt() { itsThread->interrupt(); }
   void join() { itsThread->join(); }
+
  private:
   ParentPtr itsParent;
 
@@ -175,6 +176,7 @@ class FifoScheduler
   std::size_t size() { return itsQueue.size(); }
   std::size_t maxSize() { return itsMaxSize; }
   bool empty() { return itsQueue.empty(); }
+
  private:
   std::size_t itsMaxSize;
 
@@ -570,5 +572,5 @@ class ThreadPool : public boost::noncopyable
 
   std::list<boost::shared_ptr<Worker<PoolType> > > itsWorkers;
 };
-}
-}
+}  // namespace ThreadPool
+}  // namespace Fmi

@@ -21,13 +21,13 @@
 
 #include "AstronomyJulianTime.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
-using boost::posix_time::not_a_date_time;
 using boost::gregorian::date;
-using boost::local_time::time_zone_ptr;
 using boost::local_time::local_date_time;
+using boost::local_time::time_zone_ptr;
+using boost::posix_time::not_a_date_time;
 using boost::posix_time::ptime;
 
 namespace Fmi

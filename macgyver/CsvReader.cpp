@@ -9,8 +9,8 @@
 #include <boost/algorithm/string.hpp>
 #include <cctype>
 #include <fstream>
-#include <stdexcept>
 #include <iostream>  // REMOVE
+#include <stdexcept>
 
 using namespace std;
 
@@ -194,7 +194,7 @@ void read(const string& filename, Callback callback, char delimiter)
     }
   }
 }
-}
-}  // namespace Fmi::CsvReader
+}  // namespace CsvReader
+}  // namespace Fmi
 
 // ======================================================================

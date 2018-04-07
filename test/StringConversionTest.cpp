@@ -5,9 +5,9 @@
  */
 // ======================================================================
 
-#include <boost/test/included/unit_test.hpp>
 #include "StringConversion.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace boost::unit_test;
 

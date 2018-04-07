@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time/local_date_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 
 namespace Fmi
@@ -25,6 +25,6 @@ class TimeFormatter
 
   virtual std::string format(const boost::local_time::local_date_time& t) const = 0;
 };
-}
+}  // namespace Fmi
 
 // ======================================================================

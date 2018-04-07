@@ -36,7 +36,7 @@ double DistanceFromLineSegment(
 // Bearing
 
 double Bearing(double theLon1, double theLat1, double theLon2, double theLat2);
-}
-}  // namespace Fmi::Geometry
+}  // namespace Geometry
+}  // namespace Fmi
 
 // ======================================================================

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
+#include "TemplateFormatterMT.h"
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
-#include "TemplateFormatterMT.h"
+#include <string>
 
 namespace Fmi
 {
@@ -25,4 +25,4 @@ class TemplateDirectory
  private:
   const boost::filesystem::path template_dir;
 };
-}
+}  // namespace Fmi

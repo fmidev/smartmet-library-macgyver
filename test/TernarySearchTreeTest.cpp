@@ -10,8 +10,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/locale.hpp>
 #include <boost/make_shared.hpp>
-#include <fstream>
 #include <regression/tframe.h>
+#include <fstream>
 #include <string>
 
 namespace TernarySearchTreeTest
@@ -172,7 +172,7 @@ class tests : public tframe::tests
   }
 };
 
-}  // namespace Edge
+}  // namespace TernarySearchTreeTest
 
 //! The main program
 int main(void)

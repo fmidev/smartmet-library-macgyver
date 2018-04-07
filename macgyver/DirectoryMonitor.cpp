@@ -52,8 +52,8 @@
 #include <boost/tuple/tuple.hpp>
 
 //#ifdef FMI_MULTITHREAD
-#include <boost/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread.hpp>
 //#endif
 
 #include <stdexcept>

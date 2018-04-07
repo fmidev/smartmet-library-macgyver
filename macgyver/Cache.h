@@ -6,17 +6,17 @@
 // ======================================================================
 #pragma once
 
-#include <boost/noncopyable.hpp>
 #include <boost/bimap.hpp>
-#include <boost/bimap/unordered_set_of.hpp>
 #include <boost/bimap/list_of.hpp>
-#include <boost/thread.hpp>
-#include <boost/optional.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/functional/hash.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/thread.hpp>
+#include <boost/unordered_map.hpp>
 
 // For random number generation
 #include <boost/random/mersenne_twister.hpp>
@@ -24,14 +24,14 @@
 #include <boost/random/uniform_real_distribution.hpp>
 
 #include <cmath>
+#include <ctime>
+#include <fstream>
+#include <iterator>
+#include <limits>
 #include <map>
 #include <set>
-#include <utility>
-#include <limits>
-#include <ctime>
 #include <sstream>
-#include <iterator>
-#include <fstream>
+#include <utility>
 
 // #ifndef NDEBUG
 #if 0
@@ -968,7 +968,8 @@ class Cache : public boost::noncopyable
 
   typedef typename boost::bimaps::bimap<
       boost::bimaps::unordered_set_of<KeyType, boost::hash<KeyType>, std::equal_to<KeyType> >,
-      boost::bimaps::list_of<CacheObjectType> > MapType;
+      boost::bimaps::list_of<CacheObjectType> >
+      MapType;
   typedef typename MapType::left_iterator LeftIteratorType;
   typedef typename MapType::right_iterator RightIteratorType;
 
@@ -1588,7 +1589,8 @@ class FileCache : boost::noncopyable
   typedef boost::bimaps::bimap<boost::bimaps::unordered_set_of<std::size_t,
                                                                boost::hash<std::size_t>,
                                                                std::equal_to<std::size_t> >,
-                               boost::bimaps::list_of<FileCacheStruct> > MapType;
+                               boost::bimaps::list_of<FileCacheStruct> >
+      MapType;
 
  public:
   // ----------------------------------------------------------------------

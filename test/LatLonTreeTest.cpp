@@ -6,12 +6,12 @@
 // ======================================================================
 
 #include "LatLonTree.h"
-#include <iostream>
-#include <regression/tframe.h>
-#include <string>
-#include <sstream>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <regression/tframe.h>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -160,7 +160,7 @@ class tests : public tframe::tests
   }
 };
 
-}  // namespace Edge
+}  // namespace LatLonTreeTest
 
 //! The main program
 int main(void)

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "TemplateFormatter.h"
 #include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
-#include "TemplateFormatter.h"
 
 namespace Fmi
 {
@@ -22,4 +22,4 @@ class TemplateFormatterMT : public boost::noncopyable
   const std::string file_name;
   boost::thread_specific_ptr<TemplateFormatter> tf_mt;
 };
-}
+}  // namespace Fmi

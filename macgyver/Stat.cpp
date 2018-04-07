@@ -1,16 +1,16 @@
 #include "Stat.h"
 
-#include <boost/foreach.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/weighted_variance.hpp>
 #include <boost/accumulators/statistics/weighted_mean.hpp>
 #include <boost/accumulators/statistics/weighted_median.hpp>
+#include <boost/accumulators/statistics/weighted_variance.hpp>
+#include <boost/foreach.hpp>
 
 #include <cmath>
 #include <iterator>
-#include <stdexcept>
 #include <numeric>
+#include <stdexcept>
 
 namespace Fmi
 {

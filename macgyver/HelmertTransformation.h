@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <string>
-#include <boost/array.hpp>
 #include "ReferenceEllipsoid.h"
+#include <boost/array.hpp>
+#include <string>
 
 namespace Fmi
 {
@@ -100,4 +100,4 @@ std::string get_fmi_sphere_towgs84_proj4_string(
     double lon,
     enum Fmi::HelmertTransformation::FmiSphereConvScalingType scaling_type =
         Fmi::HelmertTransformation::FMI_SPHERE_NO_SCALING);
-}
+}  // namespace Fmi

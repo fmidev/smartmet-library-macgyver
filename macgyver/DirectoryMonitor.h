@@ -61,7 +61,8 @@ class DirectoryMonitor : private boost::noncopyable
   // references instead of copies.
 
   typedef boost::function<void(
-      Watcher id, boost::filesystem::path path, boost::regex pattern, Status status)> Listener;
+      Watcher id, boost::filesystem::path path, boost::regex pattern, Status status)>
+      Listener;
 
   typedef boost::function<void(
       Watcher id, boost::filesystem::path path, boost::regex pattern, std::string message)>

@@ -1,7 +1,7 @@
 #include "ReferenceEllipsoid.h"
+#include <boost/test/included/unit_test.hpp>
 #include <algorithm>
 #include <cmath>
-#include <boost/test/included/unit_test.hpp>
 
 using namespace boost::unit_test;
 

@@ -53,6 +53,7 @@ class ReferenceEllipsoid
 
   double get_semimajor_axis() const { return a; }
   double get_eccentricity() const { return sqrt(e2); }
+
  private:
   double a;
   double e2;
@@ -60,4 +61,4 @@ class ReferenceEllipsoid
  public:
   static const ReferenceEllipsoid wgs84;
 };
-}
+}  // namespace Fmi
