@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.4.7
+Version: 18.4.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -72,6 +72,10 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri May 11 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.11-1.fmi
+- Added class DateTimeParser to speed up repeated parsing of time stamps
+- Marked TimeParser as deprecated
+
 * Sat Apr  7 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.7-1.fmi
 - Upgrade to boost 1.66
 

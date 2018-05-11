@@ -3,6 +3,16 @@
  * \brief Parse timestamps
  *
  * Known formats: iso, epoch, timestamp, sql, xml
+ *
+ * \deprecated
+ *
+ * This header is deprecated. Please use DateTimeParser instead, which
+ * is faster when used in loops. This header will be removed once FMI
+ * has ported all code to use DateTimeParser instead.
+ *
+ * Note that DateTimeParser reveals only a minimal set of methods.
+ * Some private methods hidden behind an implementation pointer
+ * may have to be made public once old code is ported.
  */
 // ======================================================================
 
