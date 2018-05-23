@@ -13,6 +13,53 @@
 #include <cmath>
 #include <stdexcept>
 
+namespace
+{
+/* Quick access table for minutes, hours, seconds, days and months in %02d format. Even though
+ * libfmt does this fast, it still usually has to parse the format string. This table can be used to
+ * avoid that step.
+ */
+
+const char* ints_02d[] = {
+    "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14",
+    "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+    "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44",
+    "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
+    "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74",
+    "75", "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
+    "90", "91", "92", "93", "94", "95", "96", "97", "98", "99"};
+
+// Years 1900-2100 optimized in similar fashion.
+
+const char* years_04d[] = {
+    "1900", "1901", "1902", "1903", "1904", "1905", "1906", "1907", "1908", "1909", "1910", "1911",
+    "1912", "1913", "1914", "1915", "1916", "1917", "1918", "1919", "1920", "1921", "1922", "1923",
+    "1924", "1925", "1926", "1927", "1928", "1929", "1930", "1931", "1932", "1933", "1934", "1935",
+    "1936", "1937", "1938", "1939", "1940", "1941", "1942", "1943", "1944", "1945", "1946", "1947",
+    "1948", "1949", "1950", "1951", "1952", "1953", "1954", "1955", "1956", "1957", "1958", "1959",
+    "1960", "1961", "1962", "1963", "1964", "1965", "1966", "1967", "1968", "1969", "1970", "1971",
+    "1972", "1973", "1974", "1975", "1976", "1977", "1978", "1979", "1980", "1981", "1982", "1983",
+    "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995",
+    "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007",
+    "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019",
+    "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031",
+    "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040", "2041", "2042", "2043",
+    "2044", "2045", "2046", "2047", "2048", "2049", "2050", "2051", "2052", "2053", "2054", "2055",
+    "2056", "2057", "2058", "2059", "2060", "2061", "2062", "2063", "2064", "2065", "2066", "2067",
+    "2068", "2069", "2070", "2071", "2072", "2073", "2074", "2075", "2076", "2077", "2078", "2079",
+    "2080", "2081", "2082", "2083", "2084", "2085", "2086", "2087", "2088", "2089", "2090", "2091",
+    "2092", "2093", "2094", "2095", "2096", "2097", "2098", "2099"};
+
+void append_year(std::string& result, int year)
+{
+  if (year >= 1900 && year < 2100)
+    result += years_04d[year - 1900];
+  else
+    result += fmt::sprintf("%04ld", year);
+}
+
+}  // namespace
+
 namespace Fmi
 {
 // ----------------------------------------------------------------------
@@ -133,8 +180,9 @@ std::string to_iso_string(const boost::posix_time::time_duration& duration)
     std::string ret;
     ret.reserve(1 + 6 + 1);  // sign + hhmmss + terminator byte, hoping for no fractional part
     if (duration.is_negative()) ret += '-';
-    ret +=
-        fmt::sprintf("%02ld%02ld%02ld", duration.hours(), duration.minutes(), duration.seconds());
+    ret += ints_02d[duration.hours()];
+    ret += ints_02d[duration.minutes()];
+    ret += ints_02d[duration.seconds()];
     auto frac_sec = duration.fractional_seconds();
     if (frac_sec != 0)
     {
@@ -164,8 +212,11 @@ std::string to_iso_extended_string(const boost::posix_time::time_duration& durat
     std::string ret;
     ret.reserve(1 + 8 + 1);  // sign + hh:mm:ss + terminator byte, hoping for no fractional part
     if (duration.is_negative()) ret += '-';
-    ret +=
-        fmt::sprintf("%02ld:%02ld:%02ld", duration.hours(), duration.minutes(), duration.seconds());
+    ret += ints_02d[duration.hours()];
+    ret += ":";
+    ret += ints_02d[duration.minutes()];
+    ret += ":";
+    ret += ints_02d[duration.seconds()];
     auto frac_sec = duration.fractional_seconds();
     if (frac_sec != 0)
     {
@@ -180,20 +231,26 @@ std::string to_iso_extended_string(const boost::posix_time::time_duration& durat
 std::string to_iso_string(const boost::gregorian::date& date)
 {
   boost::gregorian::greg_year_month_day ymd = date.year_month_day();
-  return fmt::sprintf("%04d%02d%02d",
-                      static_cast<int>(ymd.year),
-                      static_cast<int>(ymd.month),
-                      static_cast<int>(ymd.day));
+  std::string ret;
+  ret.reserve(4 + 2 + 2);
+  append_year(ret, ymd.year);
+  ret += ints_02d[ymd.month];
+  ret += ints_02d[ymd.day];
+  return ret;
 }
 
 // Convert date to form YYYY-MM-DD
 std::string to_iso_extended_string(const boost::gregorian::date& date)
 {
   boost::gregorian::greg_year_month_day ymd = date.year_month_day();
-  return fmt::sprintf("%04d-%02d-%02d",
-                      static_cast<int>(ymd.year),
-                      static_cast<int>(ymd.month),
-                      static_cast<int>(ymd.day));
+  std::string ret;
+  ret.reserve(4 + 1 + 2 + 1 + 2);
+  append_year(ret, ymd.year);
+  ret += '-';
+  ret += ints_02d[ymd.month];
+  ret += '-';
+  ret += ints_02d[ymd.day];
+  return ret;
 }
 
 // Convert to form YYYYMMDDTHHMMSS,fffffffff where T is the date-time separator
