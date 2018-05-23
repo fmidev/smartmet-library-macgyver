@@ -230,107 +230,6 @@ std::vector<string> newyork_2008()
   return result_strings;
 }
 
-std::vector<string> fiji_2008()
-{
-  std::vector<string> result_strings;
-
-  result_strings.push_back(
-      "01  0019 1215  0132 1244  0108 1212  0216 1340  0211 1413  0242 1550  0305 1652  0510 1835  "
-      "0649 1909  0716 1856  0840 1948  0904 2018");
-  result_strings.push_back(
-      "02  0108 1249  0225 1331  0201 1305  0259 1436  0249 1508  0329 1656  0408 1800  0613 1920  "
-      "0742 1945  0809 1936  0932 2039  0948 2110");
-  result_strings.push_back(
-      "03  0157 1326  0319 1423  0252 1401  0339 1532  0327 1606  0423 1806  0516 1902  0713 2001  "
-      "0834 2022  0902 2019  1022 2131  1028 2202");
-  result_strings.push_back(
-      "04  0248 1406  0411 1518  0340 1458  0418 1628  0408 1707  0524 1916  0624 1958  0809 2038  "
-      "0926 2100  0955 2105  1108 2224  1106 2252");
-  result_strings.push_back(
-      "05  0341 1451  0502 1614  0425 1555  0456 1725  0454 1812  0631 2021  0730 2046  0902 2114  "
-      "1019 2141  1048 2154  1151 2316  1141 2342");
-  result_strings.push_back(
-      "06  0435 1540  0549 1712  0507 1651  0537 1825  0545 1921  0739 2120  0831 2129  0954 2149  "
-      "1112 2225  1140 2246  1231       1217     ");
-  result_strings.push_back(
-      "07  0528 1633  0632 1809  0546 1748  0620 1928  0642 2031  0846 2211  0928 2207  1045 2226  "
-      "1205 2312  1228 2339  1308 0008  1252 0033");
-  result_strings.push_back(
-      "08  0620 1729  0713 1905  0625 1844  0707 2034  0746 2138  0948 2255  1022 2243  1136 2304  "
-      "1258       1314       1344 0100  1330 0126");
-  result_strings.push_back(
-      "09  0709 1826  0752 2000  0704 1942  0800 2142  0852 2239  1046 2334  1113 2317  1228 2346  "
-      "1348 0003  1356 0033  1421 0152  1412 0222");
-  result_strings.push_back(
-      "10  0754 1922  0829 2056  0744 2042  0859 2249  0958 2332  1139       1203 2352  1321       "
-      "1436 0055  1436 0126  1459 0245  1459 0323");
-  result_strings.push_back(
-      "11  0836 2018  0907 2152  0828 2145  1002 2352  1101       1230 0010  1253       1414 0031  "
-      "1521 0150  1514 0219  1540 0342  1554 0428");
-  result_strings.push_back(
-      "12  0915 2112  0947 2251  0916 2249  1106       1159 0018  1320 0044  1344 0029  1506 0120  "
-      "1603 0244  1551 0312  1625 0441  1655 0537");
-  result_strings.push_back(
-      "13  0952 2206  1031 2353  1009 2355  1209 0048  1253 0059  1409 0118  1436 0108  1556 0212  "
-      "1642 0338  1628 0406  1716 0546  1803 0646");
-  result_strings.push_back(
-      "14  1029 2301  1119       1107       1308 0137  1345 0136  1459 0153  1529 0151  1643 0306  "
-      "1719 0432  1708 0502  1815 0654  1913 0751");
-  result_strings.push_back(
-      "15  1107 2357  1213 0057  1210 0059  1404 0220  1434 0210  1550 0230  1622 0237  1727 0400  "
-      "1756 0526  1751 0600  1919 0803  2020 0850");
-  result_strings.push_back(
-      "16  1148       1313 0202  1313 0158  1457 0259  1523 0243  1642 0310  1713 0327  1807 0455  "
-      "1834 0620  1838 0702  2026 0909  2124 0941");
-  result_strings.push_back(
-      "17  1232 0057  1416 0305  1414 0251  1547 0334  1612 0317  1735 0354  1802 0420  1846 0549  "
-      "1914 0716  1932 0807  2133 1010  2223 1026");
-  result_strings.push_back(
-      "18  1323 0200  1520 0403  1513 0338  1637 0408  1702 0353  1827 0442  1848 0514  1922 0642  "
-      "1958 0815  2031 0914  2237 1103  2318 1106");
-  result_strings.push_back(
-      "19  1421 0305  1622 0455  1608 0420  1726 0442  1754 0430  1918 0533  1930 0609  1959 0735  "
-      "2046 0916  2135 1020  2336 1149       1143");
-  result_strings.push_back(
-      "20  1523 0412  1721 0541  1701 0458  1816 0516  1847 0512  2005 0626  2009 0703  2036 0829  "
-      "2140 1020  2240 1122       1230  0010 1219");
-  result_strings.push_back(
-      "21  1629 0515  1816 0622  1752 0533  1907 0552  1939 0557  2050 0720  2046 0755  2116 0924  "
-      "2239 1125  2343 1218  0031 1308  0102 1255");
-  result_strings.push_back(
-      "22  1735 0613  1909 0700  1841 0607  1959 0631  2031 0645  2130 0814  2122 0848  2200 1022  "
-      "2342 1229       1307  0124 1343  0153 1332");
-  result_strings.push_back(
-      "23  1837 0704  2000 0735  1931 0641  2052 0713  2121 0737  2208 0907  2158 0940  2249 1124  "
-      "     1328  0044 1351  0215 1418  0244 1411");
-  result_strings.push_back(
-      "24  1935 0748  2050 0809  2022 0716  2145 0800  2207 0830  2245 0959  2235 1033  2344 1227  "
-      "0046 1421  0140 1430  0305 1454  0337 1454");
-  result_strings.push_back(
-      "25  2029 0828  2139 0843  2113 0753  2236 0849  2250 0924  2320 1051  2316 1129       1332  "
-      "0149 1509  0234 1507  0356 1532  0430 1540");
-  result_strings.push_back(
-      "26  2121 0904  2230 0919  2206 0833  2325 0942  2330 1018  2357 1143       1228  0045 1435  "
-      "0249 1551  0327 1542  0448 1612  0522 1629");
-  result_strings.push_back(
-      "27  2210 0938  2322 0957  2259 0917       1035       1111       1238  0002 1331  0149 1533  "
-      "0345 1630  0418 1617  0541 1656  0613 1721");
-  result_strings.push_back(
-      "28  2259 1012       1038  2351 1004  0010 1130  0008 1203  0036 1336  0053 1436  0254 1626  "
-      "0440 1707  0509 1654  0634 1743  0702 1813");
-  result_strings.push_back(
-      "29  2349 1046  0015 1123       1055  0053 1224  0045 1256  0119 1438  0152 1542  0358 1712  "
-      "0532 1742  0601 1733  0727 1833  0746 1906");
-  result_strings.push_back(
-      "30       1122             0042 1149  0133 1318  0121 1351  0208 1544  0256 1646  0458 1754  "
-      "0624 1818  0654 1814  0817 1925  0828 1958");
-  result_strings.push_back(
-      "31  0040 1201             0131 1244             0200 1449             0403 1744  0555 1833  "
-      "           0747 1859             0906 2048");
-
-  return result_strings;
-}
-
 std::vector<string> utsjoki_2008()
 {
   std::vector<string> result_strings;
@@ -969,8 +868,6 @@ bool moon_rise_set(
     reference_data = newyork_2008();
   else if (ss.str() == "honolulu_2008")
     reference_data = honolulu_2008();
-  else if (ss.str() == "fiji_2008")
-    reference_data = fiji_2008();
   else
   {
     stringstream ss;
@@ -1075,16 +972,6 @@ bool moon_rise_set(
     expected_str += "2 minute differences #0";
     if (ss_received_result.str() != expected_str)
       TEST_FAILED(string("Result for Honolulu 2008 should be ") + expected_str + " not " +
-                  ss_received_result.str());
-  }
-  else if (ss.str() == "fiji_2008")
-  {
-    string expected_str;
-    expected_str += "exact matches #602\n";
-    expected_str += "1 minute differences #142\n";
-    expected_str += "2 minute differences #0";
-    if (ss_received_result.str() != expected_str)
-      TEST_FAILED(string("Result for Fiji 2008 should be ") + expected_str + " not " +
                   ss_received_result.str());
   }
 
@@ -1240,17 +1127,6 @@ void moonriseset_honolulu()
   time_zone_ptr tz_honolulu(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Pacific/Honolulu"));
   moon_rise_set("Honolulu", 2008, lat_hon, lon_hon, tz_honolulu);
-
-  TEST_PASSED();
-}
-
-void moonriseset_fiji()
-{
-  // Fiji
-  double lat_fij(17.8);
-  double lon_fij(177.41666667);
-  time_zone_ptr tz_fiji(Fmi::TimeZoneFactory::instance().time_zone_from_region("Pacific/Fiji"));
-  moon_rise_set("Fiji", 2008, lat_fij, lon_fij, tz_fiji);
 
   TEST_PASSED();
 }
@@ -1460,7 +1336,6 @@ class tests : public tframe::tests
     TEST(moonriseset_utsjoki);
     TEST(moonriseset_newyork);
     TEST(moonriseset_honolulu);
-    TEST(moonriseset_fiji);
     TEST(moon_rises_twice);
     TEST(moon_sets_twice);
     TEST(lunar_time_t_struct);
