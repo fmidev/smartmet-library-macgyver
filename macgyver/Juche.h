@@ -2,31 +2,28 @@
 
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
-#include <iostream>
 #include <map>
 #include <string>
 
 namespace Fmi
 {
+namespace Juche
+{
 typedef boost::mutex MutexType;
 typedef boost::lock_guard<MutexType> Lock;
 
 template <typename KeyType, typename ValueType>
-class Juche
+class Cache
 {
  public:
   using TimeType = std::time_t;
-  using KeyTimePair = std::pair<KeyType, TimeType>;
-  using KeyTimeMap = std::map<KeyType, TimeType>;
-
-  using KeyValuePair = std::pair<KeyType, ValueType>;
-  using KeyValueMap = std::map<KeyType, ValueType>;
-
   using TimeValuePair = std::pair<TimeType, ValueType>;
+  using KeyTimeValuePair = std::pair<KeyType, TimeValuePair>;
+  using KeyTimeValueMap = std::map<KeyType, TimeValuePair>;
 
-  Juche() : mMaxSize(10), mTimeConstant(0) {}
+  Cache() : mMaxSize(10), mTimeConstant(0) {}
 
-  Juche(const std::size_t& maxSize, const long& timeConstant)
+  Cache(const std::size_t& maxSize, const long& timeConstant)
       : mMaxSize(maxSize), mTimeConstant(timeConstant)
   {
   }
@@ -37,15 +34,12 @@ class Juche
 
     if (mMaxSize == 0) return false;
 
-    auto ktIt = mKeyTimeMap.find(key);
-    if (ktIt != mKeyTimeMap.end())
+    auto it = mKeyTimeValueMap.find(key);
+    if (it != mKeyTimeValueMap.end())
     {
-      if (std::time(NULL) - ktIt->second > mTimeConstant)
+      if (std::time(NULL) - it->second.first > mTimeConstant)
       {
-        ktIt = mKeyTimeMap.erase(ktIt);
-
-        auto kvIt = mKeyValueMap.find(key);
-        if (kvIt != mKeyValueMap.end()) kvIt = mKeyValueMap.erase(kvIt);
+        it = mKeyTimeValueMap.erase(it);
       }
       else
       {
@@ -54,51 +48,39 @@ class Juche
     }
 
     // Remove all expired
-    if (mKeyTimeMap.size() >= mMaxSize)
+    if (mTimeConstant > 0 and mKeyTimeValueMap.size() >= mMaxSize)
     {
-      for (auto ktIt = mKeyTimeMap.begin(); ktIt != mKeyTimeMap.end();)
+      for (auto it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end();)
       {
-        if (std::time(NULL) - ktIt->second > mTimeConstant)
+        if (std::time(NULL) - it->second.first > mTimeConstant)
         {
-          auto kvIt = mKeyValueMap.find(ktIt->first);
-          if (kvIt != mKeyValueMap.end()) kvIt = mKeyValueMap.erase(kvIt);
-
-          ktIt = mKeyTimeMap.erase(ktIt);
+          it = mKeyTimeValueMap.erase(it);
         }
         else
-          ++ktIt;
+          ++it;
       }
     }
 
     // Remove oldest
-    if (mKeyValueMap.size() >= mMaxSize)
+    if (mKeyTimeValueMap.size() >= mMaxSize)
     {
-      auto oldestKtIt = mKeyTimeMap.begin();
-      for (auto ktIt = mKeyTimeMap.begin(); ktIt != mKeyTimeMap.end(); ++ktIt)
+      auto oldestIt = mKeyTimeValueMap.begin();
+      for (auto it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end(); ++it)
       {
-        if (ktIt->second < oldestKtIt->second) oldestKtIt = ktIt;
+        if (it->second.first < oldestIt->second.first) oldestIt = it;
       }
 
-      if (oldestKtIt == mKeyTimeMap.end())
+      if (oldestIt == mKeyTimeValueMap.end())
         throw std::runtime_error("Can not remove object from the full cache.");
 
-      auto kvIt = mKeyValueMap.find(oldestKtIt->first);
-      if (kvIt == mKeyValueMap.end())
-        throw std::runtime_error("Cannot find value for the key of KeyTime map.");
-
-      kvIt = mKeyValueMap.erase(kvIt);
-      oldestKtIt = mKeyTimeMap.erase(oldestKtIt);
+      oldestIt = mKeyTimeValueMap.erase(oldestIt);
     }
 
-    if (mKeyValueMap.size() >= mMaxSize)
+    if (mKeyTimeValueMap.size() >= mMaxSize)
       throw std::runtime_error("Object cache is still full after cleaning");
 
     auto now = std::time(NULL);
-    mKeyValueMap.insert(KeyValuePair(key, value));
-    mKeyTimeMap.insert(KeyTimePair(key, now));
-
-    if (mKeyValueMap.size() != mKeyTimeMap.size())
-      throw std::runtime_error("KeyValue and KeyTime mapping differs from each others.");
+    mKeyTimeValueMap.insert(KeyTimeValuePair(key, TimeValuePair(now, value)));
 
     return true;
   }
@@ -108,30 +90,26 @@ class Juche
   {
     Lock lock(mMutex);
 
-    auto ktIt = mKeyTimeMap.find(key);
-    if (ktIt == mKeyTimeMap.end()) return boost::optional<ValueType>();
-
-    auto kvIt = mKeyValueMap.find(key);
+    auto it = mKeyTimeValueMap.find(key);
+    if (it == mKeyTimeValueMap.end()) return boost::optional<ValueType>();
 
     std::time_t now = std::time(NULL);
-    if (now - ktIt->second > mTimeConstant)
+    if (now - it->second.first > mTimeConstant)
     {
-      ktIt = mKeyTimeMap.erase(ktIt);
-      if (kvIt != mKeyValueMap.end()) kvIt = mKeyValueMap.erase(kvIt);
+      it = mKeyTimeValueMap.erase(it);
 
       return boost::optional<ValueType>();
     }
 
-    return boost::optional<ValueType>(kvIt->second);
+    return boost::optional<ValueType>(it->second.second);
   }
 
-  std::size_t size() const { return mKeyValueMap.size(); }
+  std::size_t size() const { return mKeyTimeValueMap.size(); }
 
   std::size_t maxSize() const { return mMaxSize; }
 
  private:
-  KeyValueMap mKeyValueMap;
-  KeyTimeMap mKeyTimeMap;
+  KeyTimeValueMap mKeyTimeValueMap;
 
   MutexType mMutex;
 
@@ -139,4 +117,5 @@ class Juche
 
   long mTimeConstant;
 };
+}  // namespace Juche
 }  // namespace Fmi
