@@ -23,8 +23,8 @@ class Cache
 
   Cache() : mMaxSize(10), mTimeConstant(0) {}
 
-  Cache(const std::size_t& maxSize, const long& timeConstant)
-      : mMaxSize(maxSize), mTimeConstant(timeConstant)
+  Cache(const std::size_t& maxSize, const size_t& timeConstant)
+      : mMaxSize(maxSize), mTimeConstant((timeConstant))
   {
   }
 
@@ -115,7 +115,7 @@ class Cache
 
   std::size_t mMaxSize;
 
-  long mTimeConstant;
+  std::size_t mTimeConstant;
 };
 }  // namespace Juche
 }  // namespace Fmi
