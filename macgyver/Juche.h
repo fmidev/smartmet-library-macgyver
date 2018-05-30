@@ -50,7 +50,7 @@ class Cache
     // Remove all expired
     if (mTimeConstant > 0 and mKeyTimeValueMap.size() >= mMaxSize)
     {
-      for (auto it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end();)
+      for (it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end();)
       {
         if (std::time(NULL) - it->second.first > mTimeConstant)
         {
@@ -65,7 +65,7 @@ class Cache
     if (mKeyTimeValueMap.size() >= mMaxSize)
     {
       auto oldestIt = mKeyTimeValueMap.begin();
-      for (auto it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end(); ++it)
+      for (it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end(); ++it)
       {
         if (it->second.first < oldestIt->second.first) oldestIt = it;
       }
