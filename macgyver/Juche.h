@@ -22,6 +22,8 @@ class Juche
   using KeyValuePair = std::pair<KeyType, ValueType>;
   using KeyValueMap = std::map<KeyType, ValueType>;
 
+  using TimeValuePair = std::pair<TimeType, ValueType>;
+
   Juche() : mMaxSize(10), mTimeConstant(0) {}
 
   Juche(const std::size_t& maxSize, const long& timeConstant)
@@ -54,7 +56,7 @@ class Juche
     // Remove all expired
     if (mKeyTimeMap.size() >= mMaxSize)
     {
-      for (auto ktIt = mKeyTimeMap.begin(); ktIt != mKeyTimeMap.end(); ++ktIt)
+      for (auto ktIt = mKeyTimeMap.begin(); ktIt != mKeyTimeMap.end();)
       {
         if (std::time(NULL) - ktIt->second > mTimeConstant)
         {
@@ -63,6 +65,8 @@ class Juche
 
           ktIt = mKeyTimeMap.erase(ktIt);
         }
+        else
+          ++ktIt;
       }
     }
 
