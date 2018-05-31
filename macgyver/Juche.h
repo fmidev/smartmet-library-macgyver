@@ -12,19 +12,33 @@ namespace Juche
 typedef boost::mutex MutexType;
 typedef boost::lock_guard<MutexType> Lock;
 
+/** Cache with LRU and time eviction.
+
+  Cache discards the least recently used (LRU) items first.
+  Cache discards time expired items if constructed with
+  a positive time eviction constant as seconds.
+ */
 template <typename KeyType, typename ValueType>
 class Cache
 {
- public:
   using TimeType = std::time_t;
   using TimeValuePair = std::pair<TimeType, ValueType>;
   using KeyTimeValuePair = std::pair<KeyType, TimeValuePair>;
-  using KeyTimeValueMap = std::map<KeyType, TimeValuePair>;
+  using KeyTimeValueList = std::list<KeyTimeValuePair>;
+  using KeyTimeValueListIt = decltype(KeyTimeValueList().begin());
+  using KeyKeyTimeValueListItPair = std::pair<KeyType, KeyTimeValueListIt>;
+  using KeyTimeValueMap = std::map<KeyType, KeyTimeValueListIt>;
 
+ public:
+  // Constructor with LRU eviction and fixed cache size 10.
   Cache() : mMaxSize(10), mTimeConstant(0) {}
 
+  // Constructor with LRU eviction and user defined cache size.
+  Cache(const std::size_t& maxSize) : mMaxSize(maxSize), mTimeConstant(0) {}
+
+  // Constructor with LRU eviction and time eviction and user defined cache size.
   Cache(const std::size_t& maxSize, const size_t& timeConstant)
-      : mMaxSize(maxSize), mTimeConstant((timeConstant))
+      : mMaxSize(maxSize), mTimeConstant(timeConstant)
   {
   }
 
@@ -34,74 +48,90 @@ class Cache
 
     if (mMaxSize == 0) return false;
 
-    auto it = mKeyTimeValueMap.find(key);
-    if (it != mKeyTimeValueMap.end())
+    auto now = std::time(NULL);
+    auto mapIt = mKeyTimeValueMap.find(key);
+    if (mapIt != mKeyTimeValueMap.end())
     {
-      if (std::time(NULL) - it->second.first > mTimeConstant)
+      // Remove the object if expired, otherwise it is valid.
+      auto listIt = mapIt->second;
+      if (now - listIt->second.first > mTimeConstant)
       {
-        it = mKeyTimeValueMap.erase(it);
+        mKeyTimeValueList.erase(listIt);
+        mKeyTimeValueMap.erase(mapIt);
       }
       else
       {
+        // Cache object is still valid.
         return false;
       }
     }
 
-    // Remove all expired
-    if (mTimeConstant > 0 and mKeyTimeValueMap.size() >= mMaxSize)
+    // Object is not in the cache.
+    // Make space if full and remove expired objects.
+    if (mKeyTimeValueList.size() >= mMaxSize)
     {
-      for (it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end();)
+      auto listIt = mKeyTimeValueList.rbegin();
+      auto listEndIt = mKeyTimeValueList.rend();
+      while ((mKeyTimeValueList.size() >= mMaxSize) or
+             (mTimeConstant > 0 and (listIt != listEndIt) and
+              (now - listIt->second.first > mTimeConstant)))
       {
-        if (std::time(NULL) - it->second.first > mTimeConstant)
+        mapIt = mKeyTimeValueMap.find(listIt->first);
+        if (mapIt != mKeyTimeValueMap.end())
         {
-          it = mKeyTimeValueMap.erase(it);
+          mKeyTimeValueList.pop_back();
+          mapIt = mKeyTimeValueMap.erase(mapIt);
         }
-        else
-          ++it;
+
+        listIt = mKeyTimeValueList.rbegin();
       }
     }
 
-    // Remove oldest
-    if (mKeyTimeValueMap.size() >= mMaxSize)
-    {
-      auto oldestIt = mKeyTimeValueMap.begin();
-      for (it = mKeyTimeValueMap.begin(); it != mKeyTimeValueMap.end(); ++it)
-      {
-        if (it->second.first < oldestIt->second.first) oldestIt = it;
-      }
-
-      if (oldestIt == mKeyTimeValueMap.end())
-        throw std::runtime_error("Can not remove object from the full cache.");
-
-      oldestIt = mKeyTimeValueMap.erase(oldestIt);
-    }
-
-    if (mKeyTimeValueMap.size() >= mMaxSize)
+    if (mKeyTimeValueList.size() >= mMaxSize)
       throw std::runtime_error("Object cache is still full after cleaning");
 
-    auto now = std::time(NULL);
-    mKeyTimeValueMap.insert(KeyTimeValuePair(key, TimeValuePair(now, value)));
+    mKeyTimeValueList.push_front(KeyTimeValuePair(key, TimeValuePair(now, value)));
+    mKeyTimeValueMap.insert(KeyKeyTimeValueListItPair(key, mKeyTimeValueList.begin()));
 
     return true;
   }
 
-  // Find value from cache and remove it if it is too old.
   boost::optional<ValueType> find(const KeyType& key)
   {
     Lock lock(mMutex);
 
-    auto it = mKeyTimeValueMap.find(key);
-    if (it == mKeyTimeValueMap.end()) return boost::optional<ValueType>();
+    if (mMaxSize == 0) return boost::optional<ValueType>();
+
+    auto mapIt = mKeyTimeValueMap.find(key);
+    if (mapIt == mKeyTimeValueMap.end()) return boost::optional<ValueType>();
 
     std::time_t now = std::time(NULL);
-    if (now - it->second.first > mTimeConstant)
-    {
-      it = mKeyTimeValueMap.erase(it);
+    auto listIt = mapIt->second;
 
-      return boost::optional<ValueType>();
+    if (mTimeConstant > 0)
+    {
+      // Remove the object from the cache if expired
+      if (now - listIt->second.first > mTimeConstant)
+      {
+        mKeyTimeValueList.erase(listIt);
+        mKeyTimeValueMap.erase(mapIt);
+
+        return boost::optional<ValueType>();
+      }
     }
 
-    return boost::optional<ValueType>(it->second.second);
+    // Move the object to the begin of the list (LRU).
+    mKeyTimeValueList.splice(mKeyTimeValueList.begin(), mKeyTimeValueList, listIt);
+    listIt = mKeyTimeValueList.begin();
+    if (listIt->first != key) throw std::runtime_error("Mixed keys after a splice of cache list");
+
+    // Update the reference of object to the map.
+    mapIt = mKeyTimeValueMap.find(listIt->first);
+    if (mapIt == mKeyTimeValueMap.end())
+      throw std::runtime_error("Map object not found after a splice of cache list");
+    mapIt->second = listIt;
+
+    return boost::optional<ValueType>(listIt->second.second);
   }
 
   std::size_t size() const { return mKeyTimeValueMap.size(); }
@@ -110,7 +140,7 @@ class Cache
 
  private:
   KeyTimeValueMap mKeyTimeValueMap;
-
+  KeyTimeValueList mKeyTimeValueList;
   MutexType mMutex;
 
   std::size_t mMaxSize;
