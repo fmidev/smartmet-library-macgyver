@@ -17,6 +17,10 @@ typedef boost::lock_guard<MutexType> Lock;
   Cache discards the least recently used (LRU) items first.
   Cache discards time expired items if constructed with
   a positive time eviction constant as seconds.
+
+  User can override the expiration time constant by giving
+  custom eviction value for each or selected cache items
+  while inserting them into the cache.
  */
 template <typename KeyType, typename ValueType>
 class Cache
@@ -30,6 +34,8 @@ class Cache
   using KeyTimeValueMap = std::map<KeyType, KeyTimeValueListIt>;
 
  public:
+  using TimeConstantType = std::size_t;
+
   // Constructor with LRU eviction and fixed cache size 10.
   Cache() : mMaxSize(10), mTimeConstant(0) {}
 
@@ -42,7 +48,7 @@ class Cache
   {
   }
 
-  bool insert(const KeyType& key, const ValueType& value)
+  bool insert(const KeyType& key, const ValueType& value, const TimeConstantType& timeConstant)
   {
     Lock lock(mMutex);
 
@@ -54,7 +60,7 @@ class Cache
     {
       // Remove the object if expired, otherwise it is valid.
       auto listIt = mapIt->second;
-      if (now - listIt->second.first > mTimeConstant)
+      if (now > listIt->second.first)
       {
         mKeyTimeValueList.erase(listIt);
         mKeyTimeValueMap.erase(mapIt);
@@ -73,8 +79,7 @@ class Cache
       auto listIt = mKeyTimeValueList.rbegin();
       auto listEndIt = mKeyTimeValueList.rend();
       while ((mKeyTimeValueList.size() >= mMaxSize) or
-             (mTimeConstant > 0 and (listIt != listEndIt) and
-              (now - listIt->second.first > mTimeConstant)))
+             (mTimeConstant > 0 and (listIt != listEndIt) and (now > listIt->second.first)))
       {
         mapIt = mKeyTimeValueMap.find(listIt->first);
         if (mapIt != mKeyTimeValueMap.end())
@@ -90,10 +95,15 @@ class Cache
     if (mKeyTimeValueList.size() >= mMaxSize)
       throw std::runtime_error("Object cache is still full after cleaning");
 
-    mKeyTimeValueList.push_front(KeyTimeValuePair(key, TimeValuePair(now, value)));
+    mKeyTimeValueList.push_front(KeyTimeValuePair(key, TimeValuePair(now + timeConstant, value)));
     mKeyTimeValueMap.insert(KeyKeyTimeValueListItPair(key, mKeyTimeValueList.begin()));
 
     return true;
+  }
+
+  bool insert(const KeyType& key, const ValueType& value)
+  {
+    return insert(key, value, mTimeConstant);
   }
 
   boost::optional<ValueType> find(const KeyType& key) const
@@ -111,7 +121,7 @@ class Cache
     if (mTimeConstant > 0)
     {
       // Remove the object from the cache if expired
-      if (now - listIt->second.first > mTimeConstant)
+      if (now > listIt->second.first)
       {
         mKeyTimeValueList.erase(listIt);
         mKeyTimeValueMap.erase(mapIt);
@@ -145,7 +155,7 @@ class Cache
 
   std::size_t mMaxSize;
 
-  std::size_t mTimeConstant;
+  TimeConstantType mTimeConstant;
 };
 }  // namespace Juche
 }  // namespace Fmi
