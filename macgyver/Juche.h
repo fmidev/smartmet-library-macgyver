@@ -96,7 +96,7 @@ class Cache
     return true;
   }
 
-  boost::optional<ValueType> find(const KeyType& key)
+  boost::optional<ValueType> find(const KeyType& key) const
   {
     Lock lock(mMutex);
 
@@ -139,9 +139,9 @@ class Cache
   std::size_t maxSize() const { return mMaxSize; }
 
  private:
-  KeyTimeValueMap mKeyTimeValueMap;
-  KeyTimeValueList mKeyTimeValueList;
-  MutexType mMutex;
+  mutable KeyTimeValueMap mKeyTimeValueMap;
+  mutable KeyTimeValueList mKeyTimeValueList;
+  mutable MutexType mMutex;
 
   std::size_t mMaxSize;
 
