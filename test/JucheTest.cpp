@@ -126,6 +126,36 @@ void constructorWithMaxSizeAndEvictionTime()
   TEST_PASSED();
 }
 
+void timeEviction()
+{
+  std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  Fmi::Juche::Cache<std::string, std::string> cache(10, 1);
+
+  cache.insert(valueList.front(), valueList.front());
+  std::this_thread::sleep_for(std::chrono::microseconds(2100000));
+  if (cache.find(valueList.front())) TEST_FAILED("Time eviction failed: one object stored");
+
+  for (auto item : valueList)
+    cache.insert(item, item);
+  std::this_thread::sleep_for(std::chrono::microseconds(2100000));
+  for (auto item : valueList)
+  {
+    if (cache.find(item))
+      TEST_FAILED("Time eviction failed: all objects should have been too old to be returned.");
+  }
+
+  for (auto item : valueList)
+    cache.insert(item, item);
+  std::this_thread::sleep_for(std::chrono::microseconds(2100000));
+  cache.insert("10", "10");
+  if (cache.size() != 1)
+    TEST_FAILED(
+        "Time eviction failed: all other object should have been cleaned from the cache while "
+        "inserting a new object.");
+
+  TEST_PASSED();
+}
+
 class tests : public tframe::tests
 {
   virtual const char* error_message_prefix() const { return "\n\t"; }
@@ -138,6 +168,7 @@ class tests : public tframe::tests
 
     TEST(constructorWithMaxSize);
     TEST(constructorWithMaxSizeAndEvictionTime);
+    TEST(timeEviction);
   }
 };
 
