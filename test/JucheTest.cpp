@@ -156,6 +156,25 @@ void timeEviction()
   TEST_PASSED();
 }
 
+void customTimeEviction()
+{
+  std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  Fmi::Juche::Cache<std::string, std::string> cache(10, 1);
+
+  cache.insert(valueList.front(), valueList.front());
+  cache.insert(valueList.back(), valueList.back(), 3);
+  std::this_thread::sleep_for(std::chrono::microseconds(2100000));
+  if (cache.find(valueList.front()))
+    TEST_FAILED(
+        "Time eviction failed: global eviction time does not work with custom time eviction.");
+
+  if (not cache.find(valueList.back()))
+    TEST_FAILED(
+        "Time eviction failed: custom eviction time does not override the global time value.");
+
+  TEST_PASSED();
+}
+
 class tests : public tframe::tests
 {
   virtual const char* error_message_prefix() const { return "\n\t"; }
@@ -169,6 +188,7 @@ class tests : public tframe::tests
     TEST(constructorWithMaxSize);
     TEST(constructorWithMaxSizeAndEvictionTime);
     TEST(timeEviction);
+    TEST(customTimeEviction);
   }
 };
 
