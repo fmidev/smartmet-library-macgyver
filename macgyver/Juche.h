@@ -48,6 +48,13 @@ class Cache
   {
   }
 
+  /** Insert a key-value-pair with a custom time eviction value.
+   *  The value of timeConstant attribute overrides the timeConstant of constructor.
+   *  @param key The key is needed when finding the value from cache with the find method.
+   *  @param value An object to be stored to the cache.
+   *  @retval true The key-value insertion success.
+   *  @retval false The key-value insertion failed (the key has a valid value in the cache)
+   */
   bool insert(const KeyType& key, const ValueType& value, const TimeConstantType& timeConstant)
   {
     Lock lock(mMutex);
@@ -101,11 +108,21 @@ class Cache
     return true;
   }
 
+  /** Insert a key-value-pair
+   *  @param key The key is needed when finding the value from cache with the find method.
+   *  @param value An object to be stored to the cache.
+   *  @retval true The key-value insertion success.
+   *  @retval false The key-value insertion failed (the key has a valid value in the cache)
+   */
   bool insert(const KeyType& key, const ValueType& value)
   {
     return insert(key, value, mTimeConstant);
   }
 
+  /** Finds object with specific key.
+   *  @param key Key of the object to search for.
+   *  @return Non empty boost::optional value if the object is found.
+   */
   boost::optional<ValueType> find(const KeyType& key) const
   {
     Lock lock(mMutex);
