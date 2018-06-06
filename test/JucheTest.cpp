@@ -1,4 +1,3 @@
-
 #include "Juche.h"
 
 #include <boost/lexical_cast.hpp>
@@ -115,7 +114,7 @@ void constructorWithMaxSize()
 
 void constructorWithMaxSizeAndEvictionTime()
 {
-  Fmi::Juche::Cache<std::string, std::string> cache(20, 1);
+  Fmi::Juche::Cache<std::string, std::string> cache(20, std::chrono::seconds(1));
   if (cache.maxSize() != 20)
     TEST_FAILED(
         "Constructor with max size 20 and eviction time 1 does not result a cache of size 20.");
@@ -129,7 +128,7 @@ void constructorWithMaxSizeAndEvictionTime()
 void timeEviction()
 {
   std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
-  Fmi::Juche::Cache<std::string, std::string> cache(10, 1);
+  Fmi::Juche::Cache<std::string, std::string> cache(10, std::chrono::seconds(1));
 
   cache.insert(valueList.front(), valueList.front());
   std::this_thread::sleep_for(std::chrono::microseconds(2100000));
@@ -159,10 +158,10 @@ void timeEviction()
 void customTimeEviction()
 {
   std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
-  Fmi::Juche::Cache<std::string, std::string> cache(10, 1);
+  Fmi::Juche::Cache<std::string, std::string> cache(10, std::chrono::seconds(1));
 
   cache.insert(valueList.front(), valueList.front());
-  cache.insert(valueList.back(), valueList.back(), 3);
+  cache.insert(valueList.back(), valueList.back(), std::chrono::seconds(3));
   std::this_thread::sleep_for(std::chrono::microseconds(2100000));
   if (cache.find(valueList.front()))
     TEST_FAILED(
