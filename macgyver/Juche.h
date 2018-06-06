@@ -26,6 +26,7 @@ typedef boost::lock_guard<MutexType> Lock;
 template <typename KeyType, typename ValueType>
 class Cache
 {
+  using SizeType = std::size_t;
   using DurationType = std::chrono::seconds;
   using ClockType = std::chrono::high_resolution_clock;
   using TimeType = std::chrono::time_point<ClockType>;
@@ -174,7 +175,7 @@ class Cache
   mutable KeyTimeValueList mKeyTimeValueList;
   mutable MutexType mMutex;
 
-  std::size_t mMaxSize;
+  SizeType mMaxSize;
 
   DurationType mDuration;
 };
