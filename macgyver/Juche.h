@@ -2,6 +2,7 @@
 
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
+#include <chrono>
 #include <map>
 #include <string>
 
@@ -16,16 +17,18 @@ typedef boost::lock_guard<MutexType> Lock;
 
   Cache discards the least recently used (LRU) items first.
   Cache discards time expired items if constructed with
-  a positive time eviction constant as seconds.
+  a positive time eviction duration as seconds.
 
-  User can override the expiration time constant by giving
+  User can override the expiration duration by giving
   custom eviction value for each or selected cache items
   while inserting them into the cache.
  */
 template <typename KeyType, typename ValueType>
 class Cache
 {
-  using TimeType = std::time_t;
+  using DurationType = std::chrono::seconds;
+  using ClockType = std::chrono::high_resolution_clock;
+  using TimeType = std::chrono::time_point<ClockType>;
   using TimeValuePair = std::pair<TimeType, ValueType>;
   using KeyTimeValuePair = std::pair<KeyType, TimeValuePair>;
   using KeyTimeValueList = std::list<KeyTimeValuePair>;
@@ -34,34 +37,32 @@ class Cache
   using KeyTimeValueMap = std::map<KeyType, KeyTimeValueListIt>;
 
  public:
-  using TimeConstantType = std::size_t;
-
   // Constructor with LRU eviction and fixed cache size 10.
-  Cache() : mMaxSize(10), mTimeConstant(0) {}
+  Cache() : mMaxSize(10), mDuration(0) {}
 
   // Constructor with LRU eviction and user defined cache size.
-  Cache(const std::size_t& maxSize) : mMaxSize(maxSize), mTimeConstant(0) {}
+  Cache(const std::size_t& maxSize) : mMaxSize(maxSize), mDuration(0) {}
 
   // Constructor with LRU eviction and time eviction and user defined cache size.
-  Cache(const std::size_t& maxSize, const size_t& timeConstant)
-      : mMaxSize(maxSize), mTimeConstant(timeConstant)
+  Cache(const std::size_t& maxSize, const std::chrono::seconds& duration)
+      : mMaxSize(maxSize), mDuration(duration)
   {
   }
 
-  /** Insert a key-value-pair with a custom time eviction value.
-   *  The value of timeConstant attribute overrides the timeConstant of constructor.
+  /** Insert a key-value-pair with a custom time eviction duration.
+   *  The value of duration attribute overrides the duration of constructor.
    *  @param key The key is needed when finding the value from cache with the find method.
    *  @param value An object to be stored to the cache.
    *  @retval true The key-value insertion success.
    *  @retval false The key-value insertion failed (the key has a valid value in the cache)
    */
-  bool insert(const KeyType& key, const ValueType& value, const TimeConstantType& timeConstant)
+  bool insert(const KeyType& key, const ValueType& value, const std::chrono::seconds& duration)
   {
     Lock lock(mMutex);
 
     if (mMaxSize == 0) return false;
 
-    auto now = std::time(NULL);
+    TimeType now = ClockType::now();
     auto mapIt = mKeyTimeValueMap.find(key);
     if (mapIt != mKeyTimeValueMap.end())
     {
@@ -85,8 +86,9 @@ class Cache
     {
       auto listIt = mKeyTimeValueList.rbegin();
       auto listEndIt = mKeyTimeValueList.rend();
-      while ((mKeyTimeValueList.size() >= mMaxSize) or
-             (mTimeConstant > 0 and (listIt != listEndIt) and (now > listIt->second.first)))
+      while (
+          (mKeyTimeValueList.size() >= mMaxSize) or
+          (mDuration > DurationType(0) and (listIt != listEndIt) and (now > listIt->second.first)))
       {
         mapIt = mKeyTimeValueMap.find(listIt->first);
         if (mapIt != mKeyTimeValueMap.end())
@@ -103,7 +105,8 @@ class Cache
     if (mKeyTimeValueList.size() >= mMaxSize)
       throw std::runtime_error("Object cache is still full after cleaning");
 
-    mKeyTimeValueList.push_front(KeyTimeValuePair(key, TimeValuePair(now + timeConstant, value)));
+    TimeType evictionTime = now + duration;
+    mKeyTimeValueList.push_front(KeyTimeValuePair(key, TimeValuePair(evictionTime, value)));
     mKeyTimeValueMap.insert(KeyKeyTimeValueListItPair(key, mKeyTimeValueList.begin()));
 
     return true;
@@ -115,10 +118,7 @@ class Cache
    *  @retval true The key-value insertion success.
    *  @retval false The key-value insertion failed (the key has a valid value in the cache)
    */
-  bool insert(const KeyType& key, const ValueType& value)
-  {
-    return insert(key, value, mTimeConstant);
-  }
+  bool insert(const KeyType& key, const ValueType& value) { return insert(key, value, mDuration); }
 
   /** Finds object with specific key.
    *  @param key Key of the object to search for.
@@ -133,10 +133,10 @@ class Cache
     auto mapIt = mKeyTimeValueMap.find(key);
     if (mapIt == mKeyTimeValueMap.end()) return boost::optional<ValueType>();
 
-    std::time_t now = std::time(NULL);
+    TimeType now = ClockType::now();
     auto listIt = mapIt->second;
 
-    if (mTimeConstant > 0)
+    if (mDuration > DurationType(0))
     {
       // Remove the object from the cache if expired
       if (now > listIt->second.first)
@@ -176,7 +176,7 @@ class Cache
 
   std::size_t mMaxSize;
 
-  TimeConstantType mTimeConstant;
+  DurationType mDuration;
 };
 }  // namespace Juche
 }  // namespace Fmi
