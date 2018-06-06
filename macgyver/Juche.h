@@ -13,6 +13,45 @@ namespace Juche
 typedef boost::mutex MutexType;
 typedef boost::lock_guard<MutexType> Lock;
 
+class CacheStatistics
+{
+ public:
+  using SizeType = std::size_t;
+  using ClockType = std::chrono::high_resolution_clock;
+  using TimeType = std::chrono::time_point<ClockType>;
+
+  CacheStatistics()
+      : mConstructionTime(ClockType::now()),
+        mHits(0),
+        mMisses(0),
+        mEvictions(0),
+        mInsertFailures(0),
+        mInsertSuccesses(0)
+  {
+  }
+
+  void hit() { mHits++; }
+  void miss() { mMisses++; }
+  void insertFail() { mInsertFailures++; }
+  void insertSuccess() { mInsertSuccesses++; }
+  void eviction() { mEvictions++; }
+
+  TimeType getConstructionTime() const { return mConstructionTime; }
+  SizeType getHits() const { return mHits; }
+  SizeType getMisses() const { return mMisses; }
+  SizeType getEvictions() const { return mEvictions; }
+  SizeType getInsertFailures() const { return mInsertFailures; }
+  SizeType getInsertSuccesses() const { return mInsertSuccesses; }
+
+ private:
+  TimeType mConstructionTime;
+  SizeType mHits;
+  SizeType mMisses;
+  SizeType mEvictions;
+  SizeType mInsertFailures;
+  SizeType mInsertSuccesses;
+};
+
 /** Cache with LRU and time eviction.
 
   Cache discards the least recently used (LRU) items first.
@@ -71,12 +110,14 @@ class Cache
       auto listIt = mapIt->second;
       if (now > listIt->second.first)
       {
+        mCacheStatistics.eviction();
         mKeyTimeValueList.erase(listIt);
         mKeyTimeValueMap.erase(mapIt);
       }
       else
       {
         // Cache object is still valid.
+        mCacheStatistics.insertFail();
         return false;
       }
     }
@@ -94,6 +135,7 @@ class Cache
         mapIt = mKeyTimeValueMap.find(listIt->first);
         if (mapIt != mKeyTimeValueMap.end())
         {
+          mCacheStatistics.eviction();
           mKeyTimeValueList.pop_back();
           mapIt = mKeyTimeValueMap.erase(mapIt);
         }
@@ -106,6 +148,7 @@ class Cache
     if (mKeyTimeValueList.size() >= mMaxSize)
       throw std::runtime_error("Object cache is still full after cleaning");
 
+    mCacheStatistics.insertSuccess();
     TimeType evictionTime = now + duration;
     mKeyTimeValueList.push_front(KeyTimeValuePair(key, TimeValuePair(evictionTime, value)));
     mKeyTimeValueMap.insert(KeyKeyTimeValueListItPair(key, mKeyTimeValueList.begin()));
@@ -129,10 +172,18 @@ class Cache
   {
     Lock lock(mMutex);
 
-    if (mMaxSize == 0) return boost::optional<ValueType>();
+    if (mMaxSize == 0)
+    {
+      mCacheStatistics.miss();
+      return boost::optional<ValueType>();
+    }
 
     auto mapIt = mKeyTimeValueMap.find(key);
-    if (mapIt == mKeyTimeValueMap.end()) return boost::optional<ValueType>();
+    if (mapIt == mKeyTimeValueMap.end())
+    {
+      mCacheStatistics.miss();
+      return boost::optional<ValueType>();
+    }
 
     TimeType now = ClockType::now();
     auto listIt = mapIt->second;
@@ -145,6 +196,8 @@ class Cache
         mKeyTimeValueList.erase(listIt);
         mKeyTimeValueMap.erase(mapIt);
 
+        mCacheStatistics.eviction();
+        mCacheStatistics.miss();
         return boost::optional<ValueType>();
       }
     }
@@ -160,12 +213,15 @@ class Cache
       throw std::runtime_error("Map object not found after a splice of cache list");
     mapIt->second = listIt;
 
+    mCacheStatistics.hit();
     return boost::optional<ValueType>(listIt->second.second);
   }
 
   std::size_t size() const { return mKeyTimeValueMap.size(); }
 
   std::size_t maxSize() const { return mMaxSize; }
+
+  CacheStatistics getCacheStatistics() const { return mCacheStatistics; }
 
  private:
   Cache(const Cache&) = delete;
@@ -178,6 +234,8 @@ class Cache
   SizeType mMaxSize;
 
   DurationType mDuration;
+
+  mutable CacheStatistics mCacheStatistics;
 };
 }  // namespace Juche
 }  // namespace Fmi

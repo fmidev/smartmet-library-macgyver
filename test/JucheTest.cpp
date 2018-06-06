@@ -174,6 +174,133 @@ void customTimeEviction()
   TEST_PASSED();
 }
 
+void cacheStatisticsInsertSuccess()
+{
+  std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  Fmi::Juche::Cache<std::string, std::string> cache(10);
+
+  for (auto item : valueList)
+    cache.insert(item, item);
+
+  auto statistics = cache.getCacheStatistics();
+
+  auto now = std::chrono::high_resolution_clock::now();
+  auto timeLimitHigh = now + std::chrono::seconds(1);
+  auto timeLimitLow = now - std::chrono::seconds(1);
+  if (statistics.getConstructionTime() < timeLimitLow or
+      timeLimitHigh < statistics.getConstructionTime())
+    TEST_FAILED("CacheStatistics does not create construction time correctly.");
+
+  if (statistics.getHits() != 0) TEST_FAILED("CacheStatistics does not count hits correctly.");
+
+  if (statistics.getMisses() != 0) TEST_FAILED("CacheStatistics does not count misses correctly.");
+
+  if (statistics.getEvictions() != 0)
+    TEST_FAILED("CacheStatistics does not count evictions correctly.");
+
+  if (statistics.getInsertFailures() != 0)
+    TEST_FAILED("CacheStatistics does not count missed insertions correctly.");
+
+  if (statistics.getInsertSuccesses() != valueList.size())
+    TEST_FAILED("CacheStatistics does not count succeed insertions correctly.");
+
+  TEST_PASSED();
+}
+
+void cacheStatisticsMisses()
+{
+  std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  Fmi::Juche::Cache<std::string, std::string> cache(10);
+
+  for (auto item : valueList)
+  {
+    cache.find(item);
+  }
+
+  auto statistics = cache.getCacheStatistics();
+  if (statistics.getHits() != 0) TEST_FAILED("CacheStatistics does not count hits correctly.");
+
+  if (statistics.getMisses() != valueList.size())
+    TEST_FAILED("CacheStatistics does not count misses correctly.");
+
+  if (statistics.getEvictions() != 0)
+    TEST_FAILED("CacheStatistics does not count evictions correctly.");
+
+  if (statistics.getInsertFailures() != 0)
+    TEST_FAILED("CacheStatistics does not count missed insertions correctly.");
+
+  if (statistics.getInsertSuccesses() != 0)
+    TEST_FAILED("CacheStatistics does not count succeed insertions correctly.");
+
+  TEST_PASSED();
+}
+
+void cacheStatisticsHits()
+{
+  std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  Fmi::Juche::Cache<std::string, std::string> cache(10);
+
+  for (auto item : valueList)
+  {
+    cache.insert(item, item);
+    cache.find(item);
+  }
+
+  auto statistics = cache.getCacheStatistics();
+  if (statistics.getHits() != valueList.size())
+    TEST_FAILED("CacheStatistics does not count hits correctly.");
+
+  if (statistics.getMisses() != 0) TEST_FAILED("CacheStatistics does not count misses correctly.");
+
+  if (statistics.getEvictions() != 0)
+    TEST_FAILED("CacheStatistics does not count evictions correctly.");
+
+  if (statistics.getInsertFailures() != 0)
+    TEST_FAILED("CacheStatistics does not count missed insertions correctly.");
+
+  if (statistics.getInsertSuccesses() != valueList.size())
+    TEST_FAILED("CacheStatistics does not count succeed insertions correctly.");
+
+  TEST_PASSED();
+}
+
+void cacheStatisticsEvictions()
+{
+  std::list<std::string> valueList = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  Fmi::Juche::Cache<std::string, std::string> cache(10);
+
+  for (auto item : valueList)
+  {
+    cache.insert(item, item);
+  }
+
+  cache.insert("10", "10");
+
+  auto statistics = cache.getCacheStatistics();
+  if (statistics.getEvictions() != 1)
+    TEST_FAILED("CacheStatistics does not count evictions correctly (part 1).");
+
+  std::this_thread::sleep_for(std::chrono::microseconds(2100000));
+
+  cache.insert(valueList.front(), valueList.front());
+
+  statistics = cache.getCacheStatistics();
+  if (statistics.getHits() != 0) TEST_FAILED("CacheStatistics does not count hits correctly.");
+
+  if (statistics.getMisses() != 0) TEST_FAILED("CacheStatistics does not count misses correctly.");
+
+  if (statistics.getEvictions() != 2)
+    TEST_FAILED("CacheStatistics does not count evictions correctly (part 2).");
+
+  if (statistics.getInsertFailures() != 0)
+    TEST_FAILED("CacheStatistics does not count missed insertions correctly.");
+
+  if (statistics.getInsertSuccesses() != valueList.size() + 2)
+    TEST_FAILED("CacheStatistics does not count succeed insertions correctly.");
+
+  TEST_PASSED();
+}
+
 class tests : public tframe::tests
 {
   virtual const char* error_message_prefix() const { return "\n\t"; }
@@ -188,6 +315,11 @@ class tests : public tframe::tests
     TEST(constructorWithMaxSizeAndEvictionTime);
     TEST(timeEviction);
     TEST(customTimeEviction);
+
+    TEST(cacheStatisticsInsertSuccess);
+    TEST(cacheStatisticsMisses);
+    TEST(cacheStatisticsHits);
+    TEST(cacheStatisticsEvictions);
   }
 };
 
