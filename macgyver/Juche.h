@@ -166,6 +166,9 @@ class Cache
   std::size_t maxSize() const { return mMaxSize; }
 
  private:
+  Cache(const Cache&) = delete;
+  Cache& operator=(const Cache&) = delete;
+
   mutable KeyTimeValueMap mKeyTimeValueMap;
   mutable KeyTimeValueList mKeyTimeValueList;
   mutable MutexType mMutex;
