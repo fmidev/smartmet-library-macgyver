@@ -96,6 +96,7 @@ class Cache
         }
 
         listIt = mKeyTimeValueList.rbegin();
+        listEndIt = mKeyTimeValueList.rend();
       }
     }
 
