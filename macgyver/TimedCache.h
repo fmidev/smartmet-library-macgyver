@@ -8,7 +8,7 @@
 
 namespace Fmi
 {
-namespace Juche
+namespace TimedCache
 {
 typedef boost::mutex MutexType;
 typedef boost::lock_guard<MutexType> Lock;
@@ -241,5 +241,5 @@ class Cache
 
   mutable CacheStatistics mCacheStatistics;
 };
-}  // namespace Juche
+}  // namespace TimedCache
 }  // namespace Fmi
