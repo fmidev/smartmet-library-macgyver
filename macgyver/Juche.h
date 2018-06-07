@@ -221,7 +221,11 @@ class Cache
 
   std::size_t maxSize() const { return mMaxSize; }
 
-  CacheStatistics getCacheStatistics() const { return mCacheStatistics; }
+  CacheStatistics getCacheStatistics() const
+  {
+    Lock lock(mMutex);
+    return mCacheStatistics;
+  }
 
  private:
   Cache(const Cache&) = delete;
