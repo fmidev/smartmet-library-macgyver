@@ -51,32 +51,16 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 
-//#ifdef FMI_MULTITHREAD
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
-//#endif
 
 #include <stdexcept>
 
 // scoped read/write lock types
 
-#ifdef FMI_MULTITHREAD
 typedef boost::shared_mutex MutexType;
 typedef boost::shared_lock<MutexType> ReadLock;
 typedef boost::unique_lock<MutexType> WriteLock;
-#else
-struct MutexType
-{
-};
-struct ReadLock
-{
-  ReadLock(const MutexType& /* mutex */) {}
-};
-struct WriteLock
-{
-  WriteLock(const MutexType& /* mutex */) {}
-};
-#endif
 
 namespace fs = boost::filesystem;
 
@@ -472,11 +456,7 @@ void DirectoryMonitor::run()
 
     if (sleeptime > 0)
     {
-      //#ifdef FMI_MULTITHREAD
       boost::this_thread::sleep(boost::posix_time::seconds(sleeptime));
-      //#else
-      //			sleep(sleeptime);
-      //#endif
     }
   }
 
