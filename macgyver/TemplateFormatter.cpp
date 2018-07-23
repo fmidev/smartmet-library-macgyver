@@ -26,9 +26,9 @@ class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
   OutputCollector(std::ostream& the_ost) : ost(the_ost) {}
   virtual ~OutputCollector() throw();
 
-  virtual INT_32 Collect(const void* vData, const UINT_32 iDataLength)
+  virtual INT_32 Collect(const void* vData, const UINT_32 datalength)
   {
-    ost.write(reinterpret_cast<const char*>(vData), iDataLength);
+    ost.write(reinterpret_cast<const char*>(vData), datalength);
     return 0;
   }
 };
@@ -45,22 +45,18 @@ class Fmi::TemplateFormatter::Logger : public CTPP::Logger
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 
-  // iBasePriority is used but clang does not see it
-  Logger(std::ostream& the_ost, const UINT_32 iIBasePriority)
-      : CTPP::Logger(iBasePriority), ost(the_ost)
-  {
-  }
+  Logger(std::ostream& the_ost, const UINT_32 priority) : CTPP::Logger(priority), ost(the_ost) {}
 
 #pragma clang diagnostic pop
 
   virtual ~Logger() throw();
 
-  virtual INT_32 WriteLog(const UINT_32 iPriority, CCHAR_P szString, const UINT_32 iStringLen)
+  virtual INT_32 WriteLog(const UINT_32 priority, CCHAR_P szString, const UINT_32 stringlen)
   {
-    if (iPriority >= iBasePriority)
+    if (priority >= iBasePriority)
     {
       // FIXME: shouldn't reject for too long messages
-      ost.write(szString, iStringLen);
+      ost.write(szString, stringlen);
     }
 
     return 0;
