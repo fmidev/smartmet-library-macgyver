@@ -24,7 +24,6 @@ class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
 
  public:
   OutputCollector(std::ostream& the_ost) : ost(the_ost) {}
-  virtual ~OutputCollector() throw();
 
   virtual INT_32 Collect(const void* vData, const UINT_32 datalength)
   {
@@ -33,7 +32,6 @@ class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
   }
 };
 
-Fmi::TemplateFormatter::OutputCollector::~OutputCollector() throw() {}
 /**
  *  @brief CTPP logger class for writing log messages to provided std::ostream
  */
@@ -49,8 +47,6 @@ class Fmi::TemplateFormatter::Logger : public CTPP::Logger
 
 #pragma clang diagnostic pop
 
-  virtual ~Logger() throw();
-
   virtual INT_32 WriteLog(const UINT_32 priority, CCHAR_P szString, const UINT_32 stringlen)
   {
     if (priority >= iBasePriority)
@@ -63,7 +59,6 @@ class Fmi::TemplateFormatter::Logger : public CTPP::Logger
   }
 };
 
-Fmi::TemplateFormatter::Logger::~Logger() throw() {}
 Fmi::TemplateFormatter::TemplateFormatter(UINT_32 max_handlers) : syscall_factory(max_handlers)
 {
   CTPP::STDLibInitializer::InitLibrary(syscall_factory);
