@@ -53,7 +53,7 @@ ptime JulianTime::ptime_utc() const
 {
   if (jd == 0.0) return not_a_date_time;
 
-  int z = (int)(jd + 0.5);
+  int z = lround(jd);
   double f = (jd + 0.5) - z;
 
   int A;
