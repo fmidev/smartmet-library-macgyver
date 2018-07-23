@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.6.7
+Version: 18.7.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,7 +15,7 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: imake
-BuildRequires: smartmet-timezones >= 18.4.3
+BuildRequires: smartmet-timezones >= 18.5.9
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel
@@ -73,6 +73,12 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jul 23 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.7.23-1.fmi
+- Removed superfluous empty destructors to avoid compiler warnings
+- Use lround instead of manual rounding with static_cast
+- Fixed TemplateFormatter parameters not to use base case member names
+- Use lround to silence CodeChecker warnings
+
 * Thu Jun  7 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.7-1.fmi
 - Added TimedCache
 
