@@ -156,10 +156,9 @@ double DistanceFromLineSegment(
 
   // Otherwise the nearest point is the nearer end point
 
-  if (u < 0)
-    return Distance(theX, theY, theX1, theY1);
-  else
-    return Distance(theX, theY, theX2, theY2);
+  if (u < 0) return Distance(theX, theY, theX1, theY1);
+
+  return Distance(theX, theY, theX2, theY2);
 }
 
 // ----------------------------------------------------------------------
