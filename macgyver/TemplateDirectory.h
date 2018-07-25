@@ -16,7 +16,7 @@ class TemplateDirectory
  public:
   TemplateDirectory(const boost::filesystem::path& template_dir);
 
-  virtual ~TemplateDirectory();
+  virtual ~TemplateDirectory() = default;
 
   boost::filesystem::path find_template(const std::string& name) const;
 

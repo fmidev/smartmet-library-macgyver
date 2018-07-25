@@ -24,7 +24,6 @@ Fmi::TemplateDirectory::TemplateDirectory(const fs::path& the_template_dir)
   }
 }
 
-Fmi::TemplateDirectory::~TemplateDirectory() {}
 fs::path Fmi::TemplateDirectory::find_template(const std::string& name) const
 {
   fs::path p;
