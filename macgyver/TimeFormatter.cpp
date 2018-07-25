@@ -342,20 +342,14 @@ std::string HttpFormatter::format(const boost::local_time::local_date_time& t) c
 
 TimeFormatter* TimeFormatter::create(const std::string& name)
 {
-  if (name == "iso")
-    return new IsoFormatter();
-  else if (name == "sql")
-    return new SqlFormatter();
-  else if (name == "xml")
-    return new XmlFormatter();
-  else if (name == "epoch")
-    return new EpochFormatter();
-  else if (name == "timestamp")
-    return new TimeStampFormatter();
-  else if (name == "http")
-    return new HttpFormatter();
-  else
-    throw std::runtime_error("Unknown time format '" + name + "'");
+  if (name == "iso") return new IsoFormatter();
+  if (name == "sql") return new SqlFormatter();
+  if (name == "xml") return new XmlFormatter();
+  if (name == "epoch") return new EpochFormatter();
+  if (name == "timestamp") return new TimeStampFormatter();
+  if (name == "http") return new HttpFormatter();
+
+  throw std::runtime_error("Unknown time format '" + name + "'");
 }
 
 }  // namespace Fmi
