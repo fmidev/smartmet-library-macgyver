@@ -3,17 +3,18 @@
 #include "TypeName.h"
 #include <cstdlib>
 #include <cxxabi.h>
+#include <memory>
 
 std::string Fmi::demangle_cpp_type_name(const std::string& src)
 {
   int status;
   std::size_t length = 0;
   std::string result;
-  char* name = abi::__cxa_demangle(src.c_str(), nullptr, &length, &status);
+  std::unique_ptr<char> name(abi::__cxa_demangle(src.c_str(), nullptr, &length, &status));
   switch (status)
   {
     case 0:
-      result = name;
+      result = *name;
       break;
     case -1:
       result = "<Failed>";
@@ -22,7 +23,6 @@ std::string Fmi::demangle_cpp_type_name(const std::string& src)
       result = "<Invalid>";
       break;
   }
-  free(name);
   return result;
 }
 
