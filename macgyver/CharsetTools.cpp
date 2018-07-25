@@ -671,9 +671,9 @@ string utf8_to_latin1(const string& in)
     for (++utf8str; --len > 0 && (*utf8str != '\0'); ++utf8str)
     {
       // be sure this is not an unexpected start of a new character
-      if ((*utf8str & 0xc0) != 0x80u) break;
+      if ((static_cast<unsigned char>(*utf8str) & 0xc0) != 0x80u) break;
 
-      u = (u << 6) | (*utf8str & 0x3fu);
+      u = (u << 6) | (static_cast<unsigned char>(*utf8str) & 0x3fu);
     }
 
     // iso-8859-1 sanity check.
@@ -709,15 +709,15 @@ string latin1_to_utf8(const string& in)
   for (; *mbstr != '\0'; ++mbstr)
   {
     // the character needs no mapping if the highest bit is not set
-    if ((*mbstr & 0x80u) == 0)
+    if ((static_cast<unsigned char>(*mbstr) & 0x80u) == 0)
     {
       out += *mbstr;
     }
     // otherwise mapping is necessary (characters 0x80 or greater; highest bit is set)
     else
     {
-      out += static_cast<char>((0xC0u | (0x03u & (*mbstr >> 6))));
-      out += static_cast<char>((0x80u | (0x3Fu & *mbstr)));
+      out += static_cast<char>((0xC0u | (0x03u & (static_cast<unsigned char>(*mbstr) >> 6))));
+      out += static_cast<char>((0x80u | (0x3Fu & static_cast<unsigned char>(*mbstr))));
     }
   }
   return out;
@@ -736,9 +736,9 @@ std::wstring utf8_to_utf16(const std::string& str)
 {
   std::wstring out;
 
-  wchar_t w = 0;
+  unsigned int w = 0;
   int bytes = 0;
-  wchar_t err = L'?';
+  unsigned int err = L'?';
 
   for (std::string::size_type i = 0; i < str.size(); i++)
   {
@@ -810,7 +810,7 @@ std::string utf16_to_utf8(const std::wstring& str)
 
   for (std::wstring::size_type i = 0; i < str.size(); i++)
   {
-    wchar_t w = str[i];
+    unsigned int w = str[i];
     if (w <= 0x7f)
       out.push_back(static_cast<char>(w));
     else if (w <= 0x7ff)
