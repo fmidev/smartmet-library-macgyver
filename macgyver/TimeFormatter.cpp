@@ -93,8 +93,8 @@ TimeFormatter::~TimeFormatter() {}
 struct IsoFormatter : public TimeFormatter
 {
   IsoFormatter() : TimeFormatter() {}
-  virtual std::string format(const boost::posix_time::ptime& t) const;
-  virtual std::string format(const boost::local_time::local_date_time& t) const;
+  std::string format(const boost::posix_time::ptime& t) const override;
+  std::string format(const boost::local_time::local_date_time& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -108,8 +108,8 @@ struct IsoFormatter : public TimeFormatter
 struct SqlFormatter : public TimeFormatter
 {
   SqlFormatter() : TimeFormatter() {}
-  virtual std::string format(const boost::posix_time::ptime& t) const;
-  virtual std::string format(const boost::local_time::local_date_time& t) const;
+  std::string format(const boost::posix_time::ptime& t) const override;
+  std::string format(const boost::local_time::local_date_time& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -123,8 +123,8 @@ struct SqlFormatter : public TimeFormatter
 struct XmlFormatter : public TimeFormatter
 {
   XmlFormatter() : TimeFormatter() {}
-  virtual std::string format(const boost::posix_time::ptime& t) const;
-  virtual std::string format(const boost::local_time::local_date_time& t) const;
+  std::string format(const boost::posix_time::ptime& t) const override;
+  std::string format(const boost::local_time::local_date_time& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -138,8 +138,8 @@ struct XmlFormatter : public TimeFormatter
 struct EpochFormatter : public TimeFormatter
 {
   EpochFormatter() : TimeFormatter() {}
-  virtual std::string format(const boost::posix_time::ptime& t) const;
-  virtual std::string format(const boost::local_time::local_date_time& t) const;
+  std::string format(const boost::posix_time::ptime& t) const override;
+  std::string format(const boost::local_time::local_date_time& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -153,8 +153,8 @@ struct EpochFormatter : public TimeFormatter
 struct TimeStampFormatter : public TimeFormatter
 {
   TimeStampFormatter() : TimeFormatter() {}
-  virtual std::string format(const boost::posix_time::ptime& t) const;
-  virtual std::string format(const boost::local_time::local_date_time& t) const;
+  std::string format(const boost::posix_time::ptime& t) const override;
+  std::string format(const boost::local_time::local_date_time& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -168,8 +168,8 @@ struct TimeStampFormatter : public TimeFormatter
 struct HttpFormatter : public TimeFormatter
 {
   HttpFormatter() : TimeFormatter() {}
-  virtual std::string format(const boost::posix_time::ptime& t) const;
-  virtual std::string format(const boost::local_time::local_date_time& t) const;
+  std::string format(const boost::posix_time::ptime& t) const override;
+  std::string format(const boost::local_time::local_date_time& t) const override;
 };
 
 // ----------------------------------------------------------------------
