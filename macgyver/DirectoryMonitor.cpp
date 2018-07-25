@@ -199,12 +199,10 @@ class DirectoryMonitor::Pimple
  public:
   MutexType mutex;
   Schedule schedule;
-  bool running;  // true if run() has not exited
-  bool stop;     // true if stop request is pending
-  bool isready;  // true if at least one scan has completed
-  Watcher nextid;
-
-  Pimple() : running(false), stop(false), isready(false), nextid(0) {}
+  bool running = false;  // true if run() has not exited
+  bool stop = false;     // true if stop request is pending
+  bool isready = false;  // true if at least one scan has completed
+  Watcher nextid = 0;
 };
 
 // ----------------------------------------------------------------------
