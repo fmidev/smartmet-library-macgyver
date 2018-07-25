@@ -236,11 +236,8 @@ bool looks_offset(const std::string& str)
 {
   if (str.empty()) return false;
 
-  if (str == "0" || (str.size() == 2 && str[0] == '0') ||  // 0m, 0h etc
-      str[0] == '+' || str[0] == '-')
-    return true;
-  else
-    return false;
+  return (str == "0" || (str.size() == 2 && str[0] == '0') ||  // 0m, 0h etc
+          str[0] == '+' || str[0] == '-');
 }
 
 // ----------------------------------------------------------------------
@@ -654,12 +651,7 @@ bool DateTimeParser::Impl::looks_utc(const std::string& str) const
   boost::posix_time::ptime t = try_parse_iso(str, &utc);
   if (!t.is_not_a_date_time()) return utc;
 
-  if (looks_epoch(str)) return true;
-
-  // Should not be reached now, but is the default mode for
-  // any new time format to be added
-
-  return false;
+  return looks_epoch(str);
 }
 
 // ----------------------------------------------------------------------

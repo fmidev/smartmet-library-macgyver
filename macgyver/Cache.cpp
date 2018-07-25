@@ -328,16 +328,7 @@ bool FileCache::writeFile(const fs::path& theDir,
 
   file.write(theBuffer, valueSize);
 
-  if (!file)
-  {
-// Write failed
-#ifdef MYDEBUG
-    std::cout << "WriteFile: Write failed. Path: " << (theDir / fileName).string() << std::endl;
-#endif
-    return false;
-  }
-
-  return true;
+  return !!file;
 }
 
 bool FileCache::checkForDiskSpace(const fs::path& thePath,

@@ -567,16 +567,7 @@ bool extract_subvector(const DataVector& itsData,
     }
   }
 
-  if (subvector.size() == 0) return false;
-
-#ifdef MYDEBUG
-  BOOST_FOREACH (const DataItem& item, subvector)
-  {
-    std::cout << item << std::endl;
-  }
-#endif
-
-  return true;
+  return !subvector.empty();
 }
 
 bool Stat::get_subvector(DataVector& subvector,

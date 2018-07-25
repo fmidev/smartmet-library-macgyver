@@ -379,7 +379,7 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
     {
       if (ym < 0)
       {
-        if (false == set || false == rise)
+        if (!set || !rise)
         {
           utrise = hour + z1;
           rise = true;
@@ -392,7 +392,7 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
       }
       else
       {
-        if (false == set || false == rise)
+        if (!set || !rise)
         {
           utset = hour + z1;
           set = true;
@@ -409,7 +409,7 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
     {
       if (ye < 0)
       {
-        if (false == set || false == rise)
+        if (!set || !rise)
         {
           utrise = hour + z2;
           utset = hour + z1;
@@ -422,7 +422,7 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
       }
       else
       {
-        if (false == set || false == rise)
+        if (!set || !rise)
         {
           utrise = hour + z1;
           utset = hour + z2;
