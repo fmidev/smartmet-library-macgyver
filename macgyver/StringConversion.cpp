@@ -166,14 +166,11 @@ std::string to_iso_string(const boost::posix_time::time_duration& duration)
 {
   if (duration.is_special())
   {
-    if (duration.is_not_a_date_time())
-      return "not-a-date-time";
-    else if (duration.is_pos_infinity())
-      return "+infinity";
-    else if (duration.is_neg_infinity())
-      return "-infinity";
-    else
-      return "";  // this case does not exist in boost 1.59
+    if (duration.is_not_a_date_time()) return "not-a-date-time";
+    if (duration.is_pos_infinity()) return "+infinity";
+    if (duration.is_neg_infinity()) return "-infinity";
+
+    return "";  // this case does not exist in boost 1.59
   }
   else
   {
@@ -198,14 +195,11 @@ std::string to_iso_extended_string(const boost::posix_time::time_duration& durat
 {
   if (duration.is_special())
   {
-    if (duration.is_not_a_date_time())
-      return "not-a-date-time";
-    else if (duration.is_pos_infinity())
-      return "+infinity";
-    else if (duration.is_neg_infinity())
-      return "-infinity";
-    else
-      return "";  // this case does not exist in boost 1.59
+    if (duration.is_not_a_date_time()) return "not-a-date-time";
+    if (duration.is_pos_infinity()) return "+infinity";
+    if (duration.is_neg_infinity()) return "-infinity";
+
+    return "";  // this case does not exist in boost 1.59
   }
   else
   {
