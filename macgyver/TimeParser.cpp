@@ -185,10 +185,8 @@ bool parse_uint16(const char** str, unsigned int length, std::uint16_t* value)
 
 bool skip_separator(const char** str, char separator, bool extended_format)
 {
-  if (!extended_format)
-    return true;
-  else if (**str != separator)
-    return false;
+  if (!extended_format) return true;
+  if (**str != separator) return false;
   ++*str;
   return true;
 }
@@ -262,16 +260,12 @@ bool looks_offset(const std::string& str)
 
 std::string looks(const std::string& str)
 {
-  if (looks_offset(str))
-    return "offset";
-  else if (looks_iso(str))
-    return "iso";
-  else if (looks_sql(str))
-    return "sql";
-  else if (looks_epoch(str))
-    return "epoch";
-  else
-    throw std::runtime_error("Unrecognizable time format in string '" + str + "'");
+  if (looks_offset(str)) return "offset";
+  if (looks_iso(str)) return "iso";
+  if (looks_sql(str)) return "sql";
+  if (looks_epoch(str)) return "epoch";
+
+  throw std::runtime_error("Unrecognizable time format in string '" + str + "'");
 }
 
 // ----------------------------------------------------------------------
@@ -822,18 +816,13 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
 
 boost::posix_time::ptime parse(const std::string& str, const std::string& format)
 {
-  if (format == "iso" || format == "xml" || format == "timestamp")
-    return parse_iso(str);
-  else if (format == "sql")
-    return parse_sql(str);
-  else if (format == "epoch")
-    return parse_epoch(str);
-  else if (format == "offset")
-    return parse_offset(str);
-  else if (format == "fmi")
-    return parse_fmi(str);
-  else
-    throw std::runtime_error("Unknown time format '" + format + "'");
+  if (format == "iso" || format == "xml" || format == "timestamp") return parse_iso(str);
+  if (format == "sql") return parse_sql(str);
+  if (format == "epoch") return parse_epoch(str);
+  if (format == "offset") return parse_offset(str);
+  if (format == "fmi") return parse_fmi(str);
+
+  throw std::runtime_error("Unknown time format '" + format + "'");
 }
 
 // ----------------------------------------------------------------------
