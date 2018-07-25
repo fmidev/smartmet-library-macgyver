@@ -23,7 +23,7 @@ class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
   std::ostream& ost;
 
  public:
-  OutputCollector(std::ostream& the_ost) : ost(the_ost) {}
+  explicit OutputCollector(std::ostream& the_ost) : ost(the_ost) {}
 
   virtual INT_32 Collect(const void* vData, const UINT_32 datalength)
   {
