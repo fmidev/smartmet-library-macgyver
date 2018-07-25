@@ -359,7 +359,7 @@ void DirectoryMonitor::run()
     while (checknext)
     {
       WriteLock lock(impl->mutex);
-      std::time_t tnow = std::time(NULL);
+      std::time_t tnow = std::time(nullptr);
       std::time_t tcheck = impl->schedule.begin()->first;
 
       if (tcheck > tnow)
@@ -388,7 +388,7 @@ void DirectoryMonitor::run()
           }
           else
           {
-            tchange = std::time(NULL);
+            tchange = std::time(nullptr);
           }
 
           // We cannot detect modifications simply by looking
@@ -399,7 +399,7 @@ void DirectoryMonitor::run()
           {
             // nothing to scan since dir timestamp did not change
 
-            std::time_t tnext = std::time(NULL) + mon.interval;
+            std::time_t tnext = std::time(nullptr) + mon.interval;
             impl->schedule.insert(std::make_pair(tnext, mon));
           }
           else
@@ -422,7 +422,7 @@ void DirectoryMonitor::run()
             mon.contents = newcontents;
             mon.lastmodified = tchange;
 
-            std::time_t tnext = std::time(NULL) + mon.interval;
+            std::time_t tnext = std::time(nullptr) + mon.interval;
             impl->schedule.insert(std::make_pair(tnext, mon));
           }
         }
@@ -437,7 +437,7 @@ void DirectoryMonitor::run()
             mon.errorhandler(mon.id, mon.path, mon.pattern, e.what());
           }
 
-          std::time_t tnext = std::time(NULL) + mon.interval;
+          std::time_t tnext = std::time(nullptr) + mon.interval;
           impl->schedule.insert(std::make_pair(tnext, mon));
         }
       }
@@ -449,7 +449,7 @@ void DirectoryMonitor::run()
     long sleeptime = 0;
     {
       ReadLock tmplock(impl->mutex);
-      std::time_t tmpnow = std::time(NULL);
+      std::time_t tmpnow = std::time(nullptr);
       std::time_t tmpcheck = impl->schedule.begin()->first;
       sleeptime = (tmpnow > tmpcheck ? 0 : tmpcheck - tmpnow);
     }

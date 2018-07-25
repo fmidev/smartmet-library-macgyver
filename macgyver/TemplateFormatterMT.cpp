@@ -9,7 +9,7 @@ Fmi::TemplateFormatterMT::~TemplateFormatterMT() {}
 Fmi::TemplateFormatter* Fmi::TemplateFormatterMT::get()
 {
   Fmi::TemplateFormatter* result = tf_mt.get();
-  if (result == NULL)
+  if (result == nullptr)
   {
     tf_mt.reset(new Fmi::TemplateFormatter);
     result = tf_mt.get();

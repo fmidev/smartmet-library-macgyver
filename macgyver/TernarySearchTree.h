@@ -62,7 +62,7 @@ class TernarySearchTree : private boost::noncopyable
 
 template <typename T>
 inline TernarySearchTree<T>::Node::Node(char c)
-    : chr(c), left(NULL), middle(NULL), right(NULL), value()
+    : chr(c), left(nullptr), middle(nullptr), right(nullptr), value()
 {
 }
 
@@ -99,7 +99,7 @@ inline TernarySearchTree<T>::~TernarySearchTree()
 // ----------------------------------------------------------------------
 
 template <typename T>
-inline TernarySearchTree<T>::TernarySearchTree() : root(NULL), count(0)
+inline TernarySearchTree<T>::TernarySearchTree() : root(nullptr), count(0)
 {
 }
 
@@ -148,7 +148,7 @@ inline bool TernarySearchTree<T>::insert(const std::string& key, element_type da
   Node* node = root;
 
   // Special case code for the first word
-  if (root == NULL)
+  if (root == nullptr)
   {
     root = new Node(key[pos++]);
     node = root;
@@ -166,7 +166,7 @@ inline bool TernarySearchTree<T>::insert(const std::string& key, element_type da
   {
     if (key[pos] < node->chr)
     {
-      if (node->left == NULL)
+      if (node->left == nullptr)
       {
         node->left = new Node(key[pos++]);
         node = node->left;
@@ -176,7 +176,7 @@ inline bool TernarySearchTree<T>::insert(const std::string& key, element_type da
     }
     else if (key[pos] > node->chr)
     {
-      if (node->right == NULL)
+      if (node->right == nullptr)
       {
         node->right = new Node(key[pos++]);
         node = node->right;
@@ -188,7 +188,7 @@ inline bool TernarySearchTree<T>::insert(const std::string& key, element_type da
     {
       if (++pos < n)
       {
-        if (node->middle == NULL)
+        if (node->middle == nullptr)
         {
           node->middle = new Node(key[pos - 1]);
           node = node->middle;
@@ -227,12 +227,12 @@ inline typename TernarySearchTree<T>::element_type TernarySearchTree<T>::find(
     const std::string& key) const
 {
   // Safety checks
-  if (key.empty() || root == NULL) return element_type();
+  if (key.empty() || root == nullptr) return element_type();
 
   Node* node = root;
   size_t n = key.size();
 
-  for (size_t pos = 0; pos < n && node != NULL;)
+  for (size_t pos = 0; pos < n && node != nullptr;)
   {
     if (key[pos] < node->chr)
       node = node->left;
@@ -257,13 +257,13 @@ inline typename TernarySearchTree<T>::element_type TernarySearchTree<T>::find(
 template <typename T>
 inline void TernarySearchTree<T>::collect(Node* node, result_type& results) const
 {
-  if (node == NULL) return;
+  if (node == nullptr) return;
 
   if (node->value) results.push_back(node->value);
 
-  if (node->left != NULL) collect(node->left, results);
-  if (node->middle != NULL) collect(node->middle, results);
-  if (node->right != NULL) collect(node->right, results);
+  if (node->left != nullptr) collect(node->left, results);
+  if (node->middle != nullptr) collect(node->middle, results);
+  if (node->right != nullptr) collect(node->right, results);
 }
 
 // ----------------------------------------------------------------------
@@ -279,12 +279,12 @@ inline typename TernarySearchTree<T>::result_type TernarySearchTree<T>::findpref
   result_type results;
 
   // Safety checks
-  if (key.empty() || root == NULL) return results;
+  if (key.empty() || root == nullptr) return results;
 
   Node* node = root;
   size_t n = key.size();
 
-  for (size_t pos = 0; pos < n && node != NULL;)
+  for (size_t pos = 0; pos < n && node != nullptr;)
   {
     if (key[pos] < node->chr)
       node = node->left;

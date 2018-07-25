@@ -380,7 +380,7 @@ struct RandomEviction
                       std::size_t& currentSize,
                       std::size_t maxSize)
   {
-    static boost::random::mt19937 generator(time(NULL));
+    static boost::random::mt19937 generator(time(nullptr));
 
     while (currentSize > maxSize)
     {
@@ -406,7 +406,7 @@ struct RandomEviction
                       std::size_t maxSize,
                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static boost::random::mt19937 generator(time(NULL));
+    static boost::random::mt19937 generator(time(nullptr));
 
     while (currentSize > maxSize)
     {
@@ -437,7 +437,7 @@ struct RandomEviction
                        std::size_t& currentSize,
                        std::size_t maxSize)
   {
-    static boost::random::mt19937 generator(time(NULL));
+    static boost::random::mt19937 generator(time(nullptr));
 
     std::size_t amountToInsert = SizeFunction::getSize(value);
 
@@ -467,7 +467,7 @@ struct RandomEviction
                        std::size_t maxSize,
                        std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static boost::random::mt19937 generator(time(NULL));
+    static boost::random::mt19937 generator(time(nullptr));
 
     std::size_t amountToInsert = SizeFunction::getSize(value);
 
@@ -760,7 +760,7 @@ struct InstantExpire
       return false;
     }
 
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
 
     if ((now - theTagTime) > timeConstant)
     {
@@ -776,7 +776,7 @@ struct InstantExpire
   // Expired tags older than timeConstant are deleted
   static bool toDelete(const std::time_t& theTagTime, long timeConstant)
   {
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
 
     if ((now - theTagTime) > timeConstant)
     {
@@ -795,7 +795,7 @@ struct CoinFlipExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(NULL)));
+    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
     static boost::random::uniform_int_distribution<> dist(0, 1);
 
     // Max value means tag is valid
@@ -804,7 +804,7 @@ struct CoinFlipExpire
       return false;
     }
 
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
 
     if ((now - theTagTime) > timeConstant)
     {
@@ -829,7 +829,7 @@ struct CoinFlipExpire
   // Expired tags older than 2*timeConstant are deleted
   static bool toDelete(const std::time_t& theTagTime, long timeConstant)
   {
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
 
     if ((now - theTagTime) > 2 * timeConstant)
     {
@@ -849,7 +849,7 @@ struct LinearTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(NULL)));
+    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
     static boost::random::uniform_real_distribution<> dist(0.0, 1.0);
 
     // Max value means tag is valid
@@ -858,7 +858,7 @@ struct LinearTimeExpire
       return false;
     }
 
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
     long tagAge = now - theTagTime;
 
     assert(timeConstant != 0);
@@ -880,7 +880,7 @@ struct LinearTimeExpire
   // Expired tags with >100% removal probability are deleted
   static bool toDelete(const std::time_t& theTagTime, long timeConstant)
   {
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
 
     if ((now - theTagTime) > timeConstant)
     {
@@ -900,7 +900,7 @@ struct SigmoidTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(time(NULL)));
+    static boost::random::mt19937 generator(static_cast<unsigned int>(time(nullptr)));
     static boost::random::uniform_real_distribution<> dist(0.0, 1.0);
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -908,7 +908,7 @@ struct SigmoidTimeExpire
       return false;
     }
 
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
     long tagAge = now - theTagTime;
 
     double expirationProbability =
@@ -934,7 +934,7 @@ struct SigmoidTimeExpire
     static double eliminationAge =
         (std::log(eliminationProbability / (1.0 - eliminationProbability)) + 0.02) /
         double(timeConstant);
-    std::time_t now = std::time(NULL);
+    std::time_t now = std::time(nullptr);
 
     if ((now - theTagTime) > eliminationAge)
     {
@@ -1413,7 +1413,7 @@ class Cache : public boost::noncopyable
     }
   }
 
-  void expire(const TagType& tagToExpire, const std::time_t& expirationTime = std::time(NULL))
+  void expire(const TagType& tagToExpire, const std::time_t& expirationTime = std::time(nullptr))
   {
     Lock wlock(itsMutex);
     // Set data containing the given tag as expired

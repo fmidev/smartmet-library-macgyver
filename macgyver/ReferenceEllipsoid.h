@@ -43,7 +43,7 @@ class ReferenceEllipsoid
   void to_geodetic(const boost::array<double, 3> &x,
                    double *lat,
                    double *lon,
-                   double *height = NULL) const;
+                   double *height = nullptr) const;
 
   double transverse_curvature_radius(double lat) const;
 

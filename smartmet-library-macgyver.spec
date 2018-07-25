@@ -4,7 +4,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 18.7.25
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -73,6 +73,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jul 25 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.7.25-2.fmi
+- Prefer nullptr over NULL
+
 * Wed Jul 25 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.7.25-1.fmi
 - Cache time zone objects for TZ names for speed
 

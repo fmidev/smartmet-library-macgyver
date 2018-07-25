@@ -9,7 +9,7 @@ std::string Fmi::demangle_cpp_type_name(const std::string& src)
   int status;
   std::size_t length = 0;
   std::string result;
-  char* name = abi::__cxa_demangle(src.c_str(), NULL, &length, &status);
+  char* name = abi::__cxa_demangle(src.c_str(), nullptr, &length, &status);
   switch (status)
   {
     case 0:
