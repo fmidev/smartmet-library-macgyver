@@ -72,9 +72,9 @@ ptime JulianTime::ptime_utc() const
   int D = (int)(365.25 * C);
   int E = (int)((B - D) / 30.6001);
 
-  unsigned short day = static_cast<unsigned short>(B - D - (int)floor(30.6001 * E));
-  unsigned short month = static_cast<unsigned short>((E < 14) ? E - 1 : E - 13);
-  unsigned short year = static_cast<unsigned short>((month > 2) ? C - 4716 : C - 4715);
+  std::uint16_t day = static_cast<std::uint16_t>(B - D - (int)floor(30.6001 * E));
+  std::uint16_t month = static_cast<std::uint16_t>((E < 14) ? E - 1 : E - 13);
+  std::uint16_t year = static_cast<std::uint16_t>((month > 2) ? C - 4716 : C - 4715);
 
   date date(year, month, day);
 
