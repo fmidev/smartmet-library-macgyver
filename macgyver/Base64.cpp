@@ -84,7 +84,8 @@ std::string encode(const std::string& str)
       char_array_4[3] = char_array_3[2] & 0x3fu;
 
       for (i = 0; (i < 4); i++)
-        ' ret += base64_chars[static_cast<std::size_t>(char_array_4[i])]; i = 0;
+        ret += base64_chars[static_cast<std::size_t>(char_array_4[i])];
+      i = 0;
     }
   }
 
