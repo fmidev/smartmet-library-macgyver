@@ -15,10 +15,9 @@ Fmi::HelmertTransformation::HelmertTransformation() : m(1), ex(0), ey(0), ez(0),
 boost::array<double, 3> Fmi::HelmertTransformation::operator()(
     const boost::array<double, 3>& x) const
 {
-  boost::array<double, 3> y;
-  y[0] = m * (x[0] + (-ez) * x[1] + (ey)*x[2]) + tx;
-  y[1] = m * ((ez)*x[0] + x[1] + (-ex) * x[2]) + ty;
-  y[2] = m * ((-ey) * x[0] + (ex)*x[1] + x[2]) + tz;
+  boost::array<double, 3> y = {m * (x[0] + (-ez) * x[1] + (ey)*x[2]) + tx,
+                               m * ((ez)*x[0] + x[1] + (-ex) * x[2]) + ty,
+                               m * ((-ey) * x[0] + (ex)*x[1] + x[2]) + tz};
   return y;
 }
 
