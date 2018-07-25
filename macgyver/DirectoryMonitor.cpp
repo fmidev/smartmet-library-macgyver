@@ -126,7 +126,7 @@ std::pair<DirectoryMonitor::Status, DirectoryMonitor::Change> directory_change(
 
   BOOST_FOREACH (const Contents::value_type& it, oldcontents)
   {
-    Contents::const_iterator pos = newcontents.find(it.first);
+    const auto pos = newcontents.find(it.first);
 
     DirectoryMonitor::Change change = DirectoryMonitor::NONE;
 
@@ -143,7 +143,7 @@ std::pair<DirectoryMonitor::Status, DirectoryMonitor::Change> directory_change(
 
   BOOST_FOREACH (const Contents::value_type& it, newcontents)
   {
-    Contents::const_iterator pos = oldcontents.find(it.first);
+    const auto pos = oldcontents.find(it.first);
     if (pos == oldcontents.end())
     {
       changes |= DirectoryMonitor::CREATE;
