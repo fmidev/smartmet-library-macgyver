@@ -872,7 +872,7 @@ boost::posix_time::ptime parse(const std::string& str)
 
 boost::local_time::local_date_time parse(const std::string& str,
                                          const std::string& format,
-                                         const boost::local_time::time_zone_ptr& tz)
+                                         boost::local_time::time_zone_ptr tz)
 {
   boost::posix_time::ptime t = parse(str, format);
 
@@ -890,7 +890,7 @@ boost::local_time::local_date_time parse(const std::string& str,
 // ----------------------------------------------------------------------
 
 boost::local_time::local_date_time parse(const std::string& str,
-                                         const boost::local_time::time_zone_ptr& tz)
+                                         boost::local_time::time_zone_ptr tz)
 {
   ParserId matched;
 
