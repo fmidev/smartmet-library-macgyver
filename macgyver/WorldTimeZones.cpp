@@ -71,8 +71,8 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
 
   // Calculate the index of the coordinate
 
-  float y = (lat - itsLat1) / (itsLat2 - itsLat1) * (itsHeight - 1);
-  float x = (lon - itsLon1) / (itsLon2 - itsLon1) * (itsWidth - 1);
+  auto y = (lat - itsLat1) / (itsLat2 - itsLat1) * (itsHeight - 1);
+  auto x = (lon - itsLon1) / (itsLon2 - itsLon1) * (itsWidth - 1);
 
   uint32_t i = lround(x);
   uint32_t j = lround(y);
