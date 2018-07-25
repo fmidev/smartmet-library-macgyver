@@ -671,9 +671,9 @@ string utf8_to_latin1(const string& in)
     for (++utf8str; --len > 0 && (*utf8str != '\0'); ++utf8str)
     {
       // be sure this is not an unexpected start of a new character
-      if ((*utf8str & 0xc0) != 0x80) break;
+      if ((*utf8str & 0xc0) != 0x80u) break;
 
-      u = (u << 6) | (*utf8str & 0x3f);
+      u = (u << 6) | (*utf8str & 0x3fu);
     }
 
     // iso-8859-1 sanity check.
@@ -682,7 +682,7 @@ string utf8_to_latin1(const string& in)
     //  otherwise the utf-8 string will be considered malformed and
     //  the function returns immediately with exit code 0
 
-    if (u > 0xff || u < 0x20) return "";
+    if (u > 0xffu || u < 0x20u) return "";
 
     // sanity check passed -- add the mapped character to the destination string
     out += static_cast<char>(u);
@@ -709,15 +709,15 @@ string latin1_to_utf8(const string& in)
   for (; *mbstr != '\0'; ++mbstr)
   {
     // the character needs no mapping if the highest bit is not set
-    if ((*mbstr & 0x80) == 0)
+    if ((*mbstr & 0x80u) == 0)
     {
       out += *mbstr;
     }
     // otherwise mapping is necessary (characters 0x80 or greater; highest bit is set)
     else
     {
-      out += static_cast<char>((0xC0 | (0x03 & (*mbstr >> 6))));
-      out += static_cast<char>((0x80 | (0x3F & *mbstr)));
+      out += static_cast<char>((0xC0u | (0x03u & (*mbstr >> 6))));
+      out += static_cast<char>((0x80u | (0x3Fu & *mbstr)));
     }
   }
   return out;
@@ -744,7 +744,7 @@ std::wstring utf8_to_utf16(const std::string& str)
   {
     unsigned char c = static_cast<unsigned char>(str[i]);
 
-    if (c <= 0x7f)
+    if (c <= 0x7fu)
     {
       // first byte
       if (bytes)
@@ -754,35 +754,35 @@ std::wstring utf8_to_utf16(const std::string& str)
       }
       out.push_back(static_cast<wchar_t>(c));
     }
-    else if (c <= 0xbf)
+    else if (c <= 0xbfu)
     {
       // second/third/etc byte
       if (bytes)
       {
-        w = ((w << 6) | (c & 0x3f));
+        w = ((w << 6) | (c & 0x3fu));
         bytes--;
         if (bytes == 0) out.push_back(w);
       }
       else
         out.push_back(err);
     }
-    else if (c <= 0xdf)
+    else if (c <= 0xdfu)
     {
       // 2byte sequence start
       bytes = 1;
-      w = c & 0x1f;
+      w = c & 0x1fu;
     }
-    else if (c <= 0xef)
+    else if (c <= 0xefu)
     {
       // 3byte sequence start
       bytes = 2;
       w = c & 0x0f;
     }
-    else if (c <= 0xf7)
+    else if (c <= 0xf7u)
     {
       // 3byte sequence start
       bytes = 3;
-      w = c & 0x07;
+      w = c & 0x07u;
     }
     else
     {
@@ -815,21 +815,21 @@ std::string utf16_to_utf8(const std::wstring& str)
       out.push_back(static_cast<char>(w));
     else if (w <= 0x7ff)
     {
-      out.push_back(static_cast<char>(0xc0 | ((w >> 6) & 0x1f)));
-      out.push_back(static_cast<char>(0x80 | (w & 0x3f)));
+      out.push_back(static_cast<char>(0xc0u | ((w >> 6) & 0x1fu)));
+      out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
     }
     else if (w <= 0xffff)
     {
-      out.push_back(static_cast<char>(0xe0 | ((w >> 12) & 0x0f)));
-      out.push_back(static_cast<char>(0x80 | ((w >> 6) & 0x3f)));
-      out.push_back(static_cast<char>(0x80 | (w & 0x3f)));
+      out.push_back(static_cast<char>(0xe0u | ((w >> 12) & 0x0fu)));
+      out.push_back(static_cast<char>(0x80u | ((w >> 6) & 0x3fu)));
+      out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
     }
     else if (w <= 0x10ffff)
     {
-      out.push_back(static_cast<char>(0xf0 | ((w >> 18) & 0x07)));
-      out.push_back(static_cast<char>(0x80 | ((w >> 12) & 0x3f)));
-      out.push_back(static_cast<char>(0x80 | ((w >> 6) & 0x3f)));
-      out.push_back(static_cast<char>(0x80 | (w & 0x3f)));
+      out.push_back(static_cast<char>(0xf0u | ((w >> 18) & 0x07u)));
+      out.push_back(static_cast<char>(0x80u | ((w >> 12) & 0x3fu)));
+      out.push_back(static_cast<char>(0x80u | ((w >> 6) & 0x3fu)));
+      out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
     }
     else
       out.push_back('?');
