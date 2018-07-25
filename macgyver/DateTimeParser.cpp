@@ -121,7 +121,7 @@ boost::posix_time::ptime buildFromOffset(boost::posix_time::time_duration offset
   return boost::posix_time::ptime(now.date(), tnow + offset);
 }
 
-std : uint16_t get_short_month(const std::string& str)
+std::uint16_t get_short_month(const std::string& str)
 {
   if (str == "Jan") return 1;
   if (str == "Feb") return 2;
@@ -158,12 +158,11 @@ bool is_long_weekday(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-bool parse_ushort(const char** str, unsigned int length, std : uint16_t* value)
+bool parse_ushort(const char** str, unsigned int length, std::uint16_t* value)
 {
   const char* ptr = *str;
 
-std:
-  uint16_t tmp = 0;
+  std::uint16_t tmp = 0;
   for (unsigned int i = 0; i < length; i++)
   {
     if (!isdigit(*ptr)) return false;
@@ -354,14 +353,10 @@ boost::local_time::local_date_time make_time(const boost::gregorian::date& date,
 
 boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
 {
-std:
-  uint16_t year = 0;
-std:
-  uint16_t month = 1, day = 1;
-std:
-  uint16_t int hour = 0, minute = 0, second = 0;
-std:
-  uint16_t houroffset = 0, minuteoffset = 0;
+  std::uint16_t year = 0;
+  std::uint16_t month = 1, day = 1;
+  std::uint16_t hour = 0, minute = 0, second = 0;
+  std::uint16_t houroffset = 0, minuteoffset = 0;
   bool positiveoffset = false;
 
   const char* ptr = str.c_str();
@@ -987,10 +982,8 @@ boost::posix_time::ptime DateTimeParser::parse_http(const std::string& str) cons
     std::vector<std::string> parts;
     boost::algorithm::split(parts, s, boost::algorithm::is_any_of(" "));
 
-  std:
-    uint16_t dd, yy, mm;
-  std:
-    uint16_t hh, mi, ss;
+    std::uint16_t dd, yy, mm;
+    std::uint16_t hh, mi, ss;
     std::string hms;
 
     switch (parts.size())
