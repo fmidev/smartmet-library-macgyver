@@ -27,9 +27,9 @@ enum ParserId
 
 };
 
-typedef boost::optional<unsigned int> OptionalInt;
-typedef boost::optional<std::string> OptionalString;
-typedef boost::optional<char> OptionalChar;
+using OptionalInt = boost::optional<unsigned int>;
+using OptionalString = boost::optional<std::string>;
+using OptionalChar = boost::optional<char>;
 
 struct TimeZoneOffset
 {
@@ -40,7 +40,7 @@ struct TimeZoneOffset
   unsigned int minutes;
 };
 
-typedef unsigned int UnixTime;
+using UnixTime = unsigned int;
 
 struct TimeOffset
 {
@@ -99,7 +99,7 @@ namespace qi = boost::spirit::qi;
 template <typename Iterator>
 struct TimeZoneParser : qi::grammar<Iterator, TimeZoneOffset()>
 {
-  typedef qi::uint_parser<unsigned int, 10, 2, 2> TwoDigitNumber;  // Radix 10, exactly 2 digits
+  using TwoDigitNumber = qi::uint_parser<unsigned int, 10, 2, 2>;  // Radix 10, exactly 2 digits
 
   TimeZoneParser() : TimeZoneParser::base_type(tz_offset)
   {
@@ -161,8 +161,9 @@ struct SQLParser : qi::grammar<Iterator, TimeStamp()>
 template <typename Iterator>
 struct FMIParser : qi::grammar<Iterator, TimeStamp()>
 {
-  typedef qi::uint_parser<unsigned int, 10, 4, 4> FourDigitNumber;  // Radix 10, exactly 4 digits
-  typedef qi::uint_parser<unsigned int, 10, 2, 2> TwoDigitNumber;   // Radix 10, exactly 2 digits
+  using FourDigitNumber = qi::uint_parser<unsigned int, 10, 4, 4>;  // Radix 10, exactly 4 digits
+  using TwoDigitNumber = qi::uint_parser<unsigned int, 10, 2, 2>;
+  ;  // Radix 10, exactly 2 digits
 
   FMIParser() : FMIParser::base_type(fmitime)
   {
@@ -192,7 +193,7 @@ struct FMIParser : qi::grammar<Iterator, TimeStamp()>
 // Epoch parser
 //########################################################
 
-typedef qi::uint_parser<UnixTime, 10, 5, 11> EpochParser;  // Radix 10, min digits 5, max digits 11
+using EpochParser = qi::uint_parser<UnixTime, 10, 5, 11>;  // Radix 10, min digits 5, max digits 11
 
 //########################################################
 // Offset-style timestring parser
@@ -251,9 +252,9 @@ struct OffsetParser : qi::grammar<Iterator, TimeOffset()>
 template <typename Iterator>
 struct ISOParser : qi::grammar<Iterator, TimeStamp()>
 {
-  typedef qi::uint_parser<unsigned int, 10, 4, 4> FourDigitNumber;   // Radix 10, exactly 4 digits
-  typedef qi::uint_parser<unsigned int, 10, 3, 3> ThreeDigitNumber;  // Radix 10, exactly 4 digits
-  typedef qi::uint_parser<unsigned int, 10, 2, 2> TwoDigitNumber;    // Radix 10, exactly 2 digits
+  using FourDigitNumber = qi::uint_parser<unsigned int, 10, 4, 4>;   // Radix 10, exactly 4 digits
+  using ThreeDigitNumber = qi::uint_parser<unsigned int, 10, 3, 3>;  // Radix 10, exactly 4 digits
+  using TwoDigitNumber = qi::uint_parser<unsigned int, 10, 2, 2>;    // Radix 10, exactly 2 digits
 
   ISOParser() : ISOParser::base_type(isostamp)
   {

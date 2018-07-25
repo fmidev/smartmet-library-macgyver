@@ -59,8 +59,8 @@ namespace Fmi
 {
 namespace Cache
 {
-typedef boost::mutex MutexType;
-typedef boost::lock_guard<MutexType> Lock;
+using MutexType = boost::mutex;
+using Lock = boost::lock_guard<MutexType>;
 
 // ----------------------------------------------------------------------
 /*!
@@ -962,19 +962,19 @@ template <class KeyType,
 class Cache : public boost::noncopyable
 {
  public:
-  typedef std::set<TagType> TagSetType;
-  typedef CacheObject<KeyType, ValueType, TagSetType> CacheObjectType;
-  typedef CacheReportingObject<KeyType, ValueType, TagSetType> CacheReportingObjectType;
+  using TagSetType = std::set<TagType>;
+  using CacheObjectType = CacheObject<KeyType, ValueType, TagSetType>;
+  using CacheReportingObjectType = CacheReportingObject<KeyType, ValueType, TagSetType>;
 
-  typedef typename boost::bimaps::bimap<
+  using MapType = boost::bimaps::bimap<
       boost::bimaps::unordered_set_of<KeyType, boost::hash<KeyType>, std::equal_to<KeyType> >,
-      boost::bimaps::list_of<CacheObjectType> >
-      MapType;
-  typedef typename MapType::left_iterator LeftIteratorType;
-  typedef typename MapType::right_iterator RightIteratorType;
+      boost::bimaps::list_of<CacheObjectType> >;
 
-  typedef std::map<TagType, std::pair<std::time_t, std::size_t> > TagMapType;
-  typedef std::vector<std::pair<KeyType, ValueType> > ItemVector;
+  using LeftIteratorType = typename MapType::left_iterator;
+  using RightIteratorType = typename MapType::right_iterator;
+
+  using TagMapType = std::map<TagType, std::pair<std::time_t, std::size_t> >;
+  using ItemVector = std::vector<std::pair<KeyType, ValueType> >;
 
   // Default constructor eases the use as data member
   Cache()
@@ -1580,17 +1580,16 @@ struct FileCacheStruct
 
 class FileCache : boost::noncopyable
 {
-  typedef boost::shared_mutex MutexType;
-  typedef boost::shared_lock<MutexType> ReadLock;
-  typedef boost::unique_lock<MutexType> WriteLock;
-  typedef boost::upgrade_lock<MutexType> UpgradeReadLock;
-  typedef boost::upgrade_to_unique_lock<MutexType> UpgradeWriteLock;
+  using MutexType = boost::shared_mutex;
+  using ReadLock = boost::shared_lock<MutexType>;
+  using WriteLock = boost::unique_lock<MutexType>;
+  using UpgradeReadLock = boost::upgrade_lock<MutexType>;
+  using UpgradeWriteLock = boost::upgrade_to_unique_lock<MutexType>;
 
-  typedef boost::bimaps::bimap<boost::bimaps::unordered_set_of<std::size_t,
-                                                               boost::hash<std::size_t>,
-                                                               std::equal_to<std::size_t> >,
-                               boost::bimaps::list_of<FileCacheStruct> >
-      MapType;
+  using MapType = boost::bimaps::bimap<boost::bimaps::unordered_set_of<std::size_t,
+                                                                       boost::hash<std::size_t>,
+                                                                       std::equal_to<std::size_t> >,
+                                       boost::bimaps::list_of<FileCacheStruct> >;
 
  public:
   // ----------------------------------------------------------------------

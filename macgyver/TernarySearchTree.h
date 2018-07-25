@@ -22,8 +22,8 @@ template <typename T>
 class TernarySearchTree : private boost::noncopyable
 {
  public:
-  typedef boost::shared_ptr<T> element_type;
-  typedef std::list<element_type> result_type;
+  using element_type = boost::shared_ptr<T>;
+  using result_type = std::list<element_type>;
 
  private:
   struct Node

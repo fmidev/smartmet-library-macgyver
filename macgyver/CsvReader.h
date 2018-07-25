@@ -14,8 +14,8 @@ namespace Fmi
 {
 namespace CsvReader
 {
-typedef std::vector<std::string> row_type;
-typedef boost::function<void(const row_type& row)> Callback;
+using row_type = std::vector<std::string>;
+using Callback = boost::function<void(const row_type& row)>;
 
 void read(const std::string& filename, Callback callback, char delimiter = ',');
 }  // namespace CsvReader

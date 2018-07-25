@@ -22,8 +22,8 @@ template <typename T, bool Safe = DEFAULT_SAFETY>
 class Matrix
 {
  public:
-  typedef T value_type;
-  typedef int size_type;
+  using value_type = T;
+  using size_type = int;
 
   Matrix(size_type i, size_type j, value_type value = value_type());
   Matrix(const Matrix& other);

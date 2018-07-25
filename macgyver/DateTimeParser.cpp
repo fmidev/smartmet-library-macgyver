@@ -518,7 +518,7 @@ struct DateTimeParser::Impl
 
 boost::posix_time::ptime DateTimeParser::Impl::parse_iso(const std::string& str) const
 {
-  typedef std::string::const_iterator iterator;
+  using iterator = std::string::const_iterator;
   TimeParser::TimeStamp target;
 
   iterator start = str.begin();
@@ -539,7 +539,7 @@ boost::posix_time::ptime DateTimeParser::Impl::parse_iso(const std::string& str)
 
 boost::posix_time::ptime DateTimeParser::Impl::parse_fmi(const std::string& str) const
 {
-  typedef std::string::const_iterator iterator;
+  using iterator = std::string::const_iterator;
   TimeStamp target;
 
   iterator start = str.begin();
@@ -560,7 +560,7 @@ boost::posix_time::ptime DateTimeParser::Impl::parse_fmi(const std::string& str)
 
 boost::posix_time::ptime DateTimeParser::Impl::parse_sql(const std::string& str) const
 {
-  typedef std::string::const_iterator iterator;
+  using iterator = std::string::const_iterator;
   TimeStamp target;
 
   iterator start = str.begin();
@@ -581,7 +581,7 @@ boost::posix_time::ptime DateTimeParser::Impl::parse_sql(const std::string& str)
 
 boost::posix_time::ptime DateTimeParser::Impl::parse_epoch(const std::string& str) const
 {
-  typedef std::string::const_iterator iterator;
+  using iterator = std::string::const_iterator;
 
   UnixTime target;
 
@@ -698,7 +698,7 @@ boost::posix_time::time_duration DateTimeParser::Impl::try_parse_duration(
 
   // Old time duration format
 
-  typedef std::string::const_iterator iterator;
+  using iterator = std::string::const_iterator;
 
   TimeOffset target;
 

@@ -49,11 +49,11 @@ struct DataItem
 
 std::ostream& operator<<(std::ostream& os, const DataItem& item);
 
-typedef std::vector<DataItem> DataVector;
-typedef std::pair<boost::local_time::local_date_time, double> LocalDateTimeValue;
-typedef std::vector<LocalDateTimeValue> LocalDateTimeValueVector;
-typedef std::pair<boost::posix_time::ptime, double> PosixTimeValue;
-typedef std::vector<PosixTimeValue> PosixTimeValueVector;
+using DataVector = std::vector<DataItem>;
+using LocalDateTimeValue = std::pair<boost::local_time::local_date_time, double>;
+using LocalDateTimeValueVector = std::vector<LocalDateTimeValue>;
+using PosixTimeValue = std::pair<boost::posix_time::ptime, double>;
+using PosixTimeValueVector = std::vector<PosixTimeValue>;
 
 class Stat
 {

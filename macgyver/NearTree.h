@@ -131,9 +131,9 @@ class NearTree : private boost::noncopyable
   class Impl
   {
    public:
-    typedef T value_type;
-    typedef F functor_type;
-    typedef std::size_t size_type;
+    using value_type = T;
+    using functor_type = F;
+    using size_type = std::size_t;
 
     Impl();
     ~Impl();
@@ -169,9 +169,9 @@ class NearTree : private boost::noncopyable
   };
 
  public:
-  typedef T value_type;
-  typedef F functor_type;
-  typedef std::size_t size_type;
+  using value_type = T;
+  using functor_type = F;
+  using size_type = std::size_t;
 
   ~NearTree();
   NearTree();
@@ -192,7 +192,7 @@ class NearTree : private boost::noncopyable
  private:
   boost::shared_ptr<Impl> impl;
 
-  typedef std::vector<value_type> buffer_type;
+  using buffer_type = std::vector<value_type>;
   mutable buffer_type buffer;
 
 };  // class NearTree

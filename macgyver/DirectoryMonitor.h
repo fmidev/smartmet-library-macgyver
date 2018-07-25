@@ -23,11 +23,11 @@ class DirectoryMonitor : private boost::noncopyable
  public:
   // Watcher ID
 
-  typedef std::size_t Watcher;
+  using Watcher = std::size_t;
 
   // Change type
 
-  typedef int Change;
+  using Change = int;
 
   // Observable events
 
@@ -40,8 +40,8 @@ class DirectoryMonitor : private boost::noncopyable
 
   // Directory listing with modification state
 
-  typedef std::map<boost::filesystem::path, Change> StatusMap;
-  typedef boost::shared_ptr<StatusMap> Status;
+  using StatusMap = std::map<boost::filesystem::path, Change>;
+  using Status = boost::shared_ptr<StatusMap>;
 
   DirectoryMonitor();
   ~DirectoryMonitor();
@@ -60,13 +60,11 @@ class DirectoryMonitor : private boost::noncopyable
   // test shows that the code compiles if the callee declares
   // references instead of copies.
 
-  typedef boost::function<void(
-      Watcher id, boost::filesystem::path path, boost::regex pattern, Status status)>
-      Listener;
+  using Listener = boost::function<void(
+      Watcher id, boost::filesystem::path path, boost::regex pattern, Status status)>;
 
-  typedef boost::function<void(
-      Watcher id, boost::filesystem::path path, boost::regex pattern, std::string message)>
-      ErrorHandler;
+  using ErrorHandler = boost::function<void(
+      Watcher id, boost::filesystem::path path, boost::regex pattern, std::string message)>;
 
   // Request new monitored path/regex
 

@@ -19,29 +19,6 @@
  * perform any update necessary, the decision is up to the
  * user.
  *
- * The DirectoryMonitor is intended to be used like this:
- * \code
- * Fmi::DirectoryMonitor mon;
- * mon.watch(...);
- * ...
- * boost::thread thrd(boost::bind(&DirectoryMonitor::run,&mon));
- * ...
- * // Explicit stop:
- * mon.stop();
- * // Timed stop:
- * thrd.timed_join(boost::posix_time::seconds(N));
- * \endcode
- * The behaviour is unspecified if the destructor is called while  typedef
- boost::interprocess::interprocess_upgradable_mutex MutexType;
-  typedef boost::interprocess::upgradable_lock<MutexType> WriteLock;
-  typedef boost::interprocess::sharable_lock<MutexType> ReadLock;
-
- * the thread is still running.
- *
- * It is possible to run the monitor single threaded, but in that
- * case it is possible to stop the monitor only by calling the stop
- * method from the callback function (or by signals).
- *
  */
 // ======================================================================
 
@@ -58,9 +35,9 @@
 
 // scoped read/write lock types
 
-typedef boost::shared_mutex MutexType;
-typedef boost::shared_lock<MutexType> ReadLock;
-typedef boost::unique_lock<MutexType> WriteLock;
+using MutexType = boost::shared_mutex;
+using ReadLock = boost::shared_lock<MutexType>;
+using WriteLock = boost::unique_lock<MutexType>;
 
 namespace fs = boost::filesystem;
 
@@ -72,7 +49,7 @@ namespace Fmi
  */
 // ----------------------------------------------------------------------
 
-typedef std::map<boost::filesystem::path, std::time_t> Contents;
+using Contents = std::map<boost::filesystem::path, std::time_t>;
 
 // ----------------------------------------------------------------------
 /*!
@@ -209,7 +186,7 @@ struct Monitor
  */
 // ----------------------------------------------------------------------
 
-typedef std::multimap<std::time_t, Monitor> Schedule;
+using Schedule = std::multimap<std::time_t, Monitor>;
 
 // ----------------------------------------------------------------------
 /*!

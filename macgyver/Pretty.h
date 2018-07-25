@@ -31,7 +31,7 @@ struct is_container_helper
   template <typename U>
   static std::false_type f(...);
 
-  typedef decltype(f<T>(0)) type;
+  using type = decltype(f<T>(0));
 };
 
 template <typename T>

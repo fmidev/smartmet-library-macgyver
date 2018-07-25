@@ -49,7 +49,7 @@ void read(const string& filename, Callback callback, char delimiter)
   using boost::algorithm::trim;
 
   // Initial state
-  typedef vector<string> CsvRow;
+  using CsvRow = vector<string>;
   CsvRow row;
   CsvState state = ExpectingRecord;
   bool field_quoted = false;

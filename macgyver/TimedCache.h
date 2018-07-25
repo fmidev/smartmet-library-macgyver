@@ -10,8 +10,8 @@ namespace Fmi
 {
 namespace TimedCache
 {
-typedef boost::mutex MutexType;
-typedef boost::lock_guard<MutexType> Lock;
+using MutexType = boost::mutex;
+using Lock = boost::lock_guard<MutexType>;
 
 class CacheStatistics
 {

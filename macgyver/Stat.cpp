@@ -17,8 +17,8 @@ namespace Fmi
 namespace Stat
 {
 #define MODULO_VALUE_360 360.0
-typedef DataVector::iterator DataIterator;
-typedef DataVector::const_iterator DataConstIterator;
+using DataIterator = DataVector::iterator;
+using DataConstIterator = DataVector::const_iterator;
 
 using namespace boost::accumulators;
 using namespace std;

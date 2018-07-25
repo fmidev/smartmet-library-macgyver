@@ -6,7 +6,7 @@ namespace Cache
 {
 bool parse_size_t(const std::string& input, std::size_t& result)
 {
-  typedef boost::spirit::qi::uint_parser<std::size_t, 16, 1, -1> SizeTParser;
+  using SizeTParser = boost::spirit::qi::uint_parser<std::size_t, 16, 1, -1>;
   auto begin = input.begin();
   auto end = input.end();
 

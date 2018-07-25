@@ -21,10 +21,10 @@ namespace Fmi
 {
 namespace ThreadPool
 {
-typedef boost::function<void()> Task;
-typedef boost::mutex MutexType;
-typedef boost::unique_lock<MutexType> Lock;
-typedef boost::condition_variable ConditionVariableType;
+using Task = boost::function<void()>;
+using MutexType = boost::mutex;
+using Lock = boost::unique_lock<MutexType>;
+using ConditionVariableType = boost::condition_variable;
 
 // ======================================================================
 /*!
@@ -37,8 +37,8 @@ typedef boost::condition_variable ConditionVariableType;
 template <class Executor>
 class Worker : public boost::enable_shared_from_this<Worker<Executor> >
 {
-  typedef Executor* ParentPtr;
-  typedef typename std::list<boost::shared_ptr<Worker<Executor> > >::iterator IteratorType;
+  using ParentPtr = Executor*;
+  using IteratorType = std::list<boost::shared_ptr<Worker<Executor> > >::iterator;
 
  public:
   // ======================================================================
@@ -195,7 +195,7 @@ template <class SchedulingPolicy = FifoScheduler>
 class ThreadPool : public boost::noncopyable
 {
  private:
-  typedef ThreadPool<SchedulingPolicy> PoolType;
+  using PoolType = ThreadPool<SchedulingPolicy>;
 
   friend class Worker<PoolType>;
 
