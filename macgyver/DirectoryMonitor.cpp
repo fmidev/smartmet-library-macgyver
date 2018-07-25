@@ -204,7 +204,7 @@ class DirectoryMonitor::Pimple
   bool isready;  // true if at least one scan has completed
   Watcher nextid;
 
-  Pimple() : mutex(), schedule(), running(false), stop(false), isready(false), nextid(0) {}
+  Pimple() : running(false), stop(false), isready(false), nextid(0) {}
 };
 
 // ----------------------------------------------------------------------
