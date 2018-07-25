@@ -6,6 +6,7 @@
 
 #include "TimeZones.h"
 #include "StringConversion.h"
+#include "TimedCache.h"
 #include "WorldTimeZones.h"
 
 #include <memory>
@@ -15,6 +16,9 @@ using namespace std;
 
 const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
 const char* default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
+
+// Boost date_time_zonespec.csv has 593 rows, this should be enough for a long time
+const int tz_cache_size = 1024;
 
 namespace Fmi
 {
@@ -28,12 +32,14 @@ class TimeZones::Pimple
 {
  public:
   Pimple(const std::string& regionsFile, const std::string& coordinatesFile)
-      : itsRegions(), itsCoordinates(coordinatesFile)
+      : itsRegions(), itsCoordinates(coordinatesFile), itsTimeZoneCache(tz_cache_size)
   {
     itsRegions.load_from_file(regionsFile);
   }
   boost::local_time::tz_database itsRegions;
   WorldTimeZones itsCoordinates;
+
+  TimedCache::Cache<std::string, boost::local_time::time_zone_ptr> itsTimeZoneCache;
 
 };  // Pimple
 
@@ -77,8 +83,14 @@ vector<string> TimeZones::region_list() const { return itsPimple->itsRegions.reg
 
 boost::local_time::time_zone_ptr TimeZones::time_zone_from_region(const string& id) const
 {
+  auto opt_value = itsPimple->itsTimeZoneCache.find(id);
+  if (opt_value) return *opt_value;
+
   boost::local_time::time_zone_ptr ptr = itsPimple->itsRegions.time_zone_from_region(id);
   if (!ptr) throw runtime_error("TimeZones does not recognize region '" + id + "'");
+
+  itsPimple->itsTimeZoneCache.insert(id, ptr);
+
   return ptr;
 }
 
