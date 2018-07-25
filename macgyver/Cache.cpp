@@ -20,10 +20,7 @@ bool parse_size_t(const std::string& input, std::size_t& result)
     result = res;
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 FileCache::FileCache(const fs::path& directory, std::size_t maxSize)
@@ -120,17 +117,12 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
   auto it = itsContentMap.left.find(key);
   if (it != itsContentMap.left.end())
   {
-    if (fs::exists(it->second.path, err))
-    {
-      return true;  // Already in the cache and disk
-    }
-    else
-    {
-      // Found in map, but not on the disk. Someone has cleaned it without our knowledge
-      // Remove from the map and proceed with insert
-      itsSize -= it->second.fileSize;
-      itsContentMap.left.erase(it);
-    }
+    if (fs::exists(it->second.path, err)) return true;  // Already in the cache and disk
+
+    // Found in map, but not on the disk. Someone has cleaned it without our knowledge
+    // Remove from the map and proceed with insert
+    itsSize -= it->second.fileSize;
+    itsContentMap.left.erase(it);
   }
 
   std::pair<std::string, std::string> subDirAndFilename = getFileDirAndName(key);

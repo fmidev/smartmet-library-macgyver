@@ -480,13 +480,9 @@ boost::posix_time::ptime parse_iso(const std::string& str)
   bool success = qi::parse(start, finish, theParser, target);
 
   if (success)  // parse succesful, parsers check that entire input was consumed
-  {
     return ::buildFromISO(target);
-  }
-  else
-  {
-    throw std::runtime_error("Invalid ISO-time: '" + str + "'");
-  }
+
+  throw std::runtime_error("Invalid ISO-time: '" + str + "'");
 }
 
 // ----------------------------------------------------------------------
@@ -507,13 +503,9 @@ boost::posix_time::ptime parse_fmi(const std::string& str)
   bool success = qi::parse(start, finish, theParser, target);
 
   if (success)  // parse succesful, parsers check that entire input was consumed
-  {
     return ::buildFromISO(target);
-  }
-  else
-  {
-    throw std::runtime_error("Invalid ISO-time: '" + str + "'");
-  }
+
+  throw std::runtime_error("Invalid ISO-time: '" + str + "'");
 }
 
 // ----------------------------------------------------------------------
@@ -534,13 +526,9 @@ boost::posix_time::ptime parse_sql(const std::string& str)
   bool success = qi::parse(start, finish, theParser, target);
 
   if (success)  // parse succesful, parsers check that entire input was consumed
-  {
     return ::buildFromSQL(target);
-  }
-  else
-  {
-    throw std::runtime_error("Invalid SQL-time: '" + str + "'");
-  }
+
+  throw std::runtime_error("Invalid SQL-time: '" + str + "'");
 }
 
 // ----------------------------------------------------------------------
