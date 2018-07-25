@@ -42,12 +42,12 @@
 
 namespace
 {
-static const std::string& base64_chars = *new std::string(
+const std::string& base64_chars = *new std::string(
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789+/");
 
-static inline bool is_base64(char c) { return (isalnum(c) || (c == '+') || (c == '/')); }
+inline bool is_base64(char c) { return (isalnum(c) || (c == '+') || (c == '/')); }
 }  // namespace
 
 namespace Fmi
@@ -84,8 +84,7 @@ std::string encode(const std::string& str)
       char_array_4[3] = char_array_3[2] & 0x3fu;
 
       for (i = 0; (i < 4); i++)
-        ret += base64_chars[static_cast<std::size_t>(char_array_4[i])];
-      i = 0;
+        ' ret += base64_chars[static_cast<std::size_t>(char_array_4[i])]; i = 0;
     }
   }
 
