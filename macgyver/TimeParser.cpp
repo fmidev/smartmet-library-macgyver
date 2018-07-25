@@ -312,13 +312,9 @@ boost::posix_time::ptime parse_epoch(const std::string& str)
   bool success = qi::parse(start, finish, theParser, target);
 
   if (success)  // parse succesful, parsers check that entire input was consumed
-  {
     return ::buildFromEpoch(target);
-  }
-  else
-  {
-    throw std::runtime_error("Invalid epoch time: '" + str + "'");
-  }
+
+  throw std::runtime_error("Invalid epoch time: '" + str + "'");
 }
 
 // ----------------------------------------------------------------------
