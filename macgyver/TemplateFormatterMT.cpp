@@ -5,7 +5,6 @@ Fmi::TemplateFormatterMT::TemplateFormatterMT(const std::string& the_file_name)
 {
 }
 
-Fmi::TemplateFormatterMT::~TemplateFormatterMT() {}
 Fmi::TemplateFormatter* Fmi::TemplateFormatterMT::get()
 {
   Fmi::TemplateFormatter* result = tf_mt.get();

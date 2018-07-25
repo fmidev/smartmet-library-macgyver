@@ -14,7 +14,7 @@ class TemplateFormatterMT : public boost::noncopyable
  public:
   TemplateFormatterMT(const std::string& file_name);
 
-  virtual ~TemplateFormatterMT();
+  virtual ~TemplateFormatterMT() = default;
 
   TemplateFormatter* get();
 
