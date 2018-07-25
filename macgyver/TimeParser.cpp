@@ -124,7 +124,7 @@ namespace Fmi
 {
 namespace TimeParser
 {
-unsigned short get_short_month(const std::string& str)
+std::uint16_t get_short_month(const std::string& str)
 {
   if (str == "Jan") return 1;
   if (str == "Feb") return 2;
@@ -160,11 +160,11 @@ bool is_long_weekday(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-bool parse_ushort(const char** str, unsigned int length, unsigned short* value)
+bool parse_uint16(const char** str, unsigned int length, std::uint16_t* value)
 {
   const char* ptr = *str;
 
-  unsigned short tmp = 0;
+  std::uint16_t tmp = 0;
   for (unsigned int i = 0; i < length; i++)
   {
     if (!isdigit(*ptr)) return false;
@@ -354,10 +354,10 @@ boost::posix_time::ptime try_parse_offset(const std::string& str)
 
 boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
 {
-  unsigned short year = 0;
-  unsigned short month = 1, day = 1;
-  unsigned short int hour = 0, minute = 0, second = 0;
-  unsigned short houroffset = 0, minuteoffset = 0;
+  std::uint16_t year = 0;
+  std::uint16_t month = 1, day = 1;
+  std::uint16_t hour = 0, minute = 0, second = 0;
+  std::uint16_t houroffset = 0, minuteoffset = 0;
   bool positiveoffset = false;
 
   const char* ptr = str.c_str();
@@ -367,7 +367,7 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
 
   // Year
 
-  if (!parse_ushort(&ptr, 4, &year)) return bad_time;
+  if (!parse_uint16(&ptr, 4, &year)) return bad_time;
 
   // Quick sanity check to prevent further useless parsing
   // - boost library version 1.34 or greater support dates
@@ -382,7 +382,7 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
   // Month
 
   if (!skip_separator(&ptr, '-', extended_format)) return bad_time;  // should never happen though
-  if (!parse_ushort(&ptr, 2, &month)) return bad_time;               // YYYY is not allowed
+  if (!parse_uint16(&ptr, 2, &month)) return bad_time;               // YYYY is not allowed
   if (month == 0 || month > 12) return bad_time;
 
   if (*ptr == '\0')
@@ -394,28 +394,28 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
   // Day
 
   if (!skip_separator(&ptr, '-', extended_format)) return bad_time;
-  if (!parse_ushort(&ptr, 2, &day)) return bad_time;
+  if (!parse_uint16(&ptr, 2, &day)) return bad_time;
   if (day == 0 || day > 31) return bad_time;
   if (*ptr == '\0') goto build_iso;  // YYYY-MM-DD is allowed
 
   // We permit omitting 'T' to enable old YYYYMMDDHHMI timestamp format
 
   if (*ptr == 'T') ++ptr;
-  if (!parse_ushort(&ptr, 2, &hour)) return bad_time;
+  if (!parse_uint16(&ptr, 2, &hour)) return bad_time;
   if (hour > 23) return bad_time;
   if (*ptr == '\0') goto build_iso;  // YYYY-MM-DDTHH is allowed
 
   if (*ptr == 'Z' || *ptr == '+' || *ptr == '-') goto zone_began;
 
   if (!skip_separator(&ptr, ':', extended_format)) return bad_time;
-  if (!parse_ushort(&ptr, 2, &minute)) return bad_time;
+  if (!parse_uint16(&ptr, 2, &minute)) return bad_time;
   if (minute > 59) return bad_time;
   if (*ptr == '\0') goto build_iso;  // YYYY-MM-DDTHH:MI is allowed
 
   if (*ptr == 'Z' || *ptr == '+' || *ptr == '-') goto zone_began;
 
   if (!skip_separator(&ptr, ':', extended_format)) return bad_time;
-  if (!parse_ushort(&ptr, 2, &second)) return bad_time;
+  if (!parse_uint16(&ptr, 2, &second)) return bad_time;
   if (second > 59) return bad_time;
   if (*ptr == '\0') goto build_iso;  // YYYY-MM-DDTHH:MI:SS is allowed
 
@@ -434,13 +434,13 @@ zone_began:
   positiveoffset = (*ptr == '+');
   ptr++;
 
-  if (!parse_ushort(&ptr, 2, &houroffset)) return bad_time;
+  if (!parse_uint16(&ptr, 2, &houroffset)) return bad_time;
   if (houroffset >= 14) return bad_time;  // some offsets are > 12
 
   if (*ptr == '\0') goto build_iso;
 
   if (!skip_separator(&ptr, ':', extended_format)) return bad_time;
-  if (!parse_ushort(&ptr, 2, &minuteoffset)) return bad_time;
+  if (!parse_uint16(&ptr, 2, &minuteoffset)) return bad_time;
   if (*ptr != '\0') return bad_time;
 
 build_iso:
@@ -925,8 +925,8 @@ boost::posix_time::ptime parse_http(const std::string& str)
     std::vector<std::string> parts;
     boost::algorithm::split(parts, s, boost::algorithm::is_any_of(" "));
 
-    unsigned short dd, yy, mm;
-    unsigned short hh, mi, ss;
+    std::uint16_t dd, yy, mm;
+    std::uint16_t hh, mi, ss;
     std::string hms;
 
     switch (parts.size())
