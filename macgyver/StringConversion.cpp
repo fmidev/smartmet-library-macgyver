@@ -15,6 +15,11 @@
 
 namespace
 {
+const char* weekdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+
+const char* months[] = {
+    "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
 /* Quick access table for minutes, hours, seconds, days and months in %02d format. Even though
  * libfmt does this fast, it still usually has to parse the format string. This table can be used to
  * avoid that step.
@@ -268,6 +273,30 @@ std::string to_iso_extended_string(const boost::posix_time::ptime& time)
   ret.reserve(19 + 1);  // +1 for null byte terminator, we hope there is no fractional part
   ret += to_iso_extended_string(date);
   if (!duration.is_special()) ret.append("T").append(to_iso_extended_string(duration));
+  return ret;
+}
+
+// Convert a valid time to form "Fri, 27 Jul 2018 11:26:04 GMT" suitable for HTTP responses
+std::string to_http_string(const boost::posix_time::ptime& time)
+{
+  const auto& date = time.date();
+  const auto& duration = time.time_of_day();
+  std::string ret;
+  ret.reserve(30);
+  ret += weekdays[date.day_of_week()];
+  ret += ", ";
+  ret += ints_02d[date.day()];
+  ret += ' ';
+  ret += months[date.month()];
+  ret += ' ';
+  append_year(ret, date.year());
+  ret += ' ';
+  ret += ints_02d[duration.hours()];
+  ret += ':';
+  ret += ints_02d[duration.minutes()];
+  ret += ':';
+  ret += ints_02d[duration.seconds()];
+  ret += " GMT";
   return ret;
 }
 

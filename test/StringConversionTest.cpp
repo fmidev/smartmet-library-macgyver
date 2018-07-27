@@ -184,6 +184,18 @@ BOOST_AUTO_TEST_CASE(to_iso_extended_string)
   BOOST_CHECK_EQUAL("2002-01-01T01:02:03,004000", Fmi::to_iso_extended_string(time2));
 }
 
+BOOST_AUTO_TEST_CASE(to_http_string)
+{
+  using namespace boost::posix_time;
+  using namespace boost::gregorian;
+
+  ptime time1(date(2002, Jan, 1), time_duration(1, 2, 3));
+  BOOST_CHECK_EQUAL("Tue, 01 Jan 2002 01:02:03 GMT", Fmi::to_http_string(time1));
+
+  ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
+  BOOST_CHECK_EQUAL("Tue, 01 Jan 2002 01:02:03 GMT", Fmi::to_http_string(time2));
+}
+
 BOOST_AUTO_TEST_CASE(ascii_tolower)
 {
   BOOST_TEST_MESSAGE(" + Fmi::ascii_tolower()");
