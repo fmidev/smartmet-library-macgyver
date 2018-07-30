@@ -38,7 +38,7 @@ template <class Executor>
 class Worker : public boost::enable_shared_from_this<Worker<Executor> >
 {
   using ParentPtr = Executor*;
-  using IteratorType = std::list<boost::shared_ptr<Worker<Executor> > >::iterator;
+  using IteratorType = typename std::list<boost::shared_ptr<Worker<Executor> > >::iterator;
 
  public:
   // ======================================================================
