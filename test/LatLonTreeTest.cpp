@@ -6,7 +6,6 @@
 // ======================================================================
 
 #include "LatLonTree.h"
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regression/tframe.h>
 #include <iostream>
@@ -33,7 +32,7 @@ struct Point
 template <typename T>
 void print(const T& points)
 {
-  BOOST_FOREACH (const auto& p, points)
+  for (const auto& p : points)
     std::cout << p.second.name << " " << p.first << std::endl;
   std::cout << std::endl;
 }

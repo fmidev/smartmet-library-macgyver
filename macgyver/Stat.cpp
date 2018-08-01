@@ -5,7 +5,6 @@
 #include <boost/accumulators/statistics/weighted_mean.hpp>
 #include <boost/accumulators/statistics/weighted_median.hpp>
 #include <boost/accumulators/statistics/weighted_variance.hpp>
-#include <boost/foreach.hpp>
 
 #include <cmath>
 #include <iterator>
@@ -49,7 +48,7 @@ Stat::Stat(const LocalDateTimeValueVector& theValues,
     : itsMissingValue(theMissingValue), itsWeights(true), itsDegrees(false)
 
 {
-  BOOST_FOREACH (const LocalDateTimeValue& item, theValues)
+  for (const LocalDateTimeValue& item : theValues)
   {
     itsData.push_back(DataItem(item.first.utc_time(), item.second));
   }
@@ -60,7 +59,7 @@ Stat::Stat(const PosixTimeValueVector& theValues,
            double theMissingValue /*= std::numeric_limits<double>::quiet_NaN(*/)
     : itsMissingValue(theMissingValue), itsWeights(true), itsDegrees(false)
 {
-  BOOST_FOREACH (const PosixTimeValue& item, theValues)
+  for (const PosixTimeValue& item : theValues)
   {
     itsData.push_back(DataItem(item.first, item.second));
   }
@@ -93,7 +92,7 @@ void Stat::addData(const boost::posix_time::ptime& theTime, double theValue)
 
 void Stat::addData(const vector<double>& theData)
 {
-  BOOST_FOREACH (double value, theData)
+  for (double value : theData)
     itsData.push_back(DataItem(not_a_date_time, value));
   calculate_weights();
 }
@@ -118,7 +117,7 @@ double Stat::integ(const ptime& startTime /*= not_a_date_time */,
 
   accumulator_set<double, stats<tag::sum>, double> acc;
 
-  BOOST_FOREACH (const DataItem& item, subvector)
+  for (const DataItem& item : subvector)
   {
     acc(item.value, weight = item.weight);
   }
@@ -142,7 +141,7 @@ double Stat::sum(const ptime& startTime /*= not_a_date_time */,
 
   accumulator_set<double, stats<tag::sum>, double> acc;
 
-  BOOST_FOREACH (const DataItem& item, subvector)
+  for (const DataItem& item : subvector)
   {
     acc(item.value, weight = 1.0);
   }
@@ -209,7 +208,7 @@ double Stat::mean(const ptime& startTime /*= not_a_date_time */,
   }
 
   accumulator_set<double, stats<tag::mean>, double> acc;
-  BOOST_FOREACH (const DataItem& item, subvector)
+  for (const DataItem& item : subvector)
   {
     acc(item.value, weight = (itsWeights ? item.weight : 1.0));
   }
@@ -329,7 +328,7 @@ unsigned int Stat::count(double lowerLimit,
 
   unsigned int occurances(0);
 
-  BOOST_FOREACH (const DataItem& item, subvector)
+  for (const DataItem& item : subvector)
   {
     if (item.value >= lowerLimit && item.value <= upperLimit) occurances++;
   }
@@ -353,7 +352,7 @@ double Stat::percentage(double lowerLimit,
   int occurances(0);
   int total_count(0);
 
-  BOOST_FOREACH (const DataItem& item, subvector)
+  for (const DataItem& item : subvector)
   {
     if (item.value >= lowerLimit && item.value <= upperLimit)
       occurances += (itsWeights ? item.weight : 1);
@@ -381,7 +380,7 @@ double Stat::median(const ptime& startTime /*= not_a_date_time */,
 
   vector<double> double_vector;
 
-  BOOST_FOREACH (const DataItem& item, subvector)
+  for (const DataItem& item : subvector)
   {
     double_vector.insert(
         double_vector.end(), static_cast<std::size_t>(itsWeights ? item.weight : 1.0), item.value);
@@ -418,7 +417,7 @@ double Stat::variance(const ptime& startTime /*= not_a_date_time */,
 
   accumulator_set<double, stats<tag::variance>, double> acc;
 
-  BOOST_FOREACH (const DataItem& item, subvector)
+  for (const DataItem& item : subvector)
   {
     acc(item.value, weight = (itsWeights ? item.weight : 1.0));
   }
@@ -637,7 +636,7 @@ void Stat::calculate_weights()
 
 bool Stat::invalid_timestamps() const
 {
-  BOOST_FOREACH (const DataItem& item, itsData)
+  for (const DataItem& item : itsData)
   {
     if (item.time == not_a_date_time)
     {

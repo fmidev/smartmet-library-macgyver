@@ -95,7 +95,6 @@
 
 #pragma once
 
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
@@ -658,7 +657,7 @@ void NearTree<T, F>::flush() const
     // since the former uses rand()
     std::random_shuffle(buffer.begin(), buffer.end());
 
-    BOOST_FOREACH (const T& it, buffer)
+    for (const T& it : buffer)
       impl->insert(it);
 
     buffer.clear();

@@ -10,7 +10,6 @@
 #include "boost/date_time/posix_time/posix_time.hpp"  //include all types plus i/o
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regression/tframe.h>
 #include <algorithm>
@@ -1026,7 +1025,7 @@ void print_moonrise_moonset_table(
                " Aug.      Sept.       Oct.       Nov.       Dec     "
             << std::endl;
 
-  BOOST_FOREACH (const std::string& str, test_data)
+  for (const std::string& str : test_data)
     std::cout << str << std::endl;
 
   string second_rises;

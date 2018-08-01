@@ -24,13 +24,9 @@
 
 #include "DirectoryMonitor.h"
 #include "StringConversion.h"
-
-#include <boost/foreach.hpp>
-#include <boost/tuple/tuple.hpp>
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
-
+#include <boost/tuple/tuple.hpp>
 #include <stdexcept>
 
 // scoped read/write lock types
@@ -124,7 +120,7 @@ std::pair<DirectoryMonitor::Status, DirectoryMonitor::Change> directory_change(
 
   // Scan old contents detecting modifications and deletes
 
-  BOOST_FOREACH (const Contents::value_type& it, oldcontents)
+  for (const Contents::value_type& it : oldcontents)
   {
     const auto pos = newcontents.find(it.first);
 
@@ -141,7 +137,7 @@ std::pair<DirectoryMonitor::Status, DirectoryMonitor::Change> directory_change(
 
   // Scan new contents detecting new files
 
-  BOOST_FOREACH (const Contents::value_type& it, newcontents)
+  for (const Contents::value_type& it : newcontents)
   {
     const auto pos = oldcontents.find(it.first);
     if (pos == oldcontents.end())
