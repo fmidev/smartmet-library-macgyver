@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.8.1
+Version: 18.8.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -73,6 +73,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Aug  4 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.4-1.fmi
+- Changed DirectoryMonitor constants to be unsigned to avoid warnings on bitwise operations
+
 * Wed Aug  1 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.1-1.fmi
 - Use C++11 for-loops instead of BOOST_FOREACH
 

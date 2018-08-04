@@ -27,7 +27,7 @@ class DirectoryMonitor : private boost::noncopyable
 
   // Change type
 
-  using Change = int;
+  using Change = unsigned int;
 
   // Observable events
 
