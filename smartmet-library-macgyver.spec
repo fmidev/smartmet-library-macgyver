@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.8.4
+Version: 18.8.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -73,6 +73,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Aug 20 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.20-1.fmi
+- DirectoryMonitor now passes objects as const references to observers
+
 * Sat Aug  4 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.8.4-1.fmi
 - Changed DirectoryMonitor constants to be unsigned to avoid warnings on bitwise operations
 

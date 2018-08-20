@@ -60,11 +60,15 @@ class DirectoryMonitor : private boost::noncopyable
   // test shows that the code compiles if the callee declares
   // references instead of copies.
 
-  using Listener = boost::function<void(
-      Watcher id, boost::filesystem::path path, boost::regex pattern, Status status)>;
+  using Listener = boost::function<void(Watcher id,
+                                        const boost::filesystem::path& path,
+                                        const boost::regex& pattern,
+                                        const Status& status)>;
 
-  using ErrorHandler = boost::function<void(
-      Watcher id, boost::filesystem::path path, boost::regex pattern, std::string message)>;
+  using ErrorHandler = boost::function<void(Watcher id,
+                                            const boost::filesystem::path& path,
+                                            const boost::regex& pattern,
+                                            const std::string& message)>;
 
   // Request new monitored path/regex
 
