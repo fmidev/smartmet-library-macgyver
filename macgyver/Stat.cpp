@@ -318,20 +318,18 @@ unsigned int Stat::count(double lowerLimit,
                          const ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
-  std::cout << "trend(" << lowerLimit << ", " << upperLimit << ", " << startTime << ", " << endTime
+  std::cout << "count(" << lowerLimit << ", " << upperLimit << ", " << startTime << ", " << endTime
             << ")" << std::endl;
 #endif
   DataVector subvector;
 
-  if (!get_subvector(subvector, startTime, endTime))
+  if (!get_subvector(subvector, startTime, endTime, false))
     return static_cast<unsigned int>(itsMissingValue);
 
   unsigned int occurances(0);
 
   for (const DataItem& item : subvector)
-  {
     if (item.value >= lowerLimit && item.value <= upperLimit) occurances++;
-  }
 
   return occurances;
 }
@@ -571,7 +569,8 @@ bool extract_subvector(const DataVector& itsData,
 
 bool Stat::get_subvector(DataVector& subvector,
                          const ptime& startTime /*= not_a_date_time*/,
-                         const ptime& endTime /*= not_a_date_time*/) const
+                         const ptime& endTime /*= not_a_date_time*/,
+                         bool useWeights /*= true*/) const
 {
   if (invalid_timestamps())
   {
@@ -590,8 +589,8 @@ bool Stat::get_subvector(DataVector& subvector,
       return true;
     }
   }
-
-  return extract_subvector(itsData, subvector, startTime, endTime, itsMissingValue, itsWeights);
+  bool applyWeights = (useWeights == false ? false : itsWeights);
+  return extract_subvector(itsData, subvector, startTime, endTime, itsMissingValue, applyWeights);
 }
 
 void Stat::calculate_weights()
