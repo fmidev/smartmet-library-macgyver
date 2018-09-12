@@ -112,7 +112,7 @@ class Stat
   bool get_subvector(DataVector& subvector,
                      const ptime& startTime = not_a_date_time,
                      const ptime& endTime = not_a_date_time,
-					 bool useWeights = true) const;
+                     bool useWeights = true) const;
   void calculate_weights();
   bool invalid_timestamps() const;
 
