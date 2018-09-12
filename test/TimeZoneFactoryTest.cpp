@@ -200,7 +200,8 @@ class tests : public tframe::tests
     TEST(time_zone_from_coordinate);
     TEST(time_zone_from_string);
     TEST(zone_name_from_coordinate);
-    TEST(ocean);
+    // Disabled: waiting for fix to brainstorm-912
+    // TEST(ocean);
   }
 };
 
