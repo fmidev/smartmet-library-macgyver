@@ -70,7 +70,7 @@ struct test_data_t
 
 static vector<test_data_t> test_data;
 
-#define ZONESPEC_CVS "/smartmet/share/boost/date_time_zonespec.csv"
+#define ZONESPEC_CVS "/usr/share/smartmet/timezones/date_time_zonespec.csv"
 
 boost::shared_ptr<boost::local_time::tz_database> tz_db;
 
