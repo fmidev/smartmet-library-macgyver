@@ -16,6 +16,7 @@ INCLUDES = -I ../macgyver -I /usr/include/smartmet
 
 LIBS = ../libsmartmet-macgyver.so \
 	-lfmt \
+	-lboost_filesystem \
 	-lboost_locale \
 	-lboost_date_time \
 	-lboost_thread
@@ -25,9 +26,6 @@ clean:
 	rm -f $(PROG) *~
 
 test: $(PROG)
-	@rm -rf /tmp/filecachetest #Filecache uses this directory
-	@rm -rf /tmp/filecachetest2 #Filecache uses this directory
-	@rm -rf /tmp/filecachetest3 #Filecache uses this directory
 	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \
