@@ -19,7 +19,12 @@ BuildRequires: smartmet-timezones >= 18.5.9
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel
-Buildrequires: boost-devel
+#TestRequires: make
+#TestRequires: gcc-c++
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-timezones >= 18.5.9
+#TestRequires: fmt-devel
+#TestRequires: boost-devel
 Requires: fmt
 Requires: ctpp2
 Requires: libicu >= 50.1.2
