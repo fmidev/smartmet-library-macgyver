@@ -29,11 +29,12 @@ test: $(PROG)
 	@rm -rf /tmp/filecachetest2 #Filecache uses this directory
 	@rm -rf /tmp/filecachetest3 #Filecache uses this directory
 	@echo Running tests:
-	@ok=true; \
-	for prog in $(PROG); do \
-	./$$prog || ok=false; \
-	done; \
-	$$ok
+	@rm -f *.err
+	@for prog in $(PROG); do \
+	  ( ./$$prog || touch $$prog.err ) ; \
+	done
+	@test `find . -name \*.err | wc -l` = "0" || ( echo ; echo "The following tests have errors:" ; \
+		for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false ) 
 
 $(PROG) : % : %.cpp ../libsmartmet-macgyver.so
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
