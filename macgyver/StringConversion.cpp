@@ -1,15 +1,10 @@
 #include "StringConversion.h"
-
-#include <fmt/format.h>
-#if defined(_WIN32) || defined(WIN32)
-#include <fmt/printf.h>
-#endif
-
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
 #include <boost/spirit/include/qi.hpp>
-
+#include <fmt/format.h>
+#include <fmt/printf.h>
 #include <cmath>
 #include <stdexcept>
 
