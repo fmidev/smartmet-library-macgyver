@@ -202,7 +202,8 @@ class tests : public tframe::tests
     TEST(denmark);
     TEST(estonia);
     TEST(russia);
-    TEST(ocean);
+    // Disabled: waiting for fix to brainstorm-912
+    // TEST(ocean);
   }
 
 };  // class tests

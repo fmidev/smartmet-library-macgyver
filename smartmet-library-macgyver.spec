@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.9.5
+Version: 18.9.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,12 +15,17 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: imake
-BuildRequires: smartmet-timezones >= 18.5.9
+BuildRequires: smartmet-timezones >= 18.9.10
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
-BuildRequires: fmt-devel
-Buildrequires: boost-devel
-Requires: fmt
+BuildRequires: fmt-devel >= 5.2.0
+#TestRequires: make
+#TestRequires: gcc-c++
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-timezones >= 18.9.10
+#TestRequires: fmt-devel
+#TestRequires: boost-devel
+Requires: fmt >= 5.2.0
 Requires: ctpp2
 Requires: libicu >= 50.1.2
 Requires: boost-date-time
@@ -73,6 +78,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Sep 29 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.9.29-1.fmi
+- Use newer fmt library
+
 * Wed Sep 5 2018 Anssi Reponen <anssi.reponen@fmi.fi> - 18.9.5-1.fmi
 - Weights (based on period length) must not be applied to count-function (BRAINSTORM-1131)
 

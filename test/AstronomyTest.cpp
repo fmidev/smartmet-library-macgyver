@@ -70,7 +70,7 @@ struct test_data_t
 
 static vector<test_data_t> test_data;
 
-#define ZONESPEC_CVS "/smartmet/share/boost/date_time_zonespec.csv"
+#define ZONESPEC_CVS "/usr/share/smartmet/timezones/date_time_zonespec.csv"
 
 boost::shared_ptr<boost::local_time::tz_database> tz_db;
 
@@ -283,13 +283,13 @@ static void prepare_test_data()
                                   LAT_N(18, 56, 0),  // whole India in one time zone
                                   //
                                   ptime(JUN_18_2008, time_duration(13, 20, 0)),
-                                  23.415606387026095,  // declination
-                                  297.3376,            // azimuth
-                                  79.6269,             // elevation
+                                  23.4148,  // declination
+                                  45.0144,            // azimuth
+                                  83.5651,             // elevation
                                   //
-                                  ptime(JUN_18_2008, time_duration(6, 1, 43)),
-                                  ptime(JUN_18_2008, time_duration(19, 17, 57)),
-                                  time_duration(12, 39, 43),
+                                  ptime(JUN_18_2008, time_duration(7, 1, 43)),
+                                  ptime(JUN_18_2008, time_duration(20, 17, 57)),
+                                  time_duration(13, 39, 43),
                                   time_duration(13, 16, 14)));
 
   /* Kiribati (+14 time zone)

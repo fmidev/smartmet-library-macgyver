@@ -1,6 +1,7 @@
 #include "Cache.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 #include <regression/tframe.h>
@@ -11,6 +12,8 @@
 
 using namespace std;
 using namespace Fmi::Cache;
+
+static boost::filesystem::path* testpaths[3] = {nullptr};
 
 namespace CacheTest
 {
@@ -37,7 +40,7 @@ struct custom_comparator
 
 void testfilecache()
 {
-  fs::path testdir("/tmp/filecachetest");
+  fs::path testdir(*testpaths[0]);
 
   FileCache cache(testdir, 100);
 
@@ -73,7 +76,7 @@ void testfilecache()
 
 void testfilecacheorder()
 {
-  fs::path testdir("/tmp/filecachetest2");
+  fs::path testdir(*testpaths[1]);
 
   FileCache cache(testdir, 100);
 
@@ -120,7 +123,7 @@ void testfilecacheorder()
 
 void testfilecachesize()
 {
-  fs::path testdir("/tmp/filecachetest3");
+  fs::path testdir(*testpaths[2]);
 
   FileCache cache(testdir, 8);
 
@@ -495,10 +498,30 @@ class tests : public tframe::tests
 };
 }  // namespace CacheTest
 
+static void atexit_handler()
+{
+  for (unsigned int i = 0; i < sizeof(testpaths) / sizeof(*testpaths); i++)
+  {
+    if (testpaths[i] != nullptr)
+    {
+      boost::filesystem::remove_all(*testpaths[i]);
+      delete testpaths[i];
+    }
+  }
+}
+
 int main(void)
 {
   using namespace std;
   cout << endl << "Cache" << endl << "=========" << endl;
+  atexit(atexit_handler);  // Remove this if you need to debug test directory contents after test
+  for (unsigned int i = 0; i < sizeof(testpaths) / sizeof(*testpaths); i++)
+  {
+    testpaths[i] = new boost::filesystem::path(
+        boost::filesystem::unique_path(boost::filesystem::temp_directory_path().string() + "/" +
+                                       "MacGyver_CacheTest_" + to_string(i) + "_%%%%%%%%"));
+    // cout << "Testpath " << i << " is " << *testpaths[i] << endl;
+  }
   CacheTest::tests t;
   return t.run();
 }

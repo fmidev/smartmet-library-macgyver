@@ -37,12 +37,6 @@ void underline()
   TEST_PASSED();
 }
 
-void blink()
-{
-  std::cout << ANSI_BLINK_ON << "Blink" << ANSI_BLINK_OFF << ' ';
-  TEST_FAILED("Does not work in F19/RHEL6");
-}
-
 void inverse()
 {
   std::cout << ANSI_INVERSE_ON << "Inverse" << ANSI_INVERSE_OFF << ' ';
@@ -165,7 +159,6 @@ class tests : public tframe::tests
     TEST(bold);
     TEST(italic);
     TEST(underline);
-    TEST(blink);
     TEST(inverse);
     TEST(strike);
     TEST(black);
