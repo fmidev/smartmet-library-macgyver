@@ -19,7 +19,9 @@ LIBS = ../libsmartmet-macgyver.so \
 	-lboost_filesystem \
 	-lboost_locale \
 	-lboost_date_time \
-	-lboost_thread
+	-lboost_thread \
+	-lboost_system \
+	-lpthread
 
 all: $(PROG)
 clean:

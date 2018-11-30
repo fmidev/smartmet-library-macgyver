@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.9.29
+Version: 18.11.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,14 +15,14 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: imake
-BuildRequires: smartmet-timezones >= 18.9.10
+BuildRequires: smartmet-timezones >= 18.11.8
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel >= 5.2.0
 #TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 18.9.10
+#TestRequires: smartmet-timezones >= 18.11.8
 #TestRequires: fmt-devel
 #TestRequires: boost-devel
 Requires: fmt >= 5.2.0
@@ -78,6 +78,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Nov 12 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.11.12-1.fmi
+- Replaced TemplateFormatterMT with TemplateFactory
+
 * Sat Sep 29 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.9.29-1.fmi
 - Use newer fmt library
 

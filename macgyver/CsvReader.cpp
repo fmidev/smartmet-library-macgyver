@@ -73,8 +73,8 @@ void read(const string& filename, Callback callback, char delimiter)
           getline(input, line);
           break;
         }
-        // Fall through
       }
+      // fall through
       case ExpectingField:
       {
         if (input.eof() || isnewline(ch))
