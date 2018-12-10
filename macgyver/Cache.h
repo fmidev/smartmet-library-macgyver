@@ -936,7 +936,7 @@ struct SigmoidTimeExpire
         double(timeConstant);
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > eliminationAge)
+    if (static_cast<double>((now - theTagTime)) > eliminationAge)
     {
       return true;
     }
