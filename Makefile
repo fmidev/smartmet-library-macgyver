@@ -81,6 +81,7 @@ LIBS = -L$(libdir) \
 	-lboost_thread \
 	-lboost_regex \
 	-lboost_system \
+        -lpqxx \
 	$(pkg-config --libs icu-i18n) \
 	-lfmt \
 	-lctpp2 \
