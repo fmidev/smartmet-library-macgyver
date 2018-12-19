@@ -19,6 +19,7 @@ BuildRequires: smartmet-timezones >= 18.11.8
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel >= 5.2.0
+BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
@@ -33,6 +34,7 @@ Requires: boost-filesystem
 Requires: boost-thread
 Requires: boost-regex
 Requires: boost-system
+Requires: libpqxx
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
