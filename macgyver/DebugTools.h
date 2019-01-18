@@ -1,6 +1,9 @@
 #pragma once
 
+#include <exception>
+#include <iostream>
 #include <string>
+#include "TypeName.h"
 
 namespace Fmi
 {
@@ -30,4 +33,25 @@ class ScopedTimer
   std::string time_str;
   double start;
 };
+
+/**
+ *   @brief Debugging macro for showing exceptions thrown by a function
+ *
+ *   Possible use:
+ *   boost test framwork do not report exceptions type and related info in case of use
+ *   of macros line BOOST_CHECK_NO_THROW(). On can use this macro to workaround this
+ *   problem:
+ *   @code
+ *   BOOST_CHECK_NO_THROW(foo = SHOW_EXCEPTIONS(bar());
+ *   @endcode
+ */
+#define SHOW_EXCEPTIONS(x)						                           \
+  [&]() { try { return x; } catch (const std::exception& e)		                           \
+  {									                           \
+    std::cout << "Exception " << Fmi::current_exception_type() << ": " << e.what() << std::endl    \
+	      << "    thrown by '" << #x << '\'' << std::endl	                                   \
+	      << "    in " << __FILE__ << " at line " << __LINE__ << std::endl;	                   \
+    throw;								                           \
+  }}()
+
 }  // namespace Fmi
