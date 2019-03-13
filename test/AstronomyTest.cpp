@@ -150,7 +150,7 @@ static void prepare_test_data()
                   time_duration(),  // (12,14,49) but NOAA does not give it so not among the test
                   seconds(0)));
 
-  // Aurinko nousee kesäksi
+  // Aurinko nousee kesï¿½ksi
   test_data.push_back(
       test_data_t("Utsjoki 3",
                   "Europe/Helsinki",
@@ -167,7 +167,7 @@ static void prepare_test_data()
                   time_duration(13, 8, 15),
                   time_duration(22, 23, 47)));
 
-  // Ja laskee heinäkuussa
+  // Ja laskee heinï¿½kuussa
   test_data.push_back(
       test_data_t("Utsjoki 4",
                   "Europe/Helsinki",
@@ -283,13 +283,13 @@ static void prepare_test_data()
                                   LAT_N(18, 56, 0),  // whole India in one time zone
                                   //
                                   ptime(JUN_18_2008, time_duration(13, 20, 0)),
-                                  23.4148,  // declination
-                                  45.0144,            // azimuth
-                                  83.5651,             // elevation
+                                  23.4156,  // declination
+                                  297.338,  // azimuth
+                                  79.627,   // elevation
                                   //
-                                  ptime(JUN_18_2008, time_duration(7, 1, 43)),
-                                  ptime(JUN_18_2008, time_duration(20, 17, 57)),
-                                  time_duration(13, 39, 43),
+                                  ptime(JUN_18_2008, time_duration(6, 1, 43)),
+                                  ptime(JUN_18_2008, time_duration(19, 17, 57)),
+                                  time_duration(12, 39, 43),
                                   time_duration(13, 16, 14)));
 
   /* Kiribati (+14 time zone)
