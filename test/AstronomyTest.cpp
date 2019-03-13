@@ -98,6 +98,7 @@ static void prepare_test_data()
   const boost::gregorian::date JUN_11_2012(2012, 6, 11);
   const boost::gregorian::date JUL_01_2012(2012, 7, 1);
   const boost::gregorian::date OCT_7_2013(2013, 10, 7);
+  const boost::gregorian::date JUN_18_2019(2019, 6, 18);
 
   /* HELSINKI 2008-Jun-18 15:34:07
    */
@@ -282,15 +283,15 @@ static void prepare_test_data()
                                   LON_E(72, 50, 0),
                                   LAT_N(18, 56, 0),  // whole India in one time zone
                                   //
-                                  ptime(JUN_18_2008, time_duration(13, 20, 0)),
-                                  23.4156,  // declination
-                                  297.338,  // azimuth
-                                  79.627,   // elevation
+                                  ptime(JUN_18_2019, time_duration(13, 20, 0)),
+                                  23.3976,  // declination
+                                  297.186,  // azimuth
+                                  79.6093,  // elevation
                                   //
-                                  ptime(JUN_18_2008, time_duration(6, 1, 43)),
-                                  ptime(JUN_18_2008, time_duration(19, 17, 57)),
-                                  time_duration(12, 39, 43),
-                                  time_duration(13, 16, 14)));
+                                  ptime(JUN_18_2019, time_duration(6, 1, 38)),
+                                  ptime(JUN_18_2019, time_duration(19, 17, 48)),
+                                  time_duration(12, 39, 36),
+                                  time_duration(13, 16, 10)));
 
   /* Kiribati (+14 time zone)
    *
