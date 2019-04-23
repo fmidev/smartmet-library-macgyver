@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.11.24
+Version: 19.4.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -80,6 +80,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Apr 4 2019 Anssi Reponen <anssi.reponen@fmi.fi> - 19.4.4-1.fmi
+- dataTypes()-function added in PostgreSQLConnection-class to get PostgreSQL data types from database
+
 * Sat Nov 24 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.11.24-1.fmi
 - Use boost::core::demangle to avoid a malloc/delete mismatch
 
