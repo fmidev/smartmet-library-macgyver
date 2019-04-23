@@ -80,9 +80,10 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+
 * Tue Apr 23 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.4.23-1.fmi
 - Fix to Count() method
-- Added PostgreSQLConnection::dataTypes
+- dataTypes()-function added in PostgreSQLConnection-class to get PostgreSQL data types from database
 
 * Sat Nov 24 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.11.24-1.fmi
 - Use boost::core::demangle to avoid a malloc/delete mismatch

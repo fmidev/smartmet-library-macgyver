@@ -48,6 +48,7 @@ class PostgreSQLConnection
 
   bool collateSupported() { return itsCollate; }
   std::string quote(const std::string& theString) const;
+  const std::map<unsigned int, std::string>& dataTypes() const { return itsDataTypes; }
 
  private:
   boost::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
@@ -55,6 +56,7 @@ class PostgreSQLConnection
   bool itsDebug;
   bool itsCollate;
   PostgreSQLConnectionOptions itsConnectionOptions;
+  std::map<unsigned int, std::string> itsDataTypes;
 };  // class PostgreSQLConnection
 
 }  // namespace Database
