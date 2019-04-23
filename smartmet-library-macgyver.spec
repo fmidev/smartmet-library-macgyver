@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 18.11.24
+Version: 19.4.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,7 +15,7 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: imake
-BuildRequires: smartmet-timezones >= 18.11.8
+BuildRequires: smartmet-timezones >= 19.4.2
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel >= 5.2.0
@@ -23,7 +23,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 18.11.8
+#TestRequires: smartmet-timezones >= 19.4.2
 #TestRequires: fmt-devel
 #TestRequires: boost-devel
 Requires: fmt >= 5.2.0
@@ -80,6 +80,10 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Apr 23 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.4.23-1.fmi
+- Fix to Count() method
+- Added PostgreSQLConnection::dataTypes
+
 * Sat Nov 24 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.11.24-1.fmi
 - Use boost::core::demangle to avoid a malloc/delete mismatch
 
