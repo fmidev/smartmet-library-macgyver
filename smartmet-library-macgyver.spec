@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 19.4.23
+Version: 19.7.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -80,6 +80,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+
+* Mon Jul 29 2019 Andris Pavenis <andris.pavenis@fmi.fi> - 19.7.29-1.fmi
+- Add C++ class Fmi::TaskGroup
 
 * Tue Apr 23 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.4.23-1.fmi
 - Fix to Count() method
