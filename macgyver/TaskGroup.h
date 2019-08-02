@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <future>
@@ -16,6 +17,8 @@ class TaskGroup
  public:
   TaskGroup(std::size_t max_parallel_tasks = 30);
   virtual ~TaskGroup();
+
+  operator bool () const { return get_num_failures() != 0; }
 
   void add(const std::string& name, std::function<void()> task);
   void wait();
@@ -38,7 +41,7 @@ class TaskGroup
   std::condition_variable cond;
   std::size_t max_parallel_tasks;
   std::size_t counter;
-  std::size_t num_failures;
+  std::atomic<std::size_t> num_failures;
   std::list<std::pair<std::string, std::shared_future<void> > > task_list;
   boost::signals2::signal<void(const std::string&)> signal_task_ended;
   boost::signals2::signal<void(const std::string&)> signal_task_failed;

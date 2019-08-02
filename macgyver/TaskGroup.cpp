@@ -45,6 +45,11 @@ std::size_t Fmi::TaskGroup::get_num_tasks() const
   return task_list.size();
 }
 
+std::size_t Fmi::TaskGroup::get_num_failures() const
+{
+  return num_failures;
+}
+
 boost::signals2::connection
 Fmi::TaskGroup::on_task_ended(std::function<void(const std::string&)> callback)
 {
