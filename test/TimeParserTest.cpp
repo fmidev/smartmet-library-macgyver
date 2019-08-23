@@ -88,6 +88,16 @@ void parse_epoch()
   if ((res = TimeParser::parse_epoch("951714900")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
+  // date +%s --date="2019-08-23 07:05:33 UTC" --> 1566543933
+  ok = ptime(date(2019, 8, 23), hours(7) + minutes(5) + seconds(33));
+  if ((res = TimeParser::parse_epoch("1566543933")) != ok)
+    TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
+
+  // date +%s --date="2019-08-22 07:01:59 UTC" --> 1566457319
+  ok = ptime(date(2019, 8, 22), hours(7) + minutes(1) + seconds(59));
+  if ((res = TimeParser::parse_epoch("1566457319")) != ok)
+    TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
+
   try
   {
     res = TimeParser::parse_epoch("foobar");
@@ -511,6 +521,16 @@ void parse()
 
   ok = ptime(date(2013, 5, 15), hours(13) + minutes(17));
   if ((res = TimeParser::parse("201305151317")) != ok)
+    TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
+
+  // date +%s --date="2019-08-23 07:05:33 UTC" --> 1566543933
+  ok = ptime(date(2019, 8, 23), hours(7) + minutes(5) + seconds(33));
+  if ((res = TimeParser::parse("1566543933")) != ok)
+    TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
+
+  // date +%s --date="2019-08-22 07:01:59 UTC" --> 1566457319
+  ok = ptime(date(2019, 8, 22), hours(7) + minutes(1) + seconds(59));
+  if ((res = TimeParser::parse("1566457319")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
   TimeParser::parse("-10h");
