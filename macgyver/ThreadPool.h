@@ -8,11 +8,11 @@
 
 #pragma once
 #include <boost/bind.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/functional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-
 #include <iostream>
 #include <queue>
 #include <stdexcept>
