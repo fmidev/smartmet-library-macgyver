@@ -32,7 +32,7 @@ class WorldTimeZones
 
   std::vector<std::string> itsZones;
 
-  unsigned int itsSize;
+  uint32_t itsSize;
   char* itsData;
 
 };  // class WorldTimeZones

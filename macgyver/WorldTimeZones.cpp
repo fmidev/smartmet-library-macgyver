@@ -13,6 +13,7 @@
 #include "WorldTimeZones.h"
 #include "StringConversion.h"
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -30,7 +31,9 @@ namespace
 uint32_t read_pos(std::size_t thePos, char *theData)
 {
   std::size_t offset = thePos * (sizeof(uint32_t) + sizeof(uint16_t));
-  return *reinterpret_cast<uint32_t *>(theData + offset);
+  uint32_t tmp;
+  memcpy(&tmp,theData+offset,sizeof(uint32_t));
+  return tmp;
 }
 
 // ----------------------------------------------------------------------
@@ -42,8 +45,11 @@ uint32_t read_pos(std::size_t thePos, char *theData)
 uint16_t read_attr(std::size_t thePos, char *theData)
 {
   std::size_t offset = thePos * (sizeof(uint32_t) + sizeof(uint16_t)) + sizeof(uint32_t);
-  return *reinterpret_cast<uint16_t *>(theData + offset);
+  uint16_t tmp;
+  memcpy(&tmp, theData+offset, sizeof(uint16_t));
+  return tmp;
 }
+
 }  // namespace
 
 namespace Fmi
@@ -134,12 +140,7 @@ WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData
     itsZones.push_back(token);
   }
 
-  char buffer[sizeof(uint32_t)];
-  in.read(buffer, sizeof(uint32_t));
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-  itsSize = *reinterpret_cast<uint32_t *>(&buffer);
-#pragma clang diagnostic pop
+  in.read(reinterpret_cast<char *>(&itsSize), sizeof(uint32_t));
 
   std::size_t bufsize = (sizeof(uint32_t) + sizeof(uint16_t)) * itsSize;
 
