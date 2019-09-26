@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 19.8.2
+Version: 19.9.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -15,7 +15,7 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: imake
-BuildRequires: smartmet-timezones >= 19.4.2
+BuildRequires: smartmet-timezones >= 19.7.29
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel >= 5.2.0
@@ -23,7 +23,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 19.4.2
+#TestRequires: smartmet-timezones >= 19.7.29
 #TestRequires: fmt-devel
 #TestRequires: boost-devel
 Requires: fmt >= 5.2.0
@@ -80,6 +80,12 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Sep 26 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.9.26-1.fmi
+- Use std::regex instead of boost::regex
+- Fixed string conversion tests to print all results
+- Use memcpy instead of reinterpret_cast to avoid ASAN complaints
+- Added to_simple_string(ptime) to avoid locale locks
+- Added TSAN macros for handling false positives
 
 * Fri Aug  2 2019 Andris Pavenis <andris.pavenis@fmi.fi> - 19.8.2-1.fmi
 - Fmi::TaskGroup: add missing method implementation
