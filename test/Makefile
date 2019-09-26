@@ -1,6 +1,9 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
-MAINFLAGS = -Wall -W -Wno-unused-parameter -fdiagnostics-color=always
+-include $(HOME)/.smartmet.mk
+GCC_DIAG_COLOR ?= always
+
+FLAGS = -Wall -W -Wno-unused-parameter -fdiagnostics-color=$(GCC_DIAG_COLOR)
 
 EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 	-Wcast-align -Wwrite-strings -Wconversion -Winline \
@@ -10,8 +13,15 @@ EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 
 DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
+ifeq ($(TSAN), yes)
+  FLAGS += -fsanitize=thread
+endif
+ifeq ($(ASAN), yes)
+  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize-address-use-after-scope
+endif
+
 CC = g++
-CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=c++11 $(MAINFLAGS)
+CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=c++11 $(FLAGS)
 INCLUDES = -I ../macgyver -I /usr/include/smartmet
 
 LIBS = ../libsmartmet-macgyver.so \
