@@ -33,6 +33,7 @@ Requires: boost-date-time
 Requires: boost-filesystem
 Requires: boost-thread
 Requires: boost-system
+Requires: boost-regex
 Requires: libpqxx
 Requires: libpq
 Provides: %{SPECNAME}
@@ -81,7 +82,6 @@ FMI MacGyver library development files
 
 %changelog
 * Thu Sep 26 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.9.26-1.fmi
-- Use std::regex instead of boost::regex
 - Fixed string conversion tests to print all results
 - Use memcpy instead of reinterpret_cast to avoid ASAN complaints
 - Added to_simple_string(ptime) to avoid locale locks

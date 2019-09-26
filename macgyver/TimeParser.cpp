@@ -10,7 +10,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <regex>
+#include <boost/regex.hpp>
 #include <cctype>
 #include <stdexcept>
 
@@ -19,15 +19,15 @@ static boost::posix_time::time_duration bad_duration(boost::posix_time::not_a_da
 
 namespace
 {
-std::regex iso8601_weeks{"^P(\\d+)W$"};
-std::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
+boost::regex iso8601_weeks{"^P(\\d+)W$"};
+boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
 #if 0
-std::regex iso8601_long{
+boost::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?$"};
 #endif
 
-std::regex iso8601_long{
+boost::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?(T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?)?$"};
 
@@ -662,15 +662,15 @@ boost::posix_time::time_duration parse_iso_duration(const std::string& str)
 
 boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
 {
-  std::smatch match;
+  boost::smatch match;
 
-  if (std::regex_search(str, match, iso8601_weeks))
+  if (boost::regex_search(str, match, iso8601_weeks))
   {
     int n = std::stoi(match[1]);
     return boost::posix_time::hours(7 * 24 * n);
   }
 
-  if (!std::regex_search(str, match, iso8601_long)) return bad_duration;
+  if (!boost::regex_search(str, match, iso8601_long)) return bad_duration;
 
   // years, months, days, tmp , hours, minutes, seconds
   std::vector<int> vec{0, 0, 0, -1, 0, 0, 0};

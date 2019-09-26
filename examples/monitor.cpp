@@ -28,7 +28,7 @@ void sighandler(int)
 
 void listener(DirectoryMonitor::Watcher id,
               boost::filesystem::path dir,
-              std::regex pattern,
+              boost::regex pattern,
               DirectoryMonitor::Status status)
 {
   for (const DirectoryMonitor::StatusMap::value_type& it : *status)
@@ -50,7 +50,7 @@ void listener(DirectoryMonitor::Watcher id,
 
 void errorhandler(DirectoryMonitor::Watcher id,
                   boost::filesystem::path dir,
-                  std::regex pattern,
+                  boost::regex pattern,
                   std::string message)
 {
   cout << "Error: " << message << endl;
@@ -83,7 +83,7 @@ int main()
 
   DirectoryMonitor mon;
 
-  mon.watch(p, std::regex(".*"), &listener, &errorhandler, 1, DirectoryMonitor::ALL);
+  mon.watch(p, boost::regex(".*"), &listener, &errorhandler, 1, DirectoryMonitor::ALL);
 
   // start monitoring in a separate thread
   boost::thread thrd(boost::bind(&DirectoryMonitor::run, &mon));

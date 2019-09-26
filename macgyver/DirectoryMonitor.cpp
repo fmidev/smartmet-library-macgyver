@@ -54,7 +54,7 @@ using Contents = std::map<boost::filesystem::path, std::time_t>;
  */
 // ----------------------------------------------------------------------
 
-Contents directory_contents(const fs::path& path, bool hasregex, const std::regex& pattern)
+Contents directory_contents(const fs::path& path, bool hasregex, const boost::regex& pattern)
 {
   Contents contents;
 
@@ -77,7 +77,7 @@ Contents directory_contents(const fs::path& path, bool hasregex, const std::rege
       {
         if (hasregex)
         {
-          if (std::regex_match(it->path().filename().string(), pattern))
+          if (boost::regex_match(it->path().filename().string(), pattern))
           {
             std::time_t t = fs::last_write_time(it->path());
             contents.insert(Contents::value_type(it->path(), t));
@@ -161,7 +161,7 @@ struct Monitor
 {
   // static info:
   fs::path path;
-  std::regex pattern;
+  boost::regex pattern;
   bool hasregex;
   int interval;
   DirectoryMonitor::Watcher id;
@@ -224,7 +224,7 @@ DirectoryMonitor::~DirectoryMonitor() {}
 // ----------------------------------------------------------------------
 
 DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
-                                                  const std::regex& pattern,
+                                                  const boost::regex& pattern,
                                                   Listener callback,
                                                   ErrorHandler errorhandler,
                                                   int interval,
@@ -277,7 +277,7 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
                                                   int interval,
                                                   Change mask)
 {
-  return watch(path, std::regex{pattern}, callback, errorhandler, interval, mask);
+  return watch(path, boost::regex{pattern}, callback, errorhandler, interval, mask);
 }
 
 // ----------------------------------------------------------------------
