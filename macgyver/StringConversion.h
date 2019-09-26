@@ -43,8 +43,10 @@ double stod(const std::string& str);
 
 std::string to_iso_string(const boost::posix_time::time_duration& date);
 std::string to_iso_extended_string(const boost::posix_time::time_duration& date);
+std::string to_simple_string(const boost::gregorian::date& date);
 std::string to_iso_string(const boost::gregorian::date& date);
 std::string to_iso_extended_string(const boost::gregorian::date& date);
+std::string to_simple_string(const boost::posix_time::ptime& time);
 std::string to_iso_string(const boost::posix_time::ptime& time);
 std::string to_iso_extended_string(const boost::posix_time::ptime& time);
 std::string to_http_string(const boost::posix_time::ptime& time);
@@ -57,4 +59,7 @@ std::string ascii_tolower_copy(std::string input);
 
 std::string ascii_toupper_copy(std::string input);
 
+bool looks_unsigned_int(const std::string& value);
+bool looks_signed_int(const std::string& value);
+  
 }  // namespace Fmi

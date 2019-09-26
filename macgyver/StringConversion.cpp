@@ -221,6 +221,20 @@ std::string to_iso_extended_string(const boost::posix_time::time_duration& durat
   }
 }
 
+// Convert date to form YYYY-mmm-DD string where mmm 3 char month name
+std::string to_simple_string(const boost::gregorian::date& date)
+{
+  boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+  std::string ret;
+  ret.reserve(4 + 1 + 3 + 1 + 2);
+  append_year(ret, ymd.year);
+  ret += '-';
+  ret += months[ymd.month];
+  ret += '-';
+  ret += ints_02d[ymd.day];
+  return ret;
+}
+
 // Convert date to form YYYYMMDD
 std::string to_iso_string(const boost::gregorian::date& date)
 {
@@ -268,6 +282,18 @@ std::string to_iso_extended_string(const boost::posix_time::ptime& time)
   ret.reserve(19 + 1);  // +1 for null byte terminator, we hope there is no fractional part
   ret += to_iso_extended_string(date);
   if (!duration.is_special()) ret.append("T").append(to_iso_extended_string(duration));
+  return ret;
+}
+
+// Convert to form YYYY-mmm-DD HH:MM:SS.fffffffff string where mmm 3 char month name
+std::string to_simple_string(const boost::posix_time::ptime& time)
+{
+  const auto& date = time.date();
+  const auto& duration = time.time_of_day();
+  std::string ret;
+  ret.reserve(20 + 1);  // +1 for null byte terminator, we hope there is no fractional part
+  ret += to_simple_string(date);
+  if (!duration.is_special()) ret.append(" ").append(to_iso_extended_string(duration));
   return ret;
 }
 
@@ -325,6 +351,37 @@ std::string ascii_toupper_copy(std::string input)
 {
   ascii_toupper(input);
   return input;
+}
+
+bool looks_unsigned_int(const std::string& value)
+{
+  if(value.empty())
+    return false;
+  for(const auto chr : value)
+    if(chr < '0' || chr > '9')
+      return false;
+  return true;
+}
+
+bool looks_signed_int(const std::string& value)
+{
+  if(value.empty())
+    return false;
+  std::size_t i = 0;
+  if(value[i] == '+' || value[i] == '-')
+    {
+      if(value.size() == 1)
+	return false;
+      ++i;
+    }
+  const auto sz = value.size();
+  for(; i<sz; ++i)
+    {
+      const auto val = value[i];
+      if(val < '0' || val > '9')
+	return false;
+    }
+  return true;
 }
 
 }  // namespace Fmi
