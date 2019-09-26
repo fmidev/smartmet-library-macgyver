@@ -24,6 +24,7 @@
 
 #include "DirectoryMonitor.h"
 #include "StringConversion.h"
+#include <boost/atomic.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -53,7 +54,7 @@ using Contents = std::map<boost::filesystem::path, std::time_t>;
  */
 // ----------------------------------------------------------------------
 
-Contents directory_contents(const fs::path& path, bool hasregex, const boost::regex& pattern)
+Contents directory_contents(const fs::path& path, bool hasregex, const std::regex& pattern)
 {
   Contents contents;
 
@@ -76,7 +77,7 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
       {
         if (hasregex)
         {
-          if (boost::regex_match(it->path().filename().string(), pattern))
+          if (std::regex_match(it->path().filename().string(), pattern))
           {
             std::time_t t = fs::last_write_time(it->path());
             contents.insert(Contents::value_type(it->path(), t));
@@ -160,7 +161,7 @@ struct Monitor
 {
   // static info:
   fs::path path;
-  boost::regex pattern;
+  std::regex pattern;
   bool hasregex;
   int interval;
   DirectoryMonitor::Watcher id;
@@ -195,9 +196,9 @@ class DirectoryMonitor::Pimple
  public:
   MutexType mutex;
   Schedule schedule;
-  bool running = false;  // true if run() has not exited
-  bool stop = false;     // true if stop request is pending
-  bool isready = false;  // true if at least one scan has completed
+  boost::atomic<bool> running{false};  // true if run() has not exited
+  boost::atomic<bool> stop{false};     // true if stop request is pending
+  boost::atomic<bool> isready{false};  // true if at least one scan has completed
   Watcher nextid = 0;
 };
 
@@ -215,6 +216,7 @@ DirectoryMonitor::DirectoryMonitor() : impl(new Pimple()) {}
 // ----------------------------------------------------------------------
 
 DirectoryMonitor::~DirectoryMonitor() {}
+
 // ----------------------------------------------------------------------
 /*
  * \brief Request a new monitored path
@@ -222,7 +224,7 @@ DirectoryMonitor::~DirectoryMonitor() {}
 // ----------------------------------------------------------------------
 
 DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
-                                                  const boost::regex& pattern,
+                                                  const std::regex& pattern,
                                                   Listener callback,
                                                   ErrorHandler errorhandler,
                                                   int interval,
@@ -260,6 +262,22 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
   impl->schedule.insert(std::make_pair(0, mon));
 
   return mon.id;
+}
+
+// ----------------------------------------------------------------------
+/*
+ * \brief Request a new monitored path
+ */
+// ----------------------------------------------------------------------
+
+DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
+                                                  const std::string& pattern,
+                                                  Listener callback,
+                                                  ErrorHandler errorhandler,
+                                                  int interval,
+                                                  Change mask)
+{
+  return watch(path, std::regex{pattern}, callback, errorhandler, interval, mask);
 }
 
 // ----------------------------------------------------------------------

@@ -32,9 +32,9 @@ Requires: libicu >= 50.1.2
 Requires: boost-date-time
 Requires: boost-filesystem
 Requires: boost-thread
-Requires: boost-regex
 Requires: boost-system
 Requires: libpqxx
+Requires: libpq
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20

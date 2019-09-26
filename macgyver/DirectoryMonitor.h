@@ -8,12 +8,12 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/function.hpp>
-#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <ctime>
 #include <map>
 #include <memory>
+#include <regex>
 #include <string>
 
 namespace Fmi
@@ -62,18 +62,25 @@ class DirectoryMonitor : private boost::noncopyable
 
   using Listener = boost::function<void(Watcher id,
                                         const boost::filesystem::path& path,
-                                        const boost::regex& pattern,
+                                        const std::regex& pattern,
                                         const Status& status)>;
 
   using ErrorHandler = boost::function<void(Watcher id,
                                             const boost::filesystem::path& path,
-                                            const boost::regex& pattern,
+                                            const std::regex& pattern,
                                             const std::string& message)>;
 
   // Request new monitored path/regex
 
   Watcher watch(const boost::filesystem::path& path,
-                const boost::regex& pattern,
+                const std::regex& pattern,
+                Listener callback,
+                ErrorHandler errorhandler,
+                int interval = 60,
+                Change mask = ALL);
+
+  Watcher watch(const boost::filesystem::path& path,
+                const std::string& pattern,
                 Listener callback,
                 ErrorHandler errorhandler,
                 int interval = 60,

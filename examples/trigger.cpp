@@ -42,7 +42,7 @@ class Handler
 
   void errorhandler(DirectoryMonitor::Watcher id,
                     boost::filesystem::path dir,
-                    boost::regex pattern,
+                    std::regex pattern,
                     std::string message) const
   {
     cout << "Monitor " << id << " errored: " << message << endl;
@@ -50,7 +50,7 @@ class Handler
 
   void listener(DirectoryMonitor::Watcher id,
                 boost::filesystem::path dir,
-                boost::regex pattern,
+                std::regex pattern,
                 DirectoryMonitor::Status status) const
   {
     cout << "Trigger " << id << " on " << dir << ":" << endl;
@@ -82,7 +82,7 @@ class Handler
     boost::filesystem::directory_iterator end;
     for (boost::filesystem::directory_iterator it(dir); it != end; ++it)
     {
-      std::string trig = it->path().leaf();
+      std::string trig = it->path().leaf().string();
       std::replace(trig.begin(), trig.end(), ':', '/');
       trig = '/' + trig;
       if (boost::filesystem::exists(trig) && boost::filesystem::is_directory(trig))
@@ -90,7 +90,7 @@ class Handler
         // we omit modify since it require full directory polling
         // delete is omitted since it does not trigger action
         mon.watch(trig,
-                  boost::regex(".*"),
+                  std::regex(".*"),
                   boost::bind(&Handler::listener, this, _1, _2, _3, _4),
                   boost::bind(&Handler::errorhandler, this, _1, _2, _3, _4),
                   5,

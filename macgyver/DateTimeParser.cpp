@@ -1,3 +1,4 @@
+
 // ======================================================================
 /*!
  * \brief Parse timestamps
@@ -10,7 +11,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 #include <cctype>
 #include <stdexcept>
 
@@ -21,15 +22,15 @@ namespace
 boost::posix_time::ptime bad_time{boost::posix_time::not_a_date_time};
 boost::posix_time::time_duration bad_duration{boost::posix_time::not_a_date_time};
 
-boost::regex iso8601_weeks{"^P(\\d+)W$"};
-boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
+std::regex iso8601_weeks{"^P(\\d+)W$"};
+std::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
 #if 0
-boost::regex iso8601_long{
+std::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?$"};
 #endif
 
-boost::regex iso8601_long{
+std::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?(T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?)?$"};
 
@@ -251,15 +252,15 @@ bool looks_offset(const std::string& str)
 
 boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
 {
-  boost::smatch match;
+  std::smatch match;
 
-  if (boost::regex_search(str, match, iso8601_weeks))
+  if (std::regex_search(str, match, iso8601_weeks))
   {
     int n = std::stoi(match[1]);
     return boost::posix_time::hours(7 * 24 * n);
   }
 
-  if (!boost::regex_search(str, match, iso8601_long)) return bad_duration;
+  if (!std::regex_search(str, match, iso8601_long)) return bad_duration;
 
   // years, months, days, tmp , hours, minutes, seconds
   std::vector<int> vec{0, 0, 0, -1, 0, 0, 0};
