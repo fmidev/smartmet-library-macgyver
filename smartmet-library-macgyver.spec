@@ -35,7 +35,6 @@ Requires: boost-thread
 Requires: boost-system
 Requires: boost-regex
 Requires: libpqxx
-Requires: libpq
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
