@@ -13,7 +13,7 @@ namespace Fmi
 {
 namespace Geometry
 {
-const double kRearth = 6371220;
+const double kRearth = 6371229;
 const double kPii = 3.14159265358979323846264338327950;
 
 // ----------------------------------------------------------------------
