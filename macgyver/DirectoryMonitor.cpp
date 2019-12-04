@@ -332,14 +332,8 @@ void DirectoryMonitor::run()
 {
   // Do not start if already running
 
-  // Quick exit without locking if possible
   if (impl->running) return;
-
-  {
-    WriteLock lock(impl->mutex);
-    if (impl->running) return;
-    impl->running = true;
-  }
+  impl->running = true;
 
   while (!impl->stop && !impl->schedule.empty())
   {
