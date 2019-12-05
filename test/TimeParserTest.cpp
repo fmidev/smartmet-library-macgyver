@@ -442,6 +442,10 @@ void parse_sql()
   if ((res = TimeParser::parse_sql("2000-02-28")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
+  ok = ptime(date(1900, 1, 1));
+  if ((res = TimeParser::parse_sql("1900-01-01 00:00:0.0")) != ok)
+    TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
+
   try
   {
     res = TimeParser::parse_sql("foobar");
@@ -920,6 +924,9 @@ void looks()
   if ((res = TimeParser::looks("+10m")) != "offset") TEST_FAILED("+10m should look like an offset");
   if ((res = TimeParser::looks("-100H")) != "offset")
     TEST_FAILED("-100H should look like an offset");
+
+  if ((res = TimeParser::looks("1900-01-01 00:00:0.0")) != "sql")
+    TEST_FAILED("1900-01-01 00:00:0.0 should look like SQL date time");
 
   try
   {
