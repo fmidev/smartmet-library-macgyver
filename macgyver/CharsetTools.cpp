@@ -845,7 +845,7 @@ std::string utf16_to_utf8(const std::wstring& str)
  */
 bool is_utf8(const std::string& src)
 {
-  const unsigned char* str = (unsigned char*)src.c_str();
+  const unsigned char* str = reinterpret_cast<const unsigned char*>(src.c_str());
   const unsigned char* end = str + src.length();
   unsigned char byte;
   unsigned int code_length, i;
