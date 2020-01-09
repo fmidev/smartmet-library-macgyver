@@ -140,7 +140,8 @@ struct SQLParser : qi::grammar<Iterator, TimeStamp()>
                >> qi::omit[*qi::ascii::blank]  // Any number of blanks
                >> -number                      // Optional hour
                >> -(':' >> number)             // Optional minute
-               >> -(':' >> number)             // Optional second
+               >> -(':' >> number >>              // Optional second
+                   -('.' >> qi::omit[*qi::ascii::digit])) // Skip seconds part if present
                >> qi::eoi;                     // End-of-input
 
 #ifdef MYDEBUG

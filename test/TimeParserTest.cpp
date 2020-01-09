@@ -442,6 +442,10 @@ void parse_sql()
   if ((res = TimeParser::parse_sql("2000-02-28")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
+  ok = ptime(date(1900, 1, 1));
+  if ((res = TimeParser::parse_sql("1900-01-01 00:00:0.0")) != ok)
+    TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
+
   try
   {
     res = TimeParser::parse_sql("foobar");
@@ -459,12 +463,6 @@ void parse_sql()
   catch (...)
   {
   }
-
-#ifdef KNOWN_BUG
-  ok = ptime(date(1900, 1, 1));
-  if ((res = TimeParser::parse_sql("1900-01-01 00:00:0.0")) != ok)
-    TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
-#endif
 
   TEST_PASSED();
 }
