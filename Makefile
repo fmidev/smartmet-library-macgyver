@@ -30,6 +30,7 @@ DEFINES = -DUNIX -D_REENTRANT
 
 -include $(HOME)/.smartmet.mk
 GCC_DIAG_COLOR ?= always
+CXX_STD ?= c++11
 
 ifeq ($(CXX), clang++)
 
@@ -47,7 +48,7 @@ ifeq ($(CXX), clang++)
 
 else
 
- FLAGS = -std=c++11 -fdiagnostics-color=$(GCC_DIAG_COLOR) -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wnon-virtual-dtor
+ FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wnon-virtual-dtor
 
  FLAGS_DEBUG = \
 	-Wcast-align \
