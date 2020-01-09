@@ -176,6 +176,7 @@ rpm: clean $(SPEC).spec
 .SUFFIXES: $(SUFFIXES) .cpp
 
 obj/%.o: %.cpp
+	@mkdir -p obj
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 ifneq ($(wildcard obj/*.d),)
