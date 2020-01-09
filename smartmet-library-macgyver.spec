@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 19.12.4
+Version: 20.1.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -80,6 +80,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jan  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.9-1.fmi
+- Added Fmi::is_utf8 for validating UTF-8 strings
+
 * Wed Dec  4 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.4-1.fmi
 - Use -fno-omit-frame-pointer for a better profiling and debugging experience                                                                               
 - Removed unnecessary mutex on an atomic variable from DirectoryMonitor
