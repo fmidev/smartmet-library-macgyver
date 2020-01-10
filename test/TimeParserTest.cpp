@@ -935,6 +935,9 @@ void looks()
   if ((res = TimeParser::looks("-100H")) != "offset")
     TEST_FAILED("-100H should look like an offset");
 
+  if ((res = TimeParser::looks("1900-01-01 00:00:0.0")) != "sql")
+    TEST_FAILED("1900-01-01 00:00:0.0 should look like SQL date time");
+
   try
   {
     res = TimeParser::looks("foobar");
@@ -943,11 +946,6 @@ void looks()
   catch (...)
   {
   }
-
-#ifdef KNOWN_BUG
-  if ((res = TimeParser::looks("1900-01-01 00:00:0.0")) != "sql")
-    TEST_FAILED("1900-01-01 00:00:0.0 should look like SQL date time");
-#endif
 
   TEST_PASSED();
 }
