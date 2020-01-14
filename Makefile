@@ -48,7 +48,7 @@ ifeq ($(CXX), clang++)
 
 else
 
- FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) -fPIC -MD -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wnon-virtual-dtor
+ FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) -fPIC -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wnon-virtual-dtor
 
  FLAGS_DEBUG = \
 	-Wcast-align \
@@ -177,7 +177,9 @@ rpm: clean $(SPEC).spec
 
 obj/%.o: %.cpp
 	@mkdir -p obj
-	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(INCLUDES) -c  -MD -MF $(patsubst obj/%.o, obj/%.d.new, $@) -o $@ $<
+	@sed -e "s|^$(notdir $@):|$@:|" $(patsubst obj/%.o, obj/%.d.new, $@) >$(patsubst obj/%.o, obj/%.d, $@)
+	@rm -f $(patsubst obj/%.o, obj/%.d.new, $@)
 
 ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)
