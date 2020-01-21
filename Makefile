@@ -35,7 +35,7 @@ CXX_STD ?= c++11
 ifeq ($(CXX), clang++)
 
  FLAGS = \
-	-std=c++11 -fPIC -MD -fno-omit-frame-pointer \
+	-std=$(CXX_STD) -fPIC -MD -fno-omit-frame-pointer \
 	-Weverything \
 	-Wno-c++98-compat \
 	-Wno-float-equal \
