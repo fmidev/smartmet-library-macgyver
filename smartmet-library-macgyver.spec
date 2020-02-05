@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.1.9
+Version: 20.2.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -80,6 +80,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Feb 5 2020 Anssi Reponen <anssi.reponen@fmi.fi> - 20.2.5-1.fmi
+- Interpolate- and nearest-functions added (BRAINSTORM-1504)
+
 * Thu Jan  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.9-1.fmi
 - Added Fmi::is_utf8 for validating UTF-8 strings
 
