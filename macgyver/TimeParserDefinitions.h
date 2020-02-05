@@ -9,6 +9,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 
 #include <string>
 
@@ -132,15 +133,21 @@ struct SQLParser : qi::grammar<Iterator, TimeStamp()>
 {
   SQLParser() : SQLParser::base_type(fulltime)
   {
-    number = qi::uint_;
+    using namespace qi;
+    number = uint_;
+    month %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=1U && _val<=12U)];
+    mday %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=1U && _val<=31U)];
+    hour %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=0U && _val<=23U)];
+    minsec %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=0U && _val<=59U)];
 
     fulltime = number >> '-'                   // Year
-               >> number                       // Month
-               >> '-' >> number                // Day
+               >> month                        // Month
+               >> '-' >> mday                  // Day
                >> qi::omit[*qi::ascii::blank]  // Any number of blanks
-               >> -number                      // Optional hour
-               >> -(':' >> number)             // Optional minute
-               >> -(':' >> number)             // Optional second
+               >> -hour                      // Optional hour
+               >> -(':' >> minsec)             // Optional minute
+               >> -(':' >> minsec >>              // Optional second
+                   -('.' >> qi::omit[*qi::ascii::digit])) // Skip seconds part if present
                >> qi::eoi;                     // End-of-input
 
 #ifdef MYDEBUG
@@ -150,6 +157,10 @@ struct SQLParser : qi::grammar<Iterator, TimeStamp()>
   }
 
   qi::rule<Iterator, unsigned int()> number;
+  qi::rule<Iterator, unsigned int()> month;
+  qi::rule<Iterator, unsigned int()> mday;
+  qi::rule<Iterator, unsigned int()> hour;
+  qi::rule<Iterator, unsigned int()> minsec;
   qi::rule<Iterator, TimeStamp()> fulltime;
 };
 

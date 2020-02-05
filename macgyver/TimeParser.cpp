@@ -212,10 +212,9 @@ bool looks_integer(const std::string& str)
 
 bool looks_sql(const std::string& t)
 {
-  return (t.size() == 19 && t[4] == '-' && t[7] == '-' && t[10] == ' ' && t[13] == ':' &&
-          t[16] == ':' && looks_integer(t.substr(0, 4)) && looks_integer(t.substr(5, 2)) &&
-          looks_integer(t.substr(8, 2)) && looks_integer(t.substr(11, 2)) &&
-          looks_integer(t.substr(14, 2)) && looks_integer(t.substr(17, 2)));
+  using iterator = std::string::const_iterator;
+  SQLParser<iterator> theParser;
+  return qi::parse(t.begin(), t.end(), theParser);
 }
 
 // ----------------------------------------------------------------------

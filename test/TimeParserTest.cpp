@@ -446,23 +446,33 @@ void parse_sql()
   if ((res = TimeParser::parse_sql("1900-01-01 00:00:0.0")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  try
-  {
-    res = TimeParser::parse_sql("foobar");
-    TEST_FAILED("Should fail to parse 'foobar', got " + to_simple_string(res));
-  }
-  catch (...)
-  {
+  const std::vector<std::string> invalid = {
+      "foobar",
+      "12345678901",
+      "1970-0-1 00:00:00",
+      "1970-13-1 00:00:00",
+      "1970-001-1 00:00:00",
+      "1970-1-0 00:00:00",
+      "1970-1-32 00:00:00",
+      "1970-1-1 24:00:00",
+      "1970-1-1 00:60:00",
+      "1970-1-1 23:00:60",
+      "1970-1-1 23:059:00",
+      "1970-01-01 00:000:00"};
+
+  for (const std::string& src : invalid) {
+    bool failed = false;
+    ptime res;
+    try {
+      res = TimeParser::parse_sql(src);
+      failed = true;
+    } catch (...) {}
+
+    if (failed) {
+      TEST_FAILED("Should fail to parse '" + src + ", got " + to_simple_string(res));
+    }
   }
 
-  try
-  {
-    res = TimeParser::parse_sql("12345678901");
-    TEST_FAILED("Should fail to parse '12345678901', got " + to_simple_string(res));
-  }
-  catch (...)
-  {
-  }
 
   TEST_PASSED();
 }

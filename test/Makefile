@@ -2,6 +2,7 @@ PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
 -include $(HOME)/.smartmet.mk
 GCC_DIAG_COLOR ?= always
+CXX_STD ?= c++11
 
 FLAGS = -Wall -W -Wno-unused-parameter -fdiagnostics-color=$(GCC_DIAG_COLOR)
 
@@ -21,7 +22,7 @@ ifeq ($(ASAN), yes)
 endif
 
 CC = g++
-CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=c++11 $(FLAGS)
+CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=$(CXX_STD) $(FLAGS)
 INCLUDES = -I ../macgyver -I /usr/include/smartmet
 
 LIBS = ../libsmartmet-macgyver.so \
