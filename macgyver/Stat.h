@@ -79,39 +79,45 @@ class Stat
   void useDegrees(bool theDegrees = true) { itsDegrees = theDegrees; }
   void clear();
 
-  double integ(const ptime& startTime = not_a_date_time,
-               const ptime& endTime = not_a_date_time) const;
-  double sum(const ptime& startTime = not_a_date_time,
-             const ptime& endTime = not_a_date_time) const;
-  double min(const ptime& startTime = not_a_date_time,
-             const ptime& endTime = not_a_date_time) const;
-  double mean(const ptime& startTime = not_a_date_time,
-              const ptime& endTime = not_a_date_time) const;
-  double max(const ptime& startTime = not_a_date_time,
-             const ptime& endTime = not_a_date_time) const;
-  double change(const ptime& startTime = not_a_date_time,
-                const ptime& endTime = not_a_date_time) const;
-  double trend(const ptime& startTime = not_a_date_time,
-               const ptime& endTime = not_a_date_time) const;
+  double integ(const boost::posix_time::ptime& startTime = not_a_date_time,
+               const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double sum(const boost::posix_time::ptime& startTime = not_a_date_time,
+             const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double min(const boost::posix_time::ptime& startTime = not_a_date_time,
+             const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double mean(const boost::posix_time::ptime& startTime = not_a_date_time,
+              const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double max(const boost::posix_time::ptime& startTime = not_a_date_time,
+             const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double change(const boost::posix_time::ptime& startTime = not_a_date_time,
+                const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double trend(const boost::posix_time::ptime& startTime = not_a_date_time,
+               const boost::posix_time::ptime& endTime = not_a_date_time) const;
   unsigned int count(double lowerLimit,
                      double upperLimit,
-                     const ptime& startTime = not_a_date_time,
-                     const ptime& endTime = not_a_date_time) const;
+                     const boost::posix_time::ptime& startTime = not_a_date_time,
+                     const boost::posix_time::ptime& endTime = not_a_date_time) const;
   double percentage(double lowerLimit,
                     double upperLimit,
-                    const ptime& startTime = not_a_date_time,
-                    const ptime& endTime = not_a_date_time) const;
-  double median(const ptime& startTime = not_a_date_time,
-                const ptime& endTime = not_a_date_time) const;
-  double variance(const ptime& startTime = not_a_date_time,
-                  const ptime& endTime = not_a_date_time) const;
-  double stddev(const ptime& startTime = not_a_date_time,
-                const ptime& endTime = not_a_date_time) const;
+                    const boost::posix_time::ptime& startTime = not_a_date_time,
+                    const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double median(const boost::posix_time::ptime& startTime = not_a_date_time,
+                const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double variance(const boost::posix_time::ptime& startTime = not_a_date_time,
+                  const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double stddev(const boost::posix_time::ptime& startTime = not_a_date_time,
+                const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double nearest(const boost::posix_time::ptime& timestep,
+                 const boost::posix_time::ptime& startTime = not_a_date_time,
+                 const boost::posix_time::ptime& endTime = not_a_date_time) const;
+  double interpolate(const boost::posix_time::ptime& timestep,
+                     const boost::posix_time::ptime& startTime = not_a_date_time,
+                     const boost::posix_time::ptime& endTime = not_a_date_time) const;
 
  private:
   bool get_subvector(DataVector& subvector,
-                     const ptime& startTime = not_a_date_time,
-                     const ptime& endTime = not_a_date_time,
+                     const boost::posix_time::ptime& startTime = not_a_date_time,
+                     const boost::posix_time::ptime& endTime = not_a_date_time,
                      bool useWeights = true) const;
   void calculate_weights();
   bool invalid_timestamps() const;

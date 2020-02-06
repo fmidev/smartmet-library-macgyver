@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.1.15
+Version: 20.2.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -80,6 +80,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Feb 5 2020 Anssi Reponen <anssi.reponen@fmi.fi> - 20.2.5-1.fmi
+- Interpolate- and nearest-functions added (BRAINSTORM-1504)
+
 * Wed Jan 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.1.15-1.fmi
 - Improved Fmi::TimeParser::parse_sql (support earlier incorrectly rejected format variants)
 

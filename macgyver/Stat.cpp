@@ -105,8 +105,8 @@ void Stat::addData(const DataItem& theData)
 
 void Stat::clear() { itsData.clear(); }
 // time in seconds is used as a weight
-double Stat::integ(const ptime& startTime /*= not_a_date_time */,
-                   const ptime& endTime /*= not_a_date_time */) const
+double Stat::integ(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                   const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "integ(" << startTime << ", " << endTime << ")" << std::endl;
@@ -129,8 +129,8 @@ double Stat::integ(const ptime& startTime /*= not_a_date_time */,
 }
 
 // weight is alwaus 1.0
-double Stat::sum(const ptime& startTime /*= not_a_date_time */,
-                 const ptime& endTime /*= not_a_date_time */) const
+double Stat::sum(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                 const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "sum(" << startTime << ", " << endTime << ")" << std::endl;
@@ -152,8 +152,8 @@ double Stat::sum(const ptime& startTime /*= not_a_date_time */,
     return boost::accumulators::sum(acc);
 }
 
-double Stat::min(const ptime& startTime /*= not_a_date_time */,
-                 const ptime& endTime /*= not_a_date_time */) const
+double Stat::min(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                 const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "min(" << startTime << ", " << endTime << ")" << std::endl;
@@ -166,8 +166,8 @@ double Stat::min(const ptime& startTime /*= not_a_date_time */,
   return std::min_element(subvector.begin(), subvector.end(), comp_value)->value;
 }
 
-double Stat::mean(const ptime& startTime /*= not_a_date_time */,
-                  const ptime& endTime /*= not_a_date_time */) const
+double Stat::mean(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                  const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "mean(" << startTime << ", " << endTime << ")" << std::endl;
@@ -215,8 +215,8 @@ double Stat::mean(const ptime& startTime /*= not_a_date_time */,
   return boost::accumulators::mean(acc);
 }
 
-double Stat::max(const ptime& startTime /*= not_a_date_time */,
-                 const ptime& endTime /*= not_a_date_time */) const
+double Stat::max(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                 const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "max(" << startTime << ", " << endTime << ")" << std::endl;
@@ -228,8 +228,8 @@ double Stat::max(const ptime& startTime /*= not_a_date_time */,
   return std::max_element(subvector.begin(), subvector.end(), comp_value)->value;
 }
 
-double Stat::change(const ptime& startTime /*= not_a_date_time */,
-                    const ptime& endTime /*= not_a_date_time */) const
+double Stat::change(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                    const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "change(" << startTime << ", " << endTime << ")" << std::endl;
@@ -266,8 +266,8 @@ double Stat::change(const ptime& startTime /*= not_a_date_time */,
   return lastValue - firstValue;
 }
 
-double Stat::trend(const ptime& startTime /*= not_a_date_time */,
-                   const ptime& endTime /*= not_a_date_time */) const
+double Stat::trend(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                   const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "trend(" << startTime << ", " << endTime << ")" << std::endl;
@@ -314,8 +314,8 @@ double Stat::trend(const ptime& startTime /*= not_a_date_time */,
 
 unsigned int Stat::count(double lowerLimit,
                          double upperLimit,
-                         const ptime& startTime /*= not_a_date_time */,
-                         const ptime& endTime /*= not_a_date_time */) const
+                         const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                         const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "count(" << lowerLimit << ", " << upperLimit << ", " << startTime << ", " << endTime
@@ -336,8 +336,8 @@ unsigned int Stat::count(double lowerLimit,
 
 double Stat::percentage(double lowerLimit,
                         double upperLimit,
-                        const ptime& startTime /*= not_a_date_time */,
-                        const ptime& endTime /*= not_a_date_time */) const
+                        const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                        const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "percentage(" << lowerLimit << ", " << upperLimit << ", " << startTime << ", "
@@ -363,8 +363,8 @@ double Stat::percentage(double lowerLimit,
                              100.0);
 }
 
-double Stat::median(const ptime& startTime /*= not_a_date_time */,
-                    const ptime& endTime /*= not_a_date_time */) const
+double Stat::median(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                    const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "median(" << startTime << ", " << endTime << ")" << std::endl;
@@ -402,8 +402,8 @@ double Stat::median(const ptime& startTime /*= not_a_date_time */,
   return double_vector[static_cast<std::size_t>(((vector_size + 1) / 2) - 1)];
 }
 
-double Stat::variance(const ptime& startTime /*= not_a_date_time */,
-                      const ptime& endTime /*= not_a_date_time */) const
+double Stat::variance(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                      const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "variance(" << startTime << ", " << endTime << ")" << std::endl;
@@ -423,8 +423,8 @@ double Stat::variance(const ptime& startTime /*= not_a_date_time */,
   return boost::accumulators::variance(acc);
 }
 
-double Stat::stddev(const ptime& startTime /*= not_a_date_time */,
-                    const ptime& endTime /*= not_a_date_time */) const
+double Stat::stddev(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                    const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
 {
 #ifdef MYDEBUG
   std::cout << "stddev(" << startTime << ", " << endTime << ")" << std::endl;
@@ -476,10 +476,139 @@ double Stat::stddev(const ptime& startTime /*= not_a_date_time */,
   return sqrt(variance(startTime, endTime));
 }
 
+double Stat::nearest(const boost::posix_time::ptime& timestep,
+                     const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                     const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
+{
+#ifdef MYDEBUG
+  std::cout << "nearest(" << timestep << ", " << startTime << ", " << endTime << ")" << std::endl;
+#endif
+
+  if (timestep == not_a_date_time) return itsMissingValue;
+
+  DataVector subvector;
+
+  if (!get_subvector(subvector, startTime, endTime, false) || subvector.size() == 0)
+    return itsMissingValue;
+  else if (subvector.size() == 1)
+    return subvector[0].value;
+
+  double nearest_value = itsMissingValue;
+  long nearest_seconds = -1;
+
+  for (unsigned int i = 0; i < subvector.size(); i++)
+  {
+    if (i == 0 || abs((subvector[i].time - timestep).total_seconds() < nearest_seconds))
+    {
+      nearest_value = subvector[i].value;
+      nearest_seconds = abs((subvector[i].time - timestep).total_seconds());
+    }
+  }
+
+  return nearest_value;
+}
+
+// Do linear inter-/extrapolation
+double Stat::interpolate(const boost::posix_time::ptime& timestep,
+                         const boost::posix_time::ptime& startTime /*= not_a_date_time */,
+                         const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
+{
+#ifdef MYDEBUG
+  std::cout << "interpolate(" << timestep << ", " << startTime << ", " << endTime << ")"
+            << std::endl;
+#endif
+
+  if (timestep == not_a_date_time) return itsMissingValue;
+
+  DataVector subvector;
+
+  if (!get_subvector(subvector, startTime, endTime, false)) return itsMissingValue;
+
+  // If there is only one timestep in the data and it is the same as requested we return the value
+  if (subvector.size() == 1 && subvector.at(0).time == timestep) return subvector.at(0).value;
+
+  // There must be at least two timesteps with valid values in order to interpolate
+  if (subvector.size() == 2 &&
+      (subvector.at(0).value == itsMissingValue || subvector.at(1).value == itsMissingValue))
+    return itsMissingValue;
+
+  double interpolated_value = itsMissingValue;
+
+  std::vector<int> indicator_vector;  // -1 indicates earliter, + 1 later than requested timestep
+  for (unsigned int i = 0; i < subvector.size(); i++)
+  {
+    if (subvector[i].value == itsMissingValue) continue;
+    if (subvector[i].time < timestep)
+      indicator_vector.push_back(-1);
+    else if (subvector[i].time > timestep)
+      indicator_vector.push_back(1);
+    else if (subvector[i].time == timestep)
+      return subvector[i].value;  // Exact timestep found
+  }
+
+  if (indicator_vector.size() < 2) return itsMissingValue;
+
+  boost::posix_time::ptime first_time = boost::posix_time::not_a_date_time;
+  boost::posix_time::ptime second_time = boost::posix_time::not_a_date_time;
+  double first_value = itsMissingValue;
+  double second_value = itsMissingValue;
+  double time_diff_to_timestep_sec = 0.0;
+  if (indicator_vector.back() == -1)
+  {
+    // All timesteps are earlier -> extrapolate to the future
+    int last_index = indicator_vector.size() - 1;
+    first_time = subvector.at(last_index - 1).time;
+    second_time = subvector.at(last_index).time;
+    first_value = subvector.at(last_index - 1).value;
+    second_value = subvector.at(last_index).value;
+    time_diff_to_timestep_sec = (timestep - first_time).total_seconds();
+  }
+  else if (indicator_vector.front() == 1)
+  {
+    // All timesteps are later -> extrapolate to the past
+    first_time = subvector.at(0).time;
+    second_time = subvector.at(1).time;
+    first_value = subvector.at(0).value;
+    second_value = subvector.at(1).value;
+    time_diff_to_timestep_sec = (timestep - first_time).total_seconds();
+  }
+  else
+  {
+    // Interpolate between timesteps
+    for (unsigned int i = 1; i < indicator_vector.size(); i++)
+    {
+      if (indicator_vector.at(i - 1) == -1 && indicator_vector.at(i) == 1)
+      {
+        first_time = subvector.at(i - 1).time;
+        second_time = subvector.at(i).time;
+        first_value = subvector.at(i - 1).value;
+        second_value = subvector.at(i).value;
+        time_diff_to_timestep_sec = (timestep - first_time).total_seconds();
+        break;
+      }
+    }
+  }
+
+  double value_diff = second_value - first_value;
+  double time_diff_sec = (second_time - first_time).total_seconds();
+  double slope = value_diff / time_diff_sec;
+  interpolated_value = (first_value + (slope * time_diff_to_timestep_sec));
+
+#ifdef MYDEBUG
+  std::cout << "first_time: " << first_time << ",second_time: " << second_time
+            << ", timestep: " << timestep << ", first_value: " << first_value
+            << ", second_value: " << second_value << ",slope: " << slope
+            << ", time_diff_to_timestep: " << time_diff_to_timestep_sec << " -> "
+            << interpolated_value << std::endl;
+#endif
+
+  return interpolated_value;
+}
+
 bool extract_subvector(const DataVector& itsData,
                        DataVector& subvector,
-                       const ptime& startTime,
-                       const ptime& endTime,
+                       const boost::posix_time::ptime& startTime,
+                       const boost::posix_time::ptime& endTime,
                        double itsMissingValue,
                        bool itsWeights)
 {
@@ -487,11 +616,12 @@ bool extract_subvector(const DataVector& itsData,
   if ((startTime != not_a_date_time && endTime != not_a_date_time) && startTime > endTime)
     return false;
 
-  ptime firstTimestamp(
+  boost::posix_time::ptime firstTimestamp(
       (startTime == not_a_date_time || startTime < itsData[0].time) ? itsData[0].time : startTime);
-  ptime lastTimestamp((endTime == not_a_date_time || endTime > itsData[itsData.size() - 1].time)
-                          ? itsData[itsData.size() - 1].time
-                          : endTime);
+  boost::posix_time::ptime lastTimestamp(
+      (endTime == not_a_date_time || endTime > itsData[itsData.size() - 1].time)
+          ? itsData[itsData.size() - 1].time
+          : endTime);
 
   time_period query_period(firstTimestamp, lastTimestamp + microseconds(1));
 
@@ -538,8 +668,8 @@ bool extract_subvector(const DataVector& itsData,
 
         // value changes halfway of timestep, so we have to handle first half and second half of
         // separately
-        ptime halfway_time(timestep_period.begin() +
-                           seconds(timestep_period.length().total_seconds() / 2));
+        boost::posix_time::ptime halfway_time(
+            timestep_period.begin() + seconds(timestep_period.length().total_seconds() / 2));
         if (intersection_period.contains(halfway_time))
         {
           time_period first_part_period(intersection_period.begin(),
@@ -568,8 +698,8 @@ bool extract_subvector(const DataVector& itsData,
 }
 
 bool Stat::get_subvector(DataVector& subvector,
-                         const ptime& startTime /*= not_a_date_time*/,
-                         const ptime& endTime /*= not_a_date_time*/,
+                         const boost::posix_time::ptime& startTime /*= not_a_date_time*/,
+                         const boost::posix_time::ptime& endTime /*= not_a_date_time*/,
                          bool useWeights /*= true*/) const
 {
   if (invalid_timestamps())
