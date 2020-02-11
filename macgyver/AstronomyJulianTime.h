@@ -59,6 +59,7 @@ class JulianTime
    */
   JulianTime(double jd_ = 0.0) : jd(jd_) {}
   JulianTime(const JulianTime& other) : jd(other.jd) {}
+  JulianTime& operator = (const JulianTime& other) { jd = other.jd; return *this; }
   bool operator==(const JulianTime& other) { return jd == other.jd; }
   bool operator!=(const JulianTime& other) { return jd != other.jd; }
   /*
