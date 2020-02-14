@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.2.5
+Version: 20.2.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -28,7 +28,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: boost-devel
 Requires: fmt >= 5.2.0
 Requires: ctpp2
-Requires: libicu >= 50.1.2
+Requires: libicu >= 50.2
 Requires: boost-date-time
 Requires: boost-filesystem
 Requires: boost-thread
@@ -80,6 +80,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Feb 14 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.14-1.fmi
+- Upgdade to pgdg12
+
 * Wed Feb 5 2020 Anssi Reponen <anssi.reponen@fmi.fi> - 20.2.5-1.fmi
 - Interpolate- and nearest-functions added (BRAINSTORM-1504)
 
