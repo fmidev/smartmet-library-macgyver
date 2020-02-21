@@ -36,7 +36,7 @@ LIBS = ../libsmartmet-macgyver.so \
 
 all: $(PROG)
 clean:
-	rm -f $(PROG) *~
+	rm -f $(PROG) *~ *.d
 
 test: $(PROG)
 	@echo Running tests:
@@ -48,4 +48,8 @@ test: $(PROG)
 		for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false ) 
 
 $(PROG) : % : %.cpp ../libsmartmet-macgyver.so
-	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
+	$(CC) $(CFLAGS) -MD -o $@ $@.cpp $(INCLUDES) $(LIBS)
+
+ifneq ($(wildcard *.d),)
+-include $(wildcard *.d)
+endif
