@@ -123,6 +123,9 @@ void parse_iso()
 #endif
       // the Gregorian calendar is officially introduced on 1582-10-15
       , { "1582-10-15T00:00:00Z", ptime(date(1582, 10, 15), hours(0) + minutes(0) + seconds(0)) }
+
+      // BRAINSTORM-1071
+      , { "1900-1-1T00:00:00", ptime(date(1900, 1, 1)) }
   };
 
   std::vector<std::string> should_fail = {
