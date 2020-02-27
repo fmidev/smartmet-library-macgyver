@@ -34,7 +34,7 @@ std::string demangle_cpp_type_name(const std::string& src);
  *  Can be used to find the name of object of derived class when base class pointer is available
  */
 template <typename Type>
-inline std::string get_type_name(const Type* x)
+std::string get_type_name(const Type* x)
 {
   return demangle_cpp_type_name(typeid(*x).name());
 }
