@@ -263,10 +263,6 @@ struct OffsetParser : qi::grammar<Iterator, TimeOffset()>
 template <typename Iterator>
 struct ISOParser : qi::grammar<Iterator, TimeStamp()>
 {
-  using FourDigitNumber = qi::uint_parser<unsigned int, 10, 4, 4>;   // Radix 10, exactly 4 digits
-  using ThreeDigitNumber = qi::uint_parser<unsigned int, 10, 3, 3>;  // Radix 10, exactly 4 digits
-  using TwoDigitNumber = qi::uint_parser<unsigned int, 10, 2, 2>;    // Radix 10, exactly 2 digits
-
   ISOParser() : ISOParser::base_type(isostamp)
   {
     optional_dash = qi::omit[-qi::lit('-')];
@@ -277,14 +273,23 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
 
     date_time_separator = qi::omit[qi::lit('T')];
 
-    isostamp = four_digits >> optional_dash >> two_digits >> optional_dash >>
-               two_digits              // Digits optionally separated by dashes
-               >> date_time_separator  // An optional literal 'T'
-               >> -two_digits >> optional_colon >> -two_digits >> optional_colon >>
-               -two_digits  // Three  optional sets of two digits, optionally separated by colons
-               >> optional_period >> -qi::omit[three_digits] >>
-               tz_parser    // Timezone, defaults to 0 as per the parser
-               >> qi::eoi;  // End of input
+    year = (uint14 >> &qi::omit[qi::lit('-')]) | uint4;
+
+    month = (uint12 >> &qi::omit[qi::lit('-')]) | uint2;
+
+    mday = (uint12 >> &qi::omit[(qi::lit('T') | qi::lit('Z') | qi::eoi)]) | uint2;
+
+    hmin = (uint12 >> &qi::omit[(qi::lit(':') | qi::lit('Z') | qi::eoi)]) | uint2;
+
+    // Possible ':' before number is included to avoid accepting 1 digit number without preceding ':'
+    second = (qi::omit[qi::lit(':')] >> uint12 >>&qi::omit[(qi::lit('.') | qi::lit('Z') | qi::eoi)])
+        | (optional_colon >> uint2);
+
+    isostamp = year >> optional_dash >> month >> optional_dash >> mday
+                    >> date_time_separator >> -hmin >> optional_colon >> -hmin
+                    >> -second >> optional_period >> -qi::omit[uint3]
+                    >> tz_parser
+                    >> qi::eoi;
 
 #ifdef MYDEBUG
     BOOST_SPIRIT_DEBUG_NODE(dash);
@@ -293,9 +298,17 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
 #endif
   }
 
-  FourDigitNumber four_digits;
-  ThreeDigitNumber three_digits;
-  TwoDigitNumber two_digits;
+  qi::uint_parser<unsigned int, 10, 4, 4> uint4;
+  qi::uint_parser<unsigned int, 10, 3, 3> uint3;
+  qi::uint_parser<unsigned int, 10, 2, 2> uint2;
+  qi::uint_parser<unsigned int, 10, 1, 2> uint12;
+  qi::uint_parser<unsigned int, 10, 1, 4> uint14;
+
+  qi::rule<Iterator, unsigned short()> year;
+  qi::rule<Iterator, unsigned short()> month;
+  qi::rule<Iterator, unsigned short()> mday;
+  qi::rule<Iterator, unsigned short()> hmin;
+  qi::rule<Iterator, unsigned short()> second;
 
   qi::rule<Iterator, void()> optional_dash;
   qi::rule<Iterator, void()> optional_colon;
