@@ -128,6 +128,8 @@ BOOST_AUTO_TEST_CASE(stod)
 BOOST_AUTO_TEST_CASE(to_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_string()");
+  BOOST_CHECK_EQUAL("0", Fmi::to_string(false));
+  BOOST_CHECK_EQUAL("1", Fmi::to_string(true));
   BOOST_CHECK_EQUAL("0", Fmi::to_string(0));
   BOOST_CHECK_EQUAL("1", Fmi::to_string(1));
   BOOST_CHECK_EQUAL("-1", Fmi::to_string(-1));
@@ -185,7 +187,6 @@ BOOST_AUTO_TEST_CASE(to_iso_extended_string)
   ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
   BOOST_CHECK_EQUAL("2002-01-01T01:02:03,004000", Fmi::to_iso_extended_string(time2));
 }
-
 
 BOOST_AUTO_TEST_CASE(to_simple_string)
 {

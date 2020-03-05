@@ -16,6 +16,7 @@
 
 namespace Fmi
 {
+std::string to_string(bool value);
 std::string to_string(int value);
 std::string to_string(long value);
 std::string to_string(unsigned int value);
@@ -61,5 +62,5 @@ std::string ascii_toupper_copy(std::string input);
 
 bool looks_unsigned_int(const std::string& value);
 bool looks_signed_int(const std::string& value);
-  
+
 }  // namespace Fmi
