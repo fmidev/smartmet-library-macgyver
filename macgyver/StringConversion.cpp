@@ -70,6 +70,7 @@ namespace Fmi
  */
 // ----------------------------------------------------------------------
 
+std::string to_string(bool value) { return value ? "1" : "0"; }
 std::string to_string(int value) { return fmt::sprintf("%d", value); }
 std::string to_string(long value) { return fmt::sprintf("%ld", value); }
 std::string to_string(unsigned int value) { return fmt::sprintf("%u", value); }
@@ -355,32 +356,27 @@ std::string ascii_toupper_copy(std::string input)
 
 bool looks_unsigned_int(const std::string& value)
 {
-  if(value.empty())
-    return false;
-  for(const auto chr : value)
-    if(chr < '0' || chr > '9')
-      return false;
+  if (value.empty()) return false;
+  for (const auto chr : value)
+    if (chr < '0' || chr > '9') return false;
   return true;
 }
 
 bool looks_signed_int(const std::string& value)
 {
-  if(value.empty())
-    return false;
+  if (value.empty()) return false;
   std::size_t i = 0;
-  if(value[i] == '+' || value[i] == '-')
-    {
-      if(value.size() == 1)
-	return false;
-      ++i;
-    }
+  if (value[i] == '+' || value[i] == '-')
+  {
+    if (value.size() == 1) return false;
+    ++i;
+  }
   const auto sz = value.size();
-  for(; i<sz; ++i)
-    {
-      const auto val = value[i];
-      if(val < '0' || val > '9')
-	return false;
-    }
+  for (; i < sz; ++i)
+  {
+    const auto val = value[i];
+    if (val < '0' || val > '9') return false;
+  }
   return true;
 }
 
