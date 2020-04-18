@@ -32,6 +32,11 @@ DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 GCC_DIAG_COLOR ?= always
 CXX_STD ?= c++11
 
+ifneq "$(wildcard /usr/include/boost169)" ""
+  INCLUDES += -I/usr/include/boost169
+  LIBS += -L/usr/lib64/boost169
+endif 
+
 ifeq ($(CXX), clang++)
 
  FLAGS = \
@@ -42,13 +47,13 @@ ifeq ($(CXX), clang++)
 	-Wno-padded \
 	-Wno-missing-prototypes
 
- INCLUDES = \
+ INCLUDES += \
 	-isystem $(includedir) \
 	-isystem $(includedir)/smartmet
 
 else
 
- FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) -fPIC -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter -Wnon-virtual-dtor
+ FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) -fPIC -fno-omit-frame-pointer -Wall -W -Wno-unused-parameter
 
  FLAGS_DEBUG = \
 	-Wcast-align \
@@ -58,7 +63,6 @@ else
 	-Woverloaded-virtual  \
 	-Wpointer-arith \
 	-Wcast-qual \
-	-Wredundant-decls \
 	-Wwrite-strings \
 	-Wno-sign-promo \
 	-Wno-unknown-pragmas \
@@ -66,7 +70,7 @@ else
 
  FLAGS_RELEASE = -Wuninitialized
 
- INCLUDES = \
+ INCLUDES += \
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
 	$(pkg-config --cflags icu-i18n) \
@@ -87,7 +91,7 @@ CFLAGS         = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
 CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -Og -g
 CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
 
-LIBS = -L$(libdir) \
+LIBS += -L$(libdir) \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_filesystem \
