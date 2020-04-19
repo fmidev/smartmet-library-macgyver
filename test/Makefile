@@ -23,9 +23,17 @@ endif
 
 CC = g++
 CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=$(CXX_STD) $(FLAGS)
-INCLUDES = -I ../macgyver -I /usr/include/smartmet
 
-LIBS = ../libsmartmet-macgyver.so \
+# Boost 1.69
+
+ifneq "$(wildcard /usr/include/boost169)" ""
+  INCLUDES += -I/usr/include/boost169
+  LIBS += -L/usr/lib64/boost169
+endif
+
+INCLUDES += -I ../macgyver -I /usr/include/smartmet
+
+LIBS += ../libsmartmet-macgyver.so \
 	-lfmt \
 	-lboost_filesystem \
 	-lboost_locale \

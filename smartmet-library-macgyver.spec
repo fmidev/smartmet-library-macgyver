@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.3.5
+Version: 20.4.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -13,7 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: rpm-build
 BuildRequires: gcc-c++
 BuildRequires: make
-BuildRequires: boost-devel
+BuildRequires: boost169-devel
 BuildRequires: imake
 BuildRequires: smartmet-timezones >= 19.7.29
 BuildRequires: ctpp2-devel
@@ -29,11 +29,11 @@ BuildRequires: libpqxx-devel
 Requires: fmt >= 5.2.0
 Requires: ctpp2
 Requires: libicu >= 50.2
-Requires: boost-date-time
-Requires: boost-filesystem
-Requires: boost-thread
-Requires: boost-system
-Requires: boost-regex
+Requires: boost169-date-time
+Requires: boost169-filesystem
+Requires: boost169-thread
+Requires: boost169-system
+Requires: boost169-regex
 Requires: libpqxx
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
@@ -80,6 +80,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
+- Upgrade to Boost 1.69
+
 * Thu Mar  5 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.5-1.fmi
 - Added to_string(bool) to avoid sign promotion warnings on int conversions
 
