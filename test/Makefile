@@ -47,9 +47,11 @@ all: $(PROG)
 clean:
 	rm -f $(PROG) *~ *.d
 
-test: $(PROG)
-	@echo Running tests:
+citest:
 	ls -lR /usr/pgsql-9.5/lib
+
+test: citest $(PROG)
+	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \
 	  ( ./$$prog || touch $$prog.err ) ; \
