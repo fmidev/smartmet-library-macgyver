@@ -40,7 +40,7 @@ LIBS += ../libsmartmet-macgyver.so \
 	-lboost_date_time \
 	-lboost_thread \
 	-lboost_system \
-	-L/usr/pgsql-9.5/lib -lpq \
+	-Wl,-rpath=/usr/pgsql-9.5/lib -L/usr/pgsql-9.5/lib -lpq \
 	-lpthread
 
 all: $(PROG)
