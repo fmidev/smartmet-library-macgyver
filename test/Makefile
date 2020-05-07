@@ -48,6 +48,7 @@ clean:
 	rm -f $(PROG) *~ *.d
 
 citest:
+	rpm -ql postgresql95-libs
 	ls -lR /usr/pgsql-9.5/lib
 
 test: citest $(PROG)
