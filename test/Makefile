@@ -40,7 +40,7 @@ LIBS += ../libsmartmet-macgyver.so \
 	-lboost_date_time \
 	-lboost_thread \
 	-lboost_system \
-	-Wl,-rpath=/usr/pgsql-9.5/lib -L/usr/pgsql-9.5/lib -lpq \
+	-Wl,-rpath,/usr/pgsql-9.5/lib -L/usr/pgsql-9.5/lib -lpq \
 	-lpthread
 
 all: $(PROG)
@@ -49,6 +49,7 @@ clean:
 
 test: $(PROG)
 	@echo Running tests:
+	ls -lR /usr/pgsql-9.5/lib
 	@rm -f *.err
 	@for prog in $(PROG); do \
 	  ( ./$$prog || touch $$prog.err ) ; \
