@@ -35,12 +35,12 @@ INCLUDES += -I ../macgyver -I /usr/include/smartmet
 
 LIBS += ../libsmartmet-macgyver.so \
 	-lfmt \
-	-L/usr/pgsql-9.5/lib -lpq \
 	-lboost_filesystem \
 	-lboost_locale \
 	-lboost_date_time \
 	-lboost_thread \
 	-lboost_system \
+	-L/usr/pgsql-9.5/lib -lpq \
 	-lpthread
 
 all: $(PROG)

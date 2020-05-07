@@ -26,6 +26,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: smartmet-timezones >= 19.7.29
 #TestRequires: fmt-devel
 #TestRequires: boost169-devel
+#TestRequires: postgresql95-libs
 Requires: fmt >= 5.2.0
 Requires: ctpp2
 Requires: libicu >= 50.2
