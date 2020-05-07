@@ -47,11 +47,7 @@ all: $(PROG)
 clean:
 	rm -f $(PROG) *~ *.d
 
-citest:
-	rpm -ql postgresql95-libs
-	ls -lR /usr/pgsql-9.5/lib
-
-test: citest $(PROG)
+test: $(PROG)
 	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \
