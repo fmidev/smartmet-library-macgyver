@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.1)
+cmake_minimum_required(VERSION 3.14.4)
 project(MacGyver)
 
 set(CMAKE_MFC_FLAG 0)
@@ -16,6 +16,10 @@ list(
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateFormatterMT.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateDirectory.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateDirectory.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateFactory.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateFactory.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/PostgreSQLConnection.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/PostgreSQLConnection.cpp"
     )
 
 add_library( 
@@ -25,14 +29,14 @@ add_library(
 
 target_link_libraries( 
     ${PROJECT_NAME}
-    fmt
     )
 
 target_include_directories( 
     ${PROJECT_NAME}
-    PUBLIC ${PROJECT_SOURCE_DIR}/include
+    PUBLIC ${PROJECT_SOURCE_DIR}/macgyver
     PUBLIC ${PROJECT_SOURCE_DIR}
     PUBLIC ${BOOST_INCLUDE_DIR}
+    PUBLIC ${FMT_INCLUDE_DIR}
     )
 
 set(
@@ -40,5 +44,6 @@ set(
     ${PROJECT_SOURCE_DIR}/macgyver
     ${PROJECT_SOURCE_DIR}
     ${BOOST_INCLUDE_DIR}
+    ${FMT_INCLUDE_DIR}
     CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE
     )
