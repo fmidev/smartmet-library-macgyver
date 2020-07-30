@@ -1,5 +1,11 @@
 #include "TaskGroup.h"
 
+#ifdef _MSC_VER
+// This enables 'not', 'or', 'and', etc logical keywords in Visual C++ compilers (implemented by
+// macro definitions),// use !, ||, &&, etc instead, if you want to get rid of this ugly inclusion.
+#include <ciso646>
+#endif
+
 Fmi::TaskGroup::TaskGroup(std::size_t max_parallel_tasks)
   : max_parallel_tasks(max_parallel_tasks)
   , counter(0)
