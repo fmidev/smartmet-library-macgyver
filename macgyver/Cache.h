@@ -859,7 +859,7 @@ struct LinearTimeExpire
     }
 
     std::time_t now = std::time(nullptr);
-    long tagAge = now - theTagTime;
+    auto tagAge = now - theTagTime;
 
     assert(timeConstant != 0);
 
@@ -909,7 +909,7 @@ struct SigmoidTimeExpire
     }
 
     std::time_t now = std::time(nullptr);
-    long tagAge = now - theTagTime;
+    auto tagAge = now - theTagTime;
 
     double expirationProbability =
         1.0 /
