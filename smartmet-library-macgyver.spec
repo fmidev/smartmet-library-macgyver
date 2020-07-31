@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.4.18
+Version: 20.6.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -25,7 +25,8 @@ BuildRequires: libpqxx-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 19.7.29
 #TestRequires: fmt-devel
-#TestRequires: boost-devel
+#TestRequires: boost169-devel
+#TestRequires: postgresql95-libs
 Requires: fmt >= 5.2.0
 Requires: ctpp2
 Requires: libicu >= 50.2
@@ -80,6 +81,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jun  8 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.6.8-1.fmi
+- Upgraded libpqxx
+
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgrade to Boost 1.69
 
