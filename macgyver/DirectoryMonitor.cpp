@@ -29,6 +29,8 @@
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <stdexcept>
+#include <mutex>
+#include <condition_variable>
 
 // scoped read/write lock types
 
@@ -199,6 +201,10 @@ class DirectoryMonitor::Pimple
   boost::atomic<bool> running{false};  // true if run() has not exited
   boost::atomic<bool> stop{false};     // true if stop request is pending
   boost::atomic<bool> isready{false};  // true if at least one scan has completed
+
+  std::mutex m2;
+  std::condition_variable cond;
+
   Watcher nextid = 0;
 };
 
@@ -439,7 +445,8 @@ void DirectoryMonitor::run()
 
     if (sleeptime > 0)
     {
-      boost::this_thread::sleep(boost::posix_time::seconds(sleeptime));
+      std::unique_lock<std::mutex> lock(impl->m2);
+      impl->cond.wait_for(lock, std::chrono::seconds(sleeptime));
     }
   }
 
@@ -463,6 +470,8 @@ void DirectoryMonitor::stop()
 {
   // locking not needed here
   impl->stop = true;
+  std::unique_lock<std::mutex> lock(impl->m2);
+  impl->cond.notify_all();
 }
 
 // ----------------------------------------------------------------------
