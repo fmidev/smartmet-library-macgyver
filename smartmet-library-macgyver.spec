@@ -4,7 +4,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 20.8.5
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -82,6 +82,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.5-2.fmi
+- Remove earlier RPM build directory before building RPM
+
 * Wed Aug  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.5-1.fmi
 - Update stopping DirectoryMonitor::run() (use std::contdition_variable)
 
