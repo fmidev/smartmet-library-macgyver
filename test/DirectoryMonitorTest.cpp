@@ -21,13 +21,13 @@ void stopping_test()
             c.notify_all();
         },
         [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {},
-        10);
+        60);
     const pt::ptime start = pt::microsec_clock::universal_time();
     std::thread t([&monitor]() { monitor.run(); });
 
     {
         std::unique_lock<std::mutex> lock(m);
-        c.wait_for(lock, std::chrono::seconds(5));
+        c.wait_for(lock, std::chrono::seconds(10));
     }
 
     //const pt::ptime t1 = pt::microsec_clock::universal_time();
@@ -37,7 +37,9 @@ void stopping_test()
 
     const pt::ptime done = pt::microsec_clock::universal_time();
     if ((done - start).total_milliseconds() > 500) {
-        TEST_FAILED("Stopping Fmi::DirectoryMonitor takes too long");
+        std::ostringstream tmp;
+        tmp << (done - start);
+        TEST_FAILED("Stopping Fmi::DirectoryMonitor takes too long (" + tmp.str() + ")");
     }
 
     TEST_PASSED();
