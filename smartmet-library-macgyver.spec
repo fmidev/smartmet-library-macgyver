@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.6.8
+Version: 20.8.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -81,6 +81,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.5-1.fmi
+- Update stopping DirectoryMonitor::run() (use std::contdition_variable)
+
 * Mon Jun  8 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.6.8-1.fmi
 - Upgraded libpqxx
 
