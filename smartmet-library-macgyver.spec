@@ -47,6 +47,7 @@ FMI MacGyver library
 
 %prep
 rm -rf $RPM_BUILD_ROOT
+rm -rf %{SPECNAME}
 
 %setup -q -n %{SPECNAME}
  
