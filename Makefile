@@ -150,6 +150,7 @@ $(LIBFILE): $(OBJS)
 clean:
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
 	rm -rf $(objdir)
+	$(MAKE) -C test clean
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
@@ -165,8 +166,8 @@ install:
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
-test:
-	$(MAKE) -C $@ test
+test test-installed:
+	$(MAKE) -C test $@
 
 objdir:
 	@mkdir -p $(objdir)
