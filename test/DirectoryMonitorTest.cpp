@@ -13,7 +13,7 @@ namespace DirectoryMonitorTests {
 
 void stopping_test()
 {
-    std::atomic<bool> started = false;
+    std::atomic<bool> started(false);
     std::mutex m;
     std::condition_variable c;
     Fmi::DirectoryMonitor monitor;
