@@ -12,12 +12,14 @@ namespace DirectoryMonitorTests {
 
 void stopping_test()
 {
+    volatile bool started = false;
     std::mutex m;
     std::condition_variable c;
     Fmi::DirectoryMonitor monitor;
     monitor.watch(".",
-        [&c, &m](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex, const Fmi::DirectoryMonitor::Status&) {
+        [&c, &m, &started](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex, const Fmi::DirectoryMonitor::Status&) {
             std::unique_lock<std::mutex> lock(m);
+            started = true;
             c.notify_all();
         },
         [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {},
@@ -27,7 +29,9 @@ void stopping_test()
 
     {
         std::unique_lock<std::mutex> lock(m);
-        c.wait_for(lock, std::chrono::seconds(5));
+        if (not started) {
+            c.wait_for(lock, std::chrono::seconds(5));
+        }
     }
 
     //const pt::ptime t1 = pt::microsec_clock::universal_time();

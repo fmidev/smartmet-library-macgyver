@@ -446,7 +446,9 @@ void DirectoryMonitor::run()
     if (sleeptime > 0)
     {
       std::unique_lock<std::mutex> lock(impl->m2);
-      impl->cond.wait_for(lock, std::chrono::seconds(sleeptime));
+      if (not impl->stop) {
+        impl->cond.wait_for(lock, std::chrono::seconds(sleeptime));
+      }
     }
   }
 
@@ -468,9 +470,8 @@ void DirectoryMonitor::run()
 
 void DirectoryMonitor::stop()
 {
-  // locking not needed here
-  impl->stop = true;
   std::unique_lock<std::mutex> lock(impl->m2);
+  impl->stop = true;
   impl->cond.notify_all();
 }
 
