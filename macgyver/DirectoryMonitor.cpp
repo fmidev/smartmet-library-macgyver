@@ -199,7 +199,7 @@ class DirectoryMonitor::Pimple
   MutexType mutex;
   Schedule schedule;
   boost::atomic<bool> running{false};  // true if run() has not exited
-  boost::atomic<bool> stop{false};     // true if stop request is pending
+  boost::atomic<bool> stop{false};   // true if stop request is pending
   boost::atomic<bool> isready{false};  // true if at least one scan has completed
 
   std::mutex m2;
@@ -446,14 +446,12 @@ void DirectoryMonitor::run()
     if (sleeptime > 0)
     {
       std::unique_lock<std::mutex> lock(impl->m2);
-      if (not impl->stop) {
-        impl->cond.wait_for(lock, std::chrono::seconds(sleeptime));
-      }
+      impl->cond.wait_for(lock, std::chrono::seconds(sleeptime),
+          [this]() -> bool { return impl->stop; });
     }
   }
 
   // Not running anymore. This order so that locking is not necessary
-
   impl->stop = false;
   impl->running = false;
 }
@@ -470,7 +468,6 @@ void DirectoryMonitor::run()
 
 void DirectoryMonitor::stop()
 {
-  std::unique_lock<std::mutex> lock(impl->m2);
   impl->stop = true;
   impl->cond.notify_all();
 }

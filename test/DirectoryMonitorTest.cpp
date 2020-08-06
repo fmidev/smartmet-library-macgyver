@@ -1,4 +1,5 @@
 #include "DirectoryMonitor.h"
+#include <atomic>
 #include <chrono>
 #include <thread>
 #include <condition_variable>
@@ -12,25 +13,26 @@ namespace DirectoryMonitorTests {
 
 void stopping_test()
 {
-    volatile bool started = false;
+    std::atomic<bool> started = false;
     std::mutex m;
     std::condition_variable c;
     Fmi::DirectoryMonitor monitor;
     monitor.watch(".",
-        [&c, &m, &started](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex, const Fmi::DirectoryMonitor::Status&) {
-            std::unique_lock<std::mutex> lock(m);
-            started = true;
-            c.notify_all();
-        },
+        [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex, const Fmi::DirectoryMonitor::Status&) {},
         [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {},
         10);
     const pt::ptime start = pt::microsec_clock::universal_time();
-    std::thread t([&monitor]() { monitor.run(); });
+    std::thread t(
+        [&monitor, &started, &c]() {
+            started = true;
+            c.notify_all();
+            monitor.run();
+        });
 
     {
         std::unique_lock<std::mutex> lock(m);
         if (not started) {
-            c.wait_for(lock, std::chrono::seconds(5));
+            c.wait_for(lock, std::chrono::seconds(5), [&started]()->bool { return started; });
         }
     }
 
