@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.8.5
-Release: 2%{?dist}.fmi
+Version: 20.8.7
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -82,6 +82,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Aug  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.7-1.fmi
+- Fix race conditions in Fmi::TaskGroup
+
 * Wed Aug  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.5-2.fmi
 - Remove earlier RPM build directory before building RPM
 
