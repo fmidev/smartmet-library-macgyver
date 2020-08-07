@@ -4,14 +4,12 @@ struct Fmi::TaskGroup::Task
 {
   std::string name;
   std::atomic<bool> done;
-  std::atomic<bool> failed;
   Fmi::TaskGroup* tg;
   std::shared_future<void> f;
 
   Task(const std::string& name, std::function<void()> task, Fmi::TaskGroup* tg)
     : name(name)
     , done(false)
-    , failed(false)
     , tg(tg)
     , f(std::async(std::launch::async, [this, task]() { execute(task); }).share())
     {
@@ -26,7 +24,6 @@ private:
         tg->notify();
       } catch (...) {
         done = true;
-        failed = true;
         tg->notify();
         throw;
       }
