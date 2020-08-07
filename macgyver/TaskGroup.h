@@ -30,7 +30,6 @@ class TaskGroup
 
  private:
   bool wait_some();
-  void remove_finished();
   void extract_finished(std::queue<std::pair<std::string, std::shared_future<void> > >& finished_tasks);
   void notify();
 
