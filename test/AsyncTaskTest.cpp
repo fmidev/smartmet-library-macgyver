@@ -120,6 +120,33 @@ namespace AsyncTaskTest {
       TEST_PASSED();
   }
 
+  // Stopping already finished task should not influence the status
+  void stop_attempt_after_task_end()
+  {
+      std::mutex m;
+      std::condition_variable cond;
+      Fmi::AsyncTask task(
+          "foobar",
+          [] () {
+              /* Do nothing */
+          },
+          &cond);
+
+      std::unique_lock<std::mutex> lock(m);
+      if (!cond.wait_for(lock, std::chrono::milliseconds(100), [&task]() { return task.ended(); })) {
+          TEST_FAILED("Did not get notification about task end");
+          task.cancel();
+      }
+      lock.unlock();
+
+      task.cancel();
+
+      task.wait();
+      if (task.get_status() != Fmi::AsyncTask::ok) { TEST_FAILED("Not expected test status"); }
+
+      TEST_PASSED();
+  }
+
   // ----------------------------------------------------------------------
   /*!
    * The actual test suite
@@ -139,6 +166,7 @@ namespace AsyncTaskTest {
       TEST(task_throws_not_std_exception);
       TEST(test_cancel_task);
       TEST(test_notify);
+      TEST(stop_attempt_after_task_end);
     }
   };
 
