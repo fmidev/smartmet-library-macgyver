@@ -30,6 +30,9 @@ namespace Fmi
 
     void wait();
 
+    /**
+     *   @brief Stops the asynchronous task at interruption point
+     */
     void cancel();
 
     bool wait_for(double sec);
@@ -37,6 +40,8 @@ namespace Fmi
     Status get_status() const;
 
     bool ended() const { return done; }
+
+    const std::string& get_name() const { return name; }
 
     static void interruption_point();
 

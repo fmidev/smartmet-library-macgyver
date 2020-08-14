@@ -1,5 +1,7 @@
 #include "TaskGroup.h"
 
+// FIXME: remove after replaced by AsyncTaskGroup in WFS plugin
+
 struct Fmi::TaskGroup::Task
 {
   std::string name;

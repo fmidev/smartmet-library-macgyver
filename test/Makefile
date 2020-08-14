@@ -72,6 +72,7 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	-lboost_locale \
 	-lboost_date_time \
 	-lboost_thread \
+	-lboost_chrono \
 	-lboost_system \
 	-L/usr/pgsql-9.5/lib -l:libpq.so.5 \
 	-lpthread

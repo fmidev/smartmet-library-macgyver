@@ -1,5 +1,7 @@
 #pragma once
 
+// FIXME: remove after replaced by AsyncTaskGroup in WFS plugin
+
 #include <atomic>
 #include <condition_variable>
 #include <functional>
