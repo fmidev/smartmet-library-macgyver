@@ -83,7 +83,7 @@ FMI MacGyver library development files
 
 %changelog
 * Fri Aug 14 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.14-1.fmi
-- New classes AsyncTask and AsyncTaskGroup (should replace earlirt TaskGroup)
+- New classes AsyncTask and AsyncTaskGroup (should replace earlier TaskGroup)
 
 * Fri Aug  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.7-1.fmi
 - Fix race conditions in Fmi::TaskGroup
