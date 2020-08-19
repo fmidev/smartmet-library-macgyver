@@ -48,14 +48,15 @@ namespace Fmi
   private:
     void run(std::function<void()> task);
     void handle_result(Status status, std::exception_ptr exc = nullptr);
+    std::exception_ptr get_exception() const;
 
   private:
     const std::string name;
-    std::mutex m1;
+    mutable std::mutex m1;
     std::atomic<Status> status;
     std::atomic<bool> done;
     std::atomic<std::condition_variable*> cond;
-    boost::thread task_thread;
     std::exception_ptr ex;
+    boost::thread task_thread;
   };
 }

@@ -11,8 +11,8 @@ Fmi::AsyncTask::AsyncTask(const std::string& name, std::function<void()> task, s
     , status(none)
     , done(false)
     , cond(cond)
-    , task_thread([this, task] () { run(task); })
     , ex(nullptr)
+    , task_thread([this, task] () { run(task); })
 {
 }
 
@@ -41,6 +41,7 @@ void Fmi::AsyncTask::wait()
 {
     if (task_thread.joinable()) {
         task_thread.join();
+        std::exception_ptr ex = get_exception();
         if (ex) {
             std::rethrow_exception(ex);
         }
@@ -52,8 +53,11 @@ bool Fmi::AsyncTask::wait_for(double sec)
     if (task_thread.joinable()) {
         int64_t mks = int64_t(std::ceil(1000000.0 * sec));
         bool done = task_thread.try_join_for(boost::chrono::microseconds(mks));
-        if (done && ex) {
-            std::rethrow_exception(ex);
+        if (done) {
+            std::exception_ptr ex = get_exception();
+            if (ex) {
+                std::rethrow_exception(ex);
+            }
         }
         return done;
     } else {
@@ -103,4 +107,10 @@ void Fmi::AsyncTask::handle_result(Status status, std::exception_ptr ex)
     if (cond) {
         (*cond).notify_all();
     }
+}
+
+std::exception_ptr Fmi::AsyncTask::get_exception() const
+{
+    std::unique_lock<std::mutex> lock(m1);
+    return ex;
 }

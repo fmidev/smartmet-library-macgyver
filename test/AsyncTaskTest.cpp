@@ -72,6 +72,8 @@ namespace AsyncTaskTest {
         task.wait();
         TEST_FAILED("Expection not thrown");
     } catch (const TestException&) {
+    } catch (const tframe::failed&) {
+        throw;
     } catch (...) {
         TEST_FAILED("Unexcpected exception of type '" + Fmi::current_exception_type() + "' thrown");
     }
