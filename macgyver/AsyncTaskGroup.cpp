@@ -6,6 +6,7 @@ Fmi::AsyncTaskGroup::AsyncTaskGroup(std::size_t max_paralell_tasks)
     , max_paralell_tasks(max_paralell_tasks)
     , num_suceeded(0)
     , num_failed(0)
+    , stop_requested(false)
 {
 }
 
@@ -17,15 +18,17 @@ Fmi::AsyncTaskGroup::~AsyncTaskGroup()
 
 void Fmi::AsyncTaskGroup::add(const std::string& name, std::function<void()> task)
 {
-  while (get_num_active_tasks() >= max_paralell_tasks) {
-    wait_some();
-  }
+  if (!stop_requested) {
+    while (get_num_active_tasks() >= max_paralell_tasks) {
+      wait_some();
+    }
 
-  std::size_t id = ++counter;
-  std::shared_ptr<AsyncTask> new_task(new AsyncTask(name, task,
-          std::bind(&Fmi::AsyncTaskGroup::on_task_completed_callback, this, id)));
-  std::unique_lock<std::mutex> lock(m1);
-  active_tasks[id] = new_task;
+    std::size_t id = ++counter;
+    std::shared_ptr<AsyncTask> new_task(new AsyncTask(name, task,
+            std::bind(&Fmi::AsyncTaskGroup::on_task_completed_callback, this, id)));
+    std::unique_lock<std::mutex> lock(m1);
+    active_tasks[id] = new_task;
+  }
 }
 
 void Fmi::AsyncTaskGroup::wait()
@@ -38,6 +41,7 @@ void Fmi::AsyncTaskGroup::wait()
 void Fmi::AsyncTaskGroup::stop()
 {
   std::unique_lock<std::mutex> lock(m1);
+  stop_requested = true;
   for (auto item : active_tasks) {
       item.second->cancel();
   }

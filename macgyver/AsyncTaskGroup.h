@@ -70,5 +70,6 @@ namespace Fmi
     std::atomic<std::size_t> num_failed;
     boost::signals2::signal<void(const std::string&)> signal_task_ended;
     boost::signals2::signal<void(const std::string&)> signal_task_failed;
+    std::atomic<bool> stop_requested;
   };
 };
