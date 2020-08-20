@@ -53,6 +53,7 @@ std::string to_simple_string(const boost::posix_time::ptime& time);
 std::string to_iso_string(const boost::posix_time::ptime& time);
 std::string to_iso_extended_string(const boost::posix_time::ptime& time);
 std::string to_http_string(const boost::posix_time::ptime& time);
+std::string to_timestamp_string(const boost::posix_time::ptime& time);
 
 void ascii_tolower(std::string& input);
 

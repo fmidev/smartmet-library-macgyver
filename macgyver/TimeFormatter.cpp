@@ -265,18 +265,13 @@ std::string EpochFormatter::format(const boost::local_time::local_date_time& t) 
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Format a ptime
+ * \brief Format a ptime: YYYYMMDDHHMI
  */
 // ----------------------------------------------------------------------
 
 std::string TimeStampFormatter::format(const boost::posix_time::ptime& t) const
 {
-  std::string tmp;
-  tmp.reserve(6 + 6 + 1);
-  tmp += Fmi::to_iso_string(t.date());
-  tmp += Fmi::to_iso_string(t.time_of_day());
-  if (tmp.size() == 12) return tmp;
-  return tmp.substr(0, 12);
+  return Fmi::to_timestamp_string(t);
 }
 
 // ----------------------------------------------------------------------
@@ -287,12 +282,7 @@ std::string TimeStampFormatter::format(const boost::posix_time::ptime& t) const
 
 std::string TimeStampFormatter::format(const boost::local_time::local_date_time& t) const
 {
-  std::string tmp;
-  tmp.reserve(6 + 6 + 1);
-  tmp += Fmi::to_iso_string(t.local_time().date());
-  tmp += Fmi::to_iso_string(t.local_time().time_of_day());
-  if (tmp.size() == 12) return tmp;
-  return tmp.substr(0, 12);
+  return Fmi::to_timestamp_string(t.local_time());
 }
 
 // ----------------------------------------------------------------------
@@ -303,19 +293,7 @@ std::string TimeStampFormatter::format(const boost::local_time::local_date_time&
 
 std::string HttpFormatter::format(const boost::posix_time::ptime& t) const
 {
-  static const char* weekdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-
-  static const char* months[] = {
-      "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
-  return fmt::sprintf("%s, %02d %s %d %02d:%02d:%02d GMT",
-                      weekdays[t.date().day_of_week()],
-                      t.date().day(),
-                      months[t.date().month()],
-                      t.date().year(),
-                      t.time_of_day().hours(),
-                      t.time_of_day().minutes(),
-                      t.time_of_day().seconds());
+  return Fmi::to_http_string(t);
 }
 
 // ----------------------------------------------------------------------
