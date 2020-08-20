@@ -1,10 +1,13 @@
 #pragma once
 
+// FIXME: remove after replaced by AsyncTaskGroup in WFS plugin
+
 #include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <future>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -14,6 +17,7 @@ namespace Fmi {
 
 class TaskGroup
 {
+  struct Task;
  public:
   TaskGroup(std::size_t max_parallel_tasks = 30);
   virtual ~TaskGroup();
@@ -30,19 +34,18 @@ class TaskGroup
 
  private:
   bool wait_some();
-  void remove_finished();
-  void extract_finished(std::queue<std::pair<std::string, std::shared_future<void> > >& finished_tasks);
+  bool extract_finished(std::queue<std::shared_ptr<Task> >& finished_tasks);
   void notify();
 
  private:
-  typedef std::list<std::pair<std::string, std::shared_future<void> > >::iterator iterator;
+  typedef std::list<std::shared_ptr<Task> >::iterator iterator;
 
   mutable std::mutex mutex;
   std::condition_variable cond;
   std::size_t max_parallel_tasks;
   std::size_t counter;
   std::atomic<std::size_t> num_failures;
-  std::list<std::pair<std::string, std::shared_future<void> > > task_list;
+  std::list<std::shared_ptr<Task> > task_list;
   boost::signals2::signal<void(const std::string&)> signal_task_ended;
   boost::signals2::signal<void(const std::string&)> signal_task_failed;
 };

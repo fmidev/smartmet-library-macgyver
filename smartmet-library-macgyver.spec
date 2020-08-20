@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.7.31
+Version: 20.8.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -47,6 +47,7 @@ FMI MacGyver library
 
 %prep
 rm -rf $RPM_BUILD_ROOT
+rm -rf %{SPECNAME}
 
 %setup -q -n %{SPECNAME}
  
@@ -81,6 +82,21 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Aug 20 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.20-1.fmi
+- Optimized to_iso_string and similar functions for speed
+
+* Fri Aug 14 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.14-1.fmi
+- New classes AsyncTask and AsyncTaskGroup (should replace earlier TaskGroup)
+
+* Fri Aug  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.7-1.fmi
+- Fix race conditions in Fmi::TaskGroup
+
+* Wed Aug  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.5-2.fmi
+- Remove earlier RPM build directory before building RPM
+
+* Wed Aug  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.5-1.fmi
+- Update stopping DirectoryMonitor::run() (use std::contdition_variable)
+
 * Fri Jul 31 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.7.31-1.fmi
 - Upgraded libpqxx to version 5
 
