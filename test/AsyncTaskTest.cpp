@@ -110,7 +110,7 @@ namespace AsyncTaskTest {
           [] () {
               std::this_thread::sleep_for(std::chrono::milliseconds(50));
           },
-          &cond);
+          [&cond]() { cond.notify_all(); });
 
       std::unique_lock<std::mutex> lock(m);
       if (!cond.wait_for(lock, std::chrono::milliseconds(100), [&task]() { return task.ended(); })) {

@@ -25,7 +25,27 @@ namespace Fmi
     static bool silent;
 
   public:
-    AsyncTask(const std::string& name, std::function<void()> task, std::condition_variable* cond = nullptr);
+    /**
+     *   @brief Constructor: creates AsyncTask object
+     *
+     *   @param name Name of task for logging purpose
+     *   @param task function to perform in the task
+     *   @param notify function to call when requested function has ended (any reason - success, interrupted, exception thrown)
+     *
+     *   Notification callback is called from task thread, so locking may be required
+     */
+    AsyncTask(
+        const std::string& name,
+        std::function<void()> task,
+        std::function<void()> notify = std::function<void()>());
+
+    // FIXME: remove after AsyncTaskGroup is updated
+    // WARNING: do not share provided std::condition_variable objects with other AsyncTask:s
+    AsyncTask(
+        const std::string& name,
+        std::function<void()> task,
+        std::condition_variable* cond);
+
     virtual ~AsyncTask();
 
     void wait();
@@ -55,7 +75,7 @@ namespace Fmi
     mutable std::mutex m1;
     std::atomic<Status> status;
     std::atomic<bool> done;
-    std::atomic<std::condition_variable*> cond;
+    const std::function<void()> notify;
     std::exception_ptr ex;
     boost::thread task_thread;
   };

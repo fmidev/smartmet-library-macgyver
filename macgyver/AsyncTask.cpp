@@ -6,13 +6,26 @@
 
 bool Fmi::AsyncTask::silent = false;
 
-Fmi::AsyncTask::AsyncTask(const std::string& name, std::function<void()> task, std::condition_variable* cond)
+Fmi::AsyncTask::AsyncTask(
+    const std::string& name,
+    std::function<void()> task,
+    std::function<void()> notify)
+
     : name(name)
     , status(none)
     , done(false)
-    , cond(cond)
+    , notify(notify)
     , ex(nullptr)
     , task_thread([this, task] () { run(task); })
+{
+}
+
+Fmi::AsyncTask::AsyncTask(
+    const std::string& name,
+    std::function<void()> task,
+    std::condition_variable* cond)
+
+    : AsyncTask(name, task, [cond]() { if (cond) { cond->notify_all(); } })
 {
 }
 
@@ -104,8 +117,8 @@ void Fmi::AsyncTask::handle_result(Status status, std::exception_ptr ex)
     this->status = status;
     this->ex = ex;
     lock.unlock();
-    if (cond) {
-        (*cond).notify_all();
+    if (notify) {
+        notify();
     }
 }
 
