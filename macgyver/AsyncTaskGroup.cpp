@@ -22,9 +22,10 @@ void Fmi::AsyncTaskGroup::add(const std::string& name, std::function<void()> tas
   }
 
   std::size_t id = ++counter;
-  std::unique_lock<std::mutex> lock(m1);
-  active_tasks.emplace(id, new AsyncTask(name, task,
+  std::shared_ptr<AsyncTask> new_task(new AsyncTask(name, task,
           std::bind(&Fmi::AsyncTaskGroup::on_task_completed_callback, this, id)));
+  std::unique_lock<std::mutex> lock(m1);
+  active_tasks[id] = new_task;
 }
 
 void Fmi::AsyncTaskGroup::wait()
