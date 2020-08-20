@@ -158,6 +158,42 @@ std::string to_iso_string(const boost::posix_time::time_duration& duration)
   return ret;
 }
 
+// Convert a duration to string of form HH:MM:SS[,fffffff]
+std::string to_simple_string(const boost::posix_time::time_duration& duration)
+{
+  if (duration.is_special()) return boost::posix_time::to_simple_string(duration);
+
+  char buffer[9];
+  char* ptr = buffer + 9;
+  *--ptr = '\0';
+  unsigned index = duration.seconds() * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  *--ptr = ':';
+  index = duration.minutes() * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  *--ptr = ':';
+  index = duration.hours() * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  if (duration.is_negative()) *--ptr = '-';
+  std::string ret(ptr);
+
+  auto frac_sec = duration.fractional_seconds();
+  if (frac_sec != 0)
+  {
+    std::string fmt = ",%0" + Fmi::to_string(duration.num_fractional_digits()) + "ld";
+    ret += fmt::sprintf(fmt, frac_sec);
+  }
+  return ret;
+}
+
+std::string to_iso_extended_string(const boost::posix_time::time_duration& duration)
+{
+  return Fmi::to_simple_string(duration);
+}
+
 // Convert date to form YYYY-mmm-DD string where mmm 3 char month name
 std::string to_simple_string(const boost::gregorian::date& date)
 {
