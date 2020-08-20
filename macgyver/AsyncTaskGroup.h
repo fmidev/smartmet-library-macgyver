@@ -2,7 +2,7 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <list>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -25,7 +25,7 @@ namespace Fmi
     /**
      *  @brief Total number of tasks added
      */
-    std::size_t get_task_count() const { return total_tasks; }
+    std::size_t get_task_count() const { return counter; }
 
     /**
      *  @brief Get number of tasks ended successfully
@@ -57,14 +57,15 @@ namespace Fmi
 
   private:
     bool wait_some();
-    bool extract_finished(std::queue<std::shared_ptr<Fmi::AsyncTask> >& finished_tasks);
+    void on_task_completed_callback(std::size_t task_id);
 
   private:
+    std::atomic<std::size_t> counter;
     std::size_t max_paralell_tasks;
     mutable std::mutex m1;
     std::condition_variable cond;
-    std::list<std::shared_ptr<AsyncTask> > task_list;
-    std::atomic<std::size_t> total_tasks;
+    std::map<std::size_t, std::shared_ptr<AsyncTask> > active_tasks;
+    std::queue<std::shared_ptr<AsyncTask> > completed_tasks;
     std::atomic<std::size_t> num_suceeded;
     std::atomic<std::size_t> num_failed;
     boost::signals2::signal<void(const std::string&)> signal_task_ended;
