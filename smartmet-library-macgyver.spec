@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.8.14
+Version: 20.8.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -82,6 +82,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Aug 20 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.20-1.fmi
+- Optimized to_iso_string and similar functions for speed
+
 * Fri Aug 14 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.14-1.fmi
 - New classes AsyncTask and AsyncTaskGroup (should replace earlier TaskGroup)
 
