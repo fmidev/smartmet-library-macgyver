@@ -163,8 +163,8 @@ std::string to_simple_string(const boost::posix_time::time_duration& duration)
 {
   if (duration.is_special()) return boost::posix_time::to_simple_string(duration);
 
-  char buffer[9];
-  char* ptr = buffer + 9;
+  char buffer[10];
+  char* ptr = buffer + 10;
   *--ptr = '\0';
   unsigned index = duration.seconds() * 2;
   *--ptr = digits[index + 1];
@@ -307,6 +307,39 @@ std::string to_iso_string(const boost::posix_time::ptime& time)
     ret += fmt::sprintf(fmt, frac_sec);
   }
   return ret;
+}
+
+// Convert to form YYYYMMDDTHHMM
+std::string to_timestamp_string(const boost::posix_time::ptime& time)
+{
+  if (time.is_special()) return boost::posix_time::to_iso_string(time);
+
+  const auto& date = time.date();
+  const auto& duration = time.time_of_day();
+  boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+
+  char buffer[13];
+  char* ptr = buffer + 13;
+  *--ptr = '\0';
+  auto index = duration.minutes() * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = duration.hours() * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = ymd.day * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = ymd.month * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = (ymd.year % 100) * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = (ymd.year / 100) * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  return std::string(ptr);
 }
 
 // Convert to form YYYY-MM-DDTHH:MM:SS,fffffffff where T is the date-time separator

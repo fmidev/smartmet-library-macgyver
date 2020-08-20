@@ -4,7 +4,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 20.8.20
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -82,6 +82,11 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Aug 20 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.20-2.fmi
+- Fixed buffer underflow in to_simple_string for negative time durations
+- Added speed optimized Fmi::to_timestamp_string which generates legacy YYYYMMDDHHMI strings
+- Fixed AsyncTaskGroup
+
 * Thu Aug 20 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.20-1.fmi
 - Optimized to_iso_string and similar functions for speed
 
