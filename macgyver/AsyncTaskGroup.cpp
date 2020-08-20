@@ -18,15 +18,15 @@ Fmi::AsyncTaskGroup::~AsyncTaskGroup()
 
 void Fmi::AsyncTaskGroup::add(const std::string& name, std::function<void()> task)
 {
-  if (!stop_requested) {
-    while (get_num_active_tasks() >= max_paralell_tasks) {
-      wait_some();
-    }
+  while (get_num_active_tasks() >= max_paralell_tasks) {
+    wait_some();
+  }
 
+  std::unique_lock<std::mutex> lock(m1);
+  if (!stop_requested) { 
     std::size_t id = ++counter;
     std::shared_ptr<AsyncTask> new_task(new AsyncTask(name, task,
             std::bind(&Fmi::AsyncTaskGroup::on_task_completed_callback, this, id)));
-    std::unique_lock<std::mutex> lock(m1);
     active_tasks[id] = new_task;
   }
 }
