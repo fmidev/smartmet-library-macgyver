@@ -30,13 +30,22 @@ namespace AsyncTaskTest {
             "not waiting for result",
             [&]()
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                for (int i = 0; i < 100; i++) {
+                    Fmi::AsyncTask::interruption_point();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                }
                 test = 1;
             }));
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    ptime t1 = microsec_clock::universal_time();
     task.reset();
-    if (test != 1) { TEST_FAILED("Variable not updated as expected by task"); }
-    TEST_PASSED();
+    ptime t2 = microsec_clock::universal_time();
+    if ((t2-t1).total_milliseconds() > 50) {
+        //std::cout << "\n" << (t2 - t1) << std::endl;
+        TEST_FAILED("Task not stopped as expected when wait for completion missing");
+    }
+    if (test != 0) { TEST_FAILED("Variable not updated as expected by task"); }
+     TEST_PASSED();
   }
 
   void not_waiting_for_result_2()
@@ -132,7 +141,7 @@ namespace AsyncTaskTest {
           [] () {
               /* Do nothing */
           },
-          &cond);
+          [&cond]() { cond.notify_all(); });
 
       std::unique_lock<std::mutex> lock(m);
       if (!cond.wait_for(lock, std::chrono::milliseconds(100), [&task]() { return task.ended(); })) {
@@ -162,7 +171,7 @@ namespace AsyncTaskTest {
     void test(void)
     {
       Fmi::AsyncTask::silent = true;
-      //TEST(not_waiting_for_result);
+      TEST(not_waiting_for_result);
       TEST(not_waiting_for_result_2);
       TEST(single_task);
       TEST(task_throws_not_std_exception);

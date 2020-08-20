@@ -39,13 +39,6 @@ namespace Fmi
         std::function<void()> task,
         std::function<void()> notify = std::function<void()>());
 
-    // FIXME: remove after AsyncTaskGroup is updated
-    // WARNING: do not share provided std::condition_variable objects with other AsyncTask:s
-    AsyncTask(
-        const std::string& name,
-        std::function<void()> task,
-        std::condition_variable* cond);
-
     virtual ~AsyncTask();
 
     void wait();

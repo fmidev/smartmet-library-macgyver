@@ -20,19 +20,11 @@ Fmi::AsyncTask::AsyncTask(
 {
 }
 
-Fmi::AsyncTask::AsyncTask(
-    const std::string& name,
-    std::function<void()> task,
-    std::condition_variable* cond)
-
-    : AsyncTask(name, task, [cond]() { if (cond) { cond->notify_all(); } })
-{
-}
-
 Fmi::AsyncTask::~AsyncTask()
 {
     if (task_thread.joinable()) {
         try {
+            cancel();
             wait();
         } catch (const std::exception& e) {
             if (!silent) {
