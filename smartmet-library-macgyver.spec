@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.8.20
-Release: 3%{?dist}.fmi
+Version: 20.8.21
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -15,19 +15,19 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: imake
-BuildRequires: smartmet-timezones >= 19.7.29
+BuildRequires: smartmet-timezones >= 20.5.5
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
-BuildRequires: fmt-devel >= 5.2.0
+BuildRequires: fmt-devel >= 6.2.1
 BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 19.7.29
+#TestRequires: smartmet-timezones >= 20.5.5
 #TestRequires: fmt-devel
 #TestRequires: boost169-devel
 #TestRequires: postgresql95-libs
-Requires: fmt >= 5.2.0
+Requires: fmt >= 6.2.1
 Requires: ctpp2
 Requires: libicu >= 50.2
 Requires: boost169-date-time
@@ -35,6 +35,7 @@ Requires: boost169-filesystem
 Requires: boost169-thread
 Requires: boost169-system
 Requires: boost169-regex
+Requires: boost169-chrono
 Requires: libpqxx
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
@@ -82,6 +83,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
+- Upgrade to fmt 6.2
+
 * Thu Aug 20 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.20-3.fmi
 - More AsyncTaskGroup updates
 
