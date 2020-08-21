@@ -95,6 +95,7 @@ LIBS += -L$(libdir) \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_filesystem \
+	-lboost_chrono \
 	-lboost_thread \
 	-lboost_system \
         -lpqxx \

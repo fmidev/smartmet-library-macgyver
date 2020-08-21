@@ -124,6 +124,24 @@ namespace AsyncTaskGroupTest {
     TEST_PASSED();
   }
 
+  void try_adding_task_after_stop_request()
+  {
+    std::atomic<int> counter(0);
+    std::unique_ptr<Fmi::AsyncTaskGroup> tg(new Fmi::AsyncTaskGroup(10));
+    tg->add("task 1", [&counter]() { counter++; });
+    tg->wait();
+    tg->stop();
+    tg->add("task ", [&counter]() { counter++; });
+    tg->wait();
+    switch (int(counter)) {
+    case 0: TEST_FAILED("No task executed"); break;
+    case 1: break;
+    case 2: TEST_FAILED("Task added after stop should not be executed"); break;
+    default: TEST_FAILED("Unexpected value of counter"); break;
+    }
+    TEST_PASSED();
+  }
+
   // ----------------------------------------------------------------------
   /*!
    * The actual test suite
@@ -142,6 +160,7 @@ namespace AsyncTaskGroupTest {
       TEST(task_throws_not_std_exception);
       TEST(large_number_of_tasks);
       TEST(test_interrupting_1);
+      TEST(try_adding_task_after_stop_request);
     }
   };
 
