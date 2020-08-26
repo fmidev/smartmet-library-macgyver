@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.8.21
+Version: 20.8.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -83,6 +83,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug 26 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.8.26-1.fmi
+- More AsyncTaskGroup ABI changes (new method stop_on_error(), new data member)
+
 * Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
 - Upgrade to fmt 6.2
 
