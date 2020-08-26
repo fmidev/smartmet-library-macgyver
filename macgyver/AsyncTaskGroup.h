@@ -51,9 +51,15 @@ namespace Fmi
     /**
      *  @brief Specifies callback to be called when task has failed (threw as exception)
      *
-     *  Called from method wait()
+     *  Called from method wait() while handling the exception.
      */
     boost::signals2::connection on_task_error(std::function<void(const std::string&)> callback);
+
+    /**
+     *  @brief Specifies whether all tasks should interrupted when one or more are noticed failing
+     *         (exception thrown)
+     */
+    bool stop_on_error(bool enable);
 
   private:
     bool wait_some();
@@ -71,5 +77,6 @@ namespace Fmi
     boost::signals2::signal<void(const std::string&)> signal_task_ended;
     boost::signals2::signal<void(const std::string&)> signal_task_failed;
     std::atomic<bool> stop_requested;
+    std::atomic<bool> stop_on_error_;
   };
 };
