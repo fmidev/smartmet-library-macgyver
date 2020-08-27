@@ -80,6 +80,11 @@ bool Fmi::AsyncTaskGroup::wait_some()
   });
   lock.unlock();
 
+  return handle_finished();
+}
+
+bool Fmi::AsyncTaskGroup::handle_finished()
+{
   std::unique_lock<std::mutex> lock2(m1);
   if (completed_tasks.empty()) {
       return false;

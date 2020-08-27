@@ -18,8 +18,36 @@ namespace Fmi
     AsyncTaskGroup(std::size_t max_paralell_tasks = 30);
     virtual ~AsyncTaskGroup();
 
+    /**
+     *   @brief Add a new task
+     *
+     *   May block if the number of maximal paralell tasks is achieved
+     *   (wait for some tasks ton complete)
+     */
     void add(const std::string& name, std::function<void()> task);
+
+    /**
+     *   @brief Wait for all added tasks to end
+     *
+     *   Any type of ending is accepted:
+     *   - success      - callback provided in call to method on_task_ended is called
+     *   - failed       - unhandled C++ exception in task. Callback provided in call to
+     *                    method on_task_failed is called from exception handler
+     *   - interrupted  - task ended due to call to method stop
+     */
     void wait();
+
+    /**
+     *   @brief Handle completion of already finished tasks (if there is any) and do not
+     *          for any more to finish
+     *
+     *   Used callbacks are same as for method wait (wait uses handle_finished internally)
+     */
+    bool handle_finished();
+
+    /**
+     *   @brief Requests all active tasks to stop and do not accept any more
+     */
     void stop();
 
     /**
