@@ -65,6 +65,11 @@ Fmi::AsyncTaskGroup::on_task_error(std::function<void(const std::string&)> callb
   return signal_task_failed.connect(callback);
 }
 
+bool Fmi::AsyncTaskGroup::stop_on_error(bool enable)
+{
+  return stop_on_error_.exchange(enable);
+}
+
 bool Fmi::AsyncTaskGroup::wait_some()
 {
   std::mutex m2;
@@ -75,10 +80,16 @@ bool Fmi::AsyncTaskGroup::wait_some()
   });
   lock.unlock();
 
+  return handle_finished();
+}
+
+bool Fmi::AsyncTaskGroup::handle_finished()
+{
   std::unique_lock<std::mutex> lock2(m1);
   if (completed_tasks.empty()) {
       return false;
   } else  {
+      bool some_failed = false;
       std::shared_ptr<AsyncTask> task = completed_tasks.front();
       completed_tasks.pop();
       lock2.unlock();
@@ -90,9 +101,17 @@ bool Fmi::AsyncTaskGroup::wait_some()
               num_suceeded++;
           }
       } catch (...) {
+          some_failed = true;
           num_failed++;
           signal_task_failed(task->get_name());
       }
+
+      if (stop_on_error_ && some_failed) {
+          stop();
+          throw std::runtime_error(METHOD_NAME + " : one ore more tasks failed with C++ exceptions."
+              " Stopping remaining tasks");
+      }
+
       return true;
   }
 }

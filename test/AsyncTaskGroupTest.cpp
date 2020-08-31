@@ -142,6 +142,49 @@ namespace AsyncTaskGroupTest {
     TEST_PASSED();
   }
 
+  void test_stop_on_error()
+  {
+    std::atomic<int> counter(0);
+    const auto task_1 = [&] ()
+        {
+            for (int i = 0; i < 10; i++) {
+                Fmi::AsyncTask::interruption_point();
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            }
+            counter++;
+        };
+
+    const auto task_2 = [] () { throw std::runtime_error("An error"); };
+
+    std::unique_ptr<Fmi::AsyncTaskGroup> tg(new Fmi::AsyncTaskGroup(10));
+    tg->stop_on_error(true);
+    tg->add("task 1a", task_1);
+    tg->add("task 1b", task_1);
+    tg->add("task_2", task_2);
+
+    const ptime t1 = microsec_clock::universal_time();
+
+    try {
+        tg->wait();
+        TEST_FAILED("Excepted exception not thrown");
+    } catch (const tframe::failed&) {
+        throw;
+    } catch (const std::runtime_error&) {
+    }
+
+    const ptime t2 = microsec_clock::universal_time();
+    if ((t2-t1).total_milliseconds() > 30) {
+        TEST_FAILED("Did not stop in time");
+    }
+
+    if (counter != 0) {
+        TEST_FAILED("Tasks not stopped as expected");
+    }
+
+    TEST_PASSED();
+  }
+
+
   // ----------------------------------------------------------------------
   /*!
    * The actual test suite
@@ -161,6 +204,7 @@ namespace AsyncTaskGroupTest {
       TEST(large_number_of_tasks);
       TEST(test_interrupting_1);
       TEST(try_adding_task_after_stop_request);
+      TEST(test_stop_on_error);
     }
   };
 
