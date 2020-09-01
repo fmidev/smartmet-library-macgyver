@@ -42,15 +42,18 @@ unsigned long stoul(const std::string& str);
 float stof(const std::string& str);
 double stod(const std::string& str);
 
-std::string to_iso_string(const boost::posix_time::time_duration& date);
-std::string to_iso_extended_string(const boost::posix_time::time_duration& date);
-std::string to_simple_string(const boost::gregorian::date& date);
+std::string to_iso_string(const boost::posix_time::time_duration& duration);
+std::string to_simple_string(const boost::posix_time::time_duration& duration);
+// this has been accidentally named incorrectly
+std::string to_iso_extended_string(const boost::posix_time::time_duration& duration);
 std::string to_iso_string(const boost::gregorian::date& date);
+std::string to_simple_string(const boost::gregorian::date& date);
 std::string to_iso_extended_string(const boost::gregorian::date& date);
 std::string to_simple_string(const boost::posix_time::ptime& time);
 std::string to_iso_string(const boost::posix_time::ptime& time);
 std::string to_iso_extended_string(const boost::posix_time::ptime& time);
 std::string to_http_string(const boost::posix_time::ptime& time);
+std::string to_timestamp_string(const boost::posix_time::ptime& time);
 
 void ascii_tolower(std::string& input);
 

@@ -40,12 +40,16 @@ class Fmi::TemplateFormatter::Logger : public CTPP::Logger
   std::ostream& ost;
 
  public:
+#ifdef __llvm__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
 
   Logger(std::ostream& the_ost, const UINT_32 priority) : CTPP::Logger(priority), ost(the_ost) {}
 
+#ifdef __llvm__
 #pragma clang diagnostic pop
+#endif
 
   virtual INT_32 WriteLog(const UINT_32 priority, CCHAR_P szString, const UINT_32 stringlen)
   {
