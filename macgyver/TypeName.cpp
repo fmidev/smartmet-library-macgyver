@@ -1,4 +1,3 @@
-#ifdef UNIX
 
 #include "TypeName.h"
 #include <boost/core/demangle.hpp>
@@ -11,7 +10,9 @@ std::string Fmi::demangle_cpp_type_name(const std::string& src)
 
 std::string Fmi::current_exception_type()
 {
+#ifdef UNIX
   return demangle_cpp_type_name(abi::__cxa_current_exception_type()->name());
-}
-
+#else
+  return "";
 #endif
+}
