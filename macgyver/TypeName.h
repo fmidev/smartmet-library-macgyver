@@ -15,8 +15,6 @@
 
 #pragma once
 
-#ifdef UNIX
-
 #include <string>
 #include <typeinfo>
 
@@ -47,5 +45,3 @@ std::string current_exception_type();
 
 // Works with Visual Studio too
 #define METHOD_NAME (Fmi::get_type_name(this) + "::" + __FUNCTION__)
-
-#endif
