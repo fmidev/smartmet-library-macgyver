@@ -6,6 +6,12 @@
 #include <map>
 #include <string>
 
+#ifdef _MSC_VER
+// This enables 'not', 'or', 'and', etc logical keywords in Visual C++ compilers (implemented by
+// macro definitions),// use !, ||, &&, etc instead, if you want to get rid of this ugly inclusion.
+#include <ciso646>
+#endif
+
 namespace Fmi
 {
 namespace TimedCache
