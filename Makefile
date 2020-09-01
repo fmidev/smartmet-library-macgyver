@@ -95,6 +95,7 @@ LIBS += -L$(libdir) \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_filesystem \
+	-lboost_chrono \
 	-lboost_thread \
 	-lboost_system \
         -lpqxx \
@@ -150,6 +151,7 @@ $(LIBFILE): $(OBJS)
 clean:
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
 	rm -rf $(objdir)
+	$(MAKE) -C test clean
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
@@ -165,8 +167,8 @@ install:
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
-test:
-	$(MAKE) -C $@ test
+test test-installed:
+	$(MAKE) -C test $@
 
 objdir:
 	@mkdir -p $(objdir)
