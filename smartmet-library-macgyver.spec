@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.8.31
+Version: 20.9.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -83,6 +83,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Sep  3 2020 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 20.9.3-1.fmi
+- Added Fmi::Exception with the intent of gradually moving away from SmartMet::Spine::Exception
+
 * Mon Aug 31 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.31-1.fmi
 - Added FastMath.h
 

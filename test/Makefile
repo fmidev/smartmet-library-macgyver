@@ -64,6 +64,14 @@ ifneq "$(wildcard /usr/include/boost169)" ""
   LIBS += -L/usr/lib64/boost169
 endif
 
+# PGSQL
+
+ifneq "$(wildcard /usr/pgsql-12/lib)" ""
+  LIBS += -L$(PREFIX)/pgsql12-lib -l:libpq.so.5
+else
+  LIBS += -I/usr/pgsql-9.5/lib -l:libpq.so.5
+endif
+
 INCLUDES += $(MACGYVER_INCLUDES) -I /usr/include/smartmet
 
 LIBS += $(MACGYVER_LDFLAGS) \
@@ -74,9 +82,7 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	-lboost_thread \
 	-lboost_chrono \
 	-lboost_system \
-	-L/usr/pgsql-9.5/lib -l:libpq.so.5 \
 	-lpthread
-
 
 
 all: $(PROG)
