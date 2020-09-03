@@ -69,7 +69,7 @@ endif
 ifneq "$(wildcard /usr/pgsql-12/lib)" ""
   LIBS += -L$(PREFIX)/pgsql12-lib -l:libpq.so.5
 else
-  LIBS += -I/usr/pgsql-9.5/lib -l:libpq.so.5
+  LIBS += -L$(PREFIX)/pgsql-9.5/lib -l:libpq.so.5
 endif
 
 INCLUDES += $(MACGYVER_INCLUDES) -I /usr/include/smartmet
