@@ -6,7 +6,7 @@ CXX_STD ?= c++11
 ifneq ($(findstring clang++,$(CXX)),)
 USE_CLANG=yes
 else
-USE_CLANF=no
+USE_CLANG=no
 endif
 
 processor := $(shell uname -p)
