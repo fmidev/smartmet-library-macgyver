@@ -1,5 +1,7 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 
+include ../common.mk
+
 MAINFLAGS = -Wall -W -Wno-unused-parameter -fsanitize=thread
 
 EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
@@ -10,17 +12,18 @@ EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 
 DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
-CC = g++
 CFLAGS = -DUNIX -O0 -g $(MAINFLAGS)
 
-INCLUDES = -I../macgyver \
+INCLUDES += -I../macgyver \
         -I/usr/include/smartmet
 
-LIBS = -L.. -lsmartmet-macgyver \
+LIBS += -L.. -lsmartmet-macgyver \
+	-lboost_regex \
         -lboost_filesystem \
         -lboost_system \
         -lboost_iostreams \
 	-lboost_thread \
+	-lboost_system \
 	-lpthread
 
 all: $(PROG) examples
@@ -35,4 +38,4 @@ examples: $(PROG)
 	done
 
 $(PROG) : % : %.cpp ../libsmartmet-macgyver.so
-	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
+	$(CXX) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
