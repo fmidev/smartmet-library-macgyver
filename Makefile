@@ -24,9 +24,7 @@ ifeq ($(USE_CLANG), yes)
 	-Wno-padded \
 	-Wno-missing-prototypes
 
- INCLUDES += \
-	-I $(includedir)/smartmet \
-	-isystem $(includedir)
+ INCLUDES += -I $(includedir)/smartmet $(SYSTEM_INCLUDES)
 
 else
 

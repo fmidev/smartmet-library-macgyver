@@ -9,14 +9,6 @@ include ../common.mk
 
 FLAGS = -Wall -W -Wno-unused-parameter -fdiagnostics-color=$(GCC_DIAG_COLOR)
 
-EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
-	-Wcast-align -Wwrite-strings -Wconversion -Winline \
-	-Wctor-dtor-privacy -Wnon-virtual-dtor -Wno-pmf-conversions \
-	-Wsign-promo -Wchar-subscripts -Wold-style-cast \
-	-Wshadow -Woverloaded-virtual
-
-DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
-
 ifeq ($(TSAN), yes)
   FLAGS += -fsanitize=thread
 endif
@@ -25,6 +17,10 @@ ifeq ($(ASAN), yes)
 endif
 
 CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=$(CXX_STD) $(FLAGS)
+
+ifeq ($(USE_CLANG),yes)
+CharsetToolsTest: CFLAGS += -Wno-invalid-source-encoding
+endif
 
 ifneq (,$(findstring test-installed,$(MAKECMDGOALS)))
 

@@ -28,6 +28,12 @@ includedir = $(PREFIX)/include
 datadir = $(PREFIX)/share
 objdir = obj
 
+ifeq ($(PREFIX),/usr)
+  SYSTEM_INCLUDES =
+else
+  SYSTEM_INCLUDES = -isystem $(includedir)
+endif
+
 ifneq "$(wildcard /usr/include/boost169)" ""
   INCLUDES += -isystem /usr/include/boost169
   LIBS += -L/usr/lib64/boost169
