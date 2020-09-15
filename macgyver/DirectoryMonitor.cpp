@@ -202,8 +202,8 @@ class DirectoryMonitor::Pimple
   boost::atomic<bool> stop{false};   // true if stop request is pending
   boost::atomic<bool> isready{false};  // true if at least one scan has completed
 
-  std::mutex m2;
-  std::condition_variable cond;
+  boost::mutex m2;
+  boost::condition_variable cond;
 
   Watcher nextid = 0;
 };
@@ -221,7 +221,15 @@ DirectoryMonitor::DirectoryMonitor() : impl(new Pimple()) {}
  */
 // ----------------------------------------------------------------------
 
-DirectoryMonitor::~DirectoryMonitor() {}
+DirectoryMonitor::~DirectoryMonitor()
+{
+  if (impl->running) {
+    std::cout << "[CRITICAL]: Fmi::DirectoryMonitor::~DirectoryMonitor:"
+              << " missing call to Fmi::DirectoryMonitor::stop() before destroying object\n"
+              << std::flush;
+    abort();
+  }
+}
 
 // ----------------------------------------------------------------------
 /*
@@ -335,6 +343,7 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(
 // ----------------------------------------------------------------------
 
 void DirectoryMonitor::run()
+try
 {
   // Do not start if already running
 
@@ -347,6 +356,8 @@ void DirectoryMonitor::run()
 
     while (checknext)
     {
+      boost::this_thread::interruption_point();
+
       WriteLock lock(impl->mutex);
       std::time_t tnow = std::time(nullptr);
       std::time_t tcheck = impl->schedule.begin()->first;
@@ -445,8 +456,8 @@ void DirectoryMonitor::run()
 
     if (sleeptime > 0)
     {
-      std::unique_lock<std::mutex> lock(impl->m2);
-      impl->cond.wait_for(lock, std::chrono::seconds(sleeptime),
+      boost::unique_lock<boost::mutex> lock(impl->m2);
+      impl->cond.wait_for(lock, boost::chrono::seconds(sleeptime),
           [this]() -> bool { return impl->stop; });
     }
   }
@@ -454,6 +465,9 @@ void DirectoryMonitor::run()
   // Not running anymore. This order so that locking is not necessary
   impl->stop = false;
   impl->running = false;
+} catch (const boost::thread_interrupted&) {
+  impl->running = false;
+  throw;
 }
 
 // ----------------------------------------------------------------------
