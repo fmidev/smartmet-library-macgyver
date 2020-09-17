@@ -1025,10 +1025,8 @@ class Cache : public boost::noncopyable
 
       // Make tagSet
       TagSetType tagSet;
-      for (auto it = tags.begin(); it != tags.end(); ++it)
-      {
-        tagSet.insert(*it);
-      }
+      for (const auto& tag : tags)
+        tagSet.insert(tag);
 
       // Perform insertion
       result =
@@ -1038,15 +1036,15 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
-        for (auto it = tags.begin(); it != tags.end(); ++it)
+        for (const auto& tag : tags)
         {
           // Check and update tags
           // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(*it);
+          auto tagIt = itsTagMap.find(tag);
           if (tagIt == itsTagMap.end())
           {
             itsTagMap.insert(typename TagMapType::value_type(
-                *it, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
+                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
           }
           else
           {
@@ -1093,10 +1091,8 @@ class Cache : public boost::noncopyable
 
       // Make tagSet
       TagSetType tagSet;
-      for (auto it = tags.begin(); it != tags.end(); ++it)
-      {
-        tagSet.insert(*it);
-      }
+      for (const auto& tag : tags)
+        tagSet.insert(tag);
 
       // Perform insertion
       result =
@@ -1106,15 +1102,15 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
-        for (auto it = tags.begin(); it != tags.end(); ++it)
+        for (const auto& tag : tags)
         {
           // Check and update tags
           // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(*it);
+          auto tagIt = itsTagMap.find(tag);
           if (tagIt == itsTagMap.end())
           {
             itsTagMap.insert(typename TagMapType::value_type(
-                *it, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
+                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
           }
           else
           {
