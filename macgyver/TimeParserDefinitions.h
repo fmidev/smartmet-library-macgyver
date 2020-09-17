@@ -8,8 +8,8 @@
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/optional.hpp>
-#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 #include <string>
 
@@ -135,20 +135,20 @@ struct SQLParser : qi::grammar<Iterator, TimeStamp()>
   {
     using namespace qi;
     number = uint_;
-    month %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=1U && _val<=12U)];
-    mday %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=1U && _val<=31U)];
-    hour %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=0U && _val<=23U)];
-    minsec %= uint_parser<unsigned int, 10, 1, 2>()[_pass=(_val>=0U && _val<=59U)];
+    month %= uint_parser<unsigned int, 10, 1, 2>()[_pass = (_val >= 1U && _val <= 12U)];
+    mday %= uint_parser<unsigned int, 10, 1, 2>()[_pass = (_val >= 1U && _val <= 31U)];
+    hour %= uint_parser<unsigned int, 10, 1, 2>()[_pass = (_val >= 0U && _val <= 23U)];
+    minsec %= uint_parser<unsigned int, 10, 1, 2>()[_pass = (_val >= 0U && _val <= 59U)];
 
-    fulltime = number >> '-'                   // Year
-               >> month                        // Month
-               >> '-' >> mday                  // Day
-               >> qi::omit[*qi::ascii::blank]  // Any number of blanks
-               >> -hour                      // Optional hour
-               >> -(':' >> minsec)             // Optional minute
-               >> -(':' >> minsec >>              // Optional second
-                   -('.' >> qi::omit[*qi::ascii::digit])) // Skip seconds part if present
-               >> qi::eoi;                     // End-of-input
+    fulltime = number >> '-'                                // Year
+               >> month                                     // Month
+               >> '-' >> mday                               // Day
+               >> qi::omit[*qi::ascii::blank]               // Any number of blanks
+               >> -hour                                     // Optional hour
+               >> -(':' >> minsec)                          // Optional minute
+               >> -(':' >> minsec >>                        // Optional second
+                    -('.' >> qi::omit[*qi::ascii::digit]))  // Skip seconds part if present
+               >> qi::eoi;                                  // End-of-input
 
 #ifdef MYDEBUG
     BOOST_SPIRIT_DEBUG_NODE(number);
@@ -173,8 +173,7 @@ template <typename Iterator>
 struct FMIParser : qi::grammar<Iterator, TimeStamp()>
 {
   using FourDigitNumber = qi::uint_parser<unsigned int, 10, 4, 4>;  // Radix 10, exactly 4 digits
-  using TwoDigitNumber = qi::uint_parser<unsigned int, 10, 2, 2>;
-  ;  // Radix 10, exactly 2 digits
+  using TwoDigitNumber = qi::uint_parser<unsigned int, 10, 2, 2>;   // Radix 10, exactly 2 digits
 
   FMIParser() : FMIParser::base_type(fmitime)
   {
@@ -281,15 +280,15 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
 
     hmin = (uint12 >> &qi::omit[(qi::lit(':') | qi::lit('Z') | qi::eoi)]) | uint2;
 
-    // Possible ':' before number is included to avoid accepting 1 digit number without preceding ':'
-    second = (qi::omit[qi::lit(':')] >> uint12 >>&qi::omit[(qi::lit('.') | qi::lit('Z') | qi::eoi)])
-        | (optional_colon >> uint2);
+    // Possible ':' before number is included to avoid accepting 1 digit number without preceding
+    // ':'
+    second =
+        (qi::omit[qi::lit(':')] >> uint12 >> &qi::omit[(qi::lit('.') | qi::lit('Z') | qi::eoi)]) |
+        (optional_colon >> uint2);
 
-    isostamp = year >> optional_dash >> month >> optional_dash >> mday
-                    >> date_time_separator >> -hmin >> optional_colon >> -hmin
-                    >> -second >> optional_period >> -qi::omit[uint3]
-                    >> tz_parser
-                    >> qi::eoi;
+    isostamp = year >> optional_dash >> month >> optional_dash >> mday >> date_time_separator >>
+               -hmin >> optional_colon >> -hmin >> -second >> optional_period >> -qi::omit[uint3] >>
+               tz_parser >> qi::eoi;
 
 #ifdef MYDEBUG
     BOOST_SPIRIT_DEBUG_NODE(dash);
