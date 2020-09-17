@@ -1,4 +1,34 @@
+# User specific settings
+
 -include $(HOME)/.smartmet.mk
+
+# Installation
+
+INSTALL_PROG = install -p -m 775
+INSTALL_DATA = install -p -m 664
+
+ifeq ($(origin PREFIX), undefined)
+  PREFIX = /usr
+else
+  PREFIX = $(PREFIX)
+endif
+
+processor := $(shell uname -p)
+ifeq ($(processor), x86_64)
+  libdir = $(PREFIX)/lib64
+else
+  libdir = $(PREFIX)/lib
+endif
+
+bindir = $(PREFIX)/bin
+includedir = $(PREFIX)/include
+datadir = $(PREFIX)/share
+objdir = obj
+
+enginedir = $(datadir)/smartmet/engines
+plugindir = $(datadir)/smartmet/plugins
+
+# Compiler flags
 
 GCC_DIAG_COLOR ?= always
 
@@ -10,9 +40,7 @@ else
   CXX_STD ?= c++11
 endif
 
-FLAGS = \
-	-std=$(CXX_STD) \
-	-fdiagnostics-color=$(GCC_DIAG_COLOR) \
+FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
 	-ggdb3 -fPIC -fno-omit-frame-pointer \
 	-Wall -Wextra \
 	-Wno-unused-parameter
@@ -24,26 +52,25 @@ ifeq ($(USE_CLANG), yes)
   FLAGS_DEBUG += -Wshadow -Wweak-vtables -Wzero-as-null-pointer-constant
 endif
 
-processor := $(shell uname -p)
+# Sanitizer support
 
-ifeq ($(origin PREFIX), undefined)
-  PREFIX = /usr
-else
-  PREFIX = $(PREFIX)
+ifeq ($(TSAN), yes)
+  FLAGS += -fsanitize=thread
+endif
+ifeq ($(ASAN), yes)
+  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract \
+           -fsanitize=undefined -fsanitize-address-use-after-scope
 endif
 
-ifeq ($(processor), x86_64)
-  libdir = $(PREFIX)/lib64
+# Compile modes (debug / release)
+
+ifneq (,$(findstring debug,$(MAKECMDGOALS)))
+  CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)
 else
-  libdir = $(PREFIX)/lib
+  CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE)
 endif
 
-bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include
-datadir = $(PREFIX)/share
-objdir = obj
-enginedir = $(datadir)/smartmet/engines
-plugindir = $(datadir)/smartmet/plugins
+# Include paths and libs
 
 ifneq ($(PREFIX),/usr)
   INCLUDES += -isystem $(includedir)
@@ -73,25 +100,4 @@ ifeq ($(REQUIRES_PGSQL),yes)
   endif
 endif
 
-# How to install
 
-INSTALL_PROG = install -p -m 775
-INSTALL_DATA = install -p -m 664
-
-# Sanitizer support
-
-ifeq ($(TSAN), yes)
-  FLAGS += -fsanitize=thread
-endif
-ifeq ($(ASAN), yes)
-  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract \
-           -fsanitize=undefined -fsanitize-address-use-after-scope
-endif
-
-# Compile option overrides
-
-ifneq (,$(findstring debug,$(MAKECMDGOALS)))
-  CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)
-else
-  CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE)
-endif
