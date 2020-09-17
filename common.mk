@@ -17,8 +17,12 @@ FLAGS = \
 	-Wall -Wextra \
 	-Wno-unused-parameter
 
-FLAGS_DEBUG = -Og -Werror -Wpedantic -Wshadow -Wundef
+FLAGS_DEBUG = -Og -Werror -Wpedantic -Wundef
 FLAGS_RELEASE = -O2 -Wuninitialized
+
+ifeq ($(USE_CLANG), yes)
+  FLAGS_DEBUG += -Wshadow -Wweak-vtables -Wzero-as-null-pointer-constant
+endif
 
 processor := $(shell uname -p)
 
