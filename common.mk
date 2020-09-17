@@ -13,7 +13,7 @@ endif
 FLAGS = \
 	-std=$(CXX_STD) \
 	-fdiagnostics-color=$(GCC_DIAG_COLOR) \
-	-g3 -fPIC -fno-omit-frame-pointer \
+	-ggdb3 -fPIC -fno-omit-frame-pointer \
 	-Wall -Wextra \
 	-Wno-unused-parameter
 
