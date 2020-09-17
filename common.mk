@@ -88,10 +88,6 @@ ifeq ($(ASAN), yes)
            -fsanitize=undefined -fsanitize-address-use-after-scope
 endif
 
-# Compile options in detault, debug and profile modes
-CFLAGS         = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
-CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -Og -g
-
 # Compile option overrides
 
 ifneq (,$(findstring debug,$(MAKECMDGOALS)))
