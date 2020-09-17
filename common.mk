@@ -2,23 +2,23 @@
 
 GCC_DIAG_COLOR ?= always
 
-FLAGS += -fdiagnostics-color=$(GCC_DIAG_COLOR) -Wall -Wextra -fno-omit-frame-pointer -fPIC
-
 ifneq ($(findstring clang,$(CXX)),)
   USE_CLANG=yes
   CXX_STD ?= c++17
-  FLAGS += -std=$(CXX_STD) -Wno-c++98-compat -Wno-float-equal -Wno-padded -Wno-missing-prototypes -Wno-unused-parameter
-  FLAGS_DEBUG +=
-  FLAGS_RELEASE +=
 else
   USE_CLANG=no
   CXX_STD ?= c++11
-  FLAGS += -std=$(CXX_STD) -Wno-unused-parameter
-  FLAGS_DEBUG += -Wcast-align -Winline -Wno-multichar -Wno-pmf-conversions -Woverloaded-virtual \
-	-Wpointer-arith -Wcast-qual -Wwrite-strings -Wno-sign-promo -Wno-unknown-pragmas \
-	-Wno-inline
-  FLAGS_RELEASE += -Wuninitialized
 endif
+
+FLAGS = \
+	-std=$(CXX_STD) \
+	-fdiagnostics-color=$(GCC_DIAG_COLOR) \
+	-g3 -fPIC -fno-omit-frame-pointer \
+	-Wall -Wextra \
+	-Wno-unused-parameter
+
+FLAGS_DEBUG = -Og -Werror -Wpedantic -Wshadow -Wundef
+FLAGS_RELEASE = -O2 -Wuninitialized
 
 processor := $(shell uname -p)
 
@@ -87,14 +87,11 @@ endif
 # Compile options in detault, debug and profile modes
 CFLAGS         = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
 CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -Og -g
-CFLAGS_PROFILE = $(DEFINES) $(FLAGS) $(FLAGS_PROFILE) -DNDEBUG -O2 -g -pg
 
 # Compile option overrides
 
 ifneq (,$(findstring debug,$(MAKECMDGOALS)))
-  CFLAGS = $(CFLAGS_DEBUG)
-endif
-
-ifneq (,$(findstring profile,$(MAKECMDGOALS)))
-  CFLAGS = $(CFLAGS_PROFILE)
+  CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)
+else
+  CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE)
 endif

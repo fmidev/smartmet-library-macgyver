@@ -7,11 +7,11 @@ INCDIR = smartmet/$(SUBNAME)
 
 processor := $(shell uname -p)
 
-include common.mk
-
 # Compiler options
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
+
+include common.mk
 
 INCLUDES += $(pkg-config --cflags icu-i18n)
 
