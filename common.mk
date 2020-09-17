@@ -61,7 +61,7 @@ ifeq ($(REQUIRES_GDAL),yes)
     INCLUDES += -isystem /usr/gdal30/include
     LIBS += -L$(PREFIX)/gdal30/lib
   else
-    INCLUDES += -I/usr/include/gdal
+    INCLUDES += -isystem /usr/include/gdal
   endif
 endif
 
