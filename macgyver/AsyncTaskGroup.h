@@ -96,17 +96,17 @@ class AsyncTaskGroup : public boost::noncopyable
   void on_task_completed_callback(std::size_t task_id);
 
  private:
-  std::atomic<std::size_t> counter;
+  std::atomic_size_t counter;
   std::size_t max_paralell_tasks;
   mutable std::mutex m1;
   std::condition_variable cond;
   std::map<std::size_t, std::shared_ptr<AsyncTask> > active_tasks;
   std::queue<std::shared_ptr<AsyncTask> > completed_tasks;
-  std::atomic<std::size_t> num_suceeded;
-  std::atomic<std::size_t> num_failed;
+  std::atomic_size_t num_suceeded;
+  std::atomic_size_t num_failed;
   boost::signals2::signal<void(const std::string&)> signal_task_ended;
   boost::signals2::signal<void(const std::string&)> signal_task_failed;
-  std::atomic<bool> stop_requested;
-  std::atomic<bool> stop_on_error_;
+  std::atomic_bool stop_requested;
+  std::atomic_bool stop_on_error_;
 };
 }  // namespace Fmi
