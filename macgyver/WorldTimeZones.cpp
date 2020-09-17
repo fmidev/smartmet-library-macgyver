@@ -11,14 +11,15 @@
 // ======================================================================
 
 #include "WorldTimeZones.h"
+
 #include "StringConversion.h"
+
 #include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <stdexcept>
-
 #include <set>
+#include <stdexcept>
 
 namespace
 {
@@ -32,7 +33,7 @@ uint32_t read_pos(std::size_t thePos, char *theData)
 {
   std::size_t offset = thePos * (sizeof(uint32_t) + sizeof(uint16_t));
   uint32_t tmp;
-  memcpy(&tmp,theData+offset,sizeof(uint32_t));
+  memcpy(&tmp, theData + offset, sizeof(uint32_t));
   return tmp;
 }
 
@@ -46,7 +47,7 @@ uint16_t read_attr(std::size_t thePos, char *theData)
 {
   std::size_t offset = thePos * (sizeof(uint32_t) + sizeof(uint16_t)) + sizeof(uint32_t);
   uint16_t tmp;
-  memcpy(&tmp, theData+offset, sizeof(uint16_t));
+  memcpy(&tmp, theData + offset, sizeof(uint16_t));
   return tmp;
 }
 
@@ -117,7 +118,7 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
  */
 // ----------------------------------------------------------------------
 
-WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData(0)
+WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData(nullptr)
 {
   std::ifstream in(theFile.c_str());
   if (!in) throw std::runtime_error("Could not open '" + theFile + "' for reading");
@@ -145,7 +146,8 @@ WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData
   std::size_t bufsize = (sizeof(uint32_t) + sizeof(uint16_t)) * itsSize;
 
   itsData = new char[bufsize];
-  if (itsData == 0) throw std::runtime_error("Failed to allocate memory for zone information");
+  if (itsData == nullptr)
+    throw std::runtime_error("Failed to allocate memory for zone information");
   in.read(itsData, static_cast<long>(bufsize));
   if (in.bad()) throw std::runtime_error("Reading timezone data failed");
 
