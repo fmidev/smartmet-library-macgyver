@@ -1,20 +1,6 @@
-PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
-
-bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include
-datadir = $(PREFIX)/share
-objdir = obj
-
 include ../common.mk
 
-FLAGS = -Wall -W -Wno-unused-parameter -fdiagnostics-color=$(GCC_DIAG_COLOR)
-
-ifeq ($(TSAN), yes)
-  FLAGS += -fsanitize=thread
-endif
-ifeq ($(ASAN), yes)
-  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize-address-use-after-scope
-endif
+PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
 CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=$(CXX_STD) $(FLAGS)
 
