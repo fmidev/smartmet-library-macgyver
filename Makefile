@@ -11,7 +11,7 @@ processor := $(shell uname -p)
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
-include common.mk
+include makefile.inc
 
 INCLUDES += $(pkg-config --cflags icu-i18n)
 

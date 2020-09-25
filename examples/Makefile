@@ -1,6 +1,6 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 
-include ../common.mk
+include ../makefile.inc
 
 MAINFLAGS = -Wall -W -Wno-unused-parameter -fsanitize=thread
 

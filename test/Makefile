@@ -1,4 +1,4 @@
-include ../common.mk
+include ../makefile.inc
 
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
