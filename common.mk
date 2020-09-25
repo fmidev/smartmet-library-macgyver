@@ -40,7 +40,7 @@ else
   CXX_STD ?= c++11
 endif
 
-FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
+FLAGS += -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
 	-ggdb3 -fPIC -fno-omit-frame-pointer \
 	-Wall -Wextra \
 	-Wno-unused-parameter
@@ -63,6 +63,8 @@ ifeq ($(ASAN), yes)
   FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract \
            -fsanitize=undefined -fsanitize-address-use-after-scope
 endif
+
+FLAGS += $(EXTRA_FLAGS)
 
 # Compile modes (debug / release)
 
