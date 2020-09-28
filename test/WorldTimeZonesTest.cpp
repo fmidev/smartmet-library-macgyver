@@ -80,10 +80,10 @@ void sweden()
 
   ret = tq.zone_name(12.00, 57.72);
   if (ret != "Europe/Stockholm")
-    TEST_FAILED("Should get Europe/Stockholm for Göteborg, not " + ret);
+    TEST_FAILED("Should get Europe/Stockholm for GÃ¶teborg, not " + ret);
 
   ret = tq.zone_name(13.01095, 55.59062);
-  if (ret != "Europe/Stockholm") TEST_FAILED("Should get Europe/Stockholm for Malmö, not " + ret);
+  if (ret != "Europe/Stockholm") TEST_FAILED("Should get Europe/Stockholm for MalmÃ¶, not " + ret);
 
   TEST_PASSED();
 }
@@ -121,11 +121,11 @@ void denmark()
 
   ret = tq.zone_name(12.54, 55.69);
   if (ret != "Europe/Copenhagen")
-    TEST_FAILED("Should get Europe/Copenhagen for Kööpenhamina, not " + ret);
+    TEST_FAILED("Should get Europe/Copenhagen for KÃ¶Ã¶penhamina, not " + ret);
 
   ret = tq.zone_name(12.6041, 56.0319);
   if (ret != "Europe/Copenhagen")
-    TEST_FAILED("Should get Europe/Copenhagen for Helsingör, not " + ret);
+    TEST_FAILED("Should get Europe/Copenhagen for HelsingÃ¶r, not " + ret);
 
   TEST_PASSED();
 }

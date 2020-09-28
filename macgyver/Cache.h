@@ -123,7 +123,7 @@ struct CacheReportingObject
 template <class ValueType>
 struct TrivialSizeFunction
 {
-  static std::size_t getSize(const ValueType& theValue) { return 1; }
+  static std::size_t getSize(const ValueType& /* theValue */) { return 1; }
 };
 
 template <class TagSetType, class TagMapType>
@@ -488,7 +488,7 @@ struct RandomEviction
     return true;
   }
 
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
+  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
   {
     // No-op
   }
@@ -596,7 +596,7 @@ struct FIFOEviction
     return true;
   }
 
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
+  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
   {
     // No-op
   }
@@ -704,7 +704,7 @@ struct FILOEviction
     return true;
   }
 
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
+  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
   {
     // No-op
   }
@@ -723,6 +723,7 @@ struct StaticExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
+    (void)timeConstant;
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
     {
@@ -736,6 +737,7 @@ struct StaticExpire
   // All expired tags are deleted
   static bool toDelete(const std::time_t& theTagTime, long timeConstant)
   {
+    (void)timeConstant;
     if (theTagTime != std::numeric_limits<std::time_t>::max())
     {
       return true;
@@ -1023,10 +1025,8 @@ class Cache : public boost::noncopyable
 
       // Make tagSet
       TagSetType tagSet;
-      for (auto it = tags.begin(); it != tags.end(); ++it)
-      {
-        tagSet.insert(*it);
-      }
+      for (const auto& tag : tags)
+        tagSet.insert(tag);
 
       // Perform insertion
       result =
@@ -1036,15 +1036,15 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
-        for (auto it = tags.begin(); it != tags.end(); ++it)
+        for (const auto& tag : tags)
         {
           // Check and update tags
           // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(*it);
+          auto tagIt = itsTagMap.find(tag);
           if (tagIt == itsTagMap.end())
           {
             itsTagMap.insert(typename TagMapType::value_type(
-                *it, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
+                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
           }
           else
           {
@@ -1091,10 +1091,8 @@ class Cache : public boost::noncopyable
 
       // Make tagSet
       TagSetType tagSet;
-      for (auto it = tags.begin(); it != tags.end(); ++it)
-      {
-        tagSet.insert(*it);
-      }
+      for (const auto& tag : tags)
+        tagSet.insert(tag);
 
       // Perform insertion
       result =
@@ -1104,15 +1102,15 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
-        for (auto it = tags.begin(); it != tags.end(); ++it)
+        for (const auto& tag : tags)
         {
           // Check and update tags
           // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(*it);
+          auto tagIt = itsTagMap.find(tag);
           if (tagIt == itsTagMap.end())
           {
             itsTagMap.insert(typename TagMapType::value_type(
-                *it, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
+                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
           }
           else
           {

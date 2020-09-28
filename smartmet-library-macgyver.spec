@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.8.31
+Version: 20.9.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -83,6 +83,15 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Sep 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.18-1.fmi
+- TimeZones object now immediately creates TZ objects for all known regions for better access speed
+
+* Tue Sep 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.15-1.fmi
+- Add Fmi::DirectoryMonitor::run() interruption support
+
+* Thu Sep  3 2020 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 20.9.3-1.fmi
+- Added Fmi::Exception with the intent of gradually moving away from SmartMet::Spine::Exception
+
 * Mon Aug 31 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.31-1.fmi
 - Added FastMath.h
 

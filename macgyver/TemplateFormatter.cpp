@@ -6,11 +6,13 @@
  */
 
 #include "TemplateFormatter.h"
+
 #include <ctpp2/CTPP2Logger.hpp>
 #include <ctpp2/CTPP2OutputCollector.hpp>
 #include <ctpp2/CTPP2VM.hpp>
 #include <ctpp2/CTPP2VMFileLoader.hpp>
 #include <ctpp2/CTPP2VMSTDLib.hpp>
+
 #include <cstdarg>
 #include <cstdio>
 #include <ostream>
@@ -25,12 +27,14 @@ class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
  public:
   explicit OutputCollector(std::ostream& the_ost) : ost(the_ost) {}
 
-  virtual INT_32 Collect(const void* vData, const UINT_32 datalength)
-  {
-    ost.write(reinterpret_cast<const char*>(vData), datalength);
-    return 0;
-  }
+  virtual INT_32 Collect(const void* vData, const UINT_32 datalength);
 };
+
+INT_32 Fmi::TemplateFormatter::OutputCollector::Collect(const void* vData, const UINT_32 datalength)
+{
+  ost.write(reinterpret_cast<const char*>(vData), datalength);
+  return 0;
+}
 
 /**
  *  @brief CTPP logger class for writing log messages to provided std::ostream
@@ -51,17 +55,21 @@ class Fmi::TemplateFormatter::Logger : public CTPP::Logger
 #pragma clang diagnostic pop
 #endif
 
-  virtual INT_32 WriteLog(const UINT_32 priority, CCHAR_P szString, const UINT_32 stringlen)
-  {
-    if (priority >= iBasePriority)
-    {
-      // FIXME: shouldn't reject for too long messages
-      ost.write(szString, stringlen);
-    }
-
-    return 0;
-  }
+  virtual INT_32 WriteLog(const UINT_32 priority, CCHAR_P szString, const UINT_32 stringlen);
 };
+
+INT_32 Fmi::TemplateFormatter::Logger::WriteLog(const UINT_32 priority,
+                                                CCHAR_P szString,
+                                                const UINT_32 stringlen)
+{
+  if (priority >= iBasePriority)
+  {
+    // FIXME: shouldn't reject for too long messages
+    ost.write(szString, stringlen);
+  }
+
+  return 0;
+}
 
 Fmi::TemplateFormatter::TemplateFormatter(UINT_32 max_handlers) : syscall_factory(max_handlers)
 {

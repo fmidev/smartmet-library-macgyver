@@ -498,7 +498,7 @@ double Stat::nearest(const boost::posix_time::ptime& timestep,
 
   for (unsigned int i = 0; i < subvector.size(); i++)
   {
-    if (i == 0 || abs((subvector[i].time - timestep).total_seconds() < nearest_seconds))
+    if (i == 0 || abs((subvector[i].time - timestep).total_seconds()) < nearest_seconds)
     {
       nearest_value = subvector[i].value;
       nearest_seconds = abs((subvector[i].time - timestep).total_seconds());
