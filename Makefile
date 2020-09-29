@@ -75,6 +75,8 @@ install:
 	done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
+	@mkdir -p $(datadir)/smartmet/devel
+	$(INSTALL_DATA) makefile.inc $(datadir)/smartmet/devel/makefile.inc
 
 test test-installed:
 	$(MAKE) -C test $@

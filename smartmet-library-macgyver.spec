@@ -81,6 +81,7 @@ FMI MacGyver library development files
 %files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
+%{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
 * Fri Sep 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.18-1.fmi
