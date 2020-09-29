@@ -1,4 +1,14 @@
-# User specific settings
+##############################################################################
+#
+#  This file is part of smartmet-library-macgyver
+#
+#  It is installed as $PREFIX/share/smartmet/devel/makefile.inc
+#
+#  For use in other projects put into the Makefile
+#
+#  include $$(PREFIX-/usr)/share/smartmet/devel/makefile.inc
+#
+###############################################################################
 
 -include $(HOME)/.smartmet.mk
 
