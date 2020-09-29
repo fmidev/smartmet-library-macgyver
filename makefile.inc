@@ -1,4 +1,14 @@
-# User specific settings
+##############################################################################
+#
+#  This file is part of smartmet-library-macgyver
+#
+#  It is installed as $PREFIX/share/smartmet/devel/makefile.inc
+#
+#  For use in other projects put into the Makefile
+#
+#  include $$(PREFIX-/usr)/share/smartmet/devel/makefile.inc
+#
+###############################################################################
 
 -include $(HOME)/.smartmet.mk
 
@@ -40,7 +50,7 @@ else
   CXX_STD ?= c++11
 endif
 
-FLAGS = -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
+FLAGS += -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
 	-ggdb3 -fPIC -fno-omit-frame-pointer \
 	-Wall -Wextra \
 	-Wno-unused-parameter
@@ -63,6 +73,19 @@ ifeq ($(ASAN), yes)
   FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract \
            -fsanitize=undefined -fsanitize-address-use-after-scope
 endif
+
+# Static code analyzer support (warning: currently only gcc-10+)
+
+ifeq ($(ANALYZER), yes)
+  ifeq ($(USE_CLANG), yes)
+     $(error "TODO: Implement static code analyzer support for CLANG")
+  else
+     FLAGS += -fanalyzer
+  endif
+endif
+
+
+FLAGS += $(EXTRA_FLAGS)
 
 # Compile modes (debug / release)
 
