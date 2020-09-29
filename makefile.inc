@@ -64,6 +64,17 @@ ifeq ($(ASAN), yes)
            -fsanitize=undefined -fsanitize-address-use-after-scope
 endif
 
+# Static code analyzer support (warning: currently only gcc-10+)
+
+ifeq ($(ANALYZER), yes)
+  ifeq ($(USE_CLANG), yes)
+     $(error "TODO: Implement static code analyzer support for CLANG")
+  else
+     FLAGS += -fanalyzer
+  endif
+endif
+
+
 FLAGS += $(EXTRA_FLAGS)
 
 # Compile modes (debug / release)
