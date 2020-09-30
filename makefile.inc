@@ -103,6 +103,17 @@ endif
 
 INCLUDES += -I$(includedir)/smartmet
 
+
+REQUIRES ?=
+
+ifneq ($(filter gdal,$(REQUIRES)),)
+  REQUIRES_GDAL := yes
+endif
+
+ifneq ($(filter pgsql,$(REQUIRES)),)
+  REQUIRES_PGSQL := yes
+endif
+
 ifneq "$(wildcard /usr/include/boost169)" ""
   INCLUDES += -isystem /usr/include/boost169
   LIBS += -L/usr/lib64/boost169
@@ -115,6 +126,7 @@ ifeq ($(REQUIRES_GDAL),yes)
   else
     INCLUDES += -isystem /usr/include/gdal
   endif
+  GDAL_LIBS = -lgdal
 endif
 
 ifeq ($(REQUIRES_PGSQL),yes)
@@ -125,4 +137,50 @@ ifeq ($(REQUIRES_PGSQL),yes)
   endif
 endif
 
+ifneq ($(filter jsoncpp,$(REQUIRES)),)
+  INCLUDES += $(shell pkg-config --cflags jsoncpp 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  JSONCPP_LIBS = $(shell pkg-config --libs jsoncpp 2>/dev/null)
+  ifeq ($(JSONCPP_LIBS),)
+    $(error No JsonCpp available)
+  endif
+endif
 
+ifneq ($(filter mysql,$(REQUIRES)),)
+  INCLUDES += $(shell mysql_config --cflags 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  MYSQL_LIBS = $(shell mysql_config --libs_r 2>/dev/null)
+  ifeq ($(MYSQL_LIBS),)
+    $(error No MySQL libraries available)
+  endif
+endif
+
+ifneq ($(filter icu-i18n,$(REQUIRES)),)
+  INCLUDES += $(shell pkg-config --cflags icu-i18n 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  ICU_I18N_LIBS = $(shell pkg-config --libs icu-i18n 2>/dev/null)
+  ifeq ($(ICU_I18N_LIBS),)
+    $(error No icu-i18n library available)
+  endif
+endif
+
+ifneq ($(filter configpp,$(REQUIRES)),)
+  INCLUDES += $(shell pkg-config --cflags libconfig++ 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  LIBCONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
+  ifeq ($(LIBCONFIGPP_LIBS),)
+    $(error No libconfig++ development files available)
+  endif
+endif
+
+ifneq ($(filter librsvg,$(REQUIRES)),)
+  INCLUDE += $(shell pkg-config --cflags librsvg-2.0 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  LIBRSVG_LIBS = $(shell pkg-config --libs librsvg-2.0)
+  ifeq ($(LIBRSVG_LIBS),)
+    $(error No librsvg-2 library development files found)
+  endif
+endif
+
+ifneq ($(filter cairo,$(REQUIRES)),)
+  INCLUDES += $(shell pkg-config --cflags cairo-2.0 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  LIBRSVG_LIBS = $(shell pkg-config --libs cairo)
+  ifeq ($(LIBRSVG_LIBS),)
+    $(error No Cairo library development files found)
+  endif
+endif
