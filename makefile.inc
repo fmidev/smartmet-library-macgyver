@@ -56,7 +56,8 @@ FLAGS += -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
 	-Wno-unused-parameter
 
 FLAGS_DEBUG = -Og -Werror -Wpedantic -Wundef
-FLAGS_RELEASE = -O2 -Wuninitialized
+FLAGS_RELEASE = -O2 -Wuninitialized -DNDEBUG
+FLAGS_PROFILE = -O2 -g -pg -DNDEBUG
 
 ifeq ($(USE_CLANG), yes)
   FLAGS_DEBUG += -Wshadow -Wweak-vtables -Wzero-as-null-pointer-constant
@@ -92,7 +93,11 @@ FLAGS += $(EXTRA_FLAGS)
 ifneq (,$(findstring debug,$(MAKECMDGOALS)))
   CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)
 else
-  CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE)
+  ifneq (,$(findstring profile,$(MAKECMDGOALS)))
+    CFLAGS = $(DEFINED) $(FILES) $(FLAGS_PROFILE)
+  else
+    CFLAGS = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE)
+  endif
 endif
 
 # Include paths and libs
