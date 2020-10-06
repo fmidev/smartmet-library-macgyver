@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.9.18
+Version: 20.10.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -81,8 +81,18 @@ FMI MacGyver library development files
 %files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
+%{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Mon Oct  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.5-1.fmi
+- makefile.inc updates (added missing -DNDEBUG for release build, added profile build support)
+
+* Fri Oct  2 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.2-1.fmi
+- makefile.inc updates
+
+* Tue Sep 29 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.29-1.fmi
+- Install common Makefile fragment for use in other packages
+
 * Fri Sep 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.18-1.fmi
 - TimeZones object now immediately creates TZ objects for all known regions for better access speed
 

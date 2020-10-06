@@ -1,8 +1,8 @@
-include ../common.mk
+include ../makefile.inc
 
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
-CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=$(CXX_STD) $(FLAGS)
+CFLAGS = -DUNIX -D_REENTRANT -O0 -g $(FLAGS)
 
 ifeq ($(USE_CLANG),yes)
 CharsetToolsTest: CFLAGS += -Wno-invalid-source-encoding

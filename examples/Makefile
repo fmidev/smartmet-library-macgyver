@@ -1,18 +1,6 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 
-include ../common.mk
-
-MAINFLAGS = -Wall -W -Wno-unused-parameter -fsanitize=thread
-
-EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
-	-Wcast-align -Wwrite-strings -Wconversion -Winline \
-	-Wctor-dtor-privacy -Wnon-virtual-dtor -Wno-pmf-conversions \
-	-Wsign-promo -Wchar-subscripts -Wold-style-cast \
-	-Wshadow -Woverloaded-virtual
-
-DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
-
-CFLAGS = -DUNIX -O0 -g $(MAINFLAGS)
+include ../makefile.inc
 
 INCLUDES += -I../macgyver \
         -I/usr/include/smartmet

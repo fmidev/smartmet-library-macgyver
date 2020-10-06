@@ -11,7 +11,7 @@ processor := $(shell uname -p)
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
-include common.mk
+include makefile.inc
 
 INCLUDES += $(pkg-config --cflags icu-i18n)
 
@@ -61,9 +61,13 @@ clean:
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
 	rm -rf $(objdir)
 	$(MAKE) -C test clean
+	$(MAKE) -C examples clean
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
+
+examples:
+	$(MAKE) -C examples
 
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
@@ -75,6 +79,8 @@ install:
 	done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
+	@mkdir -p $(datadir)/smartmet/devel
+	$(INSTALL_DATA) makefile.inc $(datadir)/smartmet/devel/makefile.inc
 
 test test-installed:
 	$(MAKE) -C test $@
