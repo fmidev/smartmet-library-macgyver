@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.10.5
+Version: 20.10.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -84,6 +84,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Wed Oct  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.7-1.fmi
+- makefile.inc bugfixes
+
 * Mon Oct  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.5-1.fmi
 - makefile.inc updates (added missing -DNDEBUG for release build, added profile build support)
 
