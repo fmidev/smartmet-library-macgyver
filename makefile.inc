@@ -168,14 +168,14 @@ endif
 
 ifneq ($(filter configpp,$(REQUIRES)),)
   INCLUDES += $(shell pkg-config --cflags libconfig++ 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
-  LIBCONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
-  ifeq ($(LIBCONFIGPP_LIBS),)
+  CONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
+  ifeq ($(CONFIGPP_LIBS),)
     $(error No libconfig++ development files available)
   endif
 endif
 
 ifneq ($(filter librsvg,$(REQUIRES)),)
-  INCLUDE += $(shell pkg-config --cflags librsvg-2.0 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  INCLUDES += $(shell pkg-config --cflags librsvg-2.0 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
   LIBRSVG_LIBS = $(shell pkg-config --libs librsvg-2.0)
   ifeq ($(LIBRSVG_LIBS),)
     $(error No librsvg-2 library development files found)
@@ -183,9 +183,9 @@ ifneq ($(filter librsvg,$(REQUIRES)),)
 endif
 
 ifneq ($(filter cairo,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags cairo-2.0 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
-  LIBRSVG_LIBS = $(shell pkg-config --libs cairo)
-  ifeq ($(LIBRSVG_LIBS),)
+  INCLUDES += $(shell pkg-config --cflags cairo 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  CAIRO_LIBS = $(shell pkg-config --libs cairo)
+  ifeq ($(CAIRO_LIBS),)
     $(error No Cairo library development files found)
   endif
 endif
