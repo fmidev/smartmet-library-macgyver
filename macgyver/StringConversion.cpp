@@ -555,4 +555,21 @@ bool looks_signed_int(const std::string& value)
   return true;
 }
 
+// In place trim
+void trim(std::string& value)
+{
+  const char * spaces = " \t\n\v\f\r";
+  value.erase(value.find_last_not_of(spaces) + 1);
+  value.erase(0, value.find_first_not_of(spaces));
+}
+
+// Trim to new copy
+std::string trim_copy(const std::string& value)
+{
+  auto tmp = value;
+  trim(tmp);
+  return tmp;
+}
+
+
 }  // namespace Fmi

@@ -240,4 +240,39 @@ BOOST_AUTO_TEST_CASE(ascii_toupper)
   BOOST_CHECK_EQUAL(input, correct_result);
 }
 
+BOOST_AUTO_TEST_CASE(trim)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::trim()");
+
+  std::string input = "";
+  Fmi::trim(input);
+  BOOST_CHECK_EQUAL(input, "");
+
+  input = " ";
+  Fmi::trim(input);
+  BOOST_CHECK_EQUAL(input, "");
+
+  input = "  ";
+  Fmi::trim(input);
+  BOOST_CHECK_EQUAL(input, "");
+
+  input = "a ";
+  Fmi::trim(input);
+  BOOST_CHECK_EQUAL(input, "a");
+
+  input = " a ";
+  Fmi::trim(input);
+  BOOST_CHECK_EQUAL(input, "a");
+  
+  input = " a";
+  Fmi::trim(input);
+  BOOST_CHECK_EQUAL(input, "a");
+
+  input = "\t\n a\t\n ";
+  Fmi::trim(input);
+  BOOST_CHECK_EQUAL(input, "a");
+  
+}
+
+
 // ======================================================================

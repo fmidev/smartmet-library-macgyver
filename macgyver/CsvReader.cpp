@@ -6,7 +6,6 @@
 
 #include "CsvReader.h"
 #include "StringConversion.h"
-#include <boost/algorithm/string.hpp>
 #include <cctype>
 #include <fstream>
 #include <iostream>  // REMOVE
@@ -46,8 +45,6 @@ void myerror(const string& prefix, const string& filename, ifstream& file)
 
 void read(const string& filename, Callback callback, char delimiter)
 {
-  using boost::algorithm::trim;
-
   // Initial state
   using CsvRow = vector<string>;
   CsvRow row;
@@ -126,7 +123,7 @@ void read(const string& filename, Callback callback, char delimiter)
           }
           else
           {
-            trim(field);
+            Fmi::trim(field);
             row.push_back(field);
             callback(row);
             field.clear();
@@ -144,7 +141,7 @@ void read(const string& filename, Callback callback, char delimiter)
               row.push_back(field);
             else
             {
-              trim(field);
+              Fmi::trim(field);
               row.push_back(field);
             }
             field.clear();
