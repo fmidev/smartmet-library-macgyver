@@ -34,10 +34,6 @@ namespace Fmi
 // ----------------------------------------------------------------------
 
 std::string to_string(bool value) { return value ? "1" : "0"; }
-std::string to_string(int value) { return fmt::sprintf("%d", value); }
-std::string to_string(long value) { return fmt::sprintf("%ld", value); }
-std::string to_string(unsigned int value) { return fmt::sprintf("%u", value); }
-std::string to_string(unsigned long value) { return fmt::sprintf("%lu", value); }
 #if defined(_WIN32) || defined(WIN32)
 std::string to_string(size_t value) { return fmt::sprintf("%zu", value); }
 std::string to_string(time_t value) { return fmt::sprintf("%zd", value); }
@@ -50,6 +46,11 @@ std::string to_string(const char* fmt, unsigned int value) { return fmt::sprintf
 std::string to_string(const char* fmt, unsigned long value) { return fmt::sprintf(fmt, value); }
 std::string to_string(const char* fmt, float value) { return fmt::sprintf(fmt, value); }
 std::string to_string(const char* fmt, double value) { return fmt::sprintf(fmt, value); }
+
+std::string to_string(int value) { return fmt::format_int(value).str(); }
+std::string to_string(unsigned int value) { return fmt::format_int(value).str(); }
+std::string to_string(long value) { return fmt::format_int(value).str(); }
+std::string to_string(unsigned long value) { return fmt::format_int(value).str(); }
 
 // ----------------------------------------------------------------------
 /*
