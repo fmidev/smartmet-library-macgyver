@@ -143,7 +143,7 @@ ifeq ($(REQUIRES_PGSQL),yes)
 endif
 
 ifneq ($(filter jsoncpp,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags jsoncpp 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  INCLUDES += $(shell pkg-config --cflags jsoncpp 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   JSONCPP_LIBS = $(shell pkg-config --libs jsoncpp 2>/dev/null)
   ifeq ($(JSONCPP_LIBS),)
     $(error No JsonCpp available)
@@ -151,7 +151,7 @@ ifneq ($(filter jsoncpp,$(REQUIRES)),)
 endif
 
 ifneq ($(filter mysql,$(REQUIRES)),)
-  INCLUDES += $(shell mysql_config --cflags 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  INCLUDES += $(shell mysql_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   MYSQL_LIBS = $(shell mysql_config --libs_r 2>/dev/null)
   ifeq ($(MYSQL_LIBS),)
     $(error No MySQL libraries available)
@@ -159,7 +159,7 @@ ifneq ($(filter mysql,$(REQUIRES)),)
 endif
 
 ifneq ($(filter icu-i18n,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags icu-i18n 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  INCLUDES += $(shell pkg-config --cflags icu-i18n 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   ICU_I18N_LIBS = $(shell pkg-config --libs icu-i18n 2>/dev/null)
   ifeq ($(ICU_I18N_LIBS),)
     $(error No icu-i18n library available)
@@ -167,15 +167,15 @@ ifneq ($(filter icu-i18n,$(REQUIRES)),)
 endif
 
 ifneq ($(filter configpp,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags libconfig++ 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
-  LIBCONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
-  ifeq ($(LIBCONFIGPP_LIBS),)
+  INCLUDES += $(shell pkg-config --cflags libconfig++ 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  CONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
+  ifeq ($(CONFIGPP_LIBS),)
     $(error No libconfig++ development files available)
   endif
 endif
 
 ifneq ($(filter librsvg,$(REQUIRES)),)
-  INCLUDE += $(shell pkg-config --cflags librsvg-2.0 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
+  INCLUDES += $(shell pkg-config --cflags librsvg-2.0 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   LIBRSVG_LIBS = $(shell pkg-config --libs librsvg-2.0)
   ifeq ($(LIBRSVG_LIBS),)
     $(error No librsvg-2 library development files found)
@@ -183,9 +183,9 @@ ifneq ($(filter librsvg,$(REQUIRES)),)
 endif
 
 ifneq ($(filter cairo,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags cairo-2.0 2>/dev/null | sed -r 's/-I[:space:]*/-isystem /g')
-  LIBRSVG_LIBS = $(shell pkg-config --libs cairo)
-  ifeq ($(LIBRSVG_LIBS),)
+  INCLUDES += $(shell pkg-config --cflags cairo 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  CAIRO_LIBS = $(shell pkg-config --libs cairo)
+  ifeq ($(CAIRO_LIBS),)
     $(error No Cairo library development files found)
   endif
 endif
