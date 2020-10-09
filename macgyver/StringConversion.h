@@ -66,4 +66,8 @@ std::string ascii_toupper_copy(std::string input);
 bool looks_unsigned_int(const std::string& value);
 bool looks_signed_int(const std::string& value);
 
+// Boost trim uses the locale and is hence slow
+void trim(std::string& value);
+std::string trim_copy(const std::string& value);
+
 }  // namespace Fmi
