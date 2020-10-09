@@ -9,6 +9,7 @@
 #include "StringConversion.h"
 #include "WorldTimeZones.h"
 #include <memory>
+#include <unordered_map>
 #include <stdexcept>
 
 using namespace std;
@@ -47,7 +48,7 @@ class TimeZones::Pimple
   }
   boost::local_time::tz_database itsRegions;
   WorldTimeZones itsCoordinates;
-  std::map<std::string, boost::local_time::time_zone_ptr> itsKnownZones;
+  std::unordered_map<std::string, boost::local_time::time_zone_ptr> itsKnownZones;
 };
 
 // ----------------------------------------------------------------------
