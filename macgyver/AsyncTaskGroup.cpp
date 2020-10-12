@@ -42,7 +42,7 @@ void Fmi::AsyncTaskGroup::stop()
 {
   std::unique_lock<std::mutex> lock(m1);
   stop_requested = true;
-  for (auto item : active_tasks) {
+  for (const auto & item : active_tasks) {
       item.second->cancel();
   }
 }
