@@ -232,7 +232,7 @@ const char* Exception::getParameterNameByIndex(unsigned int _index) const
 {
   if (_index < getParameterCount())
   {
-    auto p = parameterVector.at(_index);
+    auto& p = parameterVector.at(_index);
     return p.first.c_str();
   }
 
@@ -246,7 +246,7 @@ const char* Exception::getParameterValue(const char* _name) const
   {
     for (size_t t = 0; t < size; t++)
     {
-      auto p = parameterVector.at(t);
+      auto& p = parameterVector.at(t);
       if (p.first == _name)
         return p.second.c_str();
     }
@@ -258,7 +258,7 @@ const char* Exception::getParameterValueByIndex(unsigned int _index) const
 {
   if (_index < getParameterCount())
   {
-    auto p = parameterVector.at(_index);
+    auto& p = parameterVector.at(_index);
     return p.second.c_str();
   }
 
