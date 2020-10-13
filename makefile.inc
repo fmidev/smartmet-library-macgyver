@@ -25,18 +25,19 @@ endif
 
 processor := $(shell uname -p)
 ifeq ($(processor), x86_64)
-  libdir = $(PREFIX)/lib64
+  libdir ?= $(PREFIX)/lib64
 else
-  libdir = $(PREFIX)/lib
+  libdir ?= $(PREFIX)/lib
 endif
 
-bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include
-datadir = $(PREFIX)/share
+bindir ?= $(PREFIX)/bin
+includedir ?= $(PREFIX)/include
+datadir ?= $(PREFIX)/share
+sbindir ?= $(PREFIX)/sbin
 objdir = obj
 
-enginedir = $(datadir)/smartmet/engines
-plugindir = $(datadir)/smartmet/plugins
+enginedir ?= $(datadir)/smartmet/engines
+plugindir ?= $(datadir)/smartmet/plugins
 
 # Compiler flags
 
