@@ -43,7 +43,10 @@ plugindir ?= $(datadir)/smartmet/plugins
 
 GCC_DIAG_COLOR ?= always
 
-ifneq ($(findstring clang,$(CXX)),)
+CXX_VERSION_STRING := $(shell $(CXX) --version | head -n 1)
+CXX_ID_ := $(shell echo "$(CXX_VERSION_STRING)" | sed -e 's:[\ -].*::')
+
+ifneq ($(filter $(CXX_ID_), clang),)
   USE_CLANG=yes
   CXX_STD ?= c++17
 else
