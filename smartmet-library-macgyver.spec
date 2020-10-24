@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.10.9
-Release: 3%{?dist}.fmi
+Version: 20.10.24
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -84,6 +84,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Sat Oct 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.24-1.fmi
+- Added std::string based API to TemplateFormatter to avoid std::locale locks due to std::ostream
+
 * Fri Oct  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.9-3.fmi
 - Added Fmi::trim and Fmi::trim_copy since boost versions are slow
 
