@@ -43,12 +43,27 @@ plugindir ?= $(datadir)/smartmet/plugins
 
 GCC_DIAG_COLOR ?= always
 
-ifneq ($(findstring clang,$(CXX)),)
+CXX_VERSION_STRING := $(shell $(CXX) --version 2>/dev/null | head -n 1)
+ifeq ($(CXX_VERSION_STRING),)
+  $(error Failed to query compiler version: $(CXX) --version)
+endif
+
+CXX_ID_ := $(shell echo "$(CXX_VERSION_STRING)" | sed -e 's:[\ -].*::')
+
+ifneq ($(filter $(CXX_ID_), clang),)
   USE_CLANG=yes
   CXX_STD ?= c++17
 else
+  GCC_MAJOR := $(shell $(CXX) -dumpversion 2>/dev/null | sed -e 's:\..*::')
   USE_CLANG=no
-  CXX_STD ?= c++11
+  ifeq ($(GCC_MAJOR),)
+    $(error Failed to query compiler version: $(CXX) -dumpversion)
+  endif
+  ifeq ($(filter $(GCC_MAJOR), 6 7 8 9 10 11),)
+    CXX_STD ?= c++11
+  else
+    CXX_STD ?= c++17
+  endif
 endif
 
 FLAGS += -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
