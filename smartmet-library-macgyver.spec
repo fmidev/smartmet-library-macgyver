@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.10.24
+Version: 20.10.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -18,7 +18,7 @@ BuildRequires: imake
 BuildRequires: smartmet-timezones >= 20.5.5
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
-BuildRequires: fmt-devel >= 6.2.1
+BuildRequires: fmt-devel >= 7.1.0
 BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: gcc-c++
@@ -27,7 +27,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: fmt-devel
 #TestRequires: boost169-devel
 #TestRequires: postgresql95-libs
-Requires: fmt >= 6.2.1
+Requires: fmt >= 7.1.0
 Requires: ctpp2
 Requires: libicu >= 50.2
 Requires: boost169-date-time
@@ -84,6 +84,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Wed Oct 28 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.28-1.fmi
+- Rebuild due to fmt upgrade
+
 * Sat Oct 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.24-1.fmi
 - Added std::string based API to TemplateFormatter to avoid std::locale locks due to std::ostream
 
