@@ -22,6 +22,8 @@ static const std::map<std::string, std::string> exception_name_map = {
     {"std::logic_error", "Logic error"}};
 }
 
+std::atomic<bool> Exception::force_stack_trace(false);
+
 Exception::Exception()
 {
   timestamp = boost::posix_time::second_clock::local_time();
@@ -310,7 +312,7 @@ Exception& Exception::disableStackTrace()
 
 std::string Exception::getStackTrace() const
 {
-  if (mLoggingDisabled || mStackTraceDisabled)
+  if (!force_stack_trace && (mLoggingDisabled || mStackTraceDisabled))
     return "";
 
   const Exception* e = this;
