@@ -332,11 +332,11 @@ std::string to_iso_string(const std::time_t time)
   index = tt.tm_mday * 2;
   *--ptr = digits[index + 1];
   *--ptr = digits[index];
-  index = (tt.tm_mon)+1 * 2;
+  index = (tt.tm_mon + 1) * 2;
   *--ptr = digits[index + 1];
   *--ptr = digits[index];
   auto yy = tt.tm_year + 1900;
-  index = (yy % 100 ) * 2;
+  index = (yy % 100) * 2;
   *--ptr = digits[index + 1];
   *--ptr = digits[index];
   index = (yy / 100) * 2;
