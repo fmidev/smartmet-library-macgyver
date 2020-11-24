@@ -328,7 +328,8 @@ class tests : public tframe::tests
 int main(void)
 {
   using namespace std;
-  std::cout << endl << "TimedCache::Cache" << endl << "=========" << endl;
+  std::cout << endl << "TimedCache::Cache" << endl
+                    << "=================" << endl;
   CacheTest::tests t;
   return t.run();
 }

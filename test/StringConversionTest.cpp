@@ -173,6 +173,13 @@ BOOST_AUTO_TEST_CASE(to_iso_string)
 
   ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
   BOOST_CHECK_EQUAL("20020101T010203,004000", Fmi::to_iso_string(time2));
+
+  ptime time3(date(1970, Jan, 1), time_duration(0, 0, 0));
+  BOOST_CHECK_EQUAL("19700101T000000", Fmi::to_iso_string(std::time_t(0)));
+
+  // date u --date='@2147483647' --> Tue Jan 19 03:14:07 EET 2038
+  ptime time4(date(2038, Jan, 19), time_duration(3,14,7));
+  BOOST_CHECK_EQUAL("20380119T031407", Fmi::to_iso_string(std::time_t(2147483647)));
 }
 
 BOOST_AUTO_TEST_CASE(to_iso_extended_string)
