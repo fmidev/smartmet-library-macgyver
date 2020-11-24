@@ -69,7 +69,8 @@ endif
 FLAGS += -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
 	-ggdb3 -fPIC -fno-omit-frame-pointer \
 	-Wall -Wextra \
-	-Wno-unused-parameter
+	-Wno-unused-parameter \
+        -Wno-unknown-warning-option
 
 FLAGS_DEBUG = -Og -Werror -Wpedantic -Wundef
 FLAGS_RELEASE = -O2 -Wuninitialized -DNDEBUG

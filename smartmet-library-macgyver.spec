@@ -87,6 +87,9 @@ FMI MacGyver library development files
 * Tue Nov 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.11.24-1.fmi
 - Added Fmi::to_iso_string(std::time_t)
 
+* Wed Oct 28 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.28-1.fmi
+- Rebuilt due to fmt upgrade
+
 * Sat Oct 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.24-1.fmi
 - Added std::string based API to TemplateFormatter to avoid std::locale locks due to std::ostream
 
