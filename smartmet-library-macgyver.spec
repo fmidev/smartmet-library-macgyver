@@ -18,9 +18,8 @@ BuildRequires: imake
 BuildRequires: smartmet-timezones >= 20.10.28
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
-BuildRequires: fmt-devel >= 7.1.0
-BuildRequires: libpqxx-devel < 7.0
-#TestRequires: make
+BuildRequires: fmt-devel >= 7.1.0#
+TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 20.10.28
@@ -40,7 +39,11 @@ Requires: boost169-thread
 Requires: boost169-system
 Requires: boost169-regex
 Requires: boost169-chrono
-Requires: libpqxx < 7.0
+%if 0%{rhel} >= 8
+BuildRequires: libpqxx = 6
+%else
+BuildRequires: libpqxx = 5
+%endif
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
