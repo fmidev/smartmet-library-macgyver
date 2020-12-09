@@ -39,7 +39,7 @@ namespace AsyncTaskGroupTest {
   void empty_group()
   {
     Fmi::AsyncTaskGroup tg;
-    wait();
+    tg.wait();
     TEST_PASSED();
   }
 
