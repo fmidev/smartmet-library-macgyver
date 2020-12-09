@@ -18,7 +18,7 @@ BuildRequires: imake
 BuildRequires: smartmet-timezones >= 20.10.28
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
-BuildRequires: fmt-devel >= 7.1.0#
+BuildRequires: fmt-devel >= 7.1.0
 TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
