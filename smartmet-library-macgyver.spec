@@ -19,6 +19,11 @@ BuildRequires: smartmet-timezones >= 20.10.28
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel >= 7.1.0
+%if 0%{rhel} >= 8
+BuildRequires: libpqxx-devel < 1:7.0
+%else
+BuildRequires: libpqxx-devel < 1:6.0
+%endif
 #TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
@@ -40,9 +45,9 @@ Requires: boost169-system
 Requires: boost169-regex
 Requires: boost169-chrono
 %if 0%{rhel} >= 8
-BuildRequires: libpqxx = 6
+Requires: libpqxx < 1:7.0
 %else
-BuildRequires: libpqxx = 5
+Requires: libpqxx < 1:6.0
 %endif
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
