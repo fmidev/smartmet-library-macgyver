@@ -25,7 +25,7 @@ endif
 # PGSQL
 
 ifneq "$(wildcard /usr/pgsql-12/lib)" ""
-  LIBS += -L$(PREFIX)/pgsql12-lib -l:libpq.so.5
+  LIBS += -L$(PREFIX)/pgsql12-lib -lpqxx
 else
   LIBS += -L$(PREFIX)/pgsql-9.5/lib -l:libpq.so.5
 endif
