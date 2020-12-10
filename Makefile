@@ -11,6 +11,8 @@ processor := $(shell uname -p)
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
+REQUIRES := libpqxx icu-i18n fmt ctpp2
+
 include makefile.inc
 
 INCLUDES += $(pkg-config --cflags icu-i18n)
@@ -22,10 +24,7 @@ LIBS += -L$(libdir) \
 	-lboost_chrono \
 	-lboost_thread \
 	-lboost_system \
-        -lpqxx \
-	$(pkg-config --libs icu-i18n) \
-	-lfmt \
-	-lctpp2 \
+	$(REQUIRED_LIBS) \
 	-lpthread -lrt
 
 # What to install

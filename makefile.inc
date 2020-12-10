@@ -75,6 +75,7 @@ FLAGS += -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
 FLAGS_DEBUG = -Og -Werror -Wpedantic -Wundef
 FLAGS_RELEASE = -O2 -Wuninitialized -DNDEBUG
 FLAGS_PROFILE = -O2 -g -pg -DNDEBUG
+PACKAGES_MISSING =
 
 ifeq ($(USE_CLANG), yes)
   FLAGS_DEBUG += -Wshadow -Wweak-vtables -Wzero-as-null-pointer-constant
@@ -125,84 +126,121 @@ endif
 
 INCLUDES += -I$(includedir)/smartmet
 
-
 REQUIRES ?=
 
-ifneq ($(filter gdal,$(REQUIRES)),)
-  REQUIRES_GDAL := yes
-endif
-
-ifneq ($(filter pgsql,$(REQUIRES)),)
-  REQUIRES_PGSQL := yes
-endif
+REQUIRES_MISSING :=
+REQUIRES_LEFT := $(REQUIRES)
+REQUIRED_LIBS :=
 
 ifneq "$(wildcard /usr/include/boost169)" ""
   INCLUDES += -isystem /usr/include/boost169
   LIBS += -L/usr/lib64/boost169
 endif
 
-ifeq ($(REQUIRES_GDAL),yes)
+ifneq ($(filter cairo,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out cairo, $(REQUIRES_LEFT))
+  INCLUDES += $(shell pkg-config --cflags cairo 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  CAIRO_LIBS := $(shell pkg-config --libs cairo)
+  ifeq ($(CAIRO_LIBS),)
+    REQUIRES_MISSING += libcairo
+  endif
+  REQUIRED_LIBS += $(CAIRO_LIBS)
+endif
+
+ifneq ($(filter configpp,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out ctpp2, $(REQUIRES_LEFT))
+  INCLUDES += $(shell pkg-config --cflags libconfig++ 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  CONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
+  ifeq ($(CONFIGPP_LIBS),)
+    REQUIRES_MISSING += libconfig++
+  endif
+  REQUIRED_LIBS += $(CONFIGPP_LIBS)
+endif
+
+ifneq ($(filter ctpp2,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out ctpp2, $(REQUIRES_LEFT))
+  CTPP2_LIBS := -lctpp2
+  REQUIRED_LIBS += $(CTPP2_LIBS)
+endif
+
+ifneq ($(filter fmt,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out fmt, $(REQUIRES_LEFT))
+  INCLUDES += $(shell pkg-config --cflags fmt 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  FMT_LIBS := $(shell pkg-config --libs fmt 2>/dev/null)
+  ifeq ($(FMT_LIBS),)
+    REQUIRES_MISSING += fmt
+  endif
+  REQUIRED_LIBS += $(FMT_LIBS)
+endif
+
+ifneq ($(filter gdal,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out gdal, $(REQUIRES_LEFT))
   ifneq "$(wildcard /usr/gdal30/include)" ""
     INCLUDES += -isystem /usr/gdal30/include
-    LIBS += -L$(PREFIX)/gdal30/lib
+    GDAL_LIBS += -L$(PREFIX)/gdal30/lib
   else
     INCLUDES += -isystem /usr/include/gdal
   endif
   GDAL_LIBS = -lgdal
-endif
-
-ifeq ($(REQUIRES_PGSQL),yes)
-  ifneq "$(wildcard /usr/pgsql-12/lib)" ""
-    LIBS += -L$(PREFIX)/pgsql12-lib -l:libpq.so.5
-  else
-    LIBS += -L$(PREFIX)/pgsql-9.5/lib -l:libpq.so.5
-  endif
-endif
-
-ifneq ($(filter jsoncpp,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags jsoncpp 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-  JSONCPP_LIBS = $(shell pkg-config --libs jsoncpp 2>/dev/null)
-  ifeq ($(JSONCPP_LIBS),)
-    $(error No JsonCpp available)
-  endif
-endif
-
-ifneq ($(filter mysql,$(REQUIRES)),)
-  INCLUDES += $(shell mysql_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-  MYSQL_LIBS = $(shell mysql_config --libs_r 2>/dev/null)
-  ifeq ($(MYSQL_LIBS),)
-    $(error No MySQL libraries available)
-  endif
+  REQUIRED_LIBS += $(GDAL_LIBS)
 endif
 
 ifneq ($(filter icu-i18n,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out icu-i18n, $(REQUIRES_LEFT))
   INCLUDES += $(shell pkg-config --cflags icu-i18n 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   ICU_I18N_LIBS = $(shell pkg-config --libs icu-i18n 2>/dev/null)
   ifeq ($(ICU_I18N_LIBS),)
-    $(error No icu-i18n library available)
+     REQUIRES_MISSING += icu-i18n
   endif
+  REQUIRED_LIBS += $(ICU-I18N_LIBS)
 endif
 
-ifneq ($(filter configpp,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags libconfig++ 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-  CONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
-  ifeq ($(CONFIGPP_LIBS),)
-    $(error No libconfig++ development files available)
+ifneq ($(filter jsoncpp,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out jsoncpp, $(REQUIRES_LEFT))
+  INCLUDES += $(shell pkg-config --cflags jsoncpp 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  JSONCPP_LIBS = $(shell pkg-config --libs jsoncpp 2>/dev/null)
+  ifeq ($(JSONCPP_LIBS),)
+    REQUIRES_MISSING += jsoncpp
   endif
+  REQUIRED_LIBS += $(JSONCPP_LIBS)
+endif
+
+ifneq ($(filter libpqxx,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out libpqxx, $(REQUIRES_LEFT))
+  INCLUDES += $(shell pkg-config --cflags libpqxx 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  LIBPQXX_LIBS = $(shell pkg-config --libs libpqxx 2>/dev/null)
+  ifeq ($(LIBPQXX_LIBS),)
+    REQUIRES_MISSING += libpqxx
+  endif
+  REQUIRED_LIBS += $(LIBPQXX_LIBS)
 endif
 
 ifneq ($(filter librsvg,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out librsvg, $(REQUIRES_LEFT))
   INCLUDES += $(shell pkg-config --cflags librsvg-2.0 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   LIBRSVG_LIBS = $(shell pkg-config --libs librsvg-2.0)
   ifeq ($(LIBRSVG_LIBS),)
-    $(error No librsvg-2 library development files found)
+    REQUIRES_MISSING += librsvg-2.0
+  endif
+  REQUIRED_LIBS += $(LIBRSVG_LIBS)
+endif
+
+ifneq ($(filter mysql,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out mysql, $(REQUIRES_LEFT))
+  INCLUDES += $(shell mysql_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  MYSQL_LIBS = $(shell mysql_config --libs_r 2>/dev/null)
+  ifeq ($(MYSQL_LIBS),)
+    REQUIRES_MISSING += mysql
+  endif
+  REQUIRED_LIBS += $(MYSQL_LIBS)
+endif
+
+ifneq ($(REQUIRES_MISSING),)
+  ifneq ($(IGNORE_MISSING),Y)
+    $(error Development files missing for: $(REQUIRES_MISSING))
   endif
 endif
 
-ifneq ($(filter cairo,$(REQUIRES)),)
-  INCLUDES += $(shell pkg-config --cflags cairo 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-  CAIRO_LIBS = $(shell pkg-config --libs cairo)
-  ifeq ($(CAIRO_LIBS),)
-    $(error No Cairo library development files found)
-  endif
+ifneq ($(REQUIRES_LEFT),)
+$(warning Unrecognized entries in REQUIRES variable: $(REQUIRES_LEFT))
 endif
