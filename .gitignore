@@ -1,7 +1,8 @@
 *~
 doc/
 obj/
-*Test
+/test/*Test
+/test/*.err
 lib*.so
 compile_commands.json
 .gdb_history
