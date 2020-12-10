@@ -181,11 +181,16 @@ endif
 
 ifneq ($(filter gdal,$(REQUIRES)),)
   REQUIRES_LEFT := $(filter-out gdal, $(REQUIRES_LEFT))
-  ifneq "$(wildcard /usr/gdal30/include)" ""
-    INCLUDES += -isystem /usr/gdal30/include
-    GDAL_LIBS += -L$(PREFIX)/gdal30/lib
+  ifneq "$(wildcard /usr/gdal32/include)" ""
+    INCLUDES += -isystem /usr/gdal32/include
+    GDAL_LIBS += -L$(PREFIX)/gdal32/lib
   else
-    INCLUDES += -isystem /usr/include/gdal
+    ifneq "$(wildcard /usr/gdal30/include)" ""
+      INCLUDES += -isystem /usr/gdal30/include
+      GDAL_LIBS += -L$(PREFIX)/gdal30/lib
+    else
+      INCLUDES += -isystem /usr/include/gdal
+    endif
   endif
   GDAL_LIBS = -lgdal
   REQUIRED_LIBS += $(GDAL_LIBS)

@@ -4,7 +4,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 20.12.10
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -92,6 +92,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Thu Dec 10 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.10-2.fmi
+- Added support for GDAL 3.2 into makefile.inc
+
 * Thu Dec 10 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.12.10-1.fmi
 - makefile.inc update
 - Bug (uninitialized member) fixed in FmiAsyncTaskGroup
