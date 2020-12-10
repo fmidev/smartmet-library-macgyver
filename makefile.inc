@@ -148,7 +148,7 @@ ifneq ($(filter cairo,$(REQUIRES)),)
 endif
 
 ifneq ($(filter configpp,$(REQUIRES)),)
-  REQUIRES_LEFT := $(filter-out ctpp2, $(REQUIRES_LEFT))
+  REQUIRES_LEFT := $(filter-out configpp, $(REQUIRES_LEFT))
   INCLUDES += $(shell pkg-config --cflags libconfig++ 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   CONFIGPP_LIBS = $(shell pkg-config --libs libconfig++ 2>/dev/null)
   ifeq ($(CONFIGPP_LIBS),)
