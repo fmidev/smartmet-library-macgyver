@@ -7,6 +7,7 @@ Fmi::AsyncTaskGroup::AsyncTaskGroup(std::size_t max_paralell_tasks)
     , num_suceeded(0)
     , num_failed(0)
     , stop_requested(false)
+    , stop_on_error_(false)
 {
 }
 

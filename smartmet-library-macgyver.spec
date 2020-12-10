@@ -10,6 +10,17 @@ Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+%if 0%{rhel} >= 8
+BuildRequires: libpqxx-devel < 1:7.0
+#TestRequires: postgresql12-libs
+Requires: libpqxx < 1:7.0
+%else
+BuildRequires: libpqxx-devel < 1:6.0
+#TestRequires: postgresql95-libs
+Requires: libpqxx < 1:6.0
+%endif
+
 BuildRequires: rpm-build
 BuildRequires: gcc-c++
 BuildRequires: make
@@ -19,22 +30,12 @@ BuildRequires: smartmet-timezones >= 20.10.28
 BuildRequires: ctpp2-devel
 BuildRequires: libicu-devel
 BuildRequires: fmt-devel >= 7.1.0
-%if 0%{rhel} >= 8
-BuildRequires: libpqxx-devel < 1:7.0
-%else
-BuildRequires: libpqxx-devel < 1:6.0
-%endif
 #TestRequires: make
 #TestRequires: gcc-c++
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 20.10.28
 #TestRequires: fmt-devel
 #TestRequires: boost169-devel
-%if 0%{rhel} >= 8
-#TestRequires: postgresql12-libs
-%else
-#TestRequires: postgresql95-libs
-%endif
 Requires: fmt >= 7.1.0
 Requires: ctpp2
 Requires: libicu >= 50.2
@@ -44,11 +45,6 @@ Requires: boost169-thread
 Requires: boost169-system
 Requires: boost169-regex
 Requires: boost169-chrono
-%if 0%{rhel} >= 8
-Requires: libpqxx < 1:7.0
-%else
-Requires: libpqxx < 1:6.0
-%endif
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
