@@ -163,6 +163,12 @@ ifneq ($(filter ctpp2,$(REQUIRES)),)
   REQUIRED_LIBS += $(CTPP2_LIBS)
 endif
 
+# This entry is for debugging makefile.inc only
+ifneq ($(filter debug_dummy,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out debug_dummy, $(REQUIRES_LEFT))
+  REQUIRES_MISSING += debug_dummy
+endif
+
 ifneq ($(filter fmt,$(REQUIRES)),)
   REQUIRES_LEFT := $(filter-out fmt, $(REQUIRES_LEFT))
   INCLUDES += $(shell pkg-config --cflags fmt 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
