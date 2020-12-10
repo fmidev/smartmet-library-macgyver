@@ -1,4 +1,3 @@
-IGNORE_MISSING := Y
 REQUIRES = fmt
 
 include ../makefile.inc

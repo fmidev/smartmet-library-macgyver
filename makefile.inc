@@ -242,8 +242,10 @@ ifneq ($(filter mysql,$(REQUIRES)),)
 endif
 
 ifneq ($(REQUIRES_MISSING),)
-  ifneq ($(IGNORE_MISSING),Y)
-    $(error Development files missing for: $(REQUIRES_MISSING))
+  ifeq (,$(filter test,$(MAKECMDGOALS)))
+    ifeq (,$(filter test-installed,$(MAKECMDGOALS)))
+      $(error Development files missing for: $(REQUIRES_MISSING))
+    endif
   endif
 endif
 

@@ -12,7 +12,6 @@ processor := $(shell uname -p)
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
 REQUIRES := libpqxx icu-i18n fmt ctpp2
-test test-installed: REQUIRES := fmt
 
 include makefile.inc
 
