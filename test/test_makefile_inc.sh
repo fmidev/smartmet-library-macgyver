@@ -1,6 +1,6 @@
 #! /bin/sh
 
-supported_requires="cairo configpp ctpp2 fmt gdal icu-i18n jsoncpp libpqxx librsvg mysql"
+supported_requires="cairo configpp ctpp2 fmt gdal icu-i18n jsoncpp libpqxx librsvg mysql xerces-c"
 
 for req in $supported_requires; do
     echo "--- $req"

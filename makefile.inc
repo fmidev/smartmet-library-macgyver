@@ -241,6 +241,16 @@ ifneq ($(filter mysql,$(REQUIRES)),)
   REQUIRED_LIBS += $(MYSQL_LIBS)
 endif
 
+ifneq ($(filter xerces-c,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out xerces-c, $(REQUIRES_LEFT))
+  INCLUDES += $(shell pkg-config --cflags xerces-c --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  XERCES_C_LIBS = $(shell pkg-config --libs xerces-c --libs 2>/dev/null)
+  ifeq ($(XERCES_C_LIBS),)
+    REQUIRES_MISSING += xerces-c
+  endif
+  REQUIRED_LIBS += $(XERCES_C_LIBS)
+endif
+
 ifneq ($(REQUIRES_MISSING),)
   ifeq (,$(filter test,$(MAKECMDGOALS)))
     ifeq (,$(filter test-installed,$(MAKECMDGOALS)))
