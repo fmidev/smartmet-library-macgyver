@@ -12,7 +12,7 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if 0%{rhel} >= 8
-BuildRequires: libpqxx-devel >= 1:7.0
+BuildRequires: libpqxx-devel >= 1:6.0
 #TestRequires: postgresql12-libs
 Requires: libpqxx < 1:7.0
 %else
