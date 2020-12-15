@@ -196,6 +196,19 @@ ifneq ($(filter gdal,$(REQUIRES)),)
   REQUIRED_LIBS += $(GDAL_LIBS)
 endif
 
+ifneq ($(filter geos,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out geos, $(REQUIRES_LEFT))
+  ifneq "$(wildcard /usr/geos38/bin/geos-config)" ""
+    INCLUDES += $(shell /usr/geos38/bin/geos-config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+    GEOS_LIBS = $(shell /usr/geos38/bin/geos-config --libs 2>/dev/null)
+  else
+    ifneq "$(wildcard /usr/bin/geos-config)" ""
+      GEOS_LIBS = $(shell /usr/bin/geos-config --libs 2>/dev/null)
+    endif
+  endif
+  REQUIRED_LIBS += $(GEOS_LIBS)
+endif
+
 ifneq ($(filter icu-i18n,$(REQUIRES)),)
   REQUIRES_LEFT := $(filter-out icu-i18n, $(REQUIRES_LEFT))
   INCLUDES += $(shell pkg-config --cflags icu-i18n 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
