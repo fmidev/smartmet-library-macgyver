@@ -4,7 +4,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 20.12.15
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -12,12 +12,10 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if 0%{rhel} >= 8
-BuildRequires: libpqxx-devel >= 1:6.0
-#TestRequires: postgresql12-libs
-Requires: libpqxx < 1:7.0
+BuildRequires: libpqxx-devel >= 1:7.0
+Requires: libpqxx >= 1:7.0
 %else
 BuildRequires: libpqxx-devel < 1:6.0
-#TestRequires: postgresql95-libs
 Requires: libpqxx < 1:6.0
 %endif
 
@@ -36,6 +34,7 @@ BuildRequires: fmt-devel >= 7.1.0
 #TestRequires: smartmet-timezones >= 20.10.28
 #TestRequires: fmt-devel
 #TestRequires: boost169-devel
+#TestRequires: postgresql12-libs
 Requires: fmt >= 7.1.0
 Requires: ctpp2
 Requires: libicu >= 50.2
@@ -92,6 +91,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Tue Dec 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.15-2.fmi
+- Upgrade to pgdg12
+
 * Tue Dec 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.12.15-1.fmi
 - makefile.inc update: support GEOS version detection
 
