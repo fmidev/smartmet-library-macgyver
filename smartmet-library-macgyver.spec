@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.12.10
-Release: 2%{?dist}.fmi
+Version: 20.12.15
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -79,7 +79,7 @@ rm -rf $RPM_BUILD_ROOT
 %package -n %{SPECNAME}-devel
 Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
-Requires: %{SPECNAME}
+Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
@@ -92,6 +92,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Tue Dec 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.12.15-1.fmi
+- makefile.inc update: support GEOS version detection
+
 * Thu Dec 10 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.10-2.fmi
 - Added support for GDAL 3.2 into makefile.inc
 
