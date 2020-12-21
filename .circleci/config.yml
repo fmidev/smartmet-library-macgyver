@@ -81,3 +81,13 @@ workflows:
       - test-rhel8:
           requires:
             - build-rhel8
+      - s3/deploy:
+          requires:
+	    - test-rhel7
+	  filters:
+	    branches:
+	      only: master
+	  workspace: .
+	  artifacts: dist
+	  bucket: fmi-smartmet-cicd-beta
+	  cloudfront_distribution_id: E1N8O8NLCHFHF2
