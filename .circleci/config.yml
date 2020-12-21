@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build-rhel7:
     docker:
@@ -68,7 +68,7 @@ jobs:
           destination: dist/
 
 workflows:
-  version: 2
+  version: 2.1
   build-test:
     jobs:
       - build-rhel7
