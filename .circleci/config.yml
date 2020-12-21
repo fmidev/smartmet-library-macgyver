@@ -87,7 +87,7 @@ workflows:
           filters:
             branches:
               only: master
-          workspace: .
-          artifacts: dist
+          workspace: /dist
+          artifacts: *.rpm
           bucket: fmi-smartmet-cicd-beta
           cloudfront_distribution_id: E1N8O8NLCHFHF2
