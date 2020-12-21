@@ -1,4 +1,6 @@
-version: 2
+version: 2.1
+orbs:
+  s3: ngs/s3-deploy@0.0.1
 jobs:
   build-rhel7:
     docker:
@@ -68,7 +70,7 @@ jobs:
           destination: dist/
 
 workflows:
-  version: 2
+  version: 2.1
   build-test:
     jobs:
       - build-rhel7
