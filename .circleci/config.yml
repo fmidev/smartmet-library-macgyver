@@ -37,7 +37,7 @@ jobs:
           working_directory: /
           command: |
             sudo yum install epel-release
-            sudo yum install DNF
+            sudo yum install dnf
             sudo dnf install python3-pip
             pip3 install awscli --upgrade --user
       - store_artifacts:
