@@ -32,9 +32,18 @@ jobs:
       - run:
           name: Test
           command: ci-build test
+      - run:
+          name: Installing AWS CLI
+          working_directory: /
+          command: |
+            sudo dnf install python3-pip
+            pip3 install awscli --upgrade --user
       - store_artifacts:
           path: /dist
           destination: dist/
+      - run:
+          name: Sync artifacts to S3
+          command: aws s3 sync /dist/. s3://fmi-smartmet-cicd-beta --acl public-read
   build-rhel8:
     docker:
       - image: fmidev/smartmet-cibase-8:latest
