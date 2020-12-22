@@ -44,7 +44,10 @@ jobs:
           destination: dist/
       - run:
           name: Sync artifacts to S3
-          command: aws s3 sync /dist/. s3://fmi-smartmet-cicd-beta --acl public-read
+          command: |
+            echo $PATH
+            export PATH=$PATH:/usr/local/bin
+            aws s3 sync /dist/. s3://fmi-smartmet-cicd-beta --acl public-read
   build-rhel8:
     docker:
       - image: fmidev/smartmet-cibase-8:latest
