@@ -36,9 +36,8 @@ jobs:
           name: Installing AWS CLI
           working_directory: /
           command: |
-            sudo yum install epel-release
-            sudo yum install dnf
-            sudo dnf install python3-pip
+            sudo yum -y install dnf
+            sudo dnf -y install python3-pip
             pip3 install awscli --upgrade --user
       - store_artifacts:
           path: /dist
