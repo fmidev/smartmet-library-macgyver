@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  s3: ngs/s3-deploy@0.0.3
 jobs:
   build-rhel7:
     docker:
@@ -94,13 +92,3 @@ workflows:
       - test-rhel8:
           requires:
             - build-rhel8
-      - s3/deploy:
-          requires:
-            - test-rhel7
-          filters:
-            branches:
-              only: master
-          workspace: /dist
-          artifacts: .
-          bucket: fmi-smartmet-cicd-beta
-          cloudfront_distribution_id: E1N8O8NLCHFHF2
