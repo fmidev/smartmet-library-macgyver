@@ -3,47 +3,41 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.12.15
-Release: 2%{?dist}.fmi
+Version: 20.12.26
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%if 0%{rhel} >= 8
-BuildRequires: libpqxx-devel >= 1:7.0
-Requires: libpqxx >= 1:7.0
-%else
-BuildRequires: libpqxx-devel < 1:6.0
-Requires: libpqxx < 1:6.0
-%endif
-
-BuildRequires: rpm-build
-BuildRequires: gcc-c++
-BuildRequires: make
 BuildRequires: boost169-devel
-BuildRequires: imake
-BuildRequires: smartmet-timezones >= 20.10.28
 BuildRequires: ctpp2-devel
-BuildRequires: libicu-devel
 BuildRequires: fmt-devel >= 7.1.0
-#TestRequires: make
-#TestRequires: gcc-c++
-#TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 20.10.28
-#TestRequires: fmt-devel
-#TestRequires: boost169-devel
-#TestRequires: postgresql12-libs
-Requires: fmt >= 7.1.0
-Requires: ctpp2
-Requires: libicu >= 50.2
+BuildRequires: gcc-c++
+BuildRequires: imake
+BuildRequires: libicu-devel
+BuildRequires: libpqxx-devel < 1:7.0
+BuildRequires: make
+BuildRequires: rpm-build
+BuildRequires: smartmet-timezones >= 20.10.28
+Requires: boost169-chrono
 Requires: boost169-date-time
 Requires: boost169-filesystem
-Requires: boost169-thread
-Requires: boost169-system
 Requires: boost169-regex
-Requires: boost169-chrono
+Requires: boost169-system
+Requires: boost169-thread
+Requires: ctpp2
+Requires: fmt >= 7.1.0
+Requires: libicu >= 50.2
+Requires: libpqxx < 1:7.0
+#TestRequires: boost169-devel
+#TestRequires: fmt-devel
+#TestRequires: gcc-c++
+#TestRequires: make
+#TestRequires: postgresql12-libs
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-timezones >= 20.10.28
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -91,6 +85,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Sat Dec 26 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.26-1.fmi
+- Require libpqxx before 7.0 since rhel does not support it yet
+
 * Tue Dec 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.15-2.fmi
 - Upgrade to pgdg12
 
