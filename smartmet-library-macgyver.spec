@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.12.26
+Version: 21.1.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -85,6 +85,10 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Mon Jan  4 2021 Andris Pavenis <andris.pavenis@fmi.fi> - 21.1.4-1.fmi
+- Rebuild due to PGDG repository change: gdal-3.2 uses geos-3.9 instead of geos-3.8
+- Fmi::Cache: use libstdc++ random number generator instead of Boost one
+
 * Sat Dec 26 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.26-1.fmi
 - Require libpqxx before 7.0 since rhel does not support it yet
 

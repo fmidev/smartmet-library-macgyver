@@ -198,9 +198,9 @@ endif
 
 ifneq ($(filter geos,$(REQUIRES)),)
   REQUIRES_LEFT := $(filter-out geos, $(REQUIRES_LEFT))
-  ifneq "$(wildcard /usr/geos38/bin/geos-config)" ""
-    INCLUDES += $(shell /usr/geos38/bin/geos-config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-    GEOS_LIBS = $(shell /usr/geos38/bin/geos-config --libs 2>/dev/null)
+  ifneq "$(wildcard /usr/geos39/bin/geos-config)" ""
+    INCLUDES += $(shell /usr/geos39/bin/geos-config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+    GEOS_LIBS = $(shell /usr/geos39/bin/geos-config --libs 2>/dev/null)
   else
     ifneq "$(wildcard /usr/bin/geos-config)" ""
       GEOS_LIBS = $(shell /usr/bin/geos-config --libs 2>/dev/null)
