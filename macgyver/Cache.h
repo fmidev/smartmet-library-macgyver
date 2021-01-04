@@ -18,17 +18,13 @@
 #include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
 
-// For random number generation
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
-
 #include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iterator>
 #include <limits>
 #include <map>
+#include <random>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -380,12 +376,12 @@ struct RandomEviction
                       std::size_t& currentSize,
                       std::size_t maxSize)
   {
-    static boost::random::mt19937 generator(time(nullptr));
+    static std::mt19937 generator(time(nullptr));
 
     while (currentSize > maxSize)
     {
       std::size_t mapSize = inputMap.size();
-      boost::random::uniform_int_distribution<> dist(0, mapSize - 1);
+      std::uniform_int_distribution<> dist(0, mapSize - 1);
       std::size_t randomInteger = dist(generator);
       auto iterator = inputMap.right.begin();
       std::advance(iterator, randomInteger);
@@ -406,12 +402,12 @@ struct RandomEviction
                       std::size_t maxSize,
                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static boost::random::mt19937 generator(time(nullptr));
+    static std::mt19937 generator(time(nullptr));
 
     while (currentSize > maxSize)
     {
       std::size_t mapSize = inputMap.size();
-      boost::random::uniform_int_distribution<> dist(0, mapSize - 1);
+      std::uniform_int_distribution<> dist(0, mapSize - 1);
       std::size_t randomInteger = dist(generator);
       auto iterator = inputMap.right.begin();
       std::advance(iterator, randomInteger);
@@ -437,8 +433,6 @@ struct RandomEviction
                        std::size_t& currentSize,
                        std::size_t maxSize)
   {
-    static boost::random::mt19937 generator(time(nullptr));
-
     std::size_t amountToInsert = SizeFunction::getSize(value);
 
     if (amountToInsert >= maxSize)
@@ -467,8 +461,6 @@ struct RandomEviction
                        std::size_t maxSize,
                        std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static boost::random::mt19937 generator(time(nullptr));
-
     std::size_t amountToInsert = SizeFunction::getSize(value);
 
     if (amountToInsert >= maxSize)
@@ -797,8 +789,8 @@ struct CoinFlipExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
-    static boost::random::uniform_int_distribution<> dist(0, 1);
+    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::uniform_int_distribution<> dist(0, 1);
 
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -851,8 +843,8 @@ struct LinearTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
-    static boost::random::uniform_real_distribution<> dist(0.0, 1.0);
+    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::uniform_real_distribution<> dist(0.0, 1.0);
 
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -902,8 +894,8 @@ struct SigmoidTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(time(nullptr)));
-    static boost::random::uniform_real_distribution<> dist(0.0, 1.0);
+    static std::mt19937 generator(static_cast<unsigned int>(time(nullptr)));
+    static std::uniform_real_distribution<> dist(0.0, 1.0);
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
     {
