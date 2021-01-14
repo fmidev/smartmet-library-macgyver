@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.1.5
+Version: 21.1.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -85,6 +85,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
+- Repackaged smartmet to resolve debuginfo issues
+
 * Tue Jan  5 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.5-1.fmi
 - Upgrade to fmt 7.1.3 due to changed symbol names
 
