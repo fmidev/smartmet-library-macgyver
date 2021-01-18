@@ -385,6 +385,14 @@ try
           if (fs::exists(mon.path))
           {
             tchange = fs::last_write_time(mon.path);
+			// Actually directory is scanned later if changes detected, 
+			// but we are interested in how often changes are checked
+			if(mon.mask & DirectoryMonitor::SCAN)
+			  {
+				(*newstatus)[mon.path] = DirectoryMonitor::SCAN;
+				mon.callback(mon.id, mon.path, mon.pattern, newstatus);
+				newstatus->clear();
+			  }
           }
           else
           {
