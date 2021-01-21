@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.1.14
+Version: 21.1.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -85,6 +85,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Thu Jan 21 2021 Andris Pavenis <andris.pavenis@fmi.fi> - 21.1.21-1.fmi
+- makefile.inc: Ensure that required sanityzer options are passed when linking when required
+
 * Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
 - Repackaged smartmet to resolve debuginfo issues
 
