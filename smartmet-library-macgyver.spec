@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.1.21
+Version: 21.1.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -85,6 +85,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Mon 25 Jan 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi
+- Added SCAN obervable event in DirectoryMonitor (BRAINSTORM-1981)
+
 * Thu Jan 21 2021 Andris Pavenis <andris.pavenis@fmi.fi> - 21.1.21-1.fmi
 - makefile.inc: Ensure that required sanityzer options are passed when linking when required
 
