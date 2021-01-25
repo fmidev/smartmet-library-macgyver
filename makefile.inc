@@ -87,10 +87,12 @@ endif
 
 ifeq ($(TSAN), yes)
   FLAGS += -fsanitize=thread
+  LDFLAGS += -fsanitize=thread
 endif
 ifeq ($(ASAN), yes)
   FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract \
            -fsanitize=undefined -fsanitize-address-use-after-scope
+  LDFLAGS += -fsanitize=address -fsanitize=undefined
 endif
 
 # Static code analyzer support (warning: currently only gcc-10+)

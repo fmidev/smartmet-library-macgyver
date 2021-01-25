@@ -11,3 +11,4 @@ compile_commands.json
 .settings/
 dist/
 *.d
+/smartmet-library-macgyver.tar.gz
