@@ -85,7 +85,7 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
-* Mon 25 Jan 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi
+* Mon Jan 25 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi
 - Added SCAN obervable event in DirectoryMonitor (BRAINSTORM-1981)
 
 * Thu Jan 21 2021 Andris Pavenis <andris.pavenis@fmi.fi> - 21.1.21-1.fmi
