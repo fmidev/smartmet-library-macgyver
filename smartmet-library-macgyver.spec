@@ -20,7 +20,7 @@ BuildRequires: libicu-devel
 BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-timezones >= 20.10.28
+BuildRequires: smartmet-timezones >= 21.1.5
 Requires: boost169-chrono
 Requires: boost169-date-time
 Requires: boost169-filesystem
@@ -37,7 +37,7 @@ Requires: libpqxx < 1:7.0
 #TestRequires: make
 #TestRequires: postgresql12-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 20.10.28
+#TestRequires: smartmet-timezones >= 21.1.5
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
