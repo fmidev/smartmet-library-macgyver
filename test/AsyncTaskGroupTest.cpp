@@ -36,6 +36,13 @@ namespace AsyncTaskGroupTest {
     TEST_PASSED();
   }
 
+  void empty_group()
+  {
+    Fmi::AsyncTaskGroup tg;
+    tg.wait();
+    TEST_PASSED();
+  }
+
   void single_task()
   {
     std::atomic<int> test(0);
@@ -198,6 +205,7 @@ namespace AsyncTaskGroupTest {
     void test(void)
     {
       TEST(not_waiting_for_result);
+      TEST(empty_group);
       TEST(single_task);
       TEST(several_tasks);
       TEST(task_throws_not_std_exception);

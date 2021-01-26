@@ -11,6 +11,8 @@ processor := $(shell uname -p)
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
+REQUIRES := libpqxx icu-i18n fmt ctpp2
+
 include makefile.inc
 
 INCLUDES += $(pkg-config --cflags icu-i18n)
@@ -22,10 +24,7 @@ LIBS += -L$(libdir) \
 	-lboost_chrono \
 	-lboost_thread \
 	-lboost_system \
-        -lpqxx \
-	$(pkg-config --libs icu-i18n) \
-	-lfmt \
-	-lctpp2 \
+	$(REQUIRED_LIBS) \
 	-lpthread -lrt
 
 # What to install
@@ -96,7 +95,7 @@ objdir:
 rpm: clean $(SPEC).spec
 	rm -f $(SPEC).tar.gz # Clean a possible leftover from previous attempt
 	tar -czvf $(SPEC).tar.gz --exclude test --exclude-vcs --transform "s,^,$(SPEC)/," *
-	rpmbuild -ta $(SPEC).tar.gz
+	rpmbuild -tb $(SPEC).tar.gz
 	rm -f $(SPEC).tar.gz
 
 .SUFFIXES: $(SUFFIXES) .cpp

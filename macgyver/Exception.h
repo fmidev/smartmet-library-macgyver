@@ -2,6 +2,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include <stdexcept>
@@ -105,6 +106,9 @@ class Exception : public std::exception
   DetailVector detailVector;
   bool mLoggingDisabled = false;
   bool mStackTraceDisabled = false;
+
+public:
+    static std::atomic<bool> force_stack_trace;
 };
 
 // Next is to be replaced later on with std::source_location, which is currently experimental

@@ -7,6 +7,7 @@ Fmi::AsyncTaskGroup::AsyncTaskGroup(std::size_t max_paralell_tasks)
     , num_suceeded(0)
     , num_failed(0)
     , stop_requested(false)
+    , stop_on_error_(false)
 {
 }
 
@@ -42,7 +43,7 @@ void Fmi::AsyncTaskGroup::stop()
 {
   std::unique_lock<std::mutex> lock(m1);
   stop_requested = true;
-  for (auto item : active_tasks) {
+  for (const auto & item : active_tasks) {
       item.second->cancel();
   }
 }

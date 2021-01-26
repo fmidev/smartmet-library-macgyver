@@ -1,3 +1,5 @@
+REQUIRES = fmt
+
 include ../makefile.inc
 
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
@@ -22,18 +24,10 @@ MACGYVER_TARGET := ../libsmartmet-macgyver.so
 
 endif
 
-# PGSQL
-
-ifneq "$(wildcard /usr/pgsql-12/lib)" ""
-  LIBS += -L$(PREFIX)/pgsql12-lib -l:libpq.so.5
-else
-  LIBS += -L$(PREFIX)/pgsql-9.5/lib -l:libpq.so.5
-endif
-
 INCLUDES += $(MACGYVER_INCLUDES) -I /usr/include/smartmet
 
 LIBS += $(MACGYVER_LDFLAGS) \
-	-lfmt \
+	$(REQUIRED_LIBS) \
 	-lboost_filesystem \
 	-lboost_locale \
 	-lboost_date_time \

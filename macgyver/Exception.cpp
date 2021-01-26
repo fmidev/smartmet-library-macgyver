@@ -22,6 +22,8 @@ static const std::map<std::string, std::string> exception_name_map = {
     {"std::logic_error", "Logic error"}};
 }
 
+std::atomic<bool> Exception::force_stack_trace(false);
+
 Exception::Exception()
 {
   timestamp = boost::posix_time::second_clock::local_time();
@@ -232,7 +234,7 @@ const char* Exception::getParameterNameByIndex(unsigned int _index) const
 {
   if (_index < getParameterCount())
   {
-    auto p = parameterVector.at(_index);
+    const auto& p = parameterVector.at(_index);
     return p.first.c_str();
   }
 
@@ -246,7 +248,7 @@ const char* Exception::getParameterValue(const char* _name) const
   {
     for (size_t t = 0; t < size; t++)
     {
-      auto p = parameterVector.at(t);
+      const auto& p = parameterVector.at(t);
       if (p.first == _name)
         return p.second.c_str();
     }
@@ -258,7 +260,7 @@ const char* Exception::getParameterValueByIndex(unsigned int _index) const
 {
   if (_index < getParameterCount())
   {
-    auto p = parameterVector.at(_index);
+    const auto& p = parameterVector.at(_index);
     return p.second.c_str();
   }
 
@@ -310,7 +312,7 @@ Exception& Exception::disableStackTrace()
 
 std::string Exception::getStackTrace() const
 {
-  if (mLoggingDisabled || mStackTraceDisabled)
+  if (!force_stack_trace && (mLoggingDisabled || mStackTraceDisabled))
     return "";
 
   const Exception* e = this;
