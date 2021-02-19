@@ -3,40 +3,41 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 20.8.31
+Version: 21.1.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: rpm-build
-BuildRequires: gcc-c++
-BuildRequires: make
+
 BuildRequires: boost169-devel
-BuildRequires: imake
-BuildRequires: smartmet-timezones >= 20.5.5
 BuildRequires: ctpp2-devel
+BuildRequires: fmt-devel >= 7.1.3
+BuildRequires: gcc-c++
+BuildRequires: imake
 BuildRequires: libicu-devel
-BuildRequires: fmt-devel >= 6.2.1
-BuildRequires: libpqxx-devel
-#TestRequires: make
-#TestRequires: gcc-c++
-#TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 20.5.5
-#TestRequires: fmt-devel
-#TestRequires: boost169-devel
-#TestRequires: postgresql95-libs
-Requires: fmt >= 6.2.1
-Requires: ctpp2
-Requires: libicu >= 50.2
+BuildRequires: libpqxx-devel < 1:7.0
+BuildRequires: make
+BuildRequires: rpm-build
+BuildRequires: smartmet-timezones >= 21.1.5
+Requires: boost169-chrono
 Requires: boost169-date-time
 Requires: boost169-filesystem
-Requires: boost169-thread
-Requires: boost169-system
 Requires: boost169-regex
-Requires: boost169-chrono
-Requires: libpqxx
+Requires: boost169-system
+Requires: boost169-thread
+Requires: ctpp2
+Requires: fmt >= 7.1.3
+Requires: libicu >= 50.2
+Requires: libpqxx < 1:7.0
+#TestRequires: boost169-devel
+#TestRequires: fmt-devel
+#TestRequires: gcc-c++
+#TestRequires: make
+#TestRequires: postgresql12-libs
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-timezones >= 21.1.5
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -71,7 +72,7 @@ rm -rf $RPM_BUILD_ROOT
 %package -n %{SPECNAME}-devel
 Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
-Requires: %{SPECNAME}
+Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
@@ -81,8 +82,83 @@ FMI MacGyver library development files
 %files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
+%{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Mon Jan 25 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi
+- Added SCAN obervable event in DirectoryMonitor (BRAINSTORM-1981)
+
+* Thu Jan 21 2021 Andris Pavenis <andris.pavenis@fmi.fi> - 21.1.21-1.fmi
+- makefile.inc: Ensure that required sanityzer options are passed when linking when required
+
+* Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
+- Repackaged smartmet to resolve debuginfo issues
+
+* Tue Jan  5 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.5-1.fmi
+- Upgrade to fmt 7.1.3 due to changed symbol names
+
+* Mon Jan  4 2021 Andris Pavenis <andris.pavenis@fmi.fi> - 21.1.4-1.fmi
+- Rebuild due to PGDG repository change: gdal-3.2 uses geos-3.9 instead of geos-3.8
+- Fmi::Cache: use libstdc++ random number generator instead of Boost one
+
+* Sat Dec 26 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.26-1.fmi
+- Require libpqxx before 7.0 since rhel does not support it yet
+
+* Tue Dec 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.15-2.fmi
+- Upgrade to pgdg12
+
+* Tue Dec 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.12.15-1.fmi
+- makefile.inc update: support GEOS version detection
+
+* Thu Dec 10 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.10-2.fmi
+- Added support for GDAL 3.2 into makefile.inc
+
+* Thu Dec 10 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.12.10-1.fmi
+- makefile.inc update
+- Bug (uninitialized member) fixed in FmiAsyncTaskGroup
+
+* Tue Nov 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.11.24-1.fmi
+- Added Fmi::to_iso_string(std::time_t)
+
+* Wed Oct 28 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.28-1.fmi
+- Rebuilt due to fmt upgrade
+
+* Sat Oct 24 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.24-1.fmi
+- Added std::string based API to TemplateFormatter to avoid std::locale locks due to std::ostream
+
+* Fri Oct  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.9-3.fmi
+- Added Fmi::trim and Fmi::trim_copy since boost versions are slow
+
+* Fri Oct  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.9-2.fmi
+- Optimized to_string for integer types for speed
+
+* Fri Oct  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.9-1.fmi
+- Use unordered_map in TimeZones for speed
+
+* Wed Oct  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.7-2.fmi
+- makefile.inc: fix sed regular expression use
+
+* Wed Oct  7 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.7-1.fmi
+- makefile.inc bugfixes
+
+* Mon Oct  5 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.5-1.fmi
+- makefile.inc updates (added missing -DNDEBUG for release build, added profile build support)
+
+* Fri Oct  2 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.10.2-1.fmi
+- makefile.inc updates
+
+* Tue Sep 29 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.29-1.fmi
+- Install common Makefile fragment for use in other packages
+
+* Fri Sep 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.18-1.fmi
+- TimeZones object now immediately creates TZ objects for all known regions for better access speed
+
+* Tue Sep 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.15-1.fmi
+- Add Fmi::DirectoryMonitor::run() interruption support
+
+* Thu Sep  3 2020 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 20.9.3-1.fmi
+- Added Fmi::Exception with the intent of gradually moving away from SmartMet::Spine::Exception
+
 * Mon Aug 31 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.31-1.fmi
 - Added FastMath.h
 

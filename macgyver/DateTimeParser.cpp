@@ -6,12 +6,14 @@
 // ======================================================================
 
 #include "DateTimeParser.h"
+
 #include "TimeParserDefinitions.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/regex.hpp>
+
 #include <cctype>
 #include <stdexcept>
 
@@ -269,9 +271,9 @@ boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
   {
     if (match[i].matched && i != 4)
     {
-      std::string str = match[i];
-      str.pop_back();
-      vec[i - 1] = std::stoi(str);
+      std::string tmp = match[i];
+      tmp.pop_back();
+      vec[i - 1] = std::stoi(tmp);
     }
   }
 

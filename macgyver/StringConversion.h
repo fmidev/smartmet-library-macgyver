@@ -42,6 +42,7 @@ unsigned long stoul(const std::string& str);
 float stof(const std::string& str);
 double stod(const std::string& str);
 
+std::string to_iso_string(const std::time_t time);
 std::string to_iso_string(const boost::posix_time::time_duration& duration);
 std::string to_simple_string(const boost::posix_time::time_duration& duration);
 // this has been accidentally named incorrectly
@@ -65,5 +66,9 @@ std::string ascii_toupper_copy(std::string input);
 
 bool looks_unsigned_int(const std::string& value);
 bool looks_signed_int(const std::string& value);
+
+// Boost trim uses the locale and is hence slow
+void trim(std::string& value);
+std::string trim_copy(const std::string& value);
 
 }  // namespace Fmi

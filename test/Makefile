@@ -1,47 +1,14 @@
+REQUIRES = fmt
+
+include ../makefile.inc
+
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
--include $(HOME)/.smartmet.mk
-GCC_DIAG_COLOR ?= always
-CXX_STD ?= c++11
+CFLAGS = -DUNIX -D_REENTRANT -O0 -g $(FLAGS)
 
-processor := $(shell uname -p)
-
-ifeq ($(origin PREFIX), undefined)
-  PREFIX = /usr
-else
-  PREFIX = $(PREFIX)
+ifeq ($(USE_CLANG),yes)
+CharsetToolsTest: CFLAGS += -Wno-invalid-source-encoding
 endif
-
-ifeq ($(processor), x86_64)
-  libdir = $(PREFIX)/lib64
-else
-  libdir = $(PREFIX)/lib
-endif
-
-bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include
-datadir = $(PREFIX)/share
-objdir = obj
-
-FLAGS = -Wall -W -Wno-unused-parameter -fdiagnostics-color=$(GCC_DIAG_COLOR)
-
-EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
-	-Wcast-align -Wwrite-strings -Wconversion -Winline \
-	-Wctor-dtor-privacy -Wnon-virtual-dtor -Wno-pmf-conversions \
-	-Wsign-promo -Wchar-subscripts -Wold-style-cast \
-	-Wshadow -Woverloaded-virtual
-
-DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
-
-ifeq ($(TSAN), yes)
-  FLAGS += -fsanitize=thread
-endif
-ifeq ($(ASAN), yes)
-  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize-address-use-after-scope
-endif
-
-CC = g++
-CFLAGS = -DUNIX -D_REENTRANT -O0 -g -std=$(CXX_STD) $(FLAGS)
 
 ifneq (,$(findstring test-installed,$(MAKECMDGOALS)))
 
@@ -57,26 +24,17 @@ MACGYVER_TARGET := ../libsmartmet-macgyver.so
 
 endif
 
-# Boost 1.69
-
-ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -I/usr/include/boost169
-  LIBS += -L/usr/lib64/boost169
-endif
-
 INCLUDES += $(MACGYVER_INCLUDES) -I /usr/include/smartmet
 
 LIBS += $(MACGYVER_LDFLAGS) \
-	-lfmt \
+	$(REQUIRED_LIBS) \
 	-lboost_filesystem \
 	-lboost_locale \
 	-lboost_date_time \
 	-lboost_thread \
 	-lboost_chrono \
 	-lboost_system \
-	-L/usr/pgsql-9.5/lib -l:libpq.so.5 \
 	-lpthread
-
 
 
 all: $(PROG)
@@ -94,7 +52,7 @@ test test-installed: $(PROG)
 		for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false ) 
 
 $(PROG) : % : %.cpp $(MACGYVER_TARGET)
-	$(CC) $(CFLAGS) -MD -o $@ $@.cpp $(INCLUDES) $(LIBS)
+	$(CXX) $(CFLAGS) -MD -o $@ $@.cpp $(INCLUDES) $(LIBS)
 
 ifneq ($(wildcard *.d),)
 -include $(wildcard *.d)

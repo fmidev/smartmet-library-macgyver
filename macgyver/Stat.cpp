@@ -498,7 +498,7 @@ double Stat::nearest(const boost::posix_time::ptime& timestep,
 
   for (unsigned int i = 0; i < subvector.size(); i++)
   {
-    if (i == 0 || abs((subvector[i].time - timestep).total_seconds() < nearest_seconds))
+    if (i == 0 || abs((subvector[i].time - timestep).total_seconds()) < nearest_seconds)
     {
       nearest_value = subvector[i].value;
       nearest_seconds = abs((subvector[i].time - timestep).total_seconds());
@@ -531,8 +531,6 @@ double Stat::interpolate(const boost::posix_time::ptime& timestep,
   if (subvector.size() == 2 &&
       (subvector.at(0).value == itsMissingValue || subvector.at(1).value == itsMissingValue))
     return itsMissingValue;
-
-  double interpolated_value = itsMissingValue;
 
   std::vector<int> indicator_vector;  // -1 indicates earliter, + 1 later than requested timestep
   for (unsigned int i = 0; i < subvector.size(); i++)
@@ -592,7 +590,7 @@ double Stat::interpolate(const boost::posix_time::ptime& timestep,
   double value_diff = second_value - first_value;
   double time_diff_sec = (second_time - first_time).total_seconds();
   double slope = value_diff / time_diff_sec;
-  interpolated_value = (first_value + (slope * time_diff_to_timestep_sec));
+  double interpolated_value = (first_value + (slope * time_diff_to_timestep_sec));
 
 #ifdef MYDEBUG
   std::cout << "first_time: " << first_time << ",second_time: " << second_time

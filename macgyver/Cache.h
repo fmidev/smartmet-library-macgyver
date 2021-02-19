@@ -18,17 +18,13 @@
 #include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
 
-// For random number generation
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
-
 #include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iterator>
 #include <limits>
 #include <map>
+#include <random>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -123,7 +119,7 @@ struct CacheReportingObject
 template <class ValueType>
 struct TrivialSizeFunction
 {
-  static std::size_t getSize(const ValueType& theValue) { return 1; }
+  static std::size_t getSize(const ValueType& /* theValue */) { return 1; }
 };
 
 template <class TagSetType, class TagMapType>
@@ -380,12 +376,12 @@ struct RandomEviction
                       std::size_t& currentSize,
                       std::size_t maxSize)
   {
-    static boost::random::mt19937 generator(time(nullptr));
+    static std::mt19937 generator(time(nullptr));
 
     while (currentSize > maxSize)
     {
       std::size_t mapSize = inputMap.size();
-      boost::random::uniform_int_distribution<> dist(0, mapSize - 1);
+      std::uniform_int_distribution<> dist(0, mapSize - 1);
       std::size_t randomInteger = dist(generator);
       auto iterator = inputMap.right.begin();
       std::advance(iterator, randomInteger);
@@ -406,12 +402,12 @@ struct RandomEviction
                       std::size_t maxSize,
                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static boost::random::mt19937 generator(time(nullptr));
+    static std::mt19937 generator(time(nullptr));
 
     while (currentSize > maxSize)
     {
       std::size_t mapSize = inputMap.size();
-      boost::random::uniform_int_distribution<> dist(0, mapSize - 1);
+      std::uniform_int_distribution<> dist(0, mapSize - 1);
       std::size_t randomInteger = dist(generator);
       auto iterator = inputMap.right.begin();
       std::advance(iterator, randomInteger);
@@ -437,8 +433,6 @@ struct RandomEviction
                        std::size_t& currentSize,
                        std::size_t maxSize)
   {
-    static boost::random::mt19937 generator(time(nullptr));
-
     std::size_t amountToInsert = SizeFunction::getSize(value);
 
     if (amountToInsert >= maxSize)
@@ -467,8 +461,6 @@ struct RandomEviction
                        std::size_t maxSize,
                        std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static boost::random::mt19937 generator(time(nullptr));
-
     std::size_t amountToInsert = SizeFunction::getSize(value);
 
     if (amountToInsert >= maxSize)
@@ -488,7 +480,7 @@ struct RandomEviction
     return true;
   }
 
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
+  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
   {
     // No-op
   }
@@ -596,7 +588,7 @@ struct FIFOEviction
     return true;
   }
 
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
+  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
   {
     // No-op
   }
@@ -704,7 +696,7 @@ struct FILOEviction
     return true;
   }
 
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
+  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
   {
     // No-op
   }
@@ -723,6 +715,7 @@ struct StaticExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
+    (void)timeConstant;
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
     {
@@ -736,6 +729,7 @@ struct StaticExpire
   // All expired tags are deleted
   static bool toDelete(const std::time_t& theTagTime, long timeConstant)
   {
+    (void)timeConstant;
     if (theTagTime != std::numeric_limits<std::time_t>::max())
     {
       return true;
@@ -795,8 +789,8 @@ struct CoinFlipExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
-    static boost::random::uniform_int_distribution<> dist(0, 1);
+    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::uniform_int_distribution<> dist(0, 1);
 
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -849,8 +843,8 @@ struct LinearTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
-    static boost::random::uniform_real_distribution<> dist(0.0, 1.0);
+    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::uniform_real_distribution<> dist(0.0, 1.0);
 
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -900,8 +894,8 @@ struct SigmoidTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static boost::random::mt19937 generator(static_cast<unsigned int>(time(nullptr)));
-    static boost::random::uniform_real_distribution<> dist(0.0, 1.0);
+    static std::mt19937 generator(static_cast<unsigned int>(time(nullptr)));
+    static std::uniform_real_distribution<> dist(0.0, 1.0);
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
     {
@@ -1023,10 +1017,8 @@ class Cache : public boost::noncopyable
 
       // Make tagSet
       TagSetType tagSet;
-      for (auto it = tags.begin(); it != tags.end(); ++it)
-      {
-        tagSet.insert(*it);
-      }
+      for (const auto& tag : tags)
+        tagSet.insert(tag);
 
       // Perform insertion
       result =
@@ -1036,15 +1028,15 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
-        for (auto it = tags.begin(); it != tags.end(); ++it)
+        for (const auto& tag : tags)
         {
           // Check and update tags
           // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(*it);
+          auto tagIt = itsTagMap.find(tag);
           if (tagIt == itsTagMap.end())
           {
             itsTagMap.insert(typename TagMapType::value_type(
-                *it, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
+                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
           }
           else
           {
@@ -1091,10 +1083,8 @@ class Cache : public boost::noncopyable
 
       // Make tagSet
       TagSetType tagSet;
-      for (auto it = tags.begin(); it != tags.end(); ++it)
-      {
-        tagSet.insert(*it);
-      }
+      for (const auto& tag : tags)
+        tagSet.insert(tag);
 
       // Perform insertion
       result =
@@ -1104,15 +1094,15 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
-        for (auto it = tags.begin(); it != tags.end(); ++it)
+        for (const auto& tag : tags)
         {
           // Check and update tags
           // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(*it);
+          auto tagIt = itsTagMap.find(tag);
           if (tagIt == itsTagMap.end())
           {
             itsTagMap.insert(typename TagMapType::value_type(
-                *it, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
+                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
           }
           else
           {

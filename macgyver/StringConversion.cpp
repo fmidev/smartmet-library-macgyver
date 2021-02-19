@@ -34,10 +34,6 @@ namespace Fmi
 // ----------------------------------------------------------------------
 
 std::string to_string(bool value) { return value ? "1" : "0"; }
-std::string to_string(int value) { return fmt::sprintf("%d", value); }
-std::string to_string(long value) { return fmt::sprintf("%ld", value); }
-std::string to_string(unsigned int value) { return fmt::sprintf("%u", value); }
-std::string to_string(unsigned long value) { return fmt::sprintf("%lu", value); }
 #if defined(_WIN32) || defined(WIN32)
 std::string to_string(size_t value) { return fmt::sprintf("%zu", value); }
 std::string to_string(time_t value) { return fmt::sprintf("%zd", value); }
@@ -50,6 +46,11 @@ std::string to_string(const char* fmt, unsigned int value) { return fmt::sprintf
 std::string to_string(const char* fmt, unsigned long value) { return fmt::sprintf(fmt, value); }
 std::string to_string(const char* fmt, float value) { return fmt::sprintf(fmt, value); }
 std::string to_string(const char* fmt, double value) { return fmt::sprintf(fmt, value); }
+
+std::string to_string(int value) { return fmt::format_int(value).str(); }
+std::string to_string(unsigned int value) { return fmt::format_int(value).str(); }
+std::string to_string(long value) { return fmt::format_int(value).str(); }
+std::string to_string(unsigned long value) { return fmt::format_int(value).str(); }
 
 // ----------------------------------------------------------------------
 /*
@@ -309,6 +310,42 @@ std::string to_iso_string(const boost::posix_time::ptime& time)
   return ret;
 }
 
+// Convert to form YYYYMMDDTHHMMSS where T is the date-time separator
+std::string to_iso_string(const std::time_t time)
+{
+  struct tm tt;
+  gmtime_r(&time,&tt);
+
+  char buffer[16];
+  char* ptr = buffer + 16;
+  *--ptr = '\0';
+  unsigned index = tt.tm_sec * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = tt.tm_min * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = tt.tm_hour * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  *--ptr = 'T';
+  index = tt.tm_mday * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = (tt.tm_mon + 1) * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  auto yy = tt.tm_year + 1900;
+  index = (yy % 100) * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+  index = (yy / 100) * 2;
+  *--ptr = digits[index + 1];
+  *--ptr = digits[index];
+
+  return std::string(ptr);
+}
+
 // Convert to form YYYYMMDDTHHMM
 std::string to_timestamp_string(const boost::posix_time::ptime& time)
 {
@@ -553,5 +590,22 @@ bool looks_signed_int(const std::string& value)
   }
   return true;
 }
+
+// In place trim
+void trim(std::string& value)
+{
+  const char * spaces = " \t\n\v\f\r";
+  value.erase(value.find_last_not_of(spaces) + 1);
+  value.erase(0, value.find_first_not_of(spaces));
+}
+
+// Trim to new copy
+std::string trim_copy(const std::string& value)
+{
+  auto tmp = value;
+  trim(tmp);
+  return tmp;
+}
+
 
 }  // namespace Fmi

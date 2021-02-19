@@ -890,7 +890,7 @@ bool is_utf8(const std::string& src)
     if (code_length == 2)
     {
       /* 2 bytes sequence: U+0080..U+07FF */
-      ch = ((str[0] & 0x1f) << 6) + (str[1] & 0x3f);
+      /* ch = ((str[0] & 0x1f) << 6) + (str[1] & 0x3f); */
       /* str[0] >= 0xC2, so ch >= 0x0080.
          str[0] <= 0xDF, (str[1] & 0x3f) <= 0x3f, so ch <= 0x07ff */
     }

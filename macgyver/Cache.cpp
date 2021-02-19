@@ -328,6 +328,7 @@ bool FileCache::checkForDiskSpace(const fs::path& thePath,
                                   bool doCleanup)
 
 {
+  (void)thePath;
   // Get serialization information of the value to be inserted
 
   std::size_t valueSize = theValue.size();

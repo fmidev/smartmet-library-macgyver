@@ -3,7 +3,9 @@
 #include <chrono>
 #include <thread>
 #include <condition_variable>
+#include <boost/chrono.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread.hpp>
 #include <regression/tframe.h>
 
 namespace fs = boost::filesystem;
@@ -51,6 +53,43 @@ void stopping_test()
     TEST_PASSED();
 }
 
+void interruption_test()
+{
+    std::atomic<bool> started(false);
+    std::mutex m;
+    std::condition_variable c;
+    Fmi::DirectoryMonitor monitor;
+    monitor.watch(".",
+        [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex, const Fmi::DirectoryMonitor::Status&) {},
+        [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {},
+        10);
+    boost::thread task(
+        [&monitor, &started, &c]() {
+            started = true;
+            c.notify_all();
+            monitor.run();
+        });
+
+    {
+        std::unique_lock<std::mutex> lock(m);
+        if (not started) {
+            c.wait_for(lock, std::chrono::seconds(5), [&started]()->bool { return started; });
+        }
+    }
+
+    //const pt::ptime t1 = pt::microsec_clock::universal_time();
+    //std::cout << t1 - start << std::endl;
+    task.interrupt();
+    bool joined = task.try_join_for(boost::chrono::milliseconds(200));
+    if (!joined) {
+        TEST_FAILED("Interrupting request did not stop directory monitor");
+        monitor.stop();
+        task.join();
+    }
+
+    TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 
 // The actual test driver
@@ -62,6 +101,7 @@ class tests : public tframe::tests
   void test(void)
   {
     TEST(stopping_test);
+    TEST(interruption_test);
   }
 
 };  // class tests
