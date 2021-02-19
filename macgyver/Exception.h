@@ -115,6 +115,10 @@ public:
 // Static cast explanation: https://github.com/isocpp/CppCoreGuidelines/issues/765
 
 #ifndef BCP
+#ifdef _MSC_VER
+#define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif  // _MSC_VER
+
 #define BCP __FILE__, __LINE__, static_cast<const char*>(__PRETTY_FUNCTION__)
 #endif
   

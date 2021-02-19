@@ -314,7 +314,11 @@ std::string to_iso_string(const boost::posix_time::ptime& time)
 std::string to_iso_string(const std::time_t time)
 {
   struct tm tt;
+#ifdef _MSC_VER
+  ::gmtime_s(&tt, &time);
+#else
   gmtime_r(&time,&tt);
+#endif
 
   char buffer[16];
   char* ptr = buffer + 16;
