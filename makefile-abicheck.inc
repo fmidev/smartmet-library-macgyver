@@ -3,7 +3,7 @@ ABI_CHECK_LIBNAME := $(patsubst %.so,%,$(LIBFILE))
 abi-check:
 	$(MAKE) abi-check-clean
 	$(MAKE)	abi-compliance-check
-	
+
 rev1-tree: abi-check-dir
 	if [ -z "$(rev1)" ] ; then \
 	    echo "make abi-check: mandatory parameters rev1 and(or) rev2 mising"; \
@@ -18,7 +18,7 @@ rev2-tree: abi-check-dir
 	    false; \
 	else \
 	    git archive --prefix=$(rev2)/ --format tar $(rev2): | tar x -C abi-check; \
-	else
+	fi
 
 abi-check-dir:
 	mkdir -p abi-check
@@ -40,7 +40,7 @@ abi-compliance-check: rev1-abi-dump rev2-abi-dump
 	    -l $(ABI_CHECK_LIBNAME) \
 	    -old abi-check/$(ABI_CHECK_LIBNAME)-$(rev1).dump \
 	    -new abi-check/$(ABI_CHECK_LIBNAME)-$(rev2).dump 2>&1 | tee abi-check/result.txt
-	    
+
 abi-check-clean:
 	rm -rf abi-check
 
