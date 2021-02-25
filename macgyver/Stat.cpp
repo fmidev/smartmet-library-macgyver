@@ -22,8 +22,14 @@ using DataConstIterator = DataVector::const_iterator;
 using namespace boost::accumulators;
 using namespace std;
 
-bool comp_value(const DataItem& data1, const DataItem& data2) { return data1.value < data2.value; }
-bool comp_time(const DataItem& data1, const DataItem& data2) { return data1.time < data2.time; }
+bool comp_value(const DataItem& data1, const DataItem& data2)
+{
+  return data1.value < data2.value;
+}
+bool comp_time(const DataItem& data1, const DataItem& data2)
+{
+  return data1.time < data2.time;
+}
 Stat::Stat(double theMissingValue /*= numeric_limits<double>::quiet_NaN()*/)
     : itsMissingValue(theMissingValue), itsWeights(true), itsDegrees(false)
 {
@@ -103,7 +109,10 @@ void Stat::addData(const DataItem& theData)
   calculate_weights();
 }
 
-void Stat::clear() { itsData.clear(); }
+void Stat::clear()
+{
+  itsData.clear();
+}
 // time in seconds is used as a weight
 double Stat::integ(const boost::posix_time::ptime& startTime /*= not_a_date_time */,
                    const boost::posix_time::ptime& endTime /*= not_a_date_time */) const
@@ -113,7 +122,8 @@ double Stat::integ(const boost::posix_time::ptime& startTime /*= not_a_date_time
 #endif
   DataVector subvector;
 
-  if (!get_subvector(subvector, startTime, endTime)) return itsMissingValue;
+  if (!get_subvector(subvector, startTime, endTime))
+    return itsMissingValue;
 
   accumulator_set<double, stats<tag::sum>, double> acc;
 
@@ -137,7 +147,8 @@ double Stat::sum(const boost::posix_time::ptime& startTime /*= not_a_date_time *
 #endif
   DataVector subvector;
 
-  if (!get_subvector(subvector, startTime, endTime)) return itsMissingValue;
+  if (!get_subvector(subvector, startTime, endTime))
+    return itsMissingValue;
 
   accumulator_set<double, stats<tag::sum>, double> acc;
 
@@ -174,7 +185,8 @@ double Stat::mean(const boost::posix_time::ptime& startTime /*= not_a_date_time 
 #endif
   DataVector subvector;
 
-  if (!get_subvector(subvector, startTime, endTime)) return itsMissingValue;
+  if (!get_subvector(subvector, startTime, endTime))
+    return itsMissingValue;
 
   if (itsDegrees)
   {
@@ -223,7 +235,8 @@ double Stat::max(const boost::posix_time::ptime& startTime /*= not_a_date_time *
 #endif
   DataVector subvector;
 
-  if (!get_subvector(subvector, startTime, endTime)) return itsMissingValue;
+  if (!get_subvector(subvector, startTime, endTime))
+    return itsMissingValue;
 
   return std::max_element(subvector.begin(), subvector.end(), comp_value)->value;
 }
@@ -329,7 +342,8 @@ unsigned int Stat::count(double lowerLimit,
   unsigned int occurances(0);
 
   for (const DataItem& item : subvector)
-    if (item.value >= lowerLimit && item.value <= upperLimit) occurances++;
+    if (item.value >= lowerLimit && item.value <= upperLimit)
+      occurances++;
 
   return occurances;
 }
@@ -345,7 +359,8 @@ double Stat::percentage(double lowerLimit,
 #endif
   DataVector subvector;
 
-  if (!get_subvector(subvector, startTime, endTime)) return itsMissingValue;
+  if (!get_subvector(subvector, startTime, endTime))
+    return itsMissingValue;
 
   int occurances(0);
   int total_count(0);
@@ -357,7 +372,8 @@ double Stat::percentage(double lowerLimit,
     total_count += (itsWeights ? item.weight : 1);
   }
 
-  if (occurances == 0) return 0.0;
+  if (occurances == 0)
+    return 0.0;
 
   return static_cast<double>((static_cast<double>(occurances) / static_cast<double>(total_count)) *
                              100.0);
@@ -484,7 +500,8 @@ double Stat::nearest(const boost::posix_time::ptime& timestep,
   std::cout << "nearest(" << timestep << ", " << startTime << ", " << endTime << ")" << std::endl;
 #endif
 
-  if (timestep == not_a_date_time) return itsMissingValue;
+  if (timestep == not_a_date_time)
+    return itsMissingValue;
 
   DataVector subvector;
 
@@ -518,14 +535,17 @@ double Stat::interpolate(const boost::posix_time::ptime& timestep,
             << std::endl;
 #endif
 
-  if (timestep == not_a_date_time) return itsMissingValue;
+  if (timestep == not_a_date_time)
+    return itsMissingValue;
 
   DataVector subvector;
 
-  if (!get_subvector(subvector, startTime, endTime, false)) return itsMissingValue;
+  if (!get_subvector(subvector, startTime, endTime, false))
+    return itsMissingValue;
 
   // If there is only one timestep in the data and it is the same as requested we return the value
-  if (subvector.size() == 1 && subvector.at(0).time == timestep) return subvector.at(0).value;
+  if (subvector.size() == 1 && subvector.at(0).time == timestep)
+    return subvector.at(0).value;
 
   // There must be at least two timesteps with valid values in order to interpolate
   if (subvector.size() == 2 &&
@@ -535,7 +555,8 @@ double Stat::interpolate(const boost::posix_time::ptime& timestep,
   std::vector<int> indicator_vector;  // -1 indicates earliter, + 1 later than requested timestep
   for (unsigned int i = 0; i < subvector.size(); i++)
   {
-    if (subvector[i].value == itsMissingValue) continue;
+    if (subvector[i].value == itsMissingValue)
+      continue;
     if (subvector[i].time < timestep)
       indicator_vector.push_back(-1);
     else if (subvector[i].time > timestep)
@@ -544,7 +565,8 @@ double Stat::interpolate(const boost::posix_time::ptime& timestep,
       return subvector[i].value;  // Exact timestep found
   }
 
-  if (indicator_vector.size() < 2) return itsMissingValue;
+  if (indicator_vector.size() < 2)
+    return itsMissingValue;
 
   boost::posix_time::ptime first_time = boost::posix_time::not_a_date_time;
   boost::posix_time::ptime second_time = boost::posix_time::not_a_date_time;
@@ -628,7 +650,8 @@ bool extract_subvector(const DataVector& itsData,
   {
     if (query_period.contains(itsData[0].time))
     {
-      if (itsData[0].value == itsMissingValue) return false;
+      if (itsData[0].value == itsMissingValue)
+        return false;
       subvector.push_back(DataItem(itsData[0].time, itsData[0].value, 1.0));
     }
     return true;
@@ -648,7 +671,8 @@ bool extract_subvector(const DataVector& itsData,
 
     if (!itsWeights)
     {
-      if (query_period.contains(iter->time)) subvector.push_back(*iter);
+      if (query_period.contains(iter->time))
+        subvector.push_back(*iter);
       continue;
     }
 
@@ -662,7 +686,8 @@ bool extract_subvector(const DataVector& itsData,
       {
         // first find out intersecting period
         time_period intersection_period(query_period.intersection(timestep_period));
-        if (intersection_period.length().total_seconds() == 0) continue;
+        if (intersection_period.length().total_seconds() == 0)
+          continue;
 
         // value changes halfway of timestep, so we have to handle first half and second half of
         // separately
@@ -711,7 +736,8 @@ bool Stat::get_subvector(DataVector& subvector,
     {
       for (DataConstIterator iter = itsData.begin(); iter != itsData.end(); iter++)
       {
-        if (iter->value == itsMissingValue) return false;
+        if (iter->value == itsMissingValue)
+          return false;
         subvector.push_back(*iter);
       }
       return true;
@@ -731,7 +757,8 @@ void Stat::calculate_weights()
 
   bool invalidTimestampsFound = invalid_timestamps();
 
-  if (!invalidTimestampsFound) sort(itsData.begin(), itsData.end(), comp_time);
+  if (!invalidTimestampsFound)
+    sort(itsData.begin(), itsData.end(), comp_time);
 
   for (unsigned int i = 0; i < itsData.size(); i++)
   {

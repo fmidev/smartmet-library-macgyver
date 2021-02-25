@@ -33,15 +33,10 @@ void parse_timestamp()
   ptime res, ok;
 
   std::vector<Fmi::Test::TimeParseTest> should_pass = {
-      { "20070102T0500", ptime(date(2007, 1, 2), hours(5) + minutes(0)) }
-      , { "20000228T0515", ptime(date(2000, 2, 28), hours(5) + minutes(15)) }
-  };
+      {"20070102T0500", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
+      {"20000228T0515", ptime(date(2000, 2, 28), hours(5) + minutes(15))}};
 
-  std::vector<std::string> should_fail = {
-      "foobar"
-      , "12345678901"
-      , "123456789012"
-  };
+  std::vector<std::string> should_fail = {"foobar", "12345678901", "123456789012"};
 
   Fmi::Test::check_time_parse(should_pass, &TimeParser::parse_iso);
   Fmi::Test::check_time_parse_fail(should_fail, &TimeParser::parse_iso);
@@ -61,21 +56,17 @@ void parse_epoch()
 
   std::vector<Fmi::Test::TimeParseTest> should_pass = {
       // date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
-      { "1167714000", ptime(date(2007, 1, 2), hours(5) + minutes(0)) },
+      {"1167714000", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
       // date +%s --date="2000-02-28 05:15:00 UTC" --> 951714900
-      { "951714900", ptime(date(2000, 2, 28), hours(5) + minutes(15)) },
+      {"951714900", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
       // date +%s --date="2019-08-23 07:05:33 UTC" --> 1566543933
-      { "1566543933", ptime(date(2019, 8, 23), hours(7) + minutes(5) + seconds(33)) },
+      {"1566543933", ptime(date(2019, 8, 23), hours(7) + minutes(5) + seconds(33))},
       // date +%s --date="2019-08-22 07:01:59 UTC" --> 1566457319
-      { "1566457319", ptime(date(2019, 8, 22), hours(7) + minutes(1) + seconds(59)) },
+      {"1566457319", ptime(date(2019, 8, 22), hours(7) + minutes(1) + seconds(59))},
 
-      { "1400011680", ptime(date(2014, 05, 13), hours(20) + minutes(8)) }
-  };
+      {"1400011680", ptime(date(2014, 05, 13), hours(20) + minutes(8))}};
 
-  std::vector<std::string> should_fail = {
-      "foobar",
-      "12345678901"
-  };
+  std::vector<std::string> should_fail = {"foobar", "12345678901"};
 
   Fmi::Test::check_time_parse(should_pass, &TimeParser::parse_epoch);
   Fmi::Test::check_time_parse_fail(should_fail, &TimeParser::parse_epoch);
@@ -94,51 +85,55 @@ void parse_iso()
   ptime res, ok;
 
   std::vector<Fmi::Test::TimeParseTest> should_pass = {
-      { "20070102T050000", ptime(date(2007, 1, 2), hours(5) + minutes(0)) }
-      , { "20000228T051500", ptime(date(2000, 2, 28), hours(5) + minutes(15)) }
-      , { "2007-01-02T05:00:00", ptime(date(2007, 1, 2), hours(5) + minutes(0)) }
-      , { "2000-02-28T05:15:00", ptime(date(2000, 2, 28), hours(5) + minutes(15)) }
-      , { "2000-02-28T05:15:10", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10)) }
-      , { "2000-02-28T05:15:10Z", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10)) }
-      , { "2000-02-28T05:15:10+01:00", ptime(date(2000, 2, 28), hours(4) + minutes(15) + seconds(10)) }
-      , { "2000-02-28T05:15:10+01:30", ptime(date(2000, 2, 28), hours(3) + minutes(45) + seconds(10)) }
-      , { "2000-02-28T02:15:10-01:30", ptime(date(2000, 2, 28), hours(3) + minutes(45) + seconds(10)) }
-      , { "2000-02-28T051510", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10)) }
-      , { "20000228T05:15:10", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10)) }
-      , { "2000-0228T0515:10", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10)) }
-      , { "20000228T", ptime(date(2000, 2, 28)) }
-      , { "20000228T12", ptime(date(2000, 2, 28), hours(12)) }
-      // 3 fractional seconds are ignored
-      , { "2000-02-28T12:00:00.321", ptime(date(2000, 2, 28), hours(12)) }
-      , { "2000-02-28T12:00:00.321+03:00", ptime(date(2000, 2, 28), hours(9)) }
-      // BRAINSTORM-480
-      , { "2015-06-09T16:00:00+03", ptime(date(2015, 6, 9), hours(13)) }
-      , { "2015-06-09T16:00:00+03:00", ptime(date(2015, 6, 9), hours(13)) }
-      , { "2015-06-09T16:00:00+0300", ptime(date(2015, 6, 9), hours(13)) }
-      , { "2015-06-09T08:00:00-05:30", ptime(date(2015, 6, 9), hours(13) + minutes(30)) }
+      {"20070102T050000", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
+      {"20000228T051500", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
+      {"2007-01-02T05:00:00", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
+      {"2000-02-28T05:15:00", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
+      {"2000-02-28T05:15:10", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10))},
+      {"2000-02-28T05:15:10Z", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10))},
+      {"2000-02-28T05:15:10+01:00", ptime(date(2000, 2, 28), hours(4) + minutes(15) + seconds(10))},
+      {"2000-02-28T05:15:10+01:30", ptime(date(2000, 2, 28), hours(3) + minutes(45) + seconds(10))},
+      {"2000-02-28T02:15:10-01:30", ptime(date(2000, 2, 28), hours(3) + minutes(45) + seconds(10))},
+      {"2000-02-28T051510", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10))},
+      {"20000228T05:15:10", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10))},
+      {"2000-0228T0515:10", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10))},
+      {"20000228T", ptime(date(2000, 2, 28))},
+      {"20000228T12", ptime(date(2000, 2, 28), hours(12))}  // 3 fractional seconds are ignored
+      ,
+      {"2000-02-28T12:00:00.321", ptime(date(2000, 2, 28), hours(12))},
+      {"2000-02-28T12:00:00.321+03:00", ptime(date(2000, 2, 28), hours(9))}  // BRAINSTORM-480
+      ,
+      {"2015-06-09T16:00:00+03", ptime(date(2015, 6, 9), hours(13))},
+      {"2015-06-09T16:00:00+03:00", ptime(date(2015, 6, 9), hours(13))},
+      {"2015-06-09T16:00:00+0300", ptime(date(2015, 6, 9), hours(13))},
+      {"2015-06-09T08:00:00-05:30", ptime(date(2015, 6, 9), hours(13) + minutes(30))}
 #ifdef WE_DO_NOT_SUPPORT_FRACTIONS
-      , { "2000-02-28T05:15:10.123456", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(123456)) }
-      , { "2000-02-28T05:15:10.987654Z", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(987654)) }
+      ,
+      {"2000-02-28T05:15:10.123456",
+       ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(123456))},
+      {"2000-02-28T05:15:10.987654Z",
+       ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(987654))}
 
 #endif
       // the Gregorian calendar is officially introduced on 1582-10-15
-      , { "1582-10-15T00:00:00Z", ptime(date(1582, 10, 15), hours(0) + minutes(0) + seconds(0)) }
+      ,
+      {"1582-10-15T00:00:00Z", ptime(date(1582, 10, 15), hours(0) + minutes(0) + seconds(0))}
 
       // BRAINSTORM-1071
-      , { "1900-1-1T00:00:00", ptime(date(1900, 1, 1)) }
-  };
+      ,
+      {"1900-1-1T00:00:00", ptime(date(1900, 1, 1))}};
 
   std::vector<std::string> should_fail = {
-      "2000-02-28T12:00:00.3233",      // Expected to fail when given four fractional seconds
-      "2000-02-28T12:00:00.33",        // Expected to fail when given two fractional seconds
-      "2000-02-28T12:00:00.3"          // Expected to fail when given one fractional second
-      "2015-06-09T16:00:00+00300",     // Should fail to parse '00300' timezone
-      "2015-06-09T16:00:00--0300",     // Should fail to parse double minus in timezone
-      "2015-06-09T16:00:00%0300",      // Should fail to parse invalid sign in timezone
+      "2000-02-28T12:00:00.3233",   // Expected to fail when given four fractional seconds
+      "2000-02-28T12:00:00.33",     // Expected to fail when given two fractional seconds
+      "2000-02-28T12:00:00.3"       // Expected to fail when given one fractional second
+      "2015-06-09T16:00:00+00300",  // Should fail to parse '00300' timezone
+      "2015-06-09T16:00:00--0300",  // Should fail to parse double minus in timezone
+      "2015-06-09T16:00:00%0300",   // Should fail to parse invalid sign in timezone
       "foobar",
       "12345678901",
       "123456789012",
-      "20160101T00000"                 // Should fail to parse 20160101T00000 due to an extra zero (BRAINSTORM-696)
+      "20160101T00000"  // Should fail to parse 20160101T00000 due to an extra zero (BRAINSTORM-696)
   };
 
   Fmi::Test::check_time_parse(should_pass, &TimeParser::parse_iso);
@@ -158,13 +153,12 @@ void parse_fmi()
   ptime res, ok;
 
   std::vector<Fmi::Test::TimeParseTest> should_pass = {
-      { "200912120500", ptime(date(2009, 12, 12), hours(5) + minutes(0)) }
-      , { "180001011500", ptime(date(1800, 1, 1), hours(15) + minutes(0)) }
-  };
+      {"200912120500", ptime(date(2009, 12, 12), hours(5) + minutes(0))},
+      {"180001011500", ptime(date(1800, 1, 1), hours(15) + minutes(0))}};
 
   std::vector<std::string> should_fail = {
-      "2009121205", // Should fail to parse '2009121205', due to missing minute definition
-      "200912120500334" // Should fail to parse '200912120500334', due to extra tokens
+      "2009121205",      // Should fail to parse '2009121205', due to missing minute definition
+      "200912120500334"  // Should fail to parse '200912120500334', due to extra tokens
   };
 
   Fmi::Test::check_time_parse(should_pass, &TimeParser::parse_fmi);
@@ -185,14 +179,15 @@ void try_parse_iso()
   ptime res, ok;
 
   std::vector<Fmi::Test::TimeParseTest> should_pass = {
-      { "20070102T050000", ptime(date(2007, 1, 2), hours(5) + minutes(0)) },
-      { "20000228T051500", ptime(date(2000, 2, 28), hours(5) + minutes(15)) },
-      { "2000-02-28T05:15:10Z", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10)) },
-      { "2000-02-28T05:15:10+01:00", ptime(date(2000, 2, 28), hours(4) + minutes(15) + seconds(10)) },
-      { "2000-02-28T05:15:10-01:30", ptime(date(2000, 2, 28), hours(6) + minutes(45) + seconds(10)) }
-  };
+      {"20070102T050000", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
+      {"20000228T051500", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
+      {"2000-02-28T05:15:10Z", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10))},
+      {"2000-02-28T05:15:10+01:00", ptime(date(2000, 2, 28), hours(4) + minutes(15) + seconds(10))},
+      {"2000-02-28T05:15:10-01:30",
+       ptime(date(2000, 2, 28), hours(6) + minutes(45) + seconds(10))}};
 
-  Fmi::Test::check_time_parse(should_pass, std::bind(&TimeParser::try_parse_iso, std::placeholders::_1, &utc));
+  Fmi::Test::check_time_parse(should_pass,
+                              std::bind(&TimeParser::try_parse_iso, std::placeholders::_1, &utc));
 
   TEST_PASSED();
 }
@@ -208,29 +203,27 @@ void parse_sql()
   ptime res, ok;
 
   std::vector<Fmi::Test::TimeParseTest> should_pass = {
-      { "2007-01-02 05:00:00", ptime(date(2007, 1, 2), hours(5) + minutes(0)) },
-      { "2000-02-28 05:15:00", ptime(date(2000, 2, 28), hours(5) + minutes(15)) },
-      { "2000-02-28 05", ptime(date(2000, 2, 28), hours(5)) },
-      { "2000-02-28 05:20:34", ptime(date(2000, 2, 28), hours(5) + minutes(20) + seconds(34)) },
-      { "2000-02-28", ptime(date(2000, 2, 28)) },
-      { "1900-01-01 00:00:0.0", ptime(date(1900, 1, 1)) }
-  };
+      {"2007-01-02 05:00:00", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
+      {"2000-02-28 05:15:00", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
+      {"2000-02-28 05", ptime(date(2000, 2, 28), hours(5))},
+      {"2000-02-28 05:20:34", ptime(date(2000, 2, 28), hours(5) + minutes(20) + seconds(34))},
+      {"2000-02-28", ptime(date(2000, 2, 28))},
+      {"1900-01-01 00:00:0.0", ptime(date(1900, 1, 1))}};
 
   Fmi::Test::check_time_parse(should_pass, &TimeParser::parse_sql);
 
-  const std::vector<std::string> invalid = {
-      "foobar",
-      "12345678901",
-      "1970-0-1 00:00:00",
-      "1970-13-1 00:00:00",
-      "1970-001-1 00:00:00",
-      "1970-1-0 00:00:00",
-      "1970-1-32 00:00:00",
-      "1970-1-1 24:00:00",
-      "1970-1-1 00:60:00",
-      "1970-1-1 23:00:60",
-      "1970-1-1 23:059:00",
-      "1970-01-01 00:000:00"};
+  const std::vector<std::string> invalid = {"foobar",
+                                            "12345678901",
+                                            "1970-0-1 00:00:00",
+                                            "1970-13-1 00:00:00",
+                                            "1970-001-1 00:00:00",
+                                            "1970-1-0 00:00:00",
+                                            "1970-1-32 00:00:00",
+                                            "1970-1-1 24:00:00",
+                                            "1970-1-1 00:60:00",
+                                            "1970-1-1 23:00:60",
+                                            "1970-1-1 23:059:00",
+                                            "1970-01-01 00:000:00"};
 
   Fmi::Test::check_time_parse_fail(invalid, &TimeParser::parse_sql);
 
@@ -517,17 +510,20 @@ void try_parse_duration()
   time_duration res, ok;
 
   res = TimeParser::try_parse_duration("0");
-  if (res != seconds(0)) TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
+  if (res != seconds(0))
+    TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
 
   res = TimeParser::try_parse_duration("+1");
-  if (res != minutes(1)) TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
+  if (res != minutes(1))
+    TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
 
   res = TimeParser::try_parse_duration("+10m");
   if (res != minutes(10))
     TEST_FAILED("Failed to parse +10m correctly, got " + to_simple_string(res));
 
   res = TimeParser::try_parse_duration("+3h");
-  if (res != hours(3)) TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
+  if (res != hours(3))
+    TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
 
   res = TimeParser::try_parse_duration("-24h");
   if (res != hours(-24))
@@ -567,17 +563,20 @@ void parse_duration()
   time_duration res, ok;
 
   res = TimeParser::parse_duration("0");
-  if (res != seconds(0)) TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
+  if (res != seconds(0))
+    TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_duration("+1");
-  if (res != minutes(1)) TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
+  if (res != minutes(1))
+    TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_duration("+10m");
   if (res != minutes(10))
     TEST_FAILED("Failed to parse +10m correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_duration("+3h");
-  if (res != hours(3)) TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
+  if (res != hours(3))
+    TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_duration("-24h");
   if (res != hours(-24))
@@ -613,7 +612,8 @@ void parse_iso_duration()
     TEST_FAILED("Failed to parse P2W correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_iso_duration("P1D");
-  if (res != hours(24)) TEST_FAILED("Failed to parse P1D correctly, got " + to_simple_string(res));
+  if (res != hours(24))
+    TEST_FAILED("Failed to parse P1D correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_iso_duration("P2D");
   if (res != hours(2 * 24))
@@ -632,7 +632,8 @@ void parse_iso_duration()
     TEST_FAILED("Failed to parse PT10M correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_iso_duration("PT3H");
-  if (res != hours(3)) TEST_FAILED("Failed to parse PT3H correctly, got " + to_simple_string(res));
+  if (res != hours(3))
+    TEST_FAILED("Failed to parse PT3H correctly, got " + to_simple_string(res));
 
   res = TimeParser::parse_iso_duration("P1DT10H20M30S");
   if (res != hours(24) + hours(10) + minutes(20) + seconds(30))
@@ -689,9 +690,12 @@ void looks()
   if ((res = TimeParser::looks("1357063111")) != "epoch")
     TEST_FAILED("1357063111 should look like an epoch time");
 
-  if ((res = TimeParser::looks("+10")) != "offset") TEST_FAILED("+10 should look like an offset");
-  if ((res = TimeParser::looks("-100")) != "offset") TEST_FAILED("-100 should look like an offset");
-  if ((res = TimeParser::looks("+10m")) != "offset") TEST_FAILED("+10m should look like an offset");
+  if ((res = TimeParser::looks("+10")) != "offset")
+    TEST_FAILED("+10 should look like an offset");
+  if ((res = TimeParser::looks("-100")) != "offset")
+    TEST_FAILED("-100 should look like an offset");
+  if ((res = TimeParser::looks("+10m")) != "offset")
+    TEST_FAILED("+10m should look like an offset");
   if ((res = TimeParser::looks("-100H")) != "offset")
     TEST_FAILED("-100H should look like an offset");
 
@@ -750,7 +754,8 @@ void looks_utc()
   if (TimeParser::looks_utc("2000-02-28 05:15:00"))
     TEST_FAILED("2000-02-28 05:15:00 should look like local time");
 
-  if (!TimeParser::looks_utc("1167714000")) TEST_FAILED("1167714000 should look like UTC time");
+  if (!TimeParser::looks_utc("1167714000"))
+    TEST_FAILED("1167714000 should look like UTC time");
 
   TEST_PASSED();
 }
@@ -769,17 +774,20 @@ void parse_wintertime()
   local_date_time ok = local_date_time(
       date(2012, 10, 27), hours(3) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   local_date_time res = TimeParser::parse("201210270330", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   ok = local_date_time(
       date(2012, 10, 27), hours(2) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = TimeParser::parse("201210270230", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   ok = local_date_time(
       date(2012, 10, 27), hours(1) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = TimeParser::parse("201210270130", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   TEST_PASSED();
 }
@@ -796,18 +804,21 @@ void parse_summertime()
   local_date_time ok = local_date_time(
       date(2013, 3, 31), hours(1) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   local_date_time res = TimeParser::parse("201303310130", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   ok = local_date_time(
       date(2013, 3, 31), hours(2) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = TimeParser::parse("201303310230", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   // We expect 04:30 for invalid 03:30!!
   ok = local_date_time(
       date(2013, 3, 31), hours(4) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = TimeParser::parse("201303310330", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   TEST_PASSED();
 }

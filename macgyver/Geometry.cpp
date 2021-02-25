@@ -22,14 +22,20 @@ const double kPii = 3.14159265358979323846264338327950;
  */
 // ----------------------------------------------------------------------
 
-double Radians(double theDegrees) { return theDegrees * kPii / 180; }
+double Radians(double theDegrees)
+{
+  return theDegrees * kPii / 180;
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Convert radians to degrees
  */
 // ----------------------------------------------------------------------
 
-double Degrees(double theRadians) { return theRadians * 180 / kPii; }
+double Degrees(double theRadians)
+{
+  return theRadians * 180 / kPii;
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Cartesian 2D distance
@@ -143,7 +149,8 @@ double DistanceFromLineSegment(
   const double length = Distance(theX1, theY1, theX2, theY2);
 
   // The special case when the line is a dot is handled quickly
-  if (length <= 0) return Distance(theX, theY, theX1, theY1);
+  if (length <= 0)
+    return Distance(theX, theY, theX1, theY1);
 
   // Intersection point in units of 0-1
 
@@ -156,7 +163,8 @@ double DistanceFromLineSegment(
 
   // Otherwise the nearest point is the nearer end point
 
-  if (u < 0) return Distance(theX, theY, theX1, theY1);
+  if (u < 0)
+    return Distance(theX, theY, theX1, theY1);
 
   return Distance(theX, theY, theX2, theY2);
 }
@@ -180,7 +188,8 @@ double Bearing(double theLon1, double theLat1, double theLon2, double theLat2)
       atan2(sin(dlon) * cos(lat2), cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dlon));
   angle = Degrees(angle);
 
-  if (angle < 0) angle += 360.0;
+  if (angle < 0)
+    angle += 360.0;
 
   return angle;
 }

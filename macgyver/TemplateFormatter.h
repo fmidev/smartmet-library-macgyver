@@ -56,10 +56,7 @@ class TemplateFormatter : public boost::noncopyable
    *  @param log_level the logging level.
    *  @return the value returned by CTPP::VM::Run()
    */
-  int process(CTPP::CDT& hash,
-              std::string& output_string,
-              std::string& log_string,
-              int log_level);
+  int process(CTPP::CDT& hash, std::string& output_string, std::string& log_string, int log_level);
 
   /**
    *  @brief Generate an output data from template on the base of provided values in the hash

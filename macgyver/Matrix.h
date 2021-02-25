@@ -129,7 +129,8 @@ inline const T& Matrix<T, Safe>::operator()(size_type i, size_type j) const
 {
   if (Safe)
   {
-    if (i < 0 || i >= itsWidth) throw std::runtime_error("X-index out of range in Matrix accessor");
+    if (i < 0 || i >= itsWidth)
+      throw std::runtime_error("X-index out of range in Matrix accessor");
     if (j < 0 || j >= itsHeight)
       throw std::runtime_error("Y-index out of range in Matrix accessor");
   }
@@ -151,7 +152,8 @@ inline T& Matrix<T, Safe>::operator()(size_type i, size_type j)
 {
   if (Safe)
   {
-    if (i < 0 || i >= itsWidth) throw std::runtime_error("X-index out of range in Matrix accessor");
+    if (i < 0 || i >= itsWidth)
+      throw std::runtime_error("X-index out of range in Matrix accessor");
     if (j < 0 || j >= itsHeight)
       throw std::runtime_error("Y-index out of range in Matrix accessor");
   }

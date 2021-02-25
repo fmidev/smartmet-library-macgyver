@@ -33,22 +33,42 @@ namespace Astronomy
 {
 #define INTDIV(x) (x)
 
-inline double rad2deg(double rad) { return rad * boost::math::constants::radian<double>(); }
-inline double deg2rad(double deg) { return deg * boost::math::constants::degree<double>(); }
-inline double sin_deg(double deg) { return sin(deg2rad(deg)); }
-inline double cos_deg(double deg) { return cos(deg2rad(deg)); }
-inline double tan_deg(double deg) { return tan(deg2rad(deg)); }
+inline double rad2deg(double rad)
+{
+  return rad * boost::math::constants::radian<double>();
+}
+inline double deg2rad(double deg)
+{
+  return deg * boost::math::constants::degree<double>();
+}
+inline double sin_deg(double deg)
+{
+  return sin(deg2rad(deg));
+}
+inline double cos_deg(double deg)
+{
+  return cos(deg2rad(deg));
+}
+inline double tan_deg(double deg)
+{
+  return tan(deg2rad(deg));
+}
 /* Clamp to range [a,b] */
-inline void clamp_to(double& v, double a, double b) { v = (v < a) ? a : (v > b) ? b : v; }
+inline void clamp_to(double& v, double a, double b)
+{
+  v = (v < a) ? a : (v > b) ? b : v;
+}
 /*
  * Check 'lon' and 'lat' parameters for validity; clamp to (-180,180] and
  * [-89.8,89.9] range before calculations.
  */
 inline void check_lonlat(double& lon, double& lat)
 {
-  if (fabs(lon) > 180.0) throw std::runtime_error("Longitude must be in range [-180,180]");
+  if (fabs(lon) > 180.0)
+    throw std::runtime_error("Longitude must be in range [-180,180]");
 
-  if (fabs(lat) > 90.0) throw std::runtime_error("Latitude must be in range [-90,90]");
+  if (fabs(lat) > 90.0)
+    throw std::runtime_error("Latitude must be in range [-90,90]");
 
   clamp_to(lat, -89.8, 89.8);  // exclude poles
 }
@@ -67,8 +87,14 @@ inline double HourAngleSunrise_or_set(double lat, double solarDec, bool rise)
   return rise ? ha : -ha;  // rad
 }
 
-inline double rad(double d) { return d * 0.017453292519943295; }
-inline double Deg(double d1) { return (d1 * 180) / 3.1415926535897931; }
+inline double rad(double d)
+{
+  return d * 0.017453292519943295;
+}
+inline double Deg(double d1)
+{
+  return (d1 * 180) / 3.1415926535897931;
+}
 inline double julianDay(const boost::posix_time::ptime& utc)
 {
   double d3 = utc.time_of_day().total_seconds();
@@ -90,7 +116,8 @@ inline double julianDay(const boost::posix_time::ptime& utc)
 inline double reduce(double d1)
 {
   d1 -= 6.2831853071795862 * static_cast<int>(d1 / 6.2831853071795862);
-  if (d1 < 0.0) d1 += 6.2831853071795862;
+  if (d1 < 0.0)
+    d1 += 6.2831853071795862;
   return d1;
 }
 

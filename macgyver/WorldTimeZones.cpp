@@ -61,7 +61,10 @@ namespace Fmi
  */
 // ----------------------------------------------------------------------
 
-WorldTimeZones::~WorldTimeZones() { delete[] itsData; }
+WorldTimeZones::~WorldTimeZones()
+{
+  delete[] itsData;
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Establish timezone of lon/lat point
@@ -93,7 +96,8 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
 
   while (true)
   {
-    if (lo == hi) break;
+    if (lo == hi)
+      break;
 
     uint32_t mid = (lo + hi) / 2 + 1;
     uint32_t midpos = read_pos(mid, itsData);
@@ -121,7 +125,8 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
 WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData(nullptr)
 {
   std::ifstream in(theFile.c_str());
-  if (!in) throw std::runtime_error("Could not open '" + theFile + "' for reading");
+  if (!in)
+    throw std::runtime_error("Could not open '" + theFile + "' for reading");
 
   std::string token;
   in >> token;
@@ -133,7 +138,8 @@ WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData
   // Skip the remaining line
   std::getline(in, token);
 
-  if (!in.good()) throw std::runtime_error("Invalid header in '" + theFile + "'");
+  if (!in.good())
+    throw std::runtime_error("Invalid header in '" + theFile + "'");
 
   for (int i = 0; i < zonecount; i++)
   {
@@ -149,7 +155,8 @@ WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData
   if (itsData == nullptr)
     throw std::runtime_error("Failed to allocate memory for zone information");
   in.read(itsData, static_cast<long>(bufsize));
-  if (in.bad()) throw std::runtime_error("Reading timezone data failed");
+  if (in.bad())
+    throw std::runtime_error("Reading timezone data failed");
 
   in.close();
 }

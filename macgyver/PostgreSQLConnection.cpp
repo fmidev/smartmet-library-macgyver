@@ -73,7 +73,8 @@ bool PostgreSQLConnection::reopen()
 
 void PostgreSQLConnection::close()
 {
-  if (!itsConnection) return;
+  if (!itsConnection)
+    return;
   itsConnection->disconnect();
 
 #if 0
@@ -92,13 +93,15 @@ void PostgreSQLConnection::close()
 
 std::string PostgreSQLConnection::quote(const std::string& theString) const
 {
-  if (itsConnection) return itsConnection->quote(theString);
+  if (itsConnection)
+    return itsConnection->quote(theString);
   throw std::runtime_error("Locus: Attempting to quote string without database connection");
 }
 
 pqxx::result PostgreSQLConnection::executeNonTransaction(const std::string& theSQLStatement) const
 {
-  if (itsDebug) std::cout << "SQL: " << theSQLStatement << std::endl;
+  if (itsDebug)
+    std::cout << "SQL: " << theSQLStatement << std::endl;
 
   try
   {
@@ -118,7 +121,8 @@ void PostgreSQLConnection::startTransaction()
 
 pqxx::result PostgreSQLConnection::executeTransaction(const std::string& theSQLStatement) const
 {
-  if (itsDebug) std::cout << "SQL: " << theSQLStatement << std::endl;
+  if (itsDebug)
+    std::cout << "SQL: " << theSQLStatement << std::endl;
 
   try
   {

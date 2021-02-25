@@ -140,7 +140,6 @@ int Fmi::TemplateFormatter::process(CTPP::CDT& hash,
   return result;
 }
 
-
 void Fmi::TemplateFormatter::load_template(const std::string& file_name)
 {
   loader.reset(new CTPP::VMFileLoader(file_name.c_str()));

@@ -64,7 +64,8 @@ solar_time_t solar_time(const local_date_time& ldt, double lon_e, double lat)
    */
   for (int i = 0; i < 2; i++)
   {
-    if (jt[i].valid()) continue;  // OK
+    if (jt[i].valid())
+      continue;  // OK
 
     unsigned doy = ldt.date().day_of_year();
 

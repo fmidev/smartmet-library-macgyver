@@ -117,7 +117,8 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
   auto it = itsContentMap.left.find(key);
   if (it != itsContentMap.left.end())
   {
-    if (fs::exists(it->second.path, err)) return true;  // Already in the cache and disk
+    if (fs::exists(it->second.path, err))
+      return true;  // Already in the cache and disk
 
     // Found in map, but not on the disk. Someone has cleaned it without our knowledge
     // Remove from the map and proceed with insert
@@ -257,7 +258,8 @@ void FileCache::update()
           {
             auto res =
                 itsContentMap.insert(MapType::value_type(key, FileCacheStruct(path, fileSize)));
-            if (res.second) itsSize += fileSize;  // Added new entry, update size information
+            if (res.second)
+              itsSize += fileSize;  // Added new entry, update size information
           }
         }
       }
@@ -358,7 +360,8 @@ bool FileCache::checkForDiskSpace(const fs::path& thePath,
     if (doCleanup)
     {
       bool success = this->performCleanup(valueSize);
-      if (!success) return false;  // Something failed during cleanup
+      if (!success)
+        return false;  // Something failed during cleanup
     }
     else
     {
@@ -397,10 +400,12 @@ bool FileCache::getKey(const std::string& directory, const std::string& filename
   bool res;
 
   res = parse_size_t(directory, first);
-  if (!res) return false;
+  if (!res)
+    return false;
 
   res = parse_size_t(filename, second);
-  if (!res) return false;
+  if (!res)
+    return false;
 
   key = (second << 0x8u) | first;
 

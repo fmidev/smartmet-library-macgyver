@@ -29,9 +29,11 @@ void region_list()
   if (lst.size() < 460)
     TEST_FAILED("There should at least 460 regions, not " + lexical_cast<string>(lst.size()));
 
-  if (lst.front() != "Africa/Abidjan") TEST_FAILED("First region should be Africa/Abidjan");
+  if (lst.front() != "Africa/Abidjan")
+    TEST_FAILED("First region should be Africa/Abidjan");
 
-  if (lst.back() != "Zulu") TEST_FAILED("Last region should be Zulu, not " + lst.back());
+  if (lst.back() != "Zulu")
+    TEST_FAILED("Last region should be Zulu, not " + lst.back());
 
   TEST_PASSED();
 }
@@ -154,15 +156,18 @@ void zone_name_from_coordinate()
 
   string ok1 = "Europe/Stockholm";
   string tz1 = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(17, 60);
-  if (tz1 != ok1) TEST_FAILED("17,60 string should be " + ok1 + ", not " + tz1);
+  if (tz1 != ok1)
+    TEST_FAILED("17,60 string should be " + ok1 + ", not " + tz1);
 
   string ok2 = "Europe/Helsinki";
   string tz2 = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(25, 60);
-  if (tz2 != ok2) TEST_FAILED("25,60 string should be " + ok2 + ", not " + tz2);
+  if (tz2 != ok2)
+    TEST_FAILED("25,60 string should be " + ok2 + ", not " + tz2);
 
   string ok3 = "Europe/Helsinki";
   string tz3 = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(21.3705, 59.7811);
-  if (tz3 != ok3) TEST_FAILED("21.3705,59.7811 string should be " + ok3 + ", not " + tz3);
+  if (tz3 != ok3)
+    TEST_FAILED("21.3705,59.7811 string should be " + ok3 + ", not " + tz3);
 
   TEST_PASSED();
 }
@@ -179,7 +184,8 @@ void ocean()
   using boost::local_time::time_zone_ptr;
 
   string tz = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(-47, 30);
-  if (tz != "Etc/GMT-3") TEST_FAILED("-46,30 string should be Etc/GMT-3, not " + tz);
+  if (tz != "Etc/GMT-3")
+    TEST_FAILED("-46,30 string should be Etc/GMT-3, not " + tz);
 
   TEST_PASSED();
 }

@@ -28,7 +28,8 @@ thread_local TemplateMap itsTemplates{};
 
 SharedFormatter TemplateFactory::get(const boost::filesystem::path& theFilename) const
 {
-  if (theFilename.empty()) throw std::runtime_error("TemplateFactory: Cannot use empty templates");
+  if (theFilename.empty())
+    throw std::runtime_error("TemplateFactory: Cannot use empty templates");
 
   const auto& tinfo = itsTemplates.find(theFilename);
 
@@ -36,7 +37,8 @@ SharedFormatter TemplateFactory::get(const boost::filesystem::path& theFilename)
 
   // Use cached template if it is up to date
   if (tinfo != itsTemplates.end())
-    if (tinfo->second.modtime == modtime) return tinfo->second.formatter;
+    if (tinfo->second.modtime == modtime)
+      return tinfo->second.formatter;
 
   // Initialize a new formatter
 

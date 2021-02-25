@@ -72,7 +72,7 @@ TimeZoneFactory::~TimeZoneFactory() {}
  */
 // ----------------------------------------------------------------------
 
-void TimeZoneFactory::set_coordinate_file(const string& )
+void TimeZoneFactory::set_coordinate_file(const string&)
 {
   std::cerr << "Warning: TimeZOneFactor::set_coordinate_file is deprecated\n" << std::flush;
 }
@@ -83,7 +83,7 @@ void TimeZoneFactory::set_coordinate_file(const string& )
  */
 // ----------------------------------------------------------------------
 
-void TimeZoneFactory::set_region_file(const string& )
+void TimeZoneFactory::set_region_file(const string&)
 {
   std::cerr << "Warning: TimeZoneFactory::set_region_file is deprecated\n" << std::flush;
 }
@@ -94,7 +94,10 @@ void TimeZoneFactory::set_region_file(const string& )
  */
 // ----------------------------------------------------------------------
 
-vector<string> TimeZoneFactory::region_list() { return m_Impl->m_Regions->region_list(); }
+vector<string> TimeZoneFactory::region_list()
+{
+  return m_Impl->m_Regions->region_list();
+}
 
 // ----------------------------------------------------------------------
 /*!
@@ -105,7 +108,8 @@ vector<string> TimeZoneFactory::region_list() { return m_Impl->m_Regions->region
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const string& id)
 {
   boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(id);
-  if (!ptr) throw runtime_error("TimeZoneFactory does not recognize region '" + id + "'");
+  if (!ptr)
+    throw runtime_error("TimeZoneFactory does not recognize region '" + id + "'");
   return ptr;
 }
 

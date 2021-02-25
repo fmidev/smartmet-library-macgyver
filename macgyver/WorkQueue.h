@@ -19,7 +19,8 @@ class WorkQueue : std::mutex, std::condition_variable
   template <typename Function>
   WorkQueue(Function &&function, unsigned int concurrency = std::thread::hardware_concurrency())
   {
-    if (not concurrency) throw std::invalid_argument("Concurrency must not be zero");
+    if (not concurrency)
+      throw std::invalid_argument("Concurrency must not be zero");
 
     for (unsigned int count{}; count < concurrency; ++count)
       threads.emplace_back(static_cast<void (WorkQueue::*)(Function)>(&WorkQueue::consume),
@@ -32,7 +33,7 @@ class WorkQueue : std::mutex, std::condition_variable
   WorkQueue &operator=(WorkQueue &&) = delete;
 
   template <typename... Args>
-  WorkQueue &operator()(Args &&... args)
+  WorkQueue &operator()(Args &&...args)
   {
     unique_lock lock{*this};
     while (queue.size() == threads.size())

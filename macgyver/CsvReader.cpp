@@ -29,7 +29,10 @@ const char doublequote = '"';
 const char comment = '#';
 
 // test end of record characters
-bool isnewline(int ch) { return (ch == '\n' || ch == '\r'); }
+bool isnewline(int ch)
+{
+  return (ch == '\n' || ch == '\r');
+}
 // utility function for improved error messages
 void myerror(const string& prefix, const string& filename, ifstream& file)
 {
@@ -53,7 +56,8 @@ void read(const string& filename, Callback callback, char delimiter)
   string field;
 
   ifstream input(filename.c_str());
-  if (!input) throw runtime_error("Failed to open '" + filename + "' for reading");
+  if (!input)
+    throw runtime_error("Failed to open '" + filename + "' for reading");
 
   while (input.good())
   {
@@ -80,7 +84,8 @@ void read(const string& filename, Callback callback, char delimiter)
           // If there was just a newline, the while-loop
           // will continue.
 
-          if (state == ExpectingField) row.push_back(field);
+          if (state == ExpectingField)
+            row.push_back(field);
 
           if (!row.empty())
           {
@@ -160,7 +165,8 @@ void read(const string& filename, Callback callback, char delimiter)
       {
         if (input.eof() || isnewline(ch))
         {
-          if (!field_quoted) myerror("Not expecting double quote", filename, input);
+          if (!field_quoted)
+            myerror("Not expecting double quote", filename, input);
 
           row.push_back(field);
           callback(row);

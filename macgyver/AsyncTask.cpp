@@ -95,9 +95,15 @@ void Fmi::AsyncTask::cancel()
   }
 }
 
-Fmi::AsyncTask::Status Fmi::AsyncTask::get_status() const { return status; }
+Fmi::AsyncTask::Status Fmi::AsyncTask::get_status() const
+{
+  return status;
+}
 
-void Fmi::AsyncTask::interruption_point() { boost::this_thread::interruption_point(); }
+void Fmi::AsyncTask::interruption_point()
+{
+  boost::this_thread::interruption_point();
+}
 
 void Fmi::AsyncTask::run(std::function<void()> task)
 {

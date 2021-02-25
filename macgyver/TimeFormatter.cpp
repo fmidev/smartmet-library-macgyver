@@ -40,7 +40,8 @@ static time_t my_timegm(struct tm* t)
 
   const int mon[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-  if (t->tm_year < 70) return (static_cast<time_t>(-1));
+  if (t->tm_year < 70)
+    return (static_cast<time_t>(-1));
 
   int n = t->tm_year + 1900 - 1;
   time_t epoch = (t->tm_year - 70) * YEAR +
@@ -51,7 +52,8 @@ static time_t my_timegm(struct tm* t)
   for (int i = 0; i < t->tm_mon; i++)
   {
     epoch += mon[m] * DAY;
-    if (m == 1 && y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) epoch += DAY;
+    if (m == 1 && y % 4 == 0 && (y % 100 != 0 || y % 400 == 0))
+      epoch += DAY;
     if (++m > 11)
     {
       m = 0;
@@ -315,12 +317,18 @@ std::string HttpFormatter::format(const boost::local_time::local_date_time& t) c
 
 TimeFormatter* TimeFormatter::create(const std::string& name)
 {
-  if (name == "iso") return new IsoFormatter();
-  if (name == "sql") return new SqlFormatter();
-  if (name == "xml") return new XmlFormatter();
-  if (name == "epoch") return new EpochFormatter();
-  if (name == "timestamp") return new TimeStampFormatter();
-  if (name == "http") return new HttpFormatter();
+  if (name == "iso")
+    return new IsoFormatter();
+  if (name == "sql")
+    return new SqlFormatter();
+  if (name == "xml")
+    return new XmlFormatter();
+  if (name == "epoch")
+    return new EpochFormatter();
+  if (name == "timestamp")
+    return new TimeStampFormatter();
+  if (name == "http")
+    return new HttpFormatter();
 
   throw std::runtime_error("Unknown time format '" + name + "'");
 }

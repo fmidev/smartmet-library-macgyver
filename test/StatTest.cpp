@@ -695,41 +695,50 @@ void nearest()
   // Before timeseries nearest is the first timestep
   double value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 13:00:00"));
 
-  if (value != 2.0) TEST_FAILED("Nearest value should be 2.0");
+  if (value != 2.0)
+    TEST_FAILED("Nearest value should be 2.0");
 
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 16:00:00"));
 
-  if (value != 1.0) TEST_FAILED("Nearest value should be 1.0");
+  if (value != 1.0)
+    TEST_FAILED("Nearest value should be 1.0");
 
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 16:00:01"));
 
-  if (value != 5.0) TEST_FAILED("Nearest value should be 5.0");
+  if (value != 5.0)
+    TEST_FAILED("Nearest value should be 5.0");
 
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 15:59:59"));
 
-  if (value != 1.0) TEST_FAILED("Nearest value should be 1.0");
+  if (value != 1.0)
+    TEST_FAILED("Nearest value should be 1.0");
 
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 18::00:00"));
 
-  if (value != 5.0) TEST_FAILED("Nearest value should be 5.0");
+  if (value != 5.0)
+    TEST_FAILED("Nearest value should be 5.0");
 
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 19:00:00"));
 
-  if (value != 3.0) TEST_FAILED("Nearest value should be 3.0");
+  if (value != 3.0)
+    TEST_FAILED("Nearest value should be 3.0");
 
   // Exact timestep found  in timeseries
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 20:00:00"));
 
-  if (value != 3.0) TEST_FAILED("Nearest value should be 3.0");
+  if (value != 3.0)
+    TEST_FAILED("Nearest value should be 3.0");
 
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-02 21:30:00"));
 
-  if (value != 4.0) TEST_FAILED("Nearest value should be 4.0");
+  if (value != 4.0)
+    TEST_FAILED("Nearest value should be 4.0");
 
   // After the timeseries nearest is the last timestep
   value = stat.nearest(boost::posix_time::time_from_string("2013-12-03 00:30:00"));
 
-  if (value != 4.0) TEST_FAILED("Nearest value should be 4.0");
+  if (value != 4.0)
+    TEST_FAILED("Nearest value should be 4.0");
 
   TEST_PASSED();
 }
@@ -741,43 +750,51 @@ void interpolate()
   // Before timeseries -> extrapolate to the past
   double value = stat.interpolate(boost::posix_time::time_from_string("2013-12-02 10:30:00"));
 
-  if (value != 5.5) TEST_FAILED("Interpolated value should be 5.5");
+  if (value != 5.5)
+    TEST_FAILED("Interpolated value should be 5.5");
 
   value = stat.interpolate(boost::posix_time::time_from_string("2013-12-02 13:00:00"));
 
-  if (value != 3.0) TEST_FAILED("Interpolated value should be 3.0");
+  if (value != 3.0)
+    TEST_FAILED("Interpolated value should be 3.0");
 
   // Exact timestep found  in timeseries
   value = stat.interpolate(boost::posix_time::time_from_string("2013-12-02 15:00:00"));
 
-  if (value != 1.0) TEST_FAILED("Interpolated value should be 1.0");
+  if (value != 1.0)
+    TEST_FAILED("Interpolated value should be 1.0");
 
   // Interpolation between values
   value = stat.interpolate(boost::posix_time::time_from_string("2013-12-02 17:10:00"));
   value = precision(value, 2);
 
-  if (value != 4.89) TEST_FAILED("Interpolated value should be 4.89");
+  if (value != 4.89)
+    TEST_FAILED("Interpolated value should be 4.89");
 
   value = stat.interpolate(boost::posix_time::time_from_string("2013-12-02 18:00:00"));
   value = precision(value, 2);
 
-  if (value != 4.33) TEST_FAILED("Interpolated value should be 4.33");
+  if (value != 4.33)
+    TEST_FAILED("Interpolated value should be 4.33");
 
   value = stat.interpolate(boost::posix_time::time_from_string("2013-12-02 19:30:00"));
   value = precision(value, 2);
 
-  if (value != 3.33) TEST_FAILED("Interpolated value should be 3.33");
+  if (value != 3.33)
+    TEST_FAILED("Interpolated value should be 3.33");
 
   // After timeseries -> extrapolate to the future
   value = stat.interpolate(boost::posix_time::time_from_string("2013-12-02 22:30:00"));
   value = precision(value, 2);
 
-  if (value != 4.25) TEST_FAILED("Interpolated value should be 4.25");
+  if (value != 4.25)
+    TEST_FAILED("Interpolated value should be 4.25");
 
   value = stat.interpolate(boost::posix_time::time_from_string("2013-12-03 02:00:00"));
   value = precision(value, 2);
 
-  if (value != 6.0) TEST_FAILED("Interpolated value should be 6.0");
+  if (value != 6.0)
+    TEST_FAILED("Interpolated value should be 6.0");
 
   TEST_PASSED();
 }

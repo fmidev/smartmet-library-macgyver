@@ -157,10 +157,12 @@ void testfilecachesize()
     }
   }
 
-  if (content.size() != 3) TEST_FAILED("Incorrect number of cache items, should be 3");
+  if (content.size() != 3)
+    TEST_FAILED("Incorrect number of cache items, should be 3");
 
   std::size_t size = cache.getSize();
-  if (size != 8) TEST_FAILED("Incorrect cache size, should be 8");
+  if (size != 8)
+    TEST_FAILED("Incorrect cache size, should be 8");
 
   TEST_PASSED();
 }
@@ -182,15 +184,18 @@ void testcustomtype()
 
   auto test = thisCache.find(1);
 
-  if (!test) TEST_FAILED("Did not find the inserted object.");
+  if (!test)
+    TEST_FAILED("Did not find the inserted object.");
 
   test = thisCache.find(2);
-  if (!test) TEST_FAILED("Did not find the inserted object.");
+  if (!test)
+    TEST_FAILED("Did not find the inserted object.");
 
   thisCache.insert(3, toInsert3);
 
   test = thisCache.find(1);
-  if (test) TEST_FAILED("Shouldn't have found the inserted object.");
+  if (test)
+    TEST_FAILED("Shouldn't have found the inserted object.");
 
   TEST_PASSED();
 }
@@ -216,11 +221,14 @@ void testinstantexpire()
   auto value2 = thisCache.find(2);
   auto value3 = thisCache.find(3);
 
-  if (value1) TEST_FAILED("Entry " + *thisCache.find(1) + " found in cache");
+  if (value1)
+    TEST_FAILED("Entry " + *thisCache.find(1) + " found in cache");
 
-  if (value2) TEST_FAILED("Entry " + *thisCache.find(2) + " found in cache");
+  if (value2)
+    TEST_FAILED("Entry " + *thisCache.find(2) + " found in cache");
 
-  if (!value3) TEST_FAILED("Entry 3 was not found in cache");
+  if (!value3)
+    TEST_FAILED("Entry 3 was not found in cache");
 
   TEST_PASSED();
 }
@@ -237,7 +245,8 @@ void testtagless()
 
   auto value1 = thisCache.find(1);
 
-  if (value1) TEST_FAILED("Entry " + *thisCache.find(1) + " found in cache");
+  if (value1)
+    TEST_FAILED("Entry " + *thisCache.find(1) + " found in cache");
 
   TEST_PASSED();
 }
@@ -262,11 +271,14 @@ void teststaticexpire()
   auto value2 = thisCache.find(2);
   auto value3 = thisCache.find(3);
 
-  if (!value1) TEST_FAILED("Entry 1 not found in cache");
+  if (!value1)
+    TEST_FAILED("Entry 1 not found in cache");
 
-  if (!value2) TEST_FAILED("Entry 2 not found in cache");
+  if (!value2)
+    TEST_FAILED("Entry 2 not found in cache");
 
-  if (value3) TEST_FAILED("Entry 3 was found in cache");
+  if (value3)
+    TEST_FAILED("Entry 3 was found in cache");
 
   TEST_PASSED();
 }
@@ -295,7 +307,8 @@ void testlru()
 
   std::string expected = "neljas,kolmas,toka,eka,kuudes";
 
-  if (expected == thisCache.getTextContent()) TEST_PASSED();
+  if (expected == thisCache.getTextContent())
+    TEST_PASSED();
 
   TEST_FAILED("Wrong cache content:\"" + thisCache.getTextContent() + "\", expected \"" + expected +
               "\"");
@@ -322,7 +335,8 @@ void testmru()
   thisCache.insert(6, "kuudes", twosTags);
 
   auto return_value = thisCache.find(4);
-  if (!return_value) TEST_PASSED();
+  if (!return_value)
+    TEST_PASSED();
 
   TEST_FAILED("Entry \"4\" is still in the cache");
 }
@@ -371,7 +385,8 @@ void testregularexpiringcache()
 
   std::string expected = "terve,moikka";
 
-  if (expected == thisCache.getTextContent()) TEST_PASSED();
+  if (expected == thisCache.getTextContent())
+    TEST_PASSED();
 
   TEST_FAILED("Wrong cache content:\"" + thisCache.getTextContent() + "\", expected \"" + expected +
               "\"");
@@ -430,9 +445,11 @@ void testfifo()
   auto first_value = thisCache.find(1);
   auto second_value = thisCache.find(2);
 
-  if (first_value) TEST_FAILED(*thisCache.find(1) + " should not have been found.");
+  if (first_value)
+    TEST_FAILED(*thisCache.find(1) + " should not have been found.");
 
-  if (second_value) TEST_FAILED(*thisCache.find(2) + " should not have been found.");
+  if (second_value)
+    TEST_FAILED(*thisCache.find(2) + " should not have been found.");
 
   TEST_PASSED();
 }

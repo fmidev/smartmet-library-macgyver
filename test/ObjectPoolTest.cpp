@@ -25,7 +25,10 @@ struct TestStruct
   std::string text;
 };
 
-boost::shared_ptr<TestStruct> create1() { return boost::shared_ptr<TestStruct>(new TestStruct); }
+boost::shared_ptr<TestStruct> create1()
+{
+  return boost::shared_ptr<TestStruct>(new TestStruct);
+}
 }  // namespace
 
 BOOST_AUTO_TEST_CASE(test_single_object_reuse)

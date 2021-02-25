@@ -299,24 +299,28 @@ void NearTree<T, F>::Impl::insert(const T& theObject)
 
   else if (dist_left > dist_right)
   {
-    if (itsRightBranch == 0) itsRightBranch = new typename NearTree<T, F>::Impl();
+    if (itsRightBranch == 0)
+      itsRightBranch = new typename NearTree<T, F>::Impl();
 
     // note that the next line assumes that itsMaxRight is
     // negative for a new node
 
-    if (itsMaxRight < dist_right) itsMaxRight = dist_right;
+    if (itsMaxRight < dist_right)
+      itsMaxRight = dist_right;
 
     itsRightBranch->insert(theObject);
   }
 
   else
   {
-    if (itsLeftBranch == 0) itsLeftBranch = new typename NearTree<T, F>::Impl();
+    if (itsLeftBranch == 0)
+      itsLeftBranch = new typename NearTree<T, F>::Impl();
 
     // note that the next line assumes that itsMaxLeft is
     // negative for a new node
 
-    if (itsMaxLeft < dist_left) itsMaxLeft = dist_left;
+    if (itsMaxLeft < dist_left)
+      itsMaxLeft = dist_left;
 
     itsLeftBranch->insert(theObject);
   }
@@ -349,12 +353,14 @@ void NearTree<T, F>::Impl::nearestones(std::multimap<double, value_type>& theClo
   if (itsLeftObject != 0)
   {
     double dist = Distance(thePoint, *itsLeftObject);
-    if (dist <= theRadius) theClosest.insert(std::make_pair(dist, *itsLeftObject));
+    if (dist <= theRadius)
+      theClosest.insert(std::make_pair(dist, *itsLeftObject));
   }
   if (itsRightObject != 0)
   {
     double dist = Distance(thePoint, *itsRightObject);
-    if (dist <= theRadius) theClosest.insert(std::make_pair(dist, *itsRightObject));
+    if (dist <= theRadius)
+      theClosest.insert(std::make_pair(dist, *itsRightObject));
   }
 
   // Now we test to see if the branches below might hold an object
@@ -421,7 +427,8 @@ void NearTree<T, F>::Impl::nearest(boost::optional<value_type>& theClosest,
 
   // If theRadius is negative at this point, the tree is empty
 
-  if (theRadius < 0) return;
+  if (theRadius < 0)
+    return;
 
   // Now we test to see if the branches below might hold an object
   // nearer than the best so far found. The triangle rule is used

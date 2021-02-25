@@ -100,7 +100,8 @@ class Cache
   {
     Lock lock(mMutex);
 
-    if (mMaxSize == 0) return false;
+    if (mMaxSize == 0)
+      return false;
 
     TimeType now = ClockType::now();
     auto mapIt = mKeyTimeValueMap.find(key);
@@ -205,7 +206,8 @@ class Cache
     // Move the object to the begin of the list (LRU).
     mKeyTimeValueList.splice(mKeyTimeValueList.begin(), mKeyTimeValueList, listIt);
     listIt = mKeyTimeValueList.begin();
-    if (listIt->first != key) throw std::runtime_error("Mixed keys after a splice of cache list");
+    if (listIt->first != key)
+      throw std::runtime_error("Mixed keys after a splice of cache list");
 
     // Update the reference of object to the map.
     mapIt = mKeyTimeValueMap.find(listIt->first);

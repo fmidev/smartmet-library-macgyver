@@ -63,7 +63,8 @@ solar_position_t solar_position(const ptime& utc, double lon_e, double lat)
   }
 
   double hourAngle = trueSolarTime / 4.0 - 180.0;
-  if (hourAngle < -180.0) hourAngle += 360.0;
+  if (hourAngle < -180.0)
+    hourAngle += 360.0;
 
   double csz = sin_deg(lat) * sin_deg(declination) +
                cos_deg(lat) * cos_deg(declination) * cos_deg(hourAngle);
@@ -86,9 +87,11 @@ solar_position_t solar_position(const ptime& utc, double lon_e, double lat)
 
     azimuth = 180.0 - rad2deg(acos(azRad));
 
-    if (hourAngle > 0.0) azimuth = -azimuth;
+    if (hourAngle > 0.0)
+      azimuth = -azimuth;
 
-    if (azimuth < 0.0) azimuth += 360.0;
+    if (azimuth < 0.0)
+      azimuth += 360.0;
   }
 
   double refractionCorrection;

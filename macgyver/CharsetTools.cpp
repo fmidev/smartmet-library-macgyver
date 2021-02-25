@@ -666,12 +666,14 @@ string utf8_to_latin1(const string& in)
     unsigned long u = *utf8str & UTF8_2_ISO_8859_1_mask[len];
 
     // erroneous -- expect this to be the largest possible UTF-8 encoded string
-    if (len == 0) len = 5;
+    if (len == 0)
+      len = 5;
 
     for (++utf8str; --len > 0 && (*utf8str != '\0'); ++utf8str)
     {
       // be sure this is not an unexpected start of a new character
-      if ((static_cast<unsigned char>(*utf8str) & 0xc0) != 0x80u) break;
+      if ((static_cast<unsigned char>(*utf8str) & 0xc0) != 0x80u)
+        break;
 
       u = (u << 6) | (static_cast<unsigned char>(*utf8str) & 0x3fu);
     }
@@ -682,7 +684,8 @@ string utf8_to_latin1(const string& in)
     //  otherwise the utf-8 string will be considered malformed and
     //  the function returns immediately with exit code 0
 
-    if (u > 0xffu || u < 0x20u) return "";
+    if (u > 0xffu || u < 0x20u)
+      return "";
 
     // sanity check passed -- add the mapped character to the destination string
     out += static_cast<char>(u);
@@ -761,7 +764,8 @@ std::wstring utf8_to_utf16(const std::string& str)
       {
         w = ((w << 6) | (c & 0x3fu));
         bytes--;
-        if (bytes == 0) out.push_back(w);
+        if (bytes == 0)
+          out.push_back(w);
       }
       else
         out.push_back(err);
@@ -790,7 +794,8 @@ std::wstring utf8_to_utf16(const std::string& str)
       bytes = 0;
     }
   }
-  if (bytes) out.push_back(err);
+  if (bytes)
+    out.push_back(err);
 
   return out;
 }
@@ -884,7 +889,8 @@ bool is_utf8(const std::string& src)
      * unset (b10xxxxxx). */
     for (i = 1; i < code_length; i++)
     {
-      if ((str[i] & 0xC0) != 0x80) return 0;
+      if ((str[i] & 0xC0) != 0x80)
+        return 0;
     }
 
     if (code_length == 2)
@@ -900,18 +906,21 @@ bool is_utf8(const std::string& src)
       ch = ((str[0] & 0x0f) << 12) + ((str[1] & 0x3f) << 6) + (str[2] & 0x3f);
       /* (0xff & 0x0f) << 12 | (0xff & 0x3f) << 6 | (0xff & 0x3f) = 0xffff,
          so ch <= 0xffff */
-      if (ch < 0x0800) return 0;
+      if (ch < 0x0800)
+        return 0;
 
       /* surrogates (U+D800-U+DFFF) are invalid in UTF-8:
          test if (0xD800 <= ch && ch <= 0xDFFF) */
-      if ((ch >> 11) == 0x1b) return 0;
+      if ((ch >> 11) == 0x1b)
+        return 0;
     }
     else if (code_length == 4)
     {
       /* 4 bytes sequence: U+10000..U+10FFFF */
       ch = ((str[0] & 0x07) << 18) + ((str[1] & 0x3f) << 12) + ((str[2] & 0x3f) << 6) +
            (str[3] & 0x3f);
-      if ((ch < 0x10000) || (0x10FFFF < ch)) return 0;
+      if ((ch < 0x10000) || (0x10FFFF < ch))
+        return 0;
     }
     str += code_length;
   }

@@ -466,7 +466,8 @@ int main(int argc, const char **argv)
 
     boost::local_time::time_zone_ptr tz = tz_from_region(td->tz_str);
 
-    if (!tz) throw runtime_error("Unknown time zone: '" + string(td->tz_str) + "'");
+    if (!tz)
+      throw runtime_error("Unknown time zone: '" + string(td->tz_str) + "'");
 
     //---
     // EXCEPTION_ON_ERROR: throws up if given time is non-existing, or possible

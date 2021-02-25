@@ -57,7 +57,8 @@ void size()
 
 void empty()
 {
-  if (ntree.empty()) TEST_FAILED("Test tree should not be empty");
+  if (ntree.empty())
+    TEST_FAILED("Test tree should not be empty");
   TEST_PASSED();
 }
 
@@ -67,20 +68,24 @@ void nearest()
 {
   {
     auto ret = ntree.nearest(Point(1, 0));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 1,0");
-    if (*ret != Point(1, 0)) TEST_FAILED("Closest point to 1,0 should be 1,0, not " + ret->str());
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 1,0");
+    if (*ret != Point(1, 0))
+      TEST_FAILED("Closest point to 1,0 should be 1,0, not " + ret->str());
   }
 
   {
     auto ret = ntree.nearest(Point(0.25, 0.1));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 0.25,0.1");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 0.25,0.1");
     if (*ret != Point(0, 0))
       TEST_FAILED("Closest point to 0.25,0.1 should be 0,0, not " + ret->str());
   }
 
   {
     auto ret = ntree.nearest(Point(1.25, -1.1));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 1.25,-1.1");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 1.25,-1.1");
     if (*ret != Point(1, -1))
       TEST_FAILED("Closest point to 1.25,-1.1 should be 1,-1, not " + ret->str());
   }
@@ -94,20 +99,24 @@ void nearest_distancelimit()
 {
   {
     auto ret = ntree.nearest(Point(1, 0), 0.1);
-    if (!ret) TEST_FAILED("Failed to find nearest point for 1,0");
-    if (*ret != Point(1, 0)) TEST_FAILED("Closest point to 1,0 should be 1,0, not " + ret->str());
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 1,0");
+    if (*ret != Point(1, 0))
+      TEST_FAILED("Closest point to 1,0 should be 1,0, not " + ret->str());
   }
 
   {
     auto ret = ntree.nearest(Point(0.25, 0.1), 0.5);
-    if (!ret) TEST_FAILED("Failed to find nearest point for 0.25,0.1 with distance limit 0.5");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 0.25,0.1 with distance limit 0.5");
     if (*ret != Point(0, 0))
       TEST_FAILED("Closest point to 0.25,0.1 should be 0,0, not " + ret->str());
   }
 
   {
     auto ret = ntree.nearest(Point(0.25, 0.1), 0.1);
-    if (ret) TEST_FAILED("Should not find a point for 0.25,0.1 with distance limit 0.1");
+    if (ret)
+      TEST_FAILED("Should not find a point for 0.25,0.1 with distance limit 0.1");
   }
 
   TEST_PASSED();
@@ -119,21 +128,24 @@ void farthest()
 {
   {
     auto ret = ntree.farthest(Point(1, 1));
-    if (!ret) TEST_FAILED("Failed to find farthest point for 1,1");
+    if (!ret)
+      TEST_FAILED("Failed to find farthest point for 1,1");
     if (*ret != Point(-1, -1))
       TEST_FAILED("Farthest point to 1,1 should be -1,-1, not " + ret->str());
   }
 
   {
     auto ret = ntree.farthest(Point(0.25, 0.1));
-    if (!ret) TEST_FAILED("Failed to find farthest point for 0.25,0.1");
+    if (!ret)
+      TEST_FAILED("Failed to find farthest point for 0.25,0.1");
     if (*ret != Point(-1, -1))
       TEST_FAILED("Farthest point to 0.25,0.1 should be -1,-1, not " + ret->str());
   }
 
   {
     auto ret = ntree.farthest(Point(1.25, -1.1));
-    if (!ret) TEST_FAILED("Failed to find farthest point for 1.25,-1.1");
+    if (!ret)
+      TEST_FAILED("Failed to find farthest point for 1.25,-1.1");
     if (*ret != Point(-1, 1))
       TEST_FAILED("Farthest point to 1.25,-1.1 should be -1,1, not " + ret->str());
   }
@@ -148,19 +160,24 @@ void nearest_many()
   std::multimap<double, Point> points;
 
   points = ntree.nearestones(Point(1, 0), 0.5);
-  if (points.size() != 1) TEST_FAILED("Failed to find 1 nearest points for 1,0 with radius 0.5");
+  if (points.size() != 1)
+    TEST_FAILED("Failed to find 1 nearest points for 1,0 with radius 0.5");
 
   points = ntree.nearestones(Point(1, 0), 1.3);
-  if (points.size() != 4) TEST_FAILED("Failed to find 4 nearest points for 1,0 with radius 1.3");
+  if (points.size() != 4)
+    TEST_FAILED("Failed to find 4 nearest points for 1,0 with radius 1.3");
 
   points = ntree.nearestones(Point(1, 0), 1.5);
-  if (points.size() != 6) TEST_FAILED("Failed to find 6 nearest points for 1,0 with radius 1.5");
+  if (points.size() != 6)
+    TEST_FAILED("Failed to find 6 nearest points for 1,0 with radius 1.5");
 
   points = ntree.nearestones(Point(1, 0), 2.2);
-  if (points.size() != 7) TEST_FAILED("Failed to find 7 nearest points for 1,0 with radius 2.2");
+  if (points.size() != 7)
+    TEST_FAILED("Failed to find 7 nearest points for 1,0 with radius 2.2");
 
   points = ntree.nearestones(Point(1, 0), 2.3);
-  if (points.size() != 9) TEST_FAILED("Failed to find 9 nearest points for 1,0 with radius 2.3");
+  if (points.size() != 9)
+    TEST_FAILED("Failed to find 9 nearest points for 1,0 with radius 2.3");
 
   TEST_PASSED();
 }

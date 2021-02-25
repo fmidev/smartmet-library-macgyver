@@ -141,7 +141,8 @@ template <typename T>
 inline bool TernarySearchTree<T>::insert(const std::string& key, element_type data)
 {
   // Safety against empty key
-  if (key.empty()) return false;
+  if (key.empty())
+    return false;
 
   size_t pos = 0;
   size_t n = key.size();
@@ -206,7 +207,8 @@ inline bool TernarySearchTree<T>::insert(const std::string& key, element_type da
   }
 
   // fail if already occupied
-  if (node->value) return false;
+  if (node->value)
+    return false;
 
   node->value = data;
   return true;
@@ -227,7 +229,8 @@ inline typename TernarySearchTree<T>::element_type TernarySearchTree<T>::find(
     const std::string& key) const
 {
   // Safety checks
-  if (key.empty() || root == nullptr) return element_type();
+  if (key.empty() || root == nullptr)
+    return element_type();
 
   Node* node = root;
   size_t n = key.size();
@@ -240,7 +243,8 @@ inline typename TernarySearchTree<T>::element_type TernarySearchTree<T>::find(
       node = node->right;
     else
     {
-      if (++pos == n) return node->value;
+      if (++pos == n)
+        return node->value;
       node = node->middle;
     }
   }
@@ -257,13 +261,18 @@ inline typename TernarySearchTree<T>::element_type TernarySearchTree<T>::find(
 template <typename T>
 inline void TernarySearchTree<T>::collect(Node* node, result_type& results) const
 {
-  if (node == nullptr) return;
+  if (node == nullptr)
+    return;
 
-  if (node->value) results.push_back(node->value);
+  if (node->value)
+    results.push_back(node->value);
 
-  if (node->left != nullptr) collect(node->left, results);
-  if (node->middle != nullptr) collect(node->middle, results);
-  if (node->right != nullptr) collect(node->right, results);
+  if (node->left != nullptr)
+    collect(node->left, results);
+  if (node->middle != nullptr)
+    collect(node->middle, results);
+  if (node->right != nullptr)
+    collect(node->right, results);
 }
 
 // ----------------------------------------------------------------------
@@ -279,7 +288,8 @@ inline typename TernarySearchTree<T>::result_type TernarySearchTree<T>::findpref
   result_type results;
 
   // Safety checks
-  if (key.empty() || root == nullptr) return results;
+  if (key.empty() || root == nullptr)
+    return results;
 
   Node* node = root;
   size_t n = key.size();
@@ -296,7 +306,8 @@ inline typename TernarySearchTree<T>::result_type TernarySearchTree<T>::findpref
         node = node->middle;
       else
       {
-        if (node->value) results.push_back(node->value);
+        if (node->value)
+          results.push_back(node->value);
         collect(node->middle, results);
         return results;
       }

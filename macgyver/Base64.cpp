@@ -47,7 +47,10 @@ const std::string& base64_chars = *new std::string(
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789+/");
 
-inline bool is_base64(char c) { return (isalnum(c) || (c == '+') || (c == '/')); }
+inline bool is_base64(char c)
+{
+  return (isalnum(c) || (c == '+') || (c == '/'));
+}
 }  // namespace
 
 namespace Fmi

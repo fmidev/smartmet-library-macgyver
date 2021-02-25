@@ -28,9 +28,9 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <stdexcept>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <stdexcept>
 
 // scoped read/write lock types
 
@@ -63,7 +63,8 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
   // safety against missing dir.
   // in case of single files, the file has been removed
 
-  if (!fs::exists(path)) return contents;
+  if (!fs::exists(path))
+    return contents;
 
   // find all matching filenames with modification times
   // if target is a directory
@@ -199,7 +200,7 @@ class DirectoryMonitor::Pimple
   MutexType mutex;
   Schedule schedule;
   boost::atomic<bool> running{false};  // true if run() has not exited
-  boost::atomic<bool> stop{false};   // true if stop request is pending
+  boost::atomic<bool> stop{false};     // true if stop request is pending
   boost::atomic<bool> isready{false};  // true if at least one scan has completed
 
   boost::mutex m2;
@@ -223,7 +224,8 @@ DirectoryMonitor::DirectoryMonitor() : impl(new Pimple()) {}
 
 DirectoryMonitor::~DirectoryMonitor()
 {
-  if (impl->running) {
+  if (impl->running)
+  {
     std::cout << "[CRITICAL]: Fmi::DirectoryMonitor::~DirectoryMonitor:"
               << " missing call to Fmi::DirectoryMonitor::stop() before destroying object\n"
               << std::flush;
@@ -347,7 +349,8 @@ try
 {
   // Do not start if already running
 
-  if (impl->running) return;
+  if (impl->running)
+    return;
   impl->running = true;
 
   while (!impl->stop && !impl->schedule.empty())
@@ -385,14 +388,14 @@ try
           if (fs::exists(mon.path))
           {
             tchange = fs::last_write_time(mon.path);
-			// Actually directory is scanned later if changes detected, 
-			// but we are interested in how often changes are checked
-			if(mon.mask & DirectoryMonitor::SCAN)
-			  {
-				(*newstatus)[mon.path] = DirectoryMonitor::SCAN;
-				mon.callback(mon.id, mon.path, mon.pattern, newstatus);
-				newstatus->clear();
-			  }
+            // Actually directory is scanned later if changes detected,
+            // but we are interested in how often changes are checked
+            if (mon.mask & DirectoryMonitor::SCAN)
+            {
+              (*newstatus)[mon.path] = DirectoryMonitor::SCAN;
+              mon.callback(mon.id, mon.path, mon.pattern, newstatus);
+              newstatus->clear();
+            }
           }
           else
           {
@@ -465,15 +468,17 @@ try
     if (sleeptime > 0)
     {
       boost::unique_lock<boost::mutex> lock(impl->m2);
-      impl->cond.wait_for(lock, boost::chrono::seconds(sleeptime),
-          [this]() -> bool { return impl->stop; });
+      impl->cond.wait_for(
+          lock, boost::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
     }
   }
 
   // Not running anymore. This order so that locking is not necessary
   impl->stop = false;
   impl->running = false;
-} catch (const boost::thread_interrupted&) {
+}
+catch (const boost::thread_interrupted&)
+{
   impl->running = false;
   throw;
 }
@@ -500,7 +505,10 @@ void DirectoryMonitor::stop()
  */
 // ----------------------------------------------------------------------
 
-bool DirectoryMonitor::ready() const { return impl->isready; }
+bool DirectoryMonitor::ready() const
+{
+  return impl->isready;
+}
 }  // namespace Fmi
 
 // ======================================================================

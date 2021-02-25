@@ -273,11 +273,13 @@ bool dst_on(const ptime& theTime, const boost::local_time::local_date_time& ldt)
 
     if (dst_starttime < dst_endtime)
     {
-      if (theTime >= dst_starttime && theTime <= dst_endtime) dst_on = true;
+      if (theTime >= dst_starttime && theTime <= dst_endtime)
+        dst_on = true;
     }
     else
     {
-      if (theTime >= dst_starttime || theTime <= dst_endtime) dst_on = true;
+      if (theTime >= dst_starttime || theTime <= dst_endtime)
+        dst_on = true;
     }
   }
   return dst_on;
@@ -301,7 +303,8 @@ void get_hours_and_minutes(double hours, int& hr, int& min)
   double hrs(hours);
 
   // if time is greater than 23:59:29 use value 23:59, so that we do not move to 00:00 (backwards)
-  if (hrs > 23.991 && hrs < 24.0) hrs = 23.991;
+  if (hrs > 23.991 && hrs < 24.0)
+    hrs = 23.991;
 
   hr = static_cast<int>(floor(hrs));
   min = static_cast<int>(round(60.0 * (hrs - hr)));
@@ -512,14 +515,19 @@ lunar_time_t lunar_time_i(const boost::local_time::local_date_time& ldt, double 
     lunar_time_t lt_before = lunar_time_calculation(ldt_beg, offset_before_dst_ends, lon, lat);
 
     // if rise and set is found return
-    if (lt_before.moonrise_today() && lt_before.moonset_today()) return lt_before;
+    if (lt_before.moonrise_today() && lt_before.moonset_today())
+      return lt_before;
 
     // do calculation using wintertime offset
     lunar_time_t lt_after = lunar_time_calculation(ldt_beg, offset_after_dst_ends, lon, lat);
-    if (lt_after.moonrise_today()) lt_after.moonrise += boost::posix_time::hours(1);
-    if (lt_after.moonset_today()) lt_after.moonset += boost::posix_time::hours(1);
-    if (lt_after.moonrise2_today()) lt_after.moonrise2 += boost::posix_time::hours(1);
-    if (lt_after.moonset2_today()) lt_after.moonset2 += boost::posix_time::hours(1);
+    if (lt_after.moonrise_today())
+      lt_after.moonrise += boost::posix_time::hours(1);
+    if (lt_after.moonset_today())
+      lt_after.moonset += boost::posix_time::hours(1);
+    if (lt_after.moonrise2_today())
+      lt_after.moonrise2 += boost::posix_time::hours(1);
+    if (lt_after.moonset2_today())
+      lt_after.moonset2 += boost::posix_time::hours(1);
 
     lunar_time_t lt_combined(lt_before.moonrise_today() ? lt_before.moonrise : lt_after.moonrise,
                              lt_before.moonset_today() ? lt_before.moonset : lt_after.moonset,
@@ -547,7 +555,8 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
 {
   lunar_time_t lt_ret = lunar_time_i(ldt, lon, lat);
 
-  if (allow_missing_dates) return lt_ret;
+  if (allow_missing_dates)
+    return lt_ret;
 
   unsigned int iteration_limit(366);
   if (!lt_ret.moonrise_today())
@@ -564,7 +573,8 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
         lt_prev = lunar_time_i(ldt_iter, lon, lat);
         counter++;
       }
-      if (counter < iteration_limit) lt_ret.moonrise = lt_prev.moonrise;
+      if (counter < iteration_limit)
+        lt_ret.moonrise = lt_prev.moonrise;
     }
     else
     {
@@ -576,7 +586,8 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
         lt_next = lunar_time_i(ldt_iter, lon, lat);
         counter++;
       }
-      if (counter < iteration_limit) lt_ret.moonrise = lt_next.moonrise;
+      if (counter < iteration_limit)
+        lt_ret.moonrise = lt_next.moonrise;
     }
   }
   if (!lt_ret.moonset_today())
@@ -593,7 +604,8 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
         lt_next = lunar_time_i(ldt_iter, lon, lat);
         counter++;
       }
-      if (counter < iteration_limit) lt_ret.moonset = lt_next.moonset;
+      if (counter < iteration_limit)
+        lt_ret.moonset = lt_next.moonset;
     }
     else
     {
@@ -605,7 +617,8 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
         lt_prev = lunar_time_i(ldt_iter, lon, lat);
         counter++;
       }
-      if (counter < iteration_limit) lt_ret.moonset = lt_prev.moonset;
+      if (counter < iteration_limit)
+        lt_ret.moonset = lt_prev.moonset;
     }
   }
   return lt_ret;

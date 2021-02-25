@@ -36,9 +36,12 @@ boost::regex iso8601_long{
 boost::posix_time::ptime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
 {
   unsigned int hour = 0, minute = 0, second = 0;
-  if (target.hour) hour = *target.hour;
-  if (target.minute) minute = *target.minute;
-  if (target.second) second = *target.second;
+  if (target.hour)
+    hour = *target.hour;
+  if (target.minute)
+    minute = *target.minute;
+  if (target.second)
+    second = *target.second;
 
   boost::posix_time::ptime ret;
 
@@ -62,9 +65,12 @@ boost::posix_time::ptime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
 {
   unsigned int hour = 0, minute = 0, second = 0;
 
-  if (target.hour) hour = *target.hour;
-  if (target.minute) minute = *target.minute;
-  if (target.second) second = *target.second;
+  if (target.hour)
+    hour = *target.hour;
+  if (target.minute)
+    minute = *target.minute;
+  if (target.second)
+    second = *target.second;
 
   boost::posix_time::ptime res;
 
@@ -128,22 +134,37 @@ namespace TimeParser
 {
 std::uint16_t get_short_month(const std::string& str)
 {
-  if (str == "Jan") return 1;
-  if (str == "Feb") return 2;
-  if (str == "Mar") return 3;
-  if (str == "Apr") return 4;
-  if (str == "May") return 5;
-  if (str == "Jun") return 6;
-  if (str == "Jul") return 7;
-  if (str == "Aug") return 8;
-  if (str == "Sep") return 9;
-  if (str == "Oct") return 10;
-  if (str == "Nov") return 11;
-  if (str == "Dec") return 12;
+  if (str == "Jan")
+    return 1;
+  if (str == "Feb")
+    return 2;
+  if (str == "Mar")
+    return 3;
+  if (str == "Apr")
+    return 4;
+  if (str == "May")
+    return 5;
+  if (str == "Jun")
+    return 6;
+  if (str == "Jul")
+    return 7;
+  if (str == "Aug")
+    return 8;
+  if (str == "Sep")
+    return 9;
+  if (str == "Oct")
+    return 10;
+  if (str == "Nov")
+    return 11;
+  if (str == "Dec")
+    return 12;
   throw std::runtime_error("Invalid month name '" + str + "'");
 }
 
-bool is_short_month(const std::string& str) { return (get_short_month(str) > 0); }
+bool is_short_month(const std::string& str)
+{
+  return (get_short_month(str) > 0);
+}
 bool is_short_weekday(const std::string& str)
 {
   return (str == "Sun" || str == "Mon" || str == "Tue" || str == "Wed" || str == "Thu" ||
@@ -169,7 +190,8 @@ bool parse_uint16(const char** str, unsigned int length, std::uint16_t* value)
   std::uint16_t tmp = 0;
   for (unsigned int i = 0; i < length; i++)
   {
-    if (!isdigit(*ptr)) return false;
+    if (!isdigit(*ptr))
+      return false;
     tmp *= 10;
     tmp += static_cast<unsigned int>(*ptr - '0');
     ++ptr;
@@ -187,8 +209,10 @@ bool parse_uint16(const char** str, unsigned int length, std::uint16_t* value)
 
 bool skip_separator(const char** str, char separator, bool extended_format)
 {
-  if (!extended_format) return true;
-  if (**str != separator) return false;
+  if (!extended_format)
+    return true;
+  if (**str != separator)
+    return false;
   ++*str;
   return true;
 }
@@ -225,7 +249,10 @@ bool looks_sql(const std::string& t)
  */
 // ----------------------------------------------------------------------
 
-bool looks_epoch(const std::string& t) { return looks_integer(t); }
+bool looks_epoch(const std::string& t)
+{
+  return looks_integer(t);
+}
 // ----------------------------------------------------------------------
 /*!
  * \brief Test if string looks like a iso timestamp
@@ -247,7 +274,8 @@ bool looks_iso(const std::string& str)
 
 bool looks_offset(const std::string& str)
 {
-  if (str.empty()) return false;
+  if (str.empty())
+    return false;
 
   return (str == "0" || (str.size() == 2 && str[0] == '0') ||  // 0m, 0h etc
           str[0] == '+' || str[0] == '-');
@@ -261,10 +289,14 @@ bool looks_offset(const std::string& str)
 
 std::string looks(const std::string& str)
 {
-  if (looks_offset(str)) return "offset";
-  if (looks_iso(str)) return "iso";
-  if (looks_sql(str)) return "sql";
-  if (looks_epoch(str)) return "epoch";
+  if (looks_offset(str))
+    return "offset";
+  if (looks_iso(str))
+    return "iso";
+  if (looks_sql(str))
+    return "sql";
+  if (looks_epoch(str))
+    return "epoch";
 
   throw std::runtime_error("Unrecognizable time format in string '" + str + "'");
 }
@@ -277,13 +309,15 @@ std::string looks(const std::string& str)
 
 bool looks_utc(const std::string& str)
 {
-  if (looks_sql(str)) return false;
+  if (looks_sql(str))
+    return false;
   if (looks_offset(str))  // offsets are always relative to the time now
     return true;
 
   bool utc;
   boost::posix_time::ptime t = try_parse_iso(str, &utc);
-  if (!t.is_not_a_date_time()) return utc;
+  if (!t.is_not_a_date_time())
+    return utc;
 
   return looks_epoch(str);
 }
@@ -323,10 +357,12 @@ boost::posix_time::ptime parse_epoch(const std::string& str)
 
 boost::posix_time::ptime try_parse_offset(const std::string& str)
 {
-  if (str.empty()) return bad_time;
+  if (str.empty())
+    return bad_time;
 
   auto offset = try_parse_duration(str);
-  if (offset.is_not_a_date_time()) return bad_time;
+  if (offset.is_not_a_date_time())
+    return bad_time;
 
   return ::buildFromOffset(offset);
 }
@@ -362,13 +398,15 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
 
   // Year
 
-  if (!parse_uint16(&ptr, 4, &year)) return bad_time;
+  if (!parse_uint16(&ptr, 4, &year))
+    return bad_time;
 
   // Quick sanity check to prevent further useless parsing
   // - boost library version 1.34 or greater support dates
   //   at least in the range 1400-Jan-01 to 9999-Dec-31
   // - Dates prior to 1582 using the Julian Calendar
-  if (year < 1582 || year > 5000) return bad_time;
+  if (year < 1582 || year > 5000)
+    return bad_time;
 
   // Establish whether we have basic or extended format
 
@@ -376,45 +414,68 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
 
   // Month
 
-  if (!skip_separator(&ptr, '-', extended_format)) return bad_time;  // should never happen though
-  if (!parse_uint16(&ptr, 2, &month)) return bad_time;               // YYYY is not allowed
-  if (month == 0 || month > 12) return bad_time;
+  if (!skip_separator(&ptr, '-', extended_format))
+    return bad_time;  // should never happen though
+  if (!parse_uint16(&ptr, 2, &month))
+    return bad_time;  // YYYY is not allowed
+  if (month == 0 || month > 12)
+    return bad_time;
 
   if (*ptr == '\0')
   {
-    if (!extended_format) return bad_time;  // YYYYMM is not allowed
-    goto build_iso;                         // YYYY-MM is allowed
+    if (!extended_format)
+      return bad_time;  // YYYYMM is not allowed
+    goto build_iso;     // YYYY-MM is allowed
   }
 
   // Day
 
-  if (!skip_separator(&ptr, '-', extended_format)) return bad_time;
-  if (!parse_uint16(&ptr, 2, &day)) return bad_time;
-  if (day == 0 || day > 31) return bad_time;
-  if (*ptr == '\0') goto build_iso;  // YYYY-MM-DD is allowed
+  if (!skip_separator(&ptr, '-', extended_format))
+    return bad_time;
+  if (!parse_uint16(&ptr, 2, &day))
+    return bad_time;
+  if (day == 0 || day > 31)
+    return bad_time;
+  if (*ptr == '\0')
+    goto build_iso;  // YYYY-MM-DD is allowed
 
   // We permit omitting 'T' to enable old YYYYMMDDHHMI timestamp format
 
-  if (*ptr == 'T') ++ptr;
-  if (!parse_uint16(&ptr, 2, &hour)) return bad_time;
-  if (hour > 23) return bad_time;
-  if (*ptr == '\0') goto build_iso;  // YYYY-MM-DDTHH is allowed
+  if (*ptr == 'T')
+    ++ptr;
+  if (!parse_uint16(&ptr, 2, &hour))
+    return bad_time;
+  if (hour > 23)
+    return bad_time;
+  if (*ptr == '\0')
+    goto build_iso;  // YYYY-MM-DDTHH is allowed
 
-  if (*ptr == 'Z' || *ptr == '+' || *ptr == '-') goto zone_began;
+  if (*ptr == 'Z' || *ptr == '+' || *ptr == '-')
+    goto zone_began;
 
-  if (!skip_separator(&ptr, ':', extended_format)) return bad_time;
-  if (!parse_uint16(&ptr, 2, &minute)) return bad_time;
-  if (minute > 59) return bad_time;
-  if (*ptr == '\0') goto build_iso;  // YYYY-MM-DDTHH:MI is allowed
+  if (!skip_separator(&ptr, ':', extended_format))
+    return bad_time;
+  if (!parse_uint16(&ptr, 2, &minute))
+    return bad_time;
+  if (minute > 59)
+    return bad_time;
+  if (*ptr == '\0')
+    goto build_iso;  // YYYY-MM-DDTHH:MI is allowed
 
-  if (*ptr == 'Z' || *ptr == '+' || *ptr == '-') goto zone_began;
+  if (*ptr == 'Z' || *ptr == '+' || *ptr == '-')
+    goto zone_began;
 
-  if (!skip_separator(&ptr, ':', extended_format)) return bad_time;
-  if (!parse_uint16(&ptr, 2, &second)) return bad_time;
-  if (second > 59) return bad_time;
-  if (*ptr == '\0') goto build_iso;  // YYYY-MM-DDTHH:MI:SS is allowed
+  if (!skip_separator(&ptr, ':', extended_format))
+    return bad_time;
+  if (!parse_uint16(&ptr, 2, &second))
+    return bad_time;
+  if (second > 59)
+    return bad_time;
+  if (*ptr == '\0')
+    goto build_iso;  // YYYY-MM-DDTHH:MI:SS is allowed
 
-  if (*ptr != 'Z' && *ptr != '+' && *ptr != '-') return bad_time;
+  if (*ptr != 'Z' && *ptr != '+' && *ptr != '-')
+    return bad_time;
 
 zone_began:
 
@@ -422,21 +483,28 @@ zone_began:
   if (*ptr == 'Z')
   {
     ++ptr;
-    if (*ptr != '\0') return bad_time;
+    if (*ptr != '\0')
+      return bad_time;
     goto build_iso;
   }
 
   positiveoffset = (*ptr == '+');
   ptr++;
 
-  if (!parse_uint16(&ptr, 2, &houroffset)) return bad_time;
-  if (houroffset >= 14) return bad_time;  // some offsets are > 12
+  if (!parse_uint16(&ptr, 2, &houroffset))
+    return bad_time;
+  if (houroffset >= 14)
+    return bad_time;  // some offsets are > 12
 
-  if (*ptr == '\0') goto build_iso;
+  if (*ptr == '\0')
+    goto build_iso;
 
-  if (!skip_separator(&ptr, ':', extended_format)) return bad_time;
-  if (!parse_uint16(&ptr, 2, &minuteoffset)) return bad_time;
-  if (*ptr != '\0') return bad_time;
+  if (!skip_separator(&ptr, ':', extended_format))
+    return bad_time;
+  if (!parse_uint16(&ptr, 2, &minuteoffset))
+    return bad_time;
+  if (*ptr != '\0')
+    return bad_time;
 
 build_iso:
 
@@ -534,7 +602,8 @@ boost::posix_time::ptime parse_sql(const std::string& str)
 
 boost::posix_time::ptime parse_offset(const std::string& str)
 {
-  if (str.empty()) throw std::runtime_error("Trying to parse an empty string as a time offset");
+  if (str.empty())
+    throw std::runtime_error("Trying to parse an empty string as a time offset");
 
   boost::posix_time::time_duration offset = parse_duration(str);
 
@@ -561,7 +630,8 @@ boost::posix_time::ptime parse_offset(const std::string& str)
 
 boost::posix_time::time_duration parse_duration(const std::string& str)
 {
-  if (str.empty()) throw std::runtime_error("Trying to parse an empty string as a time duration");
+  if (str.empty())
+    throw std::runtime_error("Trying to parse an empty string as a time duration");
   auto dura = try_parse_duration(str);
   if (dura.is_not_a_date_time())
     throw std::runtime_error("Failed to parse '" + str + "' as a duration");
@@ -588,9 +658,11 @@ boost::posix_time::time_duration parse_duration(const std::string& str)
 
 boost::posix_time::time_duration try_parse_duration(const std::string& str)
 {
-  if (str.empty()) return bad_duration;
+  if (str.empty())
+    return bad_duration;
 
-  if (str[0] == 'P') return try_parse_iso_duration(str);
+  if (str[0] == 'P')
+    return try_parse_iso_duration(str);
 
   // Old time duration format
 
@@ -604,7 +676,8 @@ boost::posix_time::time_duration try_parse_duration(const std::string& str)
 
   bool success = qi::parse(start, finish, theParser, target);
 
-  if (!success) return bad_duration;
+  if (!success)
+    return bad_duration;
 
   int offset_value;
 
@@ -615,21 +688,28 @@ boost::posix_time::time_duration try_parse_duration(const std::string& str)
     offset_value = static_cast<int>(target.value);
 
   // Default unit is minutes
-  if (!target.unit) return boost::posix_time::minutes(offset_value);
+  if (!target.unit)
+    return boost::posix_time::minutes(offset_value);
 
   char theUnit = *target.unit;
 
-  if (theUnit == 's' || theUnit == 'S') return boost::posix_time::seconds(offset_value);
+  if (theUnit == 's' || theUnit == 'S')
+    return boost::posix_time::seconds(offset_value);
 
-  if (theUnit == 'm' || theUnit == 'M') return boost::posix_time::minutes(offset_value);
+  if (theUnit == 'm' || theUnit == 'M')
+    return boost::posix_time::minutes(offset_value);
 
-  if (theUnit == 'h' || theUnit == 'H') return boost::posix_time::hours(offset_value);
+  if (theUnit == 'h' || theUnit == 'H')
+    return boost::posix_time::hours(offset_value);
 
-  if (theUnit == 'd' || theUnit == 'D') return boost::posix_time::hours(offset_value * 24);
+  if (theUnit == 'd' || theUnit == 'D')
+    return boost::posix_time::hours(offset_value * 24);
 
-  if (theUnit == 'w' || theUnit == 'W') return boost::posix_time::hours(offset_value * 24 * 7);
+  if (theUnit == 'w' || theUnit == 'W')
+    return boost::posix_time::hours(offset_value * 24 * 7);
 
-  if (theUnit == 'y' || theUnit == 'Y') return boost::posix_time::hours(offset_value * 24 * 365);
+  if (theUnit == 'y' || theUnit == 'Y')
+    return boost::posix_time::hours(offset_value * 24 * 365);
 
   return bad_duration;
 }
@@ -647,7 +727,8 @@ boost::posix_time::time_duration parse_iso_duration(const std::string& str)
 {
   auto dura = try_parse_iso_duration(str);
 
-  if (!dura.is_not_a_date_time()) return dura;
+  if (!dura.is_not_a_date_time())
+    return dura;
 
   throw std::runtime_error("Unable to parse ISO8601 time duration from '" + str + "'");
 }
@@ -671,7 +752,8 @@ boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
     return boost::posix_time::hours(7 * 24 * n);
   }
 
-  if (!boost::regex_search(str, match, iso8601_long)) return bad_duration;
+  if (!boost::regex_search(str, match, iso8601_long))
+    return bad_duration;
 
   // years, months, days, tmp , hours, minutes, seconds
   std::vector<int> vec{0, 0, 0, -1, 0, 0, 0};
@@ -686,8 +768,10 @@ boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
     }
   }
 
-  if (vec[1] < 0 || vec[1] > 12) return bad_duration;
-  if (vec[4] < 0 || vec[4] > 24) return bad_duration;
+  if (vec[1] < 0 || vec[1] > 12)
+    return bad_duration;
+  if (vec[4] < 0 || vec[4] > 24)
+    return bad_duration;
 
   // Year length 365 and month length 30 are arbitrary choices here
 
@@ -817,11 +901,16 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
 
 boost::posix_time::ptime parse(const std::string& str, const std::string& format)
 {
-  if (format == "iso" || format == "xml" || format == "timestamp") return parse_iso(str);
-  if (format == "sql") return parse_sql(str);
-  if (format == "epoch") return parse_epoch(str);
-  if (format == "offset") return parse_offset(str);
-  if (format == "fmi") return parse_fmi(str);
+  if (format == "iso" || format == "xml" || format == "timestamp")
+    return parse_iso(str);
+  if (format == "sql")
+    return parse_sql(str);
+  if (format == "epoch")
+    return parse_epoch(str);
+  if (format == "offset")
+    return parse_offset(str);
+  if (format == "fmi")
+    return parse_fmi(str);
 
   throw std::runtime_error("Unknown time format '" + format + "'");
 }
@@ -851,7 +940,8 @@ boost::local_time::local_date_time parse(const std::string& str,
   boost::posix_time::ptime t = parse(str, format);
 
   // epoch is always in UTC
-  if (format == "epoch") return boost::local_time::local_date_time(t, tz);
+  if (format == "epoch")
+    return boost::local_time::local_date_time(t, tz);
 
   // timestamps are local
   return make_time(t.date(), t.time_of_day(), tz);
@@ -871,7 +961,8 @@ boost::local_time::local_date_time parse(const std::string& str,
   boost::posix_time::ptime t = match_and_parse(str, matched);
 
   // epoch is always in UTC
-  if (matched == EPOCH) return boost::local_time::local_date_time(t, tz);
+  if (matched == EPOCH)
+    return boost::local_time::local_date_time(t, tz);
 
   // timestamps are local
   return make_time(t.date(), t.time_of_day(), tz);
@@ -906,7 +997,8 @@ boost::local_time::local_date_time parse(const std::string& str,
 
 boost::posix_time::ptime parse_http(const std::string& str)
 {
-  if (str.empty()) throw std::runtime_error("Empty string is not a HTTP date");
+  if (str.empty())
+    throw std::runtime_error("Empty string is not a HTTP date");
 
   std::string s = boost::algorithm::replace_all_copy(str, "  ", " ");
 
@@ -973,7 +1065,8 @@ boost::posix_time::ptime parse_http(const std::string& str)
                                boost::posix_time::hours(hh) + boost::posix_time::minutes(mi) +
                                    boost::posix_time::seconds(ss));
 
-    if (t.is_not_a_date_time()) throw std::runtime_error("");
+    if (t.is_not_a_date_time())
+      throw std::runtime_error("");
 
     return t;
   }

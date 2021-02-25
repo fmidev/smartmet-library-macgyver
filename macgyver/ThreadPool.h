@@ -348,7 +348,8 @@ class ThreadPool : public boost::noncopyable
   {
     Lock lock(itsMutex);
 
-    if (newSize == itsWorkerCount) return;
+    if (newSize == itsWorkerCount)
+      return;
 
     if (newSize < itsWorkerCount)
     {

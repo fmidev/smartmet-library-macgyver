@@ -878,7 +878,8 @@ bool moon_rise_set(
   stringstream ss_received_result;
   for (unsigned int i = 0; i < ret_vector.size(); i++)
   {
-    if (!ss_received_result.str().empty()) ss_received_result << endl;
+    if (!ss_received_result.str().empty())
+      ss_received_result << endl;
     ss_received_result << ret_vector[i];
   }
 
@@ -1034,15 +1035,18 @@ void print_moonrise_moonset_table(
   {
     for (unsigned int i = 1; i <= 12; i++)
     {
-      if (daily_test_data_details[i].size() <= j) continue;
+      if (daily_test_data_details[i].size() <= j)
+        continue;
       if (daily_test_data_details[i][j].moonrise2_today())
       {
-        if (!second_rises.empty()) second_rises += ", ";
+        if (!second_rises.empty())
+          second_rises += ", ";
         second_rises += daily_test_data_details[i][j].as_string_long(SECOND_RISE);
       }
       if (daily_test_data_details[i][j].moonset2_today())
       {
-        if (!second_sets.empty()) second_sets += ", ";
+        if (!second_sets.empty())
+          second_sets += ", ";
         second_sets += daily_test_data_details[i][j].as_string_long(SECOND_SET);
       }
     }
@@ -1261,7 +1265,8 @@ void above_below_horizont_24h()
     if (!daily_test_data[elo][j].moonrise_today() && !daily_test_data[elo][j].moonset_today())
     {
       stringstream& ss_out = (daily_test_data[8][j].above_horizont_24h() ? ss_above : ss_below);
-      if (!ss_out.str().empty()) ss_out << " ";
+      if (!ss_out.str().empty())
+        ss_out << " ";
       ss_out << std::setfill('0') << std::setw(2) << j + 1 << "." << std::setfill('0')
              << std::setw(2) << elo;
     }

@@ -33,24 +33,69 @@ namespace Fmi
  */
 // ----------------------------------------------------------------------
 
-std::string to_string(bool value) { return value ? "1" : "0"; }
+std::string to_string(bool value)
+{
+  return value ? "1" : "0";
+}
 #if defined(_WIN32) || defined(WIN32)
-std::string to_string(size_t value) { return fmt::sprintf("%zu", value); }
-std::string to_string(time_t value) { return fmt::sprintf("%zd", value); }
+std::string to_string(size_t value)
+{
+  return fmt::sprintf("%zu", value);
+}
+std::string to_string(time_t value)
+{
+  return fmt::sprintf("%zd", value);
+}
 #endif
-std::string to_string(float value) { return fmt::sprintf("%g", value); }
-std::string to_string(double value) { return fmt::sprintf("%g", value); }
-std::string to_string(const char* fmt, int value) { return fmt::sprintf(fmt, value); }
-std::string to_string(const char* fmt, long value) { return fmt::sprintf(fmt, value); }
-std::string to_string(const char* fmt, unsigned int value) { return fmt::sprintf(fmt, value); }
-std::string to_string(const char* fmt, unsigned long value) { return fmt::sprintf(fmt, value); }
-std::string to_string(const char* fmt, float value) { return fmt::sprintf(fmt, value); }
-std::string to_string(const char* fmt, double value) { return fmt::sprintf(fmt, value); }
+std::string to_string(float value)
+{
+  return fmt::sprintf("%g", value);
+}
+std::string to_string(double value)
+{
+  return fmt::sprintf("%g", value);
+}
+std::string to_string(const char* fmt, int value)
+{
+  return fmt::sprintf(fmt, value);
+}
+std::string to_string(const char* fmt, long value)
+{
+  return fmt::sprintf(fmt, value);
+}
+std::string to_string(const char* fmt, unsigned int value)
+{
+  return fmt::sprintf(fmt, value);
+}
+std::string to_string(const char* fmt, unsigned long value)
+{
+  return fmt::sprintf(fmt, value);
+}
+std::string to_string(const char* fmt, float value)
+{
+  return fmt::sprintf(fmt, value);
+}
+std::string to_string(const char* fmt, double value)
+{
+  return fmt::sprintf(fmt, value);
+}
 
-std::string to_string(int value) { return fmt::format_int(value).str(); }
-std::string to_string(unsigned int value) { return fmt::format_int(value).str(); }
-std::string to_string(long value) { return fmt::format_int(value).str(); }
-std::string to_string(unsigned long value) { return fmt::format_int(value).str(); }
+std::string to_string(int value)
+{
+  return fmt::format_int(value).str();
+}
+std::string to_string(unsigned int value)
+{
+  return fmt::format_int(value).str();
+}
+std::string to_string(long value)
+{
+  return fmt::format_int(value).str();
+}
+std::string to_string(unsigned long value)
+{
+  return fmt::format_int(value).str();
+}
 
 // ----------------------------------------------------------------------
 /*
@@ -69,7 +114,8 @@ int stoi(const std::string& str)
   long result;
   std::string::const_iterator begin = str.begin(), end = str.end();
   if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
-    if (begin == end) return boost::numeric_cast<int>(result);
+    if (begin == end)
+      return boost::numeric_cast<int>(result);
   throw std::invalid_argument("Fmi::stoi failed to convert '" + str + "' to integer");
 }
 
@@ -78,7 +124,8 @@ long stol(const std::string& str)
   long result;
   std::string::const_iterator begin = str.begin(), end = str.end();
   if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
-    if (begin == end) return result;
+    if (begin == end)
+      return result;
   throw std::invalid_argument("Fmi::stol failed to convert '" + str + "' to long");
 }
 
@@ -87,7 +134,8 @@ unsigned long stoul(const std::string& str)
   unsigned long result;
   std::string::const_iterator begin = str.begin(), end = str.end();
   if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::ulong_, result))
-    if (begin == end) return result;
+    if (begin == end)
+      return result;
   throw std::invalid_argument("Fmi::stoul failed to convert '" + str + "' to unsigned long");
 }
 
@@ -101,7 +149,8 @@ float stof(const std::string& str)
   if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))
     if (begin == end)
     {
-      if (std::isfinite(result)) return boost::numeric_cast<float>(result);
+      if (std::isfinite(result))
+        return boost::numeric_cast<float>(result);
       throw std::invalid_argument("Infinite numbers are not allowed: '" + str + "' in Fmi::stof");
     }
   throw std::invalid_argument("Fmi::stof failed to convert '" + str + "' to float");
@@ -114,7 +163,8 @@ double stod(const std::string& str)
   if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))
     if (begin == end)
     {
-      if (std::isfinite(result)) return result;
+      if (std::isfinite(result))
+        return result;
       throw std::invalid_argument("Infinite numbers are not allowed: '" + str + "' in Fmi::stod");
     }
   throw std::invalid_argument("Fmi::stod failed to convert '" + str + "' to double");
@@ -133,7 +183,8 @@ double stod(const std::string& str)
 // Convert a duration to iso string of form HHMMSS[,fffffff]
 std::string to_iso_string(const boost::posix_time::time_duration& duration)
 {
-  if (duration.is_special()) return boost::posix_time::to_iso_string(duration);
+  if (duration.is_special())
+    return boost::posix_time::to_iso_string(duration);
 
   char buffer[8];
   char* ptr = buffer + 8;
@@ -147,7 +198,8 @@ std::string to_iso_string(const boost::posix_time::time_duration& duration)
   index = duration.hours() * 2;
   *--ptr = digits[index + 1];
   *--ptr = digits[index];
-  if (duration.is_negative()) *--ptr = '-';
+  if (duration.is_negative())
+    *--ptr = '-';
   std::string ret(ptr);
 
   auto frac_sec = duration.fractional_seconds();
@@ -162,7 +214,8 @@ std::string to_iso_string(const boost::posix_time::time_duration& duration)
 // Convert a duration to string of form HH:MM:SS[,fffffff]
 std::string to_simple_string(const boost::posix_time::time_duration& duration)
 {
-  if (duration.is_special()) return boost::posix_time::to_simple_string(duration);
+  if (duration.is_special())
+    return boost::posix_time::to_simple_string(duration);
 
   char buffer[10];
   char* ptr = buffer + 10;
@@ -178,7 +231,8 @@ std::string to_simple_string(const boost::posix_time::time_duration& duration)
   index = duration.hours() * 2;
   *--ptr = digits[index + 1];
   *--ptr = digits[index];
-  if (duration.is_negative()) *--ptr = '-';
+  if (duration.is_negative())
+    *--ptr = '-';
   std::string ret(ptr);
 
   auto frac_sec = duration.fractional_seconds();
@@ -268,7 +322,8 @@ std::string to_iso_extended_string(const boost::gregorian::date& date)
 // Convert to form YYYYMMDDTHHMMSS,fffffffff where T is the date-time separator
 std::string to_iso_string(const boost::posix_time::ptime& time)
 {
-  if (time.is_special()) return boost::posix_time::to_iso_string(time);
+  if (time.is_special())
+    return boost::posix_time::to_iso_string(time);
 
   const auto& date = time.date();
   const auto& duration = time.time_of_day();
@@ -314,7 +369,7 @@ std::string to_iso_string(const boost::posix_time::ptime& time)
 std::string to_iso_string(const std::time_t time)
 {
   struct tm tt;
-  gmtime_r(&time,&tt);
+  gmtime_r(&time, &tt);
 
   char buffer[16];
   char* ptr = buffer + 16;
@@ -349,7 +404,8 @@ std::string to_iso_string(const std::time_t time)
 // Convert to form YYYYMMDDTHHMM
 std::string to_timestamp_string(const boost::posix_time::ptime& time)
 {
-  if (time.is_special()) return boost::posix_time::to_iso_string(time);
+  if (time.is_special())
+    return boost::posix_time::to_iso_string(time);
 
   const auto& date = time.date();
   const auto& duration = time.time_of_day();
@@ -382,7 +438,8 @@ std::string to_timestamp_string(const boost::posix_time::ptime& time)
 // Convert to form YYYY-MM-DDTHH:MM:SS,fffffffff where T is the date-time separator
 std::string to_iso_extended_string(const boost::posix_time::ptime& time)
 {
-  if (time.is_special()) return boost::posix_time::to_iso_extended_string(time);
+  if (time.is_special())
+    return boost::posix_time::to_iso_extended_string(time);
 
   const auto& date = time.date();
   const auto& duration = time.time_of_day();
@@ -431,7 +488,8 @@ std::string to_iso_extended_string(const boost::posix_time::ptime& time)
 // Convert to form YYYY-mmm-DD HH:MM:SS.fffffffff string where mmm 3 char month name
 std::string to_simple_string(const boost::posix_time::ptime& time)
 {
-  if (time.is_special()) return boost::posix_time::to_simple_string(time);
+  if (time.is_special())
+    return boost::posix_time::to_simple_string(time);
 
   const auto& date = time.date();
   const auto& duration = time.time_of_day();
@@ -538,7 +596,8 @@ void ascii_tolower(std::string& input)
 {
   for (std::string::iterator it = input.begin(); it != input.end(); ++it)
   {
-    if (*it > 64 && *it < 91) *it += 32;
+    if (*it > 64 && *it < 91)
+      *it += 32;
   }
 }
 
@@ -547,7 +606,8 @@ void ascii_toupper(std::string& input)
 {
   for (std::string::iterator it = input.begin(); it != input.end(); ++it)
   {
-    if (*it > 96 && *it < 123) *it -= 32;
+    if (*it > 96 && *it < 123)
+      *it -= 32;
   }
 }
 
@@ -567,26 +627,31 @@ std::string ascii_toupper_copy(std::string input)
 
 bool looks_unsigned_int(const std::string& value)
 {
-  if (value.empty()) return false;
+  if (value.empty())
+    return false;
   for (const auto chr : value)
-    if (chr < '0' || chr > '9') return false;
+    if (chr < '0' || chr > '9')
+      return false;
   return true;
 }
 
 bool looks_signed_int(const std::string& value)
 {
-  if (value.empty()) return false;
+  if (value.empty())
+    return false;
   std::size_t i = 0;
   if (value[i] == '+' || value[i] == '-')
   {
-    if (value.size() == 1) return false;
+    if (value.size() == 1)
+      return false;
     ++i;
   }
   const auto sz = value.size();
   for (; i < sz; ++i)
   {
     const auto val = value[i];
-    if (val < '0' || val > '9') return false;
+    if (val < '0' || val > '9')
+      return false;
   }
   return true;
 }
@@ -594,7 +659,7 @@ bool looks_signed_int(const std::string& value)
 // In place trim
 void trim(std::string& value)
 {
-  const char * spaces = " \t\n\v\f\r";
+  const char* spaces = " \t\n\v\f\r";
   value.erase(value.find_last_not_of(spaces) + 1);
   value.erase(0, value.find_first_not_of(spaces));
 }
@@ -606,6 +671,5 @@ std::string trim_copy(const std::string& value)
   trim(tmp);
   return tmp;
 }
-
 
 }  // namespace Fmi

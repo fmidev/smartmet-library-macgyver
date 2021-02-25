@@ -12,7 +12,6 @@
 
 namespace Fmi
 {
-
 using TimeStamp = boost::posix_time::ptime;
 using ParameterVector = std::vector<std::pair<std::string, std::string>>;
 using DetailVector = std::vector<std::string>;
@@ -107,8 +106,8 @@ class Exception : public std::exception
   bool mLoggingDisabled = false;
   bool mStackTraceDisabled = false;
 
-public:
-    static std::atomic<bool> force_stack_trace;
+ public:
+  static std::atomic<bool> force_stack_trace;
 };
 
 // Next is to be replaced later on with std::source_location, which is currently experimental
@@ -117,6 +116,5 @@ public:
 #ifndef BCP
 #define BCP __FILE__, __LINE__, static_cast<const char*>(__PRETTY_FUNCTION__)
 #endif
-  
-} // namespace Fmi
 
+}  // namespace Fmi

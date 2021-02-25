@@ -23,14 +23,18 @@ namespace MatrixTest
 void constructors()
 {
   Fmi::Matrix<int> m1;
-  if (!m1.empty()) TEST_FAILED("Default constructor should yield an empty matrix");
+  if (!m1.empty())
+    TEST_FAILED("Default constructor should yield an empty matrix");
 
   Fmi::Matrix<int> m2(2, 3);
-  if (m2.empty()) TEST_FAILED("m(2,3) should yield a non-empty matrix");
-  if (m2(0, 0) != 0) TEST_FAILED("m(2,3) should contain zeros only");
+  if (m2.empty())
+    TEST_FAILED("m(2,3) should yield a non-empty matrix");
+  if (m2(0, 0) != 0)
+    TEST_FAILED("m(2,3) should contain zeros only");
 
   Fmi::Matrix<int> m3(m2);
-  if (m3.empty()) TEST_FAILED("copy constructor failed");
+  if (m3.empty())
+    TEST_FAILED("copy constructor failed");
 
   TEST_PASSED();
 }
@@ -47,7 +51,8 @@ void assignment()
   Fmi::Matrix<int> m2;
 
   m2 = m1;
-  if (m2.empty()) TEST_FAILED("Assignment failed");
+  if (m2.empty())
+    TEST_FAILED("Assignment failed");
 
   TEST_PASSED();
 }
@@ -62,21 +67,33 @@ void size()
 {
   Fmi::Matrix<int> m1;
 
-  if (m1.xsize() != 0) TEST_FAILED("empty matrix xsize should be 0");
-  if (m1.ysize() != 0) TEST_FAILED("empty matrix ysize should be 0");
-  if (m1.width() != 0) TEST_FAILED("empty matrix width should be 0");
-  if (m1.height() != 0) TEST_FAILED("empty matrix height should be 0");
-  if (m1.rows() != 0) TEST_FAILED("empty matrix columns should be 0");
-  if (m1.columns() != 0) TEST_FAILED("empty matrix rows should be 0");
+  if (m1.xsize() != 0)
+    TEST_FAILED("empty matrix xsize should be 0");
+  if (m1.ysize() != 0)
+    TEST_FAILED("empty matrix ysize should be 0");
+  if (m1.width() != 0)
+    TEST_FAILED("empty matrix width should be 0");
+  if (m1.height() != 0)
+    TEST_FAILED("empty matrix height should be 0");
+  if (m1.rows() != 0)
+    TEST_FAILED("empty matrix columns should be 0");
+  if (m1.columns() != 0)
+    TEST_FAILED("empty matrix rows should be 0");
 
   Fmi::Matrix<int> m2(2, 3);
 
-  if (m2.xsize() != 2) TEST_FAILED("matrix(2,3) xsize should be 2");
-  if (m2.ysize() != 3) TEST_FAILED("matrix(2,3) ysize should be 3");
-  if (m2.width() != 2) TEST_FAILED("matrix(2,3) width should be 2");
-  if (m2.height() != 3) TEST_FAILED("matrix(2,3) height should be 3");
-  if (m2.rows() != 3) TEST_FAILED("matrix(2,3) columns should be 3");
-  if (m2.columns() != 2) TEST_FAILED("matrix(2,3) rows should be 2");
+  if (m2.xsize() != 2)
+    TEST_FAILED("matrix(2,3) xsize should be 2");
+  if (m2.ysize() != 3)
+    TEST_FAILED("matrix(2,3) ysize should be 3");
+  if (m2.width() != 2)
+    TEST_FAILED("matrix(2,3) width should be 2");
+  if (m2.height() != 3)
+    TEST_FAILED("matrix(2,3) height should be 3");
+  if (m2.rows() != 3)
+    TEST_FAILED("matrix(2,3) columns should be 3");
+  if (m2.columns() != 2)
+    TEST_FAILED("matrix(2,3) rows should be 2");
 
   TEST_PASSED();
 }
@@ -94,12 +111,18 @@ void elements()
     for (int j = 0; j < 3; j++)
       m(i, j) = i + j;
 
-  if (m(0, 0) != 0) TEST_FAILED("m(0,0) should be 0");
-  if (m(0, 1) != 1) TEST_FAILED("m(0,1) should be 1");
-  if (m(0, 2) != 2) TEST_FAILED("m(0,2) should be 2");
-  if (m(1, 0) != 1) TEST_FAILED("m(1,0) should be 1");
-  if (m(1, 1) != 2) TEST_FAILED("m(1,1) should be 2");
-  if (m(1, 2) != 3) TEST_FAILED("m(1,2) should be 3");
+  if (m(0, 0) != 0)
+    TEST_FAILED("m(0,0) should be 0");
+  if (m(0, 1) != 1)
+    TEST_FAILED("m(0,1) should be 1");
+  if (m(0, 2) != 2)
+    TEST_FAILED("m(0,2) should be 2");
+  if (m(1, 0) != 1)
+    TEST_FAILED("m(1,0) should be 1");
+  if (m(1, 1) != 2)
+    TEST_FAILED("m(1,1) should be 2");
+  if (m(1, 2) != 3)
+    TEST_FAILED("m(1,2) should be 3");
 
   TEST_PASSED();
 }

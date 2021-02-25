@@ -51,7 +51,8 @@ JulianTime::JulianTime(const ptime& utc)
  */
 ptime JulianTime::ptime_utc() const
 {
-  if (jd == 0.0) return not_a_date_time;
+  if (jd == 0.0)
+    return not_a_date_time;
 
   int z = lround(jd);
   double f = (jd + 0.5) - z;
@@ -103,7 +104,10 @@ local_date_time JulianTime::ldt(const time_zone_ptr& tz) const
 /*
  * Julian century since J2000.0
  */
-double JulianTime::T() const { return (jd - 2451545.0) / 36525.0; }
+double JulianTime::T() const
+{
+  return (jd - 2451545.0) / 36525.0;
+}
 double JulianTime::GeomMeanAnomalySun(double t)
 {
   return 357.52911 + t * (35999.05029 - 0.0001537 * t);  // degrees
@@ -288,7 +292,8 @@ JulianTime Sunrise_or_set_UTC(const JulianTime& noon, double lon_e, double lat, 
   double eqtime = noon.EquationOfTime();
   double solarDec = noon.SunDeclination();
   double hourAngle = HourAngleSunrise_or_set(lat, solarDec, rise);
-  if (isnan(hourAngle)) return JulianTime();
+  if (isnan(hourAngle))
+    return JulianTime();
 
   double delta = -lon_e - rad2deg(hourAngle);
   double timeDiff = 4 * delta;                   // minutes of time
@@ -302,7 +307,8 @@ JulianTime Sunrise_or_set_UTC(const JulianTime& noon, double lon_e, double lat, 
    */
 
   double tmp = floor(noon.JulianDay() + 0.5) - 0.5;
-  if (noon.JulianDay() - (tmp + timeUTC / 1440) > 0.5) ++tmp;
+  if (noon.JulianDay() - (tmp + timeUTC / 1440) > 0.5)
+    ++tmp;
   JulianTime date(tmp);
 
   JulianTime jt(date.JulianDay() + timeUTC / 1440);
@@ -323,7 +329,8 @@ JulianTime Sunrise_or_set_UTC(const JulianTime& noon, double lon_e, double lat, 
   /* Use the same calculation for both; + for rise, - for set
    */
   hourAngle = HourAngleSunrise_or_set(lat, solarDec, rise);
-  if (isnan(hourAngle)) return JulianTime();
+  if (isnan(hourAngle))
+    return JulianTime();
 
   assert(!isnan(hourAngle));
 

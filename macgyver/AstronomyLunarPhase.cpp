@@ -35,7 +35,10 @@ namespace Fmi
 {
 namespace Astronomy
 {
-double moonphase(const ptime& utc) { return lunar_phase(utc); }
+double moonphase(const ptime& utc)
+{
+  return lunar_phase(utc);
+}
 double lunar_phase(const ptime& utc)
 {
   double JDnow = julianDay(utc);
