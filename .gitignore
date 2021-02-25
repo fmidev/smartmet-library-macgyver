@@ -12,3 +12,5 @@ compile_commands.json
 dist/
 *.d
 /smartmet-library-macgyver.tar.gz
+/abi-check
+/compat_reports

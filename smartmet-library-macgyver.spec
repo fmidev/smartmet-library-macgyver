@@ -83,6 +83,7 @@ FMI MacGyver library development files
 %defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
 %{_datadir}/smartmet/devel/makefile.inc
+%{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
 * Mon Jan 25 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi

@@ -41,6 +41,7 @@ plugindir ?= $(datadir)/smartmet/plugins
 
 # Compiler flags
 
+OPTIMIZE ?= -O2
 GCC_DIAG_COLOR ?= always
 
 CXX_VERSION_STRING := $(shell $(CXX) --version 2>/dev/null | head -n 1)
@@ -73,8 +74,8 @@ FLAGS += -std=$(CXX_STD) -fdiagnostics-color=$(GCC_DIAG_COLOR) \
         -Wno-unknown-warning-option
 
 FLAGS_DEBUG = -Og -Werror -Wpedantic -Wundef
-FLAGS_RELEASE = -O2 -Wuninitialized -DNDEBUG
-FLAGS_PROFILE = -O2 -g -pg -DNDEBUG
+FLAGS_RELEASE = $(OPTIMIZE) -Wuninitialized -DNDEBUG
+FLAGS_PROFILE = $(OPTIMIZE) -g -pg -DNDEBUG
 PACKAGES_MISSING =
 
 ifeq ($(USE_CLANG), yes)
