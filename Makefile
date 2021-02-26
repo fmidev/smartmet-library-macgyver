@@ -64,10 +64,9 @@ $(LIBFILE): $(OBJS)
 clean:
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
 	rm -rf $(objdir)
-	rm -rf compat_reports
 	$(MAKE) -C test clean
 	$(MAKE) -C examples clean
-	$(MAKE) abi-check-clean
+	$(MAKE) $(CLEAN_TARGETS)
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp

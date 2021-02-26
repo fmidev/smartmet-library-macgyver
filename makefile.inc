@@ -283,3 +283,5 @@ endif
 ifneq ($(REQUIRES_LEFT),)
 $(warning Unrecognized entries in REQUIRES variable: $(REQUIRES_LEFT))
 endif
+
+CLEAN_TARGETS :=
