@@ -86,7 +86,7 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
-* Thu Mar 25 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.2.25-1.fmi
+* Thu Feb 25 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.2.25-1.fmi
 - Added support for running ABI checker from make
 
 * Mon Jan 25 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi
