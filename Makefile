@@ -61,12 +61,11 @@ $(LIBFILE): $(OBJS)
 		exit 1; \
 	fi
 
-clean:
+clean:  $(CLEAN_TARGETS)
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
 	rm -rf $(objdir)
 	$(MAKE) -C test clean
 	$(MAKE) -C examples clean
-	$(MAKE) $(CLEAN_TARGETS)
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
