@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.2.25
+Version: 21.5.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -86,6 +86,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Wed May 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.19-1.fmi
+- Added Hash.h since boost::hash_combine produces too many collisions
+
 * Thu Feb 25 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.2.25-1.fmi
 - Added support for running ABI checker from make
 
