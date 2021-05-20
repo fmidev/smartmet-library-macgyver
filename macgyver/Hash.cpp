@@ -17,7 +17,14 @@ std::size_t hash_value(const boost::posix_time::ptime& time)
 
 std::size_t hash_value(const boost::local_time::local_date_time& time)
 {
-  return Fmi::hash_value(Fmi::to_iso_string(time.local_time()) + time.zone()->std_zone_name());
+  auto hash = Fmi::hash_value(time.local_time());
+  Fmi::hash_combine(hash, Fmi::hash_value(time.zone()));
+  return hash;
+}
+
+std::size_t hash_value(const boost::local_time::time_zone_ptr& zone)
+{
+  return Fmi::hash_value(zone->std_zone_name());
 }
 
 /*
