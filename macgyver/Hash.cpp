@@ -2,38 +2,6 @@
 #include "StringConversion.h"
 #include <limits>
 
-namespace Fmi
-{
-// This should probably be replaced by siphash for better collision protection
-std::size_t hash_value(const std::string& str)
-{
-  return std::hash<std::string>{}(str);
-}
-
-std::size_t hash_value(const boost::posix_time::ptime& time)
-{
-  return hash_value(Fmi::to_iso_string(time));
-}
-
-std::size_t hash_value(const boost::local_time::local_date_time& time)
-{
-  auto hash = Fmi::hash_value(time.local_time());
-  Fmi::hash_combine(hash, Fmi::hash_value(time.zone()));
-  return hash;
-}
-
-std::size_t hash_value(const boost::local_time::time_zone_ptr& zone)
-{
-  return Fmi::hash_value(zone->std_zone_name());
-}
-
-/*
- * Boost hash_combine produces collisions too often.
- *
- * Ref:
- * https://stackoverflow.com/questions/35985960/c-why-is-boosthash-combine-the-best-way-to-combine-hash-values/50978188#50978188
- */
-
 namespace
 {
 template <typename T>
@@ -62,7 +30,130 @@ std::size_t rotl(std::size_t n, std::size_t i)
   const std::size_t c = i & m;
   return (n << c) | (n >> ((std::size_t(0) - c) & m));
 }
+
 }  // namespace
+
+namespace Fmi
+{
+// This should probably be replaced by siphash for better collision protection
+std::size_t hash_value(const std::string& str)
+{
+  return std::hash<std::string>{}(str);
+}
+
+std::size_t hash_value(const boost::posix_time::ptime& time)
+{
+  return hash_value(Fmi::to_iso_string(time));
+}
+
+std::size_t hash_value(const boost::local_time::local_date_time& time)
+{
+  auto hash = Fmi::hash_value(time.local_time());
+  Fmi::hash_combine(hash, Fmi::hash_value(time.zone()));
+  return hash;
+}
+
+std::size_t hash_value(const boost::local_time::time_zone_ptr& zone)
+{
+  return Fmi::hash_value(zone->std_zone_name());
+}
+
+std::size_t hash_value(bool value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(char value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(signed char value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned char value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(char16_t value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(char32_t value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(wchar_t value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(short value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned short value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(int value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned int value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(long value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(long long value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned long value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned long long value)
+{
+  return hash(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(float value)
+{
+  return std::hash<float>{}(value);
+}
+
+std::size_t hash_value(double value)
+{
+  return std::hash<double>{}(value);
+}
+
+std::size_t hash_value(long double value)
+{
+  return std::hash<long double>{}(value);
+}
+
+/*
+ * Boost hash_combine produces collisions too often.
+ *
+ * Ref:
+ * https://stackoverflow.com/questions/35985960/c-why-is-boosthash-combine-the-best-way-to-combine-hash-values/50978188#50978188
+ */
 
 void hash_combine(std::size_t& seed, std::size_t value)
 {

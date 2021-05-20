@@ -17,16 +17,28 @@ const std::size_t bad_hash = 6178996271928UL;
 
 void hash_combine(std::size_t& seed, std::size_t value);
 
-template <typename T>
-std::size_t hash_value(const T& value)
-{
-  return std::hash<T>{}(value);
-}
-
 std::size_t hash_value(const std::string& str);
 std::size_t hash_value(const boost::posix_time::ptime& time);
 std::size_t hash_value(const boost::local_time::local_date_time& time);
 std::size_t hash_value(const boost::local_time::time_zone_ptr& zone);
+std::size_t hash_value(bool value);
+std::size_t hash_value(char value);
+std::size_t hash_value(signed char value);
+std::size_t hash_value(unsigned char value);
+std::size_t hash_value(char16_t value);
+std::size_t hash_value(char32_t value);
+std::size_t hash_value(wchar_t value);
+std::size_t hash_value(short value);
+std::size_t hash_value(unsigned short value);
+std::size_t hash_value(int value);
+std::size_t hash_value(unsigned int value);
+std::size_t hash_value(long value);
+std::size_t hash_value(long long value);
+std::size_t hash_value(unsigned long value);
+std::size_t hash_value(unsigned long long value);
+std::size_t hash_value(float value);
+std::size_t hash_value(double value);
+std::size_t hash_value(long double value);
 
 // Optional objects with a normal hash_value implementation
 template <typename T>
