@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.5.20
-Release: 2%{?dist}.fmi
+Version: 21.5.21
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -86,6 +86,13 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Fri May 21 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.21-1.fmi
+- Improved hash_value not to return zero for zero input
+- Improved hash_combine not to use 32-bit helper functions
+
+* Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-3.fmi
+- Fixed hash_combine not to unnecessarily double hash the second input
+
 * Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-2.fmi
 - Specialized hash_value for bool, integer and float types since hash_combine works poorly with values 0 and 1
 
