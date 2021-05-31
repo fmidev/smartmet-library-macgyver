@@ -18,9 +18,12 @@ const std::size_t bad_hash = 6178996271928UL;
 void hash_combine(std::size_t& seed, std::size_t value);
 
 std::size_t hash_value(const std::string& str);
+std::size_t hash_value(const boost::gregorian::date& date);
+std::size_t hash_value(const boost::posix_time::time_duration& duration);
 std::size_t hash_value(const boost::posix_time::ptime& time);
 std::size_t hash_value(const boost::local_time::local_date_time& time);
 std::size_t hash_value(const boost::local_time::time_zone_ptr& zone);
+
 std::size_t hash_value(bool value);
 std::size_t hash_value(char value);
 std::size_t hash_value(signed char value);
