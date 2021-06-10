@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.5.31
+Version: 21.6.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -86,6 +86,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Thu Jul 10 2021 Andris Pavenis <andris.pavenis@fmi.fi> 21.6.10-1.fmi
+- Fmi::PostgreSQLConnection: new method cancel
+
 * Mon May 31 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.31-1.fmi
 - Improved hash_value functions for boost date_time objects
 
