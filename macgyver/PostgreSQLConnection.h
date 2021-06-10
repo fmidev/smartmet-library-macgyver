@@ -45,6 +45,7 @@ class PostgreSQLConnection
   void startTransaction();
   pqxx::result executeTransaction(const std::string& theSQLStatement) const;
   void commitTransaction();
+  void cancel();
 
   bool collateSupported() { return itsCollate; }
   std::string quote(const std::string& theString) const;

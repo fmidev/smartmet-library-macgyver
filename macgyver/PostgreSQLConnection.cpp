@@ -150,6 +150,18 @@ void PostgreSQLConnection::commitTransaction()
   }
 }
 
+void PostgreSQLConnection::cancel()
+{
+  try
+  {
+    itsConnection->cancel_query();
+  }
+  catch (const std::exception& e)
+  {
+    throw std::runtime_error(std::string("Canceling transaction failed: ").append(e.what()));
+  }
+}
+
 void PostgreSQLConnection::setClientEncoding(const std::string& theEncoding) const
 {
   try
