@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.6.10
+Version: 21.6.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -20,7 +20,7 @@ BuildRequires: libicu-devel
 BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-timezones >= 21.1.5
+BuildRequires: smartmet-timezones >= 21.2.2
 Requires: boost169-chrono
 Requires: boost169-date-time
 Requires: boost169-filesystem
@@ -37,7 +37,7 @@ Requires: libpqxx < 1:7.0
 #TestRequires: make
 #TestRequires: postgresql12-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 21.1.5
+#TestRequires: smartmet-timezones >= 21.2.2
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -86,7 +86,10 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
-* Thu Jul 10 2021 Andris Pavenis <andris.pavenis@fmi.fi> 21.6.10-1.fmi
+* Wed Jun 16 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.16-1.fmi
+- Use Fmi::Exception in the library itself
+
+* Thu Jun 10 2021 Andris Pavenis <andris.pavenis@fmi.fi> 21.6.10-1.fmi
 - Fmi::PostgreSQLConnection: new method cancel
 
 * Mon May 31 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.31-1.fmi
