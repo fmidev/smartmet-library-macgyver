@@ -1,6 +1,7 @@
 // ======================================================================
 
 #include "TemplateFactory.h"
+#include "Exception.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
@@ -28,29 +29,36 @@ thread_local TemplateMap itsTemplates{};
 
 SharedFormatter TemplateFactory::get(const boost::filesystem::path& theFilename) const
 {
-  if (theFilename.empty())
-    throw std::runtime_error("TemplateFactory: Cannot use empty templates");
+  try
+  {
+    if (theFilename.empty())
+      throw Fmi::Exception(BCP, "TemplateFactory: Cannot use empty templates");
 
-  const auto& tinfo = itsTemplates.find(theFilename);
+    const auto& tinfo = itsTemplates.find(theFilename);
 
-  const std::time_t modtime = boost::filesystem::last_write_time(theFilename);
+    const std::time_t modtime = boost::filesystem::last_write_time(theFilename);
 
-  // Use cached template if it is up to date
-  if (tinfo != itsTemplates.end())
-    if (tinfo->second.modtime == modtime)
-      return tinfo->second.formatter;
+    // Use cached template if it is up to date
+    if (tinfo != itsTemplates.end())
+      if (tinfo->second.modtime == modtime)
+        return tinfo->second.formatter;
 
-  // Initialize a new formatter
+    // Initialize a new formatter
 
-  TemplateInfo newinfo;
-  newinfo.modtime = modtime;
-  newinfo.formatter = boost::make_shared<Fmi::TemplateFormatter>();
-  newinfo.formatter->load_template(theFilename.c_str());
+    TemplateInfo newinfo;
+    newinfo.modtime = modtime;
+    newinfo.formatter = boost::make_shared<Fmi::TemplateFormatter>();
+    newinfo.formatter->load_template(theFilename.c_str());
 
-  // Cache the new formatter
-  itsTemplates.insert(std::make_pair(theFilename, newinfo));
+    // Cache the new formatter
+    itsTemplates.insert(std::make_pair(theFilename, newinfo));
 
-  return newinfo.formatter;
+    return newinfo.formatter;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Fmi

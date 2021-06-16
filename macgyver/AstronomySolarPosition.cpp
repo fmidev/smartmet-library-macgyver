@@ -20,6 +20,7 @@
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
 #include "AstronomyJulianTime.h"
+#include "Exception.h"
 
 #include <cmath>
 #include <vector>
@@ -45,89 +46,96 @@ namespace Astronomy
  */
 solar_position_t solar_position(const ptime& utc, double lon_e, double lat)
 {
-  check_lonlat(lon_e, lat);
-
-  JulianTime J(utc);
-  //
-  // 2008-Jun-18: 2454635.5
-
-  double declination = J.SunDeclination();  // degrees
-  double eqtime = J.EquationOfTime();
-
-  double trueSolarTime =
-      (utc.time_of_day().total_seconds()) / 60.0 + eqtime + (lon_e * 4.0);  // minutes
-
-  while (trueSolarTime > 1440)
+  try
   {
-    trueSolarTime -= 1440;
-  }
+    check_lonlat(lon_e, lat);
 
-  double hourAngle = trueSolarTime / 4.0 - 180.0;
-  if (hourAngle < -180.0)
-    hourAngle += 360.0;
+    JulianTime J(utc);
+    //
+    // 2008-Jun-18: 2454635.5
 
-  double csz = sin_deg(lat) * sin_deg(declination) +
-               cos_deg(lat) * cos_deg(declination) * cos_deg(hourAngle);
+    double declination = J.SunDeclination();  // degrees
+    double eqtime = J.EquationOfTime();
 
-  clamp_to(csz, -1.0, 1.0);
+    double trueSolarTime =
+        (utc.time_of_day().total_seconds()) / 60.0 + eqtime + (lon_e * 4.0);  // minutes
 
-  double zenith = rad2deg(acos(csz));
-
-  double azDenom = cos_deg(lat) * sin_deg(zenith);
-  double azimuth;
-
-  if (fabs(azDenom) <= 0.001)
-  {
-    azimuth = (lat > 0.0) ? 180.0 : 0.0;
-  }
-  else
-  {
-    double azRad = ((sin_deg(lat) * cos_deg(zenith)) - sin_deg(declination)) / azDenom;
-    clamp_to(azRad, -1.0, 1.0);
-
-    azimuth = 180.0 - rad2deg(acos(azRad));
-
-    if (hourAngle > 0.0)
-      azimuth = -azimuth;
-
-    if (azimuth < 0.0)
-      azimuth += 360.0;
-  }
-
-  double refractionCorrection;
-
-  double exoatmElevation = 90.0 - zenith;
-  if (exoatmElevation <= 85.0)
-  {
-    double te = tan_deg(exoatmElevation);
-    if (exoatmElevation > 5.0)
+    while (trueSolarTime > 1440)
     {
-      refractionCorrection =
-          58.1 / te - 0.07 / (te * te * te) + 0.000086 / (te * te * te * te * te);
+      trueSolarTime -= 1440;
     }
-    else if (exoatmElevation > -0.575)
+
+    double hourAngle = trueSolarTime / 4.0 - 180.0;
+    if (hourAngle < -180.0)
+      hourAngle += 360.0;
+
+    double csz = sin_deg(lat) * sin_deg(declination) +
+                 cos_deg(lat) * cos_deg(declination) * cos_deg(hourAngle);
+
+    clamp_to(csz, -1.0, 1.0);
+
+    double zenith = rad2deg(acos(csz));
+
+    double azDenom = cos_deg(lat) * sin_deg(zenith);
+    double azimuth;
+
+    if (fabs(azDenom) <= 0.001)
     {
-      refractionCorrection =
-          1735.0 +
-          exoatmElevation *
-              (-518.2 +
-               exoatmElevation * (103.4 + exoatmElevation * (-12.79 + exoatmElevation * 0.711)));
+      azimuth = (lat > 0.0) ? 180.0 : 0.0;
     }
     else
     {
-      refractionCorrection = -20.774 / te;
+      double azRad = ((sin_deg(lat) * cos_deg(zenith)) - sin_deg(declination)) / azDenom;
+      clamp_to(azRad, -1.0, 1.0);
+
+      azimuth = 180.0 - rad2deg(acos(azRad));
+
+      if (hourAngle > 0.0)
+        azimuth = -azimuth;
+
+      if (azimuth < 0.0)
+        azimuth += 360.0;
     }
-    refractionCorrection /= 3600.0;
+
+    double refractionCorrection;
+
+    double exoatmElevation = 90.0 - zenith;
+    if (exoatmElevation <= 85.0)
+    {
+      double te = tan_deg(exoatmElevation);
+      if (exoatmElevation > 5.0)
+      {
+        refractionCorrection =
+            58.1 / te - 0.07 / (te * te * te) + 0.000086 / (te * te * te * te * te);
+      }
+      else if (exoatmElevation > -0.575)
+      {
+        refractionCorrection =
+            1735.0 +
+            exoatmElevation *
+                (-518.2 +
+                 exoatmElevation * (103.4 + exoatmElevation * (-12.79 + exoatmElevation * 0.711)));
+      }
+      else
+      {
+        refractionCorrection = -20.774 / te;
+      }
+      refractionCorrection /= 3600.0;
+    }
+    else
+    {
+      refractionCorrection = 0.0;
+    }
+
+    double solarZen = zenith - refractionCorrection;
+    double elevation = 90.0 - solarZen;
+
+    return solar_position_t(azimuth, declination, elevation);
   }
-  else
+  catch (...)
   {
-    refractionCorrection = 0.0;
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-
-  double solarZen = zenith - refractionCorrection;
-  double elevation = 90.0 - solarZen;
-
-  return solar_position_t(azimuth, declination, elevation);
 }
 
 /*
@@ -138,7 +146,14 @@ solar_position_t solar_position(const ptime& utc, double lon_e, double lat)
  */
 solar_position_t solar_position(const local_date_time& ldt, double lon_e, double lat)
 {
-  return solar_position(ldt.utc_time(), lon_e, lat);
+  try
+  {
+    return solar_position(ldt.utc_time(), lon_e, lat);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Astronomy

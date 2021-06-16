@@ -12,7 +12,7 @@
 
 namespace Fmi
 {
-using TimeStamp = boost::posix_time::ptime;
+using ExceptionTimeStamp = boost::posix_time::ptime;
 using ParameterVector = std::vector<std::pair<std::string, std::string>>;
 using DetailVector = std::vector<std::string>;
 using DetailList = std::list<std::string>;
@@ -80,8 +80,8 @@ class Exception : public std::exception
   const char* getParameterValue(const char* _name) const;
   const char* getParameterValueByIndex(unsigned int _index) const;
 
-  TimeStamp getTimeStamp() const;
-  void setTimeStamp(TimeStamp _timestamp);
+  ExceptionTimeStamp getTimeStamp() const;
+  void setTimeStamp(ExceptionTimeStamp _timestamp);
 
   std::string getStackTrace() const;
   std::string getHtmlStackTrace() const;
@@ -95,7 +95,7 @@ class Exception : public std::exception
   void printError() const;
 
  protected:
-  TimeStamp timestamp;
+  ExceptionTimeStamp timestamp;
   std::string filename;
   int line;
   std::string function;

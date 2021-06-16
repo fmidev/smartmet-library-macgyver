@@ -12,6 +12,7 @@
 #define DEFAULT_SAFETY false
 #endif
 
+#include "Exception.h"
 #include <cassert>
 #include <stdexcept>
 #include <vector>
@@ -130,9 +131,9 @@ inline const T& Matrix<T, Safe>::operator()(size_type i, size_type j) const
   if (Safe)
   {
     if (i < 0 || i >= itsWidth)
-      throw std::runtime_error("X-index out of range in Matrix accessor");
+      throw Fmi::Exception(BCP, "X-index out of range in Matrix accessor");
     if (j < 0 || j >= itsHeight)
-      throw std::runtime_error("Y-index out of range in Matrix accessor");
+      throw Fmi::Exception(BCP, "Y-index out of range in Matrix accessor");
   }
 
   assert(i >= 0 && i < itsWidth);
@@ -153,9 +154,9 @@ inline T& Matrix<T, Safe>::operator()(size_type i, size_type j)
   if (Safe)
   {
     if (i < 0 || i >= itsWidth)
-      throw std::runtime_error("X-index out of range in Matrix accessor");
+      throw Fmi::Exception(BCP, "X-index out of range in Matrix accessor");
     if (j < 0 || j >= itsHeight)
-      throw std::runtime_error("Y-index out of range in Matrix accessor");
+      throw Fmi::Exception(BCP, "Y-index out of range in Matrix accessor");
   }
 
   assert(i >= 0 && i < itsWidth);

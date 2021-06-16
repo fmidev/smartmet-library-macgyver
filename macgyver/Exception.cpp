@@ -162,7 +162,7 @@ const Exception* Exception::getFirstException() const
   }
 }
 
-TimeStamp Exception::getTimeStamp() const
+ExceptionTimeStamp Exception::getTimeStamp() const
 {
   return timestamp;
 }
@@ -194,7 +194,7 @@ const Exception* Exception::getExceptionByIndex(unsigned int _index) const
   return nullptr;
 }
 
-void Exception::setTimeStamp(TimeStamp _timestamp)
+void Exception::setTimeStamp(ExceptionTimeStamp _timestamp)
 {
   timestamp = _timestamp;
 }

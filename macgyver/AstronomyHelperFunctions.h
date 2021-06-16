@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "Exception.h"
 #include <cmath>
 
 #include <boost/date_time/local_time/local_time.hpp>
@@ -65,13 +66,14 @@ inline void clamp_to(double& v, double a, double b)
 inline void check_lonlat(double& lon, double& lat)
 {
   if (fabs(lon) > 180.0)
-    throw std::runtime_error("Longitude must be in range [-180,180]");
+    throw Fmi::Exception(BCP, "Longitude must be in range [-180,180]");
 
   if (fabs(lat) > 90.0)
-    throw std::runtime_error("Latitude must be in range [-90,90]");
+    throw Fmi::Exception(BCP, "Latitude must be in range [-90,90]");
 
   clamp_to(lat, -89.8, 89.8);  // exclude poles
 }
+
 
 /*
  * hour angle of the Sun at sunrise for the latitude

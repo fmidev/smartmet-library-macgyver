@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Exception.h"
 #include <algorithm>
 #include <condition_variable>
 #include <mutex>
@@ -19,13 +20,20 @@ class WorkQueue : std::mutex, std::condition_variable
   template <typename Function>
   WorkQueue(Function &&function, unsigned int concurrency = std::thread::hardware_concurrency())
   {
-    if (not concurrency)
-      throw std::invalid_argument("Concurrency must not be zero");
+    try
+    {
+      if (not concurrency)
+        throw Fmi::Exception(BCP, "Concurrency must not be zero");
 
-    for (unsigned int count{}; count < concurrency; ++count)
-      threads.emplace_back(static_cast<void (WorkQueue::*)(Function)>(&WorkQueue::consume),
-                           this,
-                           std::forward<Function>(function));
+      for (unsigned int count{}; count < concurrency; ++count)
+        threads.emplace_back(static_cast<void (WorkQueue::*)(Function)>(&WorkQueue::consume),
+                             this,
+                             std::forward<Function>(function));
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
   }
 
   // disable move
@@ -35,23 +43,37 @@ class WorkQueue : std::mutex, std::condition_variable
   template <typename... Args>
   WorkQueue &operator()(Args &&...args)
   {
-    unique_lock lock{*this};
-    while (queue.size() == threads.size())
-      wait(lock);
-    queue.emplace(std::forward<Args>(args)...);
-    notify_one();
-    return *this;
+    try
+    {
+      unique_lock lock{*this};
+      while (queue.size() == threads.size())
+        wait(lock);
+      queue.emplace(std::forward<Args>(args)...);
+      notify_one();
+      return *this;
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
   }
 
   void join_all()
   {
-    lock();
-    if (!done)
+    try
     {
-      done = true;
-      notify_all();
-      unlock();
-      threads.join();
+      lock();
+      if (!done)
+      {
+        done = true;
+        notify_all();
+        unlock();
+        threads.join();
+      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
 
@@ -71,32 +93,39 @@ class WorkQueue : std::mutex, std::condition_variable
   template <typename Function>
   void consume(Function process)
   {
-    unique_lock lock{*this};
-    while (true)
+    try
     {
-      if (not queue.empty())
+      unique_lock lock{*this};
+      while (true)
       {
+        if (not queue.empty())
+        {
 #if 0
-		// doesn't work in g++ 4.8.5
-        Type item{std::move(queue.front())};
+      // doesn't work in g++ 4.8.5
+          Type item{std::move(queue.front())};
 #else
-        Type item;
-        std::swap(item, queue.front());
+          Type item;
+          std::swap(item, queue.front());
 #endif
-        queue.pop();
-        notify_one();
-        lock.unlock();
-        process(item);
-        lock.lock();
+          queue.pop();
+          notify_one();
+          lock.unlock();
+          process(item);
+          lock.lock();
+        }
+        else if (done)
+        {
+          break;
+        }
+        else
+        {
+          wait(lock);
+        }
       }
-      else if (done)
-      {
-        break;
-      }
-      else
-      {
-        wait(lock);
-      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
 };

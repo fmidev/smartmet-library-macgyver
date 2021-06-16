@@ -38,6 +38,7 @@
  */
 
 #include "Base64.h"
+#include "Exception.h"
 #include <cctype>
 
 namespace
@@ -65,20 +66,40 @@ namespace Base64
 
 std::string encode(const std::string& str)
 {
-  std::string ret;
-  std::size_t i = 0;
-  std::size_t j = 0;
-  std::size_t in_len = str.size();
-  unsigned char char_array_3[3];
-  unsigned char char_array_4[4];
-
-  std::size_t pos = 0;
-
-  while (in_len--)
+  try
   {
-    char_array_3[i++] = str[pos++];
-    if (i == 3)
+    std::string ret;
+    std::size_t i = 0;
+    std::size_t j = 0;
+    std::size_t in_len = str.size();
+    unsigned char char_array_3[3];
+    unsigned char char_array_4[4];
+
+    std::size_t pos = 0;
+
+    while (in_len--)
     {
+      char_array_3[i++] = str[pos++];
+      if (i == 3)
+      {
+        char_array_4[0] = (char_array_3[0] & 0xfcu) >> 2;
+        char_array_4[1] =
+            static_cast<char>((char_array_3[0] & 0x03u) << 4) + ((char_array_3[1] & 0xf0u) >> 4);
+        char_array_4[2] =
+            static_cast<char>((char_array_3[1] & 0x0fu) << 2) + ((char_array_3[2] & 0xc0u) >> 6);
+        char_array_4[3] = char_array_3[2] & 0x3fu;
+
+        for (i = 0; (i < 4); i++)
+          ret += base64_chars[static_cast<std::size_t>(char_array_4[i])];
+        i = 0;
+      }
+    }
+
+    if (i)
+    {
+      for (j = i; j < 3; j++)
+        char_array_3[j] = '\0';
+
       char_array_4[0] = (char_array_3[0] & 0xfcu) >> 2;
       char_array_4[1] =
           static_cast<char>((char_array_3[0] & 0x03u) << 4) + ((char_array_3[1] & 0xf0u) >> 4);
@@ -86,32 +107,19 @@ std::string encode(const std::string& str)
           static_cast<char>((char_array_3[1] & 0x0fu) << 2) + ((char_array_3[2] & 0xc0u) >> 6);
       char_array_4[3] = char_array_3[2] & 0x3fu;
 
-      for (i = 0; (i < 4); i++)
-        ret += base64_chars[static_cast<std::size_t>(char_array_4[i])];
-      i = 0;
+      for (j = 0; (j < i + 1); j++)
+        ret += base64_chars[static_cast<std::size_t>(char_array_4[j])];
+
+      while ((i++ < 3))
+        ret += '=';
     }
-  }
 
-  if (i)
+    return ret;
+  }
+  catch (...)
   {
-    for (j = i; j < 3; j++)
-      char_array_3[j] = '\0';
-
-    char_array_4[0] = (char_array_3[0] & 0xfcu) >> 2;
-    char_array_4[1] =
-        static_cast<char>((char_array_3[0] & 0x03u) << 4) + ((char_array_3[1] & 0xf0u) >> 4);
-    char_array_4[2] =
-        static_cast<char>((char_array_3[1] & 0x0fu) << 2) + ((char_array_3[2] & 0xc0u) >> 6);
-    char_array_4[3] = char_array_3[2] & 0x3fu;
-
-    for (j = 0; (j < i + 1); j++)
-      ret += base64_chars[static_cast<std::size_t>(char_array_4[j])];
-
-    while ((i++ < 3))
-      ret += '=';
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-
-  return ret;
 }
 
 // ----------------------------------------------------------------------
@@ -122,52 +130,59 @@ std::string encode(const std::string& str)
 
 std::string decode(const std::string& str)
 {
-  std::size_t in_len = str.size();
-  std::size_t i = 0;
-  std::size_t j = 0;
-  std::size_t in_ = 0;
-  unsigned char char_array_4[4], char_array_3[3];
-  std::string ret;
-
-  while (in_len-- && (str[in_] != '=') && is_base64(str[in_]))
+  try
   {
-    char_array_4[i++] = str[in_];
-    in_++;
-    if (i == 4)
-    {
-      for (i = 0; i < 4; i++)
-        char_array_4[i] = static_cast<char>(base64_chars.find(char_array_4[i]));
+    std::size_t in_len = str.size();
+    std::size_t i = 0;
+    std::size_t j = 0;
+    std::size_t in_ = 0;
+    unsigned char char_array_4[4], char_array_3[3];
+    std::string ret;
 
-      char_array_3[0] =
-          static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30u) >> 4));
+    while (in_len-- && (str[in_] != '=') && is_base64(str[in_]))
+    {
+      char_array_4[i++] = str[in_];
+      in_++;
+      if (i == 4)
+      {
+        for (i = 0; i < 4; i++)
+          char_array_4[i] = static_cast<char>(base64_chars.find(char_array_4[i]));
+
+        char_array_3[0] =
+            static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30u) >> 4));
+        char_array_3[1] =
+            static_cast<char>(((char_array_4[1] & 0xfu) << 4) + ((char_array_4[2] & 0x3cu) >> 2));
+        char_array_3[2] = static_cast<char>(((char_array_4[2] & 0x3u) << 6) + char_array_4[3]);
+
+        for (i = 0; (i < 3); i++)
+          ret += char_array_3[i];
+        i = 0;
+      }
+    }
+
+    if (i)
+    {
+      for (j = i; j < 4; j++)
+        char_array_4[j] = 0;
+
+      for (j = 0; j < 4; j++)
+        char_array_4[j] = static_cast<char>(base64_chars.find(char_array_4[j]));
+
+      char_array_3[0] = static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30u) >> 4));
       char_array_3[1] =
           static_cast<char>(((char_array_4[1] & 0xfu) << 4) + ((char_array_4[2] & 0x3cu) >> 2));
       char_array_3[2] = static_cast<char>(((char_array_4[2] & 0x3u) << 6) + char_array_4[3]);
 
-      for (i = 0; (i < 3); i++)
-        ret += char_array_3[i];
-      i = 0;
+      for (j = 0; (j < i - 1); j++)
+        ret += char_array_3[j];
     }
-  }
 
-  if (i)
+    return ret;
+  }
+  catch (...)
   {
-    for (j = i; j < 4; j++)
-      char_array_4[j] = 0;
-
-    for (j = 0; j < 4; j++)
-      char_array_4[j] = static_cast<char>(base64_chars.find(char_array_4[j]));
-
-    char_array_3[0] = static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30u) >> 4));
-    char_array_3[1] =
-        static_cast<char>(((char_array_4[1] & 0xfu) << 4) + ((char_array_4[2] & 0x3cu) >> 2));
-    char_array_3[2] = static_cast<char>(((char_array_4[2] & 0x3u) << 6) + char_array_4[3]);
-
-    for (j = 0; (j < i - 1); j++)
-      ret += char_array_3[j];
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-
-  return ret;
 }
 
 }  // namespace Base64

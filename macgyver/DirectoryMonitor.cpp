@@ -23,6 +23,7 @@
 // ======================================================================
 
 #include "DirectoryMonitor.h"
+#include "Exception.h"
 #include "StringConversion.h"
 #include <boost/atomic.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -58,50 +59,57 @@ using Contents = std::map<boost::filesystem::path, std::time_t>;
 
 Contents directory_contents(const fs::path& path, bool hasregex, const boost::regex& pattern)
 {
-  Contents contents;
-
-  // safety against missing dir.
-  // in case of single files, the file has been removed
-
-  if (!fs::exists(path))
-    return contents;
-
-  // find all matching filenames with modification times
-  // if target is a directory
-
-  if (fs::is_directory(path))
+  try
   {
-    fs::directory_iterator end;
-    for (fs::directory_iterator it(path); it != end; ++it)
+    Contents contents;
+
+    // safety against missing dir.
+    // in case of single files, the file has been removed
+
+    if (!fs::exists(path))
+      return contents;
+
+    // find all matching filenames with modification times
+    // if target is a directory
+
+    if (fs::is_directory(path))
     {
-      // Check first that the filename does not start with '.'
-      char dot = '.';
-      if (it->path().filename().native().at(0) != dot)
+      fs::directory_iterator end;
+      for (fs::directory_iterator it(path); it != end; ++it)
       {
-        if (hasregex)
+        // Check first that the filename does not start with '.'
+        char dot = '.';
+        if (it->path().filename().native().at(0) != dot)
         {
-          if (boost::regex_match(it->path().filename().string(), pattern))
+          if (hasregex)
+          {
+            if (boost::regex_match(it->path().filename().string(), pattern))
+            {
+              std::time_t t = fs::last_write_time(it->path());
+              contents.insert(Contents::value_type(it->path(), t));
+            }
+          }
+
+          else
           {
             std::time_t t = fs::last_write_time(it->path());
             contents.insert(Contents::value_type(it->path(), t));
           }
         }
-
-        else
-        {
-          std::time_t t = fs::last_write_time(it->path());
-          contents.insert(Contents::value_type(it->path(), t));
-        }
       }
     }
+    else
+    {
+      // No regex checking for single files
+      std::time_t t = fs::last_write_time(path);
+      contents.insert(Contents::value_type(path, t));
+    }
+    return contents;
   }
-  else
+  catch (...)
   {
-    // No regex checking for single files
-    std::time_t t = fs::last_write_time(path);
-    contents.insert(Contents::value_type(path, t));
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-  return contents;
 }
 
 // ----------------------------------------------------------------------
@@ -118,40 +126,47 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
 std::pair<DirectoryMonitor::Status, DirectoryMonitor::Change> directory_change(
     const Contents& oldcontents, const Contents& newcontents)
 {
-  DirectoryMonitor::Status status(new DirectoryMonitor::StatusMap);
-
-  DirectoryMonitor::Change changes = DirectoryMonitor::NONE;
-
-  // Scan old contents detecting modifications and deletes
-
-  for (const Contents::value_type& it : oldcontents)
+  try
   {
-    const auto pos = newcontents.find(it.first);
+    DirectoryMonitor::Status status(new DirectoryMonitor::StatusMap);
 
-    DirectoryMonitor::Change change = DirectoryMonitor::NONE;
+    DirectoryMonitor::Change changes = DirectoryMonitor::NONE;
 
-    if (pos == newcontents.end())
-      change = DirectoryMonitor::DELETE;
-    else if (it.second != pos->second)
-      change = DirectoryMonitor::MODIFY;
+    // Scan old contents detecting modifications and deletes
 
-    changes |= change;
-    (*status)[it.first] = change;
-  }
-
-  // Scan new contents detecting new files
-
-  for (const Contents::value_type& it : newcontents)
-  {
-    const auto pos = oldcontents.find(it.first);
-    if (pos == oldcontents.end())
+    for (const Contents::value_type& it : oldcontents)
     {
-      changes |= DirectoryMonitor::CREATE;
-      (*status)[it.first] = DirectoryMonitor::CREATE;
-    }
-  }
+      const auto pos = newcontents.find(it.first);
 
-  return std::make_pair(status, changes);
+      DirectoryMonitor::Change change = DirectoryMonitor::NONE;
+
+      if (pos == newcontents.end())
+        change = DirectoryMonitor::DELETE;
+      else if (it.second != pos->second)
+        change = DirectoryMonitor::MODIFY;
+
+      changes |= change;
+      (*status)[it.first] = change;
+    }
+
+    // Scan new contents detecting new files
+
+    for (const Contents::value_type& it : newcontents)
+    {
+      const auto pos = oldcontents.find(it.first);
+      if (pos == oldcontents.end())
+      {
+        changes |= DirectoryMonitor::CREATE;
+        (*status)[it.first] = DirectoryMonitor::CREATE;
+      }
+    }
+
+    return std::make_pair(status, changes);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -246,38 +261,45 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
                                                   int interval,
                                                   Change mask)
 {
-  if (interval < 1)
-    throw std::runtime_error("DirectoryMonitor: Too small update interval: " +
-                             Fmi::to_string(interval));
+  try
+  {
+    if (interval < 1)
+      throw Fmi::Exception(BCP, "DirectoryMonitor: Too small update interval: " +
+                               Fmi::to_string(interval));
 
-  if ((mask & ALL) == 0)
-    throw std::runtime_error("DirectoryMonitor: Empty mask, nothing to monitor");
+    if ((mask & ALL) == 0)
+      throw Fmi::Exception(BCP, "DirectoryMonitor: Empty mask, nothing to monitor");
 
-  // if(!fs::exists(path))
-  //   throw std::runtime_error("DirectoryMonitor: "+path.string()+" does not exist");
+    // if(!fs::exists(path))
+    //   throw std::runtime_error("DirectoryMonitor: "+path.string()+" does not exist");
 
-  // new monitor
+    // new monitor
 
-  WriteLock lock(impl->mutex);
+    WriteLock lock(impl->mutex);
 
-  Monitor mon;
-  mon.path = path;
-  mon.pattern = pattern;
-  mon.interval = interval;
-  mon.mask = mask;
-  mon.callback = callback;
-  mon.errorhandler = errorhandler;
-  mon.id = impl->nextid;
-  mon.lastmodified = 0;
-  mon.hasregex = true;
+    Monitor mon;
+    mon.path = path;
+    mon.pattern = pattern;
+    mon.interval = interval;
+    mon.mask = mask;
+    mon.callback = callback;
+    mon.errorhandler = errorhandler;
+    mon.id = impl->nextid;
+    mon.lastmodified = 0;
+    mon.hasregex = true;
 
-  ++impl->nextid;
+    ++impl->nextid;
 
-  // time_t = 0 implies no update has been made yet by run()
+    // time_t = 0 implies no update has been made yet by run()
 
-  impl->schedule.insert(std::make_pair(0, mon));
+    impl->schedule.insert(std::make_pair(0, mon));
 
-  return mon.id;
+    return mon.id;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -293,7 +315,14 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
                                                   int interval,
                                                   Change mask)
 {
-  return watch(path, boost::regex{pattern}, callback, errorhandler, interval, mask);
+  try
+  {
+    return watch(path, boost::regex{pattern}, callback, errorhandler, interval, mask);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -305,37 +334,44 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
 DirectoryMonitor::Watcher DirectoryMonitor::watch(
     const fs::path& path, Listener callback, ErrorHandler errorhandler, int interval, Change mask)
 {
-  if (interval < 1)
-    throw std::runtime_error("DirectoryMonitor: Too small update interval: " +
-                             Fmi::to_string(interval));
+  try
+  {
+    if (interval < 1)
+      throw Fmi::Exception(BCP, "DirectoryMonitor: Too small update interval: " +
+                               Fmi::to_string(interval));
 
-  if ((mask & ALL) == 0)
-    throw std::runtime_error("DirectoryMonitor: Empty mask, nothing to monitor");
+    if ((mask & ALL) == 0)
+      throw Fmi::Exception(BCP, "DirectoryMonitor: Empty mask, nothing to monitor");
 
-  // if(!fs::exists(path))
-  //   throw std::runtime_error("DirectoryMonitor: "+path.string()+" does not exist");
+    // if(!fs::exists(path))
+    //   throw std::runtime_error("DirectoryMonitor: "+path.string()+" does not exist");
 
-  // new monitor
+    // new monitor
 
-  WriteLock lock(impl->mutex);
+    WriteLock lock(impl->mutex);
 
-  Monitor mon;
-  mon.path = path;
-  mon.interval = interval;
-  mon.mask = mask;
-  mon.callback = callback;
-  mon.errorhandler = errorhandler;
-  mon.id = impl->nextid;
-  mon.lastmodified = 0;
-  mon.hasregex = false;
+    Monitor mon;
+    mon.path = path;
+    mon.interval = interval;
+    mon.mask = mask;
+    mon.callback = callback;
+    mon.errorhandler = errorhandler;
+    mon.id = impl->nextid;
+    mon.lastmodified = 0;
+    mon.hasregex = false;
 
-  ++impl->nextid;
+    ++impl->nextid;
 
-  // time_t = 0 implies no update has been made yet by run()
+    // time_t = 0 implies no update has been made yet by run()
 
-  impl->schedule.insert(std::make_pair(0, mon));
+    impl->schedule.insert(std::make_pair(0, mon));
 
-  return mon.id;
+    return mon.id;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -345,142 +381,152 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(
 // ----------------------------------------------------------------------
 
 void DirectoryMonitor::run()
-try
 {
-  // Do not start if already running
-
-  if (impl->running)
-    return;
-  impl->running = true;
-
-  while (!impl->stop && !impl->schedule.empty())
+  try
   {
-    bool checknext = true;
-
-    while (checknext)
+    try
     {
-      boost::this_thread::interruption_point();
+      // Do not start if already running
 
-      WriteLock lock(impl->mutex);
-      std::time_t tnow = std::time(nullptr);
-      std::time_t tcheck = impl->schedule.begin()->first;
+      if (impl->running)
+        return;
 
-      if (tcheck > tnow)
-        checknext = false;
-      else
+      impl->running = true;
+
+      while (!impl->stop && !impl->schedule.empty())
       {
-        // pop the monitor from the schedule, insert it back
-        // later on with updated information
+        bool checknext = true;
 
-        Monitor mon = impl->schedule.begin()->second;
-        impl->schedule.erase(impl->schedule.begin());
-
-        // first check dir modification time
-
-        // establish nature of changes
-
-        Change changes;
-        Status newstatus(new DirectoryMonitor::StatusMap);
-
-        try
+        while (checknext)
         {
-          std::time_t tchange;
-          if (fs::exists(mon.path))
-          {
-            tchange = fs::last_write_time(mon.path);
-            // Actually directory is scanned later if changes detected,
-            // but we are interested in how often changes are checked
-            if (mon.mask & DirectoryMonitor::SCAN)
-            {
-              (*newstatus)[mon.path] = DirectoryMonitor::SCAN;
-              mon.callback(mon.id, mon.path, mon.pattern, newstatus);
-              newstatus->clear();
-            }
-          }
+          boost::this_thread::interruption_point();
+
+          WriteLock lock(impl->mutex);
+          std::time_t tnow = std::time(nullptr);
+          std::time_t tcheck = impl->schedule.begin()->first;
+
+          if (tcheck > tnow)
+            checknext = false;
           else
           {
-            tchange = std::time(nullptr);
-          }
+            // pop the monitor from the schedule, insert it back
+            // later on with updated information
 
-          // We cannot detect modifications simply by looking
-          // at the directory change time. In such cases we
-          // must scan the directory contents.
+            Monitor mon = impl->schedule.begin()->second;
+            impl->schedule.erase(impl->schedule.begin());
 
-          if (tchange <= mon.lastmodified && !((mon.mask & MODIFY) != 0))
-          {
-            // nothing to scan since dir timestamp did not change
+            // first check dir modification time
 
-            std::time_t tnext = std::time(nullptr) + mon.interval;
-            impl->schedule.insert(std::make_pair(tnext, mon));
-          }
-          else
-          {
-            // new listing must be taken since dir timestamp changed
+            // establish nature of changes
 
-            Contents newcontents = directory_contents(mon.path, mon.hasregex, mon.pattern);
+            Change changes;
+            Status newstatus(new DirectoryMonitor::StatusMap);
 
-            boost::tie(newstatus, changes) = directory_change(mon.contents, newcontents);
-
-            // possible callback
-
-            if ((changes & mon.mask) != 0)
+            try
             {
-              mon.callback(mon.id, mon.path, mon.pattern, newstatus);
+              std::time_t tchange;
+              if (fs::exists(mon.path))
+              {
+                tchange = fs::last_write_time(mon.path);
+                // Actually directory is scanned later if changes detected,
+                // but we are interested in how often changes are checked
+                if (mon.mask & DirectoryMonitor::SCAN)
+                {
+                  (*newstatus)[mon.path] = DirectoryMonitor::SCAN;
+                  mon.callback(mon.id, mon.path, mon.pattern, newstatus);
+                  newstatus->clear();
+                }
+              }
+              else
+              {
+                tchange = std::time(nullptr);
+              }
+
+              // We cannot detect modifications simply by looking
+              // at the directory change time. In such cases we
+              // must scan the directory contents.
+
+              if (tchange <= mon.lastmodified && !((mon.mask & MODIFY) != 0))
+              {
+                // nothing to scan since dir timestamp did not change
+
+                std::time_t tnext = std::time(nullptr) + mon.interval;
+                impl->schedule.insert(std::make_pair(tnext, mon));
+              }
+              else
+              {
+                // new listing must be taken since dir timestamp changed
+
+                Contents newcontents = directory_contents(mon.path, mon.hasregex, mon.pattern);
+
+                boost::tie(newstatus, changes) = directory_change(mon.contents, newcontents);
+
+                // possible callback
+
+                if ((changes & mon.mask) != 0)
+                {
+                  mon.callback(mon.id, mon.path, mon.pattern, newstatus);
+                }
+
+                // update schedule and status
+
+                mon.contents = newcontents;
+                mon.lastmodified = tchange;
+
+                std::time_t tnext = std::time(nullptr) + mon.interval;
+                impl->schedule.insert(std::make_pair(tnext, mon));
+              }
             }
+            catch (std::exception& e)
+            {
+    #ifdef DEBUG
+              std::cerr << "Warning: " << e.what() << std::endl;
+    #endif
 
-            // update schedule and status
+              if ((mon.mask & ERROR) != 0)
+              {
+                mon.errorhandler(mon.id, mon.path, mon.pattern, e.what());
+              }
 
-            mon.contents = newcontents;
-            mon.lastmodified = tchange;
-
-            std::time_t tnext = std::time(nullptr) + mon.interval;
-            impl->schedule.insert(std::make_pair(tnext, mon));
+              std::time_t tnext = std::time(nullptr) + mon.interval;
+              impl->schedule.insert(std::make_pair(tnext, mon));
+            }
           }
         }
-        catch (std::exception& e)
+
+        // One scan has now been completed
+        impl->isready = true;
+
+        long sleeptime = 0;
         {
-#ifdef DEBUG
-          std::cerr << "Warning: " << e.what() << std::endl;
-#endif
+          ReadLock tmplock(impl->mutex);
+          std::time_t tmpnow = std::time(nullptr);
+          std::time_t tmpcheck = impl->schedule.begin()->first;
+          sleeptime = (tmpnow > tmpcheck ? 0 : tmpcheck - tmpnow);
+        }
 
-          if ((mon.mask & ERROR) != 0)
-          {
-            mon.errorhandler(mon.id, mon.path, mon.pattern, e.what());
-          }
-
-          std::time_t tnext = std::time(nullptr) + mon.interval;
-          impl->schedule.insert(std::make_pair(tnext, mon));
+        if (sleeptime > 0)
+        {
+          boost::unique_lock<boost::mutex> lock(impl->m2);
+          impl->cond.wait_for(
+              lock, boost::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
         }
       }
+
+      // Not running anymore. This order so that locking is not necessary
+      impl->stop = false;
+      impl->running = false;
     }
-
-    // One scan has now been completed
-    impl->isready = true;
-
-    long sleeptime = 0;
+    catch (const boost::thread_interrupted&)
     {
-      ReadLock tmplock(impl->mutex);
-      std::time_t tmpnow = std::time(nullptr);
-      std::time_t tmpcheck = impl->schedule.begin()->first;
-      sleeptime = (tmpnow > tmpcheck ? 0 : tmpcheck - tmpnow);
-    }
-
-    if (sleeptime > 0)
-    {
-      boost::unique_lock<boost::mutex> lock(impl->m2);
-      impl->cond.wait_for(
-          lock, boost::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
+      impl->running = false;
+      throw;
     }
   }
-
-  // Not running anymore. This order so that locking is not necessary
-  impl->stop = false;
-  impl->running = false;
-}
-catch (const boost::thread_interrupted&)
-{
-  impl->running = false;
-  throw;
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -495,8 +541,15 @@ catch (const boost::thread_interrupted&)
 
 void DirectoryMonitor::stop()
 {
-  impl->stop = true;
-  impl->cond.notify_all();
+  try
+  {
+    impl->stop = true;
+    impl->cond.notify_all();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -507,7 +560,14 @@ void DirectoryMonitor::stop()
 
 bool DirectoryMonitor::ready() const
 {
-  return impl->isready;
+  try
+  {
+    return impl->isready;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 }  // namespace Fmi
 
