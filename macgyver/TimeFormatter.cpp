@@ -5,6 +5,7 @@
 // ======================================================================
 
 #include "TimeFormatter.h"
+#include "Exception.h"
 #include "StringConversion.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -28,46 +29,53 @@
 
 static time_t my_timegm(struct tm* t)
 {
+  try
+  {
 #if 0
-  // THIS IS NOT THREAD SAFE IF LOCALTIME_R IS CALLED SIMULTANEOUSLY!!!
-  return ::timegm(t);  // timegm is a GNU extension
+    // THIS IS NOT THREAD SAFE IF LOCALTIME_R IS CALLED SIMULTANEOUSLY!!!
+    return ::timegm(t);  // timegm is a GNU extension
 
 #else  // Windows
-  const int MINUTE = 60;
-  const int HOUR = 60 * MINUTE;
-  const int DAY = 24 * HOUR;
-  const int YEAR = 365 * DAY;
+    const int MINUTE = 60;
+    const int HOUR = 60 * MINUTE;
+    const int DAY = 24 * HOUR;
+    const int YEAR = 365 * DAY;
 
-  const int mon[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    const int mon[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-  if (t->tm_year < 70)
-    return (static_cast<time_t>(-1));
+    if (t->tm_year < 70)
+      return (static_cast<time_t>(-1));
 
-  int n = t->tm_year + 1900 - 1;
-  time_t epoch = (t->tm_year - 70) * YEAR +
-                 ((n / 4 - n / 100 + n / 400) - (1969 / 4 - 1969 / 100 + 1969 / 400)) * DAY;
+    int n = t->tm_year + 1900 - 1;
+    time_t epoch = (t->tm_year - 70) * YEAR +
+                   ((n / 4 - n / 100 + n / 400) - (1969 / 4 - 1969 / 100 + 1969 / 400)) * DAY;
 
-  int y = t->tm_year + 1900;
-  int m = 0;
-  for (int i = 0; i < t->tm_mon; i++)
-  {
-    epoch += mon[m] * DAY;
-    if (m == 1 && y % 4 == 0 && (y % 100 != 0 || y % 400 == 0))
-      epoch += DAY;
-    if (++m > 11)
+    int y = t->tm_year + 1900;
+    int m = 0;
+    for (int i = 0; i < t->tm_mon; i++)
     {
-      m = 0;
-      y++;
+      epoch += mon[m] * DAY;
+      if (m == 1 && y % 4 == 0 && (y % 100 != 0 || y % 400 == 0))
+        epoch += DAY;
+      if (++m > 11)
+      {
+        m = 0;
+        y++;
+      }
     }
-  }
 
-  epoch += (t->tm_mday - 1) * DAY;
-  epoch += t->tm_hour * HOUR;
-  epoch += t->tm_min * MINUTE;
-  epoch += t->tm_sec;
+    epoch += (t->tm_mday - 1) * DAY;
+    epoch += t->tm_hour * HOUR;
+    epoch += t->tm_min * MINUTE;
+    epoch += t->tm_sec;
 
-  return epoch;
+    return epoch;
 #endif
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 namespace Fmi
@@ -177,7 +185,14 @@ struct HttpFormatter : public TimeFormatter
 
 std::string IsoFormatter::format(const boost::posix_time::ptime& t) const
 {
-  return Fmi::to_iso_string(t);
+  try
+  {
+    return Fmi::to_iso_string(t);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -188,7 +203,14 @@ std::string IsoFormatter::format(const boost::posix_time::ptime& t) const
 
 std::string IsoFormatter::format(const boost::local_time::local_date_time& t) const
 {
-  return Fmi::to_iso_string(t.local_time());
+  try
+  {
+    return Fmi::to_iso_string(t.local_time());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -199,9 +221,16 @@ std::string IsoFormatter::format(const boost::local_time::local_date_time& t) co
 
 std::string SqlFormatter::format(const boost::posix_time::ptime& t) const
 {
-  std::string tmp = Fmi::to_iso_extended_string(t);
-  tmp[10] = ' ';
-  return tmp;
+  try
+  {
+    std::string tmp = Fmi::to_iso_extended_string(t);
+    tmp[10] = ' ';
+    return tmp;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -212,9 +241,16 @@ std::string SqlFormatter::format(const boost::posix_time::ptime& t) const
 
 std::string SqlFormatter::format(const boost::local_time::local_date_time& t) const
 {
-  std::string tmp = Fmi::to_iso_extended_string(t.local_time());
-  tmp[10] = ' ';
-  return tmp;
+  try
+  {
+    std::string tmp = Fmi::to_iso_extended_string(t.local_time());
+    tmp[10] = ' ';
+    return tmp;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -225,7 +261,14 @@ std::string SqlFormatter::format(const boost::local_time::local_date_time& t) co
 
 std::string XmlFormatter::format(const boost::posix_time::ptime& t) const
 {
-  return Fmi::to_iso_extended_string(t);
+  try
+  {
+    return Fmi::to_iso_extended_string(t);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -236,7 +279,14 @@ std::string XmlFormatter::format(const boost::posix_time::ptime& t) const
 
 std::string XmlFormatter::format(const boost::local_time::local_date_time& t) const
 {
-  return Fmi::to_iso_extended_string(t.local_time());
+  try
+  {
+    return Fmi::to_iso_extended_string(t.local_time());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -247,9 +297,16 @@ std::string XmlFormatter::format(const boost::local_time::local_date_time& t) co
 
 std::string EpochFormatter::format(const boost::posix_time::ptime& t) const
 {
-  tm tmp = boost::posix_time::to_tm(t);
-  time_t epo = ::my_timegm(&tmp);
-  return Fmi::to_string(epo);
+  try
+  {
+    tm tmp = boost::posix_time::to_tm(t);
+    time_t epo = ::my_timegm(&tmp);
+    return Fmi::to_string(epo);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -260,9 +317,16 @@ std::string EpochFormatter::format(const boost::posix_time::ptime& t) const
 
 std::string EpochFormatter::format(const boost::local_time::local_date_time& t) const
 {
-  tm tmp = boost::posix_time::to_tm(t.utc_time());
-  time_t epo = ::my_timegm(&tmp);
-  return Fmi::to_string(epo);
+  try
+  {
+    tm tmp = boost::posix_time::to_tm(t.utc_time());
+    time_t epo = ::my_timegm(&tmp);
+    return Fmi::to_string(epo);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -273,7 +337,14 @@ std::string EpochFormatter::format(const boost::local_time::local_date_time& t) 
 
 std::string TimeStampFormatter::format(const boost::posix_time::ptime& t) const
 {
-  return Fmi::to_timestamp_string(t);
+  try
+  {
+    return Fmi::to_timestamp_string(t);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -284,7 +355,14 @@ std::string TimeStampFormatter::format(const boost::posix_time::ptime& t) const
 
 std::string TimeStampFormatter::format(const boost::local_time::local_date_time& t) const
 {
-  return Fmi::to_timestamp_string(t.local_time());
+  try
+  {
+    return Fmi::to_timestamp_string(t.local_time());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -295,7 +373,14 @@ std::string TimeStampFormatter::format(const boost::local_time::local_date_time&
 
 std::string HttpFormatter::format(const boost::posix_time::ptime& t) const
 {
-  return Fmi::to_http_string(t);
+  try
+  {
+    return Fmi::to_http_string(t);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -306,7 +391,14 @@ std::string HttpFormatter::format(const boost::posix_time::ptime& t) const
 
 std::string HttpFormatter::format(const boost::local_time::local_date_time& t) const
 {
-  return format(t.utc_time());
+  try
+  {
+    return format(t.utc_time());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -317,20 +409,27 @@ std::string HttpFormatter::format(const boost::local_time::local_date_time& t) c
 
 TimeFormatter* TimeFormatter::create(const std::string& name)
 {
-  if (name == "iso")
-    return new IsoFormatter();
-  if (name == "sql")
-    return new SqlFormatter();
-  if (name == "xml")
-    return new XmlFormatter();
-  if (name == "epoch")
-    return new EpochFormatter();
-  if (name == "timestamp")
-    return new TimeStampFormatter();
-  if (name == "http")
-    return new HttpFormatter();
+  try
+  {
+    if (name == "iso")
+      return new IsoFormatter();
+    if (name == "sql")
+      return new SqlFormatter();
+    if (name == "xml")
+      return new XmlFormatter();
+    if (name == "epoch")
+      return new EpochFormatter();
+    if (name == "timestamp")
+      return new TimeStampFormatter();
+    if (name == "http")
+      return new HttpFormatter();
 
-  throw std::runtime_error("Unknown time format '" + name + "'");
+    throw Fmi::Exception(BCP, "Unknown time format '" + name + "'");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Fmi

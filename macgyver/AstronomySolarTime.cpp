@@ -21,6 +21,7 @@
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
 #include "AstronomyJulianTime.h"
+#include "Exception.h"
 
 #include <cmath>
 #include <vector>
@@ -43,56 +44,63 @@ namespace Astronomy
  */
 solar_time_t solar_time(const local_date_time& ldt, double lon_e, double lat)
 {
-  JulianTime jt[2];
-
-  check_lonlat(lon_e, lat);
-
-  // *** Find the time of solar noon at the location.
-  //
-  JulianTime noon = SolNoon(ldt, lon_e);
-
-  /*
-   * Find prior and next sunrise/sunset, at the given location on Earth.
-   *
-   * Returns: Vector of one time (current day) if it has a sunrise/set
-   *          Vector of two times (prior and next) if current day has no sunrise/set
-   */
-  jt[0] = Sunrise_or_set_UTC(noon, lon_e, lat, true /*sunrise*/);
-  jt[1] = Sunrise_or_set_UTC(noon, lon_e, lat, false /*sunset*/);
-
-  /* No sunrise/sunset in the day?
-   */
-  for (int i = 0; i < 2; i++)
+  try
   {
-    if (jt[i].valid())
-      continue;  // OK
+    JulianTime jt[2];
 
-    unsigned doy = ldt.date().day_of_year();
+    check_lonlat(lon_e, lat);
 
-    // Northern hemisphere spring or summer, OR
-    // Southern hemisphere fall or winter
+    // *** Find the time of solar noon at the location.
     //
+    JulianTime noon = SolNoon(ldt, lon_e);
 
-    // Arctic/Antarctic circles not explicitly present
-    // since refraction and other things are taken into account
-    bool all_day =
-        ((lat > 0) && (doy > 79) && (doy < 267)) || ((lat <= 0) && ((doy < 83) || (doy > 263)));
+    /*
+     * Find prior and next sunrise/sunset, at the given location on Earth.
+     *
+     * Returns: Vector of one time (current day) if it has a sunrise/set
+     *          Vector of two times (prior and next) if current day has no sunrise/set
+     */
+    jt[0] = Sunrise_or_set_UTC(noon, lon_e, lat, true /*sunrise*/);
+    jt[1] = Sunrise_or_set_UTC(noon, lon_e, lat, false /*sunset*/);
 
-    JulianTime J(noon);
-    do
+    /* No sunrise/sunset in the day?
+     */
+    for (int i = 0; i < 2; i++)
     {
-      if ((i == 0) ? all_day : !all_day)
-        --J;
-      else
-        ++J;
+      if (jt[i].valid())
+        continue;  // OK
 
-      jt[i] = Sunrise_or_set_UTC(J, lon_e, lat, i == 0 /*sunrise/sunset*/);
+      unsigned doy = ldt.date().day_of_year();
 
-    } while (jt[i].JulianDay() == 0.0);
+      // Northern hemisphere spring or summer, OR
+      // Southern hemisphere fall or winter
+      //
+
+      // Arctic/Antarctic circles not explicitly present
+      // since refraction and other things are taken into account
+      bool all_day =
+          ((lat > 0) && (doy > 79) && (doy < 267)) || ((lat <= 0) && ((doy < 83) || (doy > 263)));
+
+      JulianTime J(noon);
+      do
+      {
+        if ((i == 0) ? all_day : !all_day)
+          --J;
+        else
+          ++J;
+
+        jt[i] = Sunrise_or_set_UTC(J, lon_e, lat, i == 0 /*sunrise/sunset*/);
+
+      } while (jt[i].JulianDay() == 0.0);
+    }
+
+    time_zone_ptr tz = ldt.zone();
+    return solar_time_t(jt[0].ldt(tz), jt[1].ldt(tz), noon.ldt(tz));
   }
-
-  time_zone_ptr tz = ldt.zone();
-  return solar_time_t(jt[0].ldt(tz), jt[1].ldt(tz), noon.ldt(tz));
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 /*
@@ -103,19 +111,26 @@ solar_time_t solar_time(const local_date_time& ldt, double lon_e, double lat)
 
 boost::posix_time::time_duration solar_time_t::daylength() const
 {
-  if (sunrise_today())
+  try
   {
-    if (sunset_today())
-      return sunset - sunrise;
+    if (sunrise_today())
+    {
+      if (sunset_today())
+        return sunset - sunrise;
+      else
+        return boost::posix_time::hours(24) - sunrise.local_time().time_of_day();
+    }
+    else if (sunset_today())
+      return sunset.local_time().time_of_day();
+    else if (polar_night())
+      return boost::posix_time::seconds(0);
     else
-      return boost::posix_time::hours(24) - sunrise.local_time().time_of_day();
+      return boost::posix_time::hours(24);
   }
-  else if (sunset_today())
-    return sunset.local_time().time_of_day();
-  else if (polar_night())
-    return boost::posix_time::seconds(0);
-  else
-    return boost::posix_time::hours(24);
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Astronomy

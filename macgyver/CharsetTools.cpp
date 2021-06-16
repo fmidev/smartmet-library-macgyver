@@ -5,6 +5,7 @@
 // ======================================================================
 
 #include "CharsetTools.h"
+#include "Exception.h"
 #include <algorithm>
 
 using namespace std;
@@ -543,28 +544,28 @@ static const unsigned char iso_8859_1_upper[256] = {0,
 /*!
  * \brief ISO-8859-1 accent removal conversion table
  *
- * Note: äåö and ÄÅÖ remain unchanged.
+ * Note: ï¿½ï¿½ï¿½ and ï¿½ï¿½ï¿½ remain unchanged.
  *
  * Accent removals / conversions:
  *
  *  192-195 --> A (65)
- *  198     --> Ä (196)
+ *  198     --> ï¿½ (196)
  *  199     --> C (67)
  *  200-203 --> E (69)
  *  204-207 --> I (73)
  *  209     --> N (78)
  *  210-213 --> O (79)
- *  216     --> Ö (214)
+ *  216     --> ï¿½ (214)
  *  217-220 --> U (85)
  *  221     --> Y (89)
  *  224-227 --> a (97)
- *  230     --> ä (228)
+ *  230     --> ï¿½ (228)
  *  231     --> c (99)
  *  232-235 --> e (101)
  *  236     --> i (105)
  *  241     --> n (110)
  *  242-245 --> o (111)
- *  248     --> ö (246)
+ *  248     --> ï¿½ (246)
  *  249-252 --> u (117)
  *  253     --> y (121)
  *  255     --> y (121)
@@ -656,42 +657,49 @@ unsigned char tolowernordic(unsigned char theChar)
 
 string utf8_to_latin1(const string& in)
 {
-  string out;
-
-  const char* utf8str = in.c_str();
-
-  while (*utf8str != '\0')
+  try
   {
-    unsigned char len = UTF8_2_ISO_8859_1_len[(*utf8str >> 2) & 0x3F];
-    unsigned long u = *utf8str & UTF8_2_ISO_8859_1_mask[len];
+    string out;
 
-    // erroneous -- expect this to be the largest possible UTF-8 encoded string
-    if (len == 0)
-      len = 5;
+    const char* utf8str = in.c_str();
 
-    for (++utf8str; --len > 0 && (*utf8str != '\0'); ++utf8str)
+    while (*utf8str != '\0')
     {
-      // be sure this is not an unexpected start of a new character
-      if ((static_cast<unsigned char>(*utf8str) & 0xc0) != 0x80u)
-        break;
+      unsigned char len = UTF8_2_ISO_8859_1_len[(*utf8str >> 2) & 0x3F];
+      unsigned long u = *utf8str & UTF8_2_ISO_8859_1_mask[len];
 
-      u = (u << 6) | (static_cast<unsigned char>(*utf8str) & 0x3fu);
+      // erroneous -- expect this to be the largest possible UTF-8 encoded string
+      if (len == 0)
+        len = 5;
+
+      for (++utf8str; --len > 0 && (*utf8str != '\0'); ++utf8str)
+      {
+        // be sure this is not an unexpected start of a new character
+        if ((static_cast<unsigned char>(*utf8str) & 0xc0) != 0x80u)
+          break;
+
+        u = (u << 6) | (static_cast<unsigned char>(*utf8str) & 0x3fu);
+      }
+
+      // iso-8859-1 sanity check.
+      //
+      //  the character has to be between 32 and 255 decimal,
+      //  otherwise the utf-8 string will be considered malformed and
+      //  the function returns immediately with exit code 0
+
+      if (u > 0xffu || u < 0x20u)
+        return "";
+
+      // sanity check passed -- add the mapped character to the destination string
+      out += static_cast<char>(u);
     }
 
-    // iso-8859-1 sanity check.
-    //
-    //  the character has to be between 32 and 255 decimal,
-    //  otherwise the utf-8 string will be considered malformed and
-    //  the function returns immediately with exit code 0
-
-    if (u > 0xffu || u < 0x20u)
-      return "";
-
-    // sanity check passed -- add the mapped character to the destination string
-    out += static_cast<char>(u);
+    return out;
   }
-
-  return out;
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -704,26 +712,33 @@ string utf8_to_latin1(const string& in)
 
 string latin1_to_utf8(const string& in)
 {
-  string out;
-
-  const char* mbstr = in.c_str();
-
-  // loop until we reach the end of the mb string
-  for (; *mbstr != '\0'; ++mbstr)
+  try
   {
-    // the character needs no mapping if the highest bit is not set
-    if ((static_cast<unsigned char>(*mbstr) & 0x80u) == 0)
+    string out;
+
+    const char* mbstr = in.c_str();
+
+    // loop until we reach the end of the mb string
+    for (; *mbstr != '\0'; ++mbstr)
     {
-      out += *mbstr;
+      // the character needs no mapping if the highest bit is not set
+      if ((static_cast<unsigned char>(*mbstr) & 0x80u) == 0)
+      {
+        out += *mbstr;
+      }
+      // otherwise mapping is necessary (characters 0x80 or greater; highest bit is set)
+      else
+      {
+        out += static_cast<char>((0xC0u | (0x03u & (static_cast<unsigned char>(*mbstr) >> 6))));
+        out += static_cast<char>((0x80u | (0x3Fu & static_cast<unsigned char>(*mbstr))));
+      }
     }
-    // otherwise mapping is necessary (characters 0x80 or greater; highest bit is set)
-    else
-    {
-      out += static_cast<char>((0xC0u | (0x03u & (static_cast<unsigned char>(*mbstr) >> 6))));
-      out += static_cast<char>((0x80u | (0x3Fu & static_cast<unsigned char>(*mbstr))));
-    }
+    return out;
   }
-  return out;
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -737,67 +752,74 @@ string latin1_to_utf8(const string& in)
 
 std::wstring utf8_to_utf16(const std::string& str)
 {
-  std::wstring out;
-
-  unsigned int w = 0;
-  int bytes = 0;
-  unsigned int err = L'?';
-
-  for (std::string::size_type i = 0; i < str.size(); i++)
+  try
   {
-    unsigned char c = static_cast<unsigned char>(str[i]);
+    std::wstring out;
 
-    if (c <= 0x7fu)
+    unsigned int w = 0;
+    int bytes = 0;
+    unsigned int err = L'?';
+
+    for (std::string::size_type i = 0; i < str.size(); i++)
     {
-      // first byte
-      if (bytes)
+      unsigned char c = static_cast<unsigned char>(str[i]);
+
+      if (c <= 0x7fu)
+      {
+        // first byte
+        if (bytes)
+        {
+          out.push_back(err);
+          bytes = 0;
+        }
+        out.push_back(static_cast<wchar_t>(c));
+      }
+      else if (c <= 0xbfu)
+      {
+        // second/third/etc byte
+        if (bytes)
+        {
+          w = ((w << 6) | (c & 0x3fu));
+          bytes--;
+          if (bytes == 0)
+            out.push_back(w);
+        }
+        else
+          out.push_back(err);
+      }
+      else if (c <= 0xdfu)
+      {
+        // 2byte sequence start
+        bytes = 1;
+        w = c & 0x1fu;
+      }
+      else if (c <= 0xefu)
+      {
+        // 3byte sequence start
+        bytes = 2;
+        w = c & 0x0f;
+      }
+      else if (c <= 0xf7u)
+      {
+        // 3byte sequence start
+        bytes = 3;
+        w = c & 0x07u;
+      }
+      else
       {
         out.push_back(err);
         bytes = 0;
       }
-      out.push_back(static_cast<wchar_t>(c));
     }
-    else if (c <= 0xbfu)
-    {
-      // second/third/etc byte
-      if (bytes)
-      {
-        w = ((w << 6) | (c & 0x3fu));
-        bytes--;
-        if (bytes == 0)
-          out.push_back(w);
-      }
-      else
-        out.push_back(err);
-    }
-    else if (c <= 0xdfu)
-    {
-      // 2byte sequence start
-      bytes = 1;
-      w = c & 0x1fu;
-    }
-    else if (c <= 0xefu)
-    {
-      // 3byte sequence start
-      bytes = 2;
-      w = c & 0x0f;
-    }
-    else if (c <= 0xf7u)
-    {
-      // 3byte sequence start
-      bytes = 3;
-      w = c & 0x07u;
-    }
-    else
-    {
+    if (bytes)
       out.push_back(err);
-      bytes = 0;
-    }
-  }
-  if (bytes)
-    out.push_back(err);
 
-  return out;
+    return out;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -811,36 +833,43 @@ std::wstring utf8_to_utf16(const std::string& str)
 
 std::string utf16_to_utf8(const std::wstring& str)
 {
-  std::string out;
-
-  for (std::wstring::size_type i = 0; i < str.size(); i++)
+  try
   {
-    unsigned int w = str[i];
-    if (w <= 0x7f)
-      out.push_back(static_cast<char>(w));
-    else if (w <= 0x7ff)
-    {
-      out.push_back(static_cast<char>(0xc0u | ((w >> 6) & 0x1fu)));
-      out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
-    }
-    else if (w <= 0xffff)
-    {
-      out.push_back(static_cast<char>(0xe0u | ((w >> 12) & 0x0fu)));
-      out.push_back(static_cast<char>(0x80u | ((w >> 6) & 0x3fu)));
-      out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
-    }
-    else if (w <= 0x10ffff)
-    {
-      out.push_back(static_cast<char>(0xf0u | ((w >> 18) & 0x07u)));
-      out.push_back(static_cast<char>(0x80u | ((w >> 12) & 0x3fu)));
-      out.push_back(static_cast<char>(0x80u | ((w >> 6) & 0x3fu)));
-      out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
-    }
-    else
-      out.push_back('?');
-  }
+    std::string out;
 
-  return out;
+    for (std::wstring::size_type i = 0; i < str.size(); i++)
+    {
+      unsigned int w = str[i];
+      if (w <= 0x7f)
+        out.push_back(static_cast<char>(w));
+      else if (w <= 0x7ff)
+      {
+        out.push_back(static_cast<char>(0xc0u | ((w >> 6) & 0x1fu)));
+        out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
+      }
+      else if (w <= 0xffff)
+      {
+        out.push_back(static_cast<char>(0xe0u | ((w >> 12) & 0x0fu)));
+        out.push_back(static_cast<char>(0x80u | ((w >> 6) & 0x3fu)));
+        out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
+      }
+      else if (w <= 0x10ffff)
+      {
+        out.push_back(static_cast<char>(0xf0u | ((w >> 18) & 0x07u)));
+        out.push_back(static_cast<char>(0x80u | ((w >> 12) & 0x3fu)));
+        out.push_back(static_cast<char>(0x80u | ((w >> 6) & 0x3fu)));
+        out.push_back(static_cast<char>(0x80u | (w & 0x3fu)));
+      }
+      else
+        out.push_back('?');
+    }
+
+    return out;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 /**
@@ -850,81 +879,88 @@ std::string utf16_to_utf8(const std::wstring& str)
  */
 bool is_utf8(const std::string& src)
 {
-  const unsigned char* str = reinterpret_cast<const unsigned char*>(src.c_str());
-  const unsigned char* end = str + src.length();
-  unsigned char byte;
-  unsigned int code_length, i;
-  uint32_t ch;
-  while (str != end)
+  try
   {
-    byte = *str;
-    if (byte <= 0x7F)
+    const unsigned char* str = reinterpret_cast<const unsigned char*>(src.c_str());
+    const unsigned char* end = str + src.length();
+    unsigned char byte;
+    unsigned int code_length, i;
+    uint32_t ch;
+    while (str != end)
     {
-      /* 1 byte sequence: U+0000..U+007F */
-      str += 1;
-      continue;
-    }
+      byte = *str;
+      if (byte <= 0x7F)
+      {
+        /* 1 byte sequence: U+0000..U+007F */
+        str += 1;
+        continue;
+      }
 
-    if (0xC2 <= byte && byte <= 0xDF) /* 0b110xxxxx: 2 bytes sequence */
-      code_length = 2;
-    else if (0xE0 <= byte && byte <= 0xEF)
-      /* 0b1110xxxx: 3 bytes sequence */
-      code_length = 3;
-    else if (0xF0 <= byte && byte <= 0xF4)
-      /* 0b11110xxx: 4 bytes sequence */
-      code_length = 4;
-    else
-    {
-      /* invalid first byte of a multibyte character */
-      return 0;
-    }
-
-    if (str + (code_length - 1) >= end)
-    {
-      /* truncated string or invalid byte sequence */
-      return 0;
-    }
-
-    /* Check continuation bytes: bit 7 should be set, bit 6 should be
-     * unset (b10xxxxxx). */
-    for (i = 1; i < code_length; i++)
-    {
-      if ((str[i] & 0xC0) != 0x80)
+      if (0xC2 <= byte && byte <= 0xDF) /* 0b110xxxxx: 2 bytes sequence */
+        code_length = 2;
+      else if (0xE0 <= byte && byte <= 0xEF)
+        /* 0b1110xxxx: 3 bytes sequence */
+        code_length = 3;
+      else if (0xF0 <= byte && byte <= 0xF4)
+        /* 0b11110xxx: 4 bytes sequence */
+        code_length = 4;
+      else
+      {
+        /* invalid first byte of a multibyte character */
         return 0;
-    }
+      }
 
-    if (code_length == 2)
-    {
-      /* 2 bytes sequence: U+0080..U+07FF */
-      /* ch = ((str[0] & 0x1f) << 6) + (str[1] & 0x3f); */
-      /* str[0] >= 0xC2, so ch >= 0x0080.
-         str[0] <= 0xDF, (str[1] & 0x3f) <= 0x3f, so ch <= 0x07ff */
-    }
-    else if (code_length == 3)
-    {
-      /* 3 bytes sequence: U+0800..U+FFFF */
-      ch = ((str[0] & 0x0f) << 12) + ((str[1] & 0x3f) << 6) + (str[2] & 0x3f);
-      /* (0xff & 0x0f) << 12 | (0xff & 0x3f) << 6 | (0xff & 0x3f) = 0xffff,
-         so ch <= 0xffff */
-      if (ch < 0x0800)
+      if (str + (code_length - 1) >= end)
+      {
+        /* truncated string or invalid byte sequence */
         return 0;
+      }
 
-      /* surrogates (U+D800-U+DFFF) are invalid in UTF-8:
-         test if (0xD800 <= ch && ch <= 0xDFFF) */
-      if ((ch >> 11) == 0x1b)
-        return 0;
+      /* Check continuation bytes: bit 7 should be set, bit 6 should be
+       * unset (b10xxxxxx). */
+      for (i = 1; i < code_length; i++)
+      {
+        if ((str[i] & 0xC0) != 0x80)
+          return 0;
+      }
+
+      if (code_length == 2)
+      {
+        /* 2 bytes sequence: U+0080..U+07FF */
+        /* ch = ((str[0] & 0x1f) << 6) + (str[1] & 0x3f); */
+        /* str[0] >= 0xC2, so ch >= 0x0080.
+           str[0] <= 0xDF, (str[1] & 0x3f) <= 0x3f, so ch <= 0x07ff */
+      }
+      else if (code_length == 3)
+      {
+        /* 3 bytes sequence: U+0800..U+FFFF */
+        ch = ((str[0] & 0x0f) << 12) + ((str[1] & 0x3f) << 6) + (str[2] & 0x3f);
+        /* (0xff & 0x0f) << 12 | (0xff & 0x3f) << 6 | (0xff & 0x3f) = 0xffff,
+           so ch <= 0xffff */
+        if (ch < 0x0800)
+          return 0;
+
+        /* surrogates (U+D800-U+DFFF) are invalid in UTF-8:
+           test if (0xD800 <= ch && ch <= 0xDFFF) */
+        if ((ch >> 11) == 0x1b)
+          return 0;
+      }
+      else if (code_length == 4)
+      {
+        /* 4 bytes sequence: U+10000..U+10FFFF */
+        ch = ((str[0] & 0x07) << 18) + ((str[1] & 0x3f) << 12) + ((str[2] & 0x3f) << 6) +
+             (str[3] & 0x3f);
+        if ((ch < 0x10000) || (0x10FFFF < ch))
+          return 0;
+      }
+      str += code_length;
     }
-    else if (code_length == 4)
-    {
-      /* 4 bytes sequence: U+10000..U+10FFFF */
-      ch = ((str[0] & 0x07) << 18) + ((str[1] & 0x3f) << 12) + ((str[2] & 0x3f) << 6) +
-           (str[3] & 0x3f);
-      if ((ch < 0x10000) || (0x10FFFF < ch))
-        return 0;
-    }
-    str += code_length;
+    return 1;
   }
-  return 1;
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Fmi

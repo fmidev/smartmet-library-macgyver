@@ -6,6 +6,7 @@
 // ======================================================================
 
 #include "StringConversion.h"
+#include "Exception.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/included/unit_test.hpp>
 
@@ -31,14 +32,14 @@ BOOST_AUTO_TEST_CASE(stoi)
   BOOST_CHECK_EQUAL(123, Fmi::stoi("123"));
   BOOST_CHECK_EQUAL(-123, Fmi::stoi("-123"));
 
-  BOOST_CHECK_THROW(Fmi::stoi("321.1234"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoi("123456789012"), std::bad_cast);
-  BOOST_CHECK_THROW(Fmi::stoi("ABC"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoi("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoi("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoi("12 "), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoi(" 12"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoi(" 12 "), std::invalid_argument);
+  BOOST_CHECK_THROW(Fmi::stoi("321.1234"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoi("123456789012"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoi("ABC"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoi("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoi("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoi("12 "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoi(" 12"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoi(" 12 "), Fmi::Exception);
 }
 
 BOOST_AUTO_TEST_CASE(stol)
@@ -51,13 +52,13 @@ BOOST_AUTO_TEST_CASE(stol)
   BOOST_CHECK_EQUAL(-123L, Fmi::stol("-123"));
   BOOST_CHECK_EQUAL(123456789012, Fmi::stol("123456789012"));
 
-  BOOST_CHECK_THROW(Fmi::stol("321.1234"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stol("ABC"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stol("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stol("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stol("12 "), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stol(" 12"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stol(" 12 "), std::invalid_argument);
+  BOOST_CHECK_THROW(Fmi::stol("321.1234"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stol("ABC"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stol("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stol("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stol("12 "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stol(" 12"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stol(" 12 "), Fmi::Exception);
 }
 
 BOOST_AUTO_TEST_CASE(stoul)
@@ -67,16 +68,16 @@ BOOST_AUTO_TEST_CASE(stoul)
   BOOST_CHECK_EQUAL(123UL, Fmi::stoul("123"));
   BOOST_CHECK_EQUAL(123456789012, Fmi::stoul("123456789012"));
 
-  BOOST_CHECK_THROW(Fmi::stoul("+0"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul("-0"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul("-123"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul("321.1234"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul("ABC"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul("12 "), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul(" 12"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stoul(" 12 "), std::invalid_argument);
+  BOOST_CHECK_THROW(Fmi::stoul("+0"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul("-0"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul("-123"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul("321.1234"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul("ABC"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul("12 "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul(" 12"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stoul(" 12 "), Fmi::Exception);
 }
 
 BOOST_AUTO_TEST_CASE(stof)
@@ -89,17 +90,17 @@ BOOST_AUTO_TEST_CASE(stof)
   BOOST_CHECK_EQUAL(-123.f, Fmi::stof("-123"));
   BOOST_CHECK_CLOSE(321.1234f, Fmi::stof("321.1234"), 0.001);
   BOOST_CHECK_CLOSE(123456789012.f, Fmi::stof("123456789012"), 1);
-  BOOST_CHECK_THROW(Fmi::stof("ABC"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("12 "), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof(" 12"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof(" 12 "), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("NaN"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("NAN"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("INF"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("+INF"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stof("-INF"), std::invalid_argument);
+  BOOST_CHECK_THROW(Fmi::stof("ABC"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("12 "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof(" 12"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof(" 12 "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("NaN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("NAN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("+INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof("-INF"), Fmi::Exception);
 }
 
 BOOST_AUTO_TEST_CASE(stod)
@@ -112,17 +113,17 @@ BOOST_AUTO_TEST_CASE(stod)
   BOOST_CHECK_EQUAL(-123, Fmi::stod("-123"));
   BOOST_CHECK_CLOSE(321.1234f, Fmi::stod("321.1234"), 0.001);
   BOOST_CHECK_CLOSE(123456789012, Fmi::stod("123456789012"), 1);
-  BOOST_CHECK_THROW(Fmi::stod("ABC"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("12A"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("12 "), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod(" 12"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod(" 12 "), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("NaN"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("NAN"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("INF"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("+INF"), std::invalid_argument);
-  BOOST_CHECK_THROW(Fmi::stod("-INF"), std::invalid_argument);
+  BOOST_CHECK_THROW(Fmi::stod("ABC"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("12A"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("12 "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod(" 12"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod(" 12 "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("NaN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("NAN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("+INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod("-INF"), Fmi::Exception);
 }
 
 BOOST_AUTO_TEST_CASE(to_string)

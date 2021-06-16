@@ -7,6 +7,7 @@
 
 #include "AsyncTaskGroup.h"
 #include "TypeName.h"
+#include "Exception.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <regression/tframe.h>
 #include <atomic>
@@ -205,7 +206,7 @@ void test_stop_on_error()
   {
     throw;
   }
-  catch (const std::runtime_error&)
+  catch (const Fmi::Exception&)
   {
   }
 

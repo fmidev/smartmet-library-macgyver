@@ -1,5 +1,6 @@
 #include "AsyncTaskGroup.h"
 #include "TypeName.h"
+#include "Exception.h"
 
 Fmi::AsyncTaskGroup::AsyncTaskGroup(std::size_t max_paralell_tasks)
     : counter(0),
@@ -120,8 +121,7 @@ bool Fmi::AsyncTaskGroup::handle_finished()
     if (stop_on_error_ && some_failed)
     {
       stop();
-      throw std::runtime_error(METHOD_NAME +
-                               " : one ore more tasks failed with C++ exceptions."
+      throw Fmi::Exception(BCP, "One ore more tasks failed with C++ exceptions."
                                " Stopping remaining tasks");
     }
 
@@ -136,7 +136,7 @@ void Fmi::AsyncTaskGroup::on_task_completed_callback(std::size_t task_id)
   if (it == active_tasks.end())
   {
     // Should never happen
-    throw std::runtime_error(" [INTERNAL ERROR] " + METHOD_NAME + " : task " +
+    throw Fmi::Exception(BCP, " [INTERNAL ERROR] : task " +
                              std::to_string(task_id) + " is not found");
   }
   else
