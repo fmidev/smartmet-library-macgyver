@@ -25,10 +25,11 @@
 #include "DirectoryMonitor.h"
 #include "Exception.h"
 #include "StringConversion.h"
-#include <boost/atomic.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 #include <stdexcept>
@@ -214,12 +215,12 @@ class DirectoryMonitor::Pimple
  public:
   MutexType mutex;
   Schedule schedule;
-  boost::atomic<bool> running{false};  // true if run() has not exited
-  boost::atomic<bool> stop{false};     // true if stop request is pending
-  boost::atomic<bool> isready{false};  // true if at least one scan has completed
+  std::atomic<bool> running{false};  // true if run() has not exited
+  std::atomic<bool> stop{false};     // true if stop request is pending
+  std::atomic<bool> isready{false};  // true if at least one scan has completed
 
-  boost::mutex m2;
-  boost::condition_variable cond;
+  std::mutex m2;
+  std::condition_variable cond;
 
   Watcher nextid = 0;
 };
@@ -507,9 +508,9 @@ void DirectoryMonitor::run()
 
         if (sleeptime > 0)
         {
-          boost::unique_lock<boost::mutex> lock(impl->m2);
+          std::unique_lock<std::mutex> lock(impl->m2);
           impl->cond.wait_for(
-              lock, boost::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
+              lock, std::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
         }
       }
 
