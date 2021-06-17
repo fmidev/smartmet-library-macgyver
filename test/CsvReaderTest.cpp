@@ -1,9 +1,10 @@
 #include "CsvReader.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regression/tframe.h>
 
 using namespace std;
+using namespace boost::placeholders;
 
 namespace CsvReaderTest
 {
