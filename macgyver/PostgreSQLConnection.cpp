@@ -58,7 +58,8 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
     }
     catch (const std::exception& e)
     {
-      throw Fmi::Exception(BCP, "Failed to connect to " + itsConnectionOptions.username + "@" +
+      throw Fmi::Exception(BCP,
+                           "Failed to connect to " + itsConnectionOptions.username + "@" +
                                itsConnectionOptions.database + ":" +
                                std::to_string(itsConnectionOptions.port) + " : " + e.what());
     }
@@ -150,7 +151,21 @@ pqxx::result PostgreSQLConnection::executeNonTransaction(const std::string& theS
     }
     catch (const std::exception& e)
     {
-      throw Fmi::Exception(BCP, std::string("Execution of SQL statement failed: ").append(e.what()));
+      // Try reopening the connection only once not to flood the network
+      if (itsConnection->is_open() || !const_cast<PostgreSQLConnection*>(this)->reopen())
+        throw Fmi::Exception(BCP,
+                             std::string("Execution of SQL statement failed: ").append(e.what()));
+
+      try
+      {
+        pqxx::nontransaction nitsTransaction(*itsConnection);
+        return nitsTransaction.exec(theSQLStatement);
+      }
+      catch (const std::exception& e)
+      {
+        throw Fmi::Exception(BCP,
+                             std::string("Execution of SQL statement failed: ").append(e.what()));
+      }
     }
   }
   catch (...)
@@ -184,7 +199,8 @@ pqxx::result PostgreSQLConnection::executeTransaction(const std::string& theSQLS
     }
     catch (const std::exception& e)
     {
-      throw Fmi::Exception(BCP,
+      throw Fmi::Exception(
+          BCP,
           std::string("Execution of SQL statement (transaction mode) failed: ").append(e.what()));
     }
   }
