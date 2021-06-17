@@ -4,7 +4,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 21.6.17
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -87,6 +87,10 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Thu Jul 17 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.6.17-2.fmi
+- Remove restriction libpqxx < 7
+- Add method Fmi::DirectoryMonitor::wait_until_ready
+
 * Thu Jun 17 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.17-1.fmi
 - Try reopening a PostgreSQL connection if the connection has been lost
 
