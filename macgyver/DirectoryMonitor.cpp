@@ -218,9 +218,12 @@ class DirectoryMonitor::Pimple
   std::atomic<bool> running{false};  // true if run() has not exited
   std::atomic<bool> stop{false};     // true if stop request is pending
   std::atomic<bool> isready{false};  // true if at least one scan has completed
+  std::atomic<bool> has_ended{false}; // true if run() has ended due to any reason
 
   std::mutex m2;
+  std::mutex m_ready;
   std::condition_variable cond;
+  std::condition_variable cond_ready;
 
   Watcher nextid = 0;
 };
@@ -393,6 +396,7 @@ void DirectoryMonitor::run()
         return;
 
       impl->running = true;
+      impl->has_ended = false; // FIXME: race if run() called more than once
 
       while (!impl->stop && !impl->schedule.empty())
       {
@@ -496,7 +500,9 @@ void DirectoryMonitor::run()
         }
 
         // One scan has now been completed
-        impl->isready = true;
+        if (!impl->isready.exchange(true)) {
+	  impl->cond_ready.notify_all();
+	}
 
         long sleeptime = 0;
         {
@@ -515,8 +521,10 @@ void DirectoryMonitor::run()
       }
 
       // Not running anymore. This order so that locking is not necessary
+      impl->has_ended = true;
       impl->stop = false;
       impl->running = false;
+      impl->cond_ready.notify_all();
     }
     catch (const boost::thread_interrupted&)
     {
@@ -526,6 +534,8 @@ void DirectoryMonitor::run()
   }
   catch (...)
   {
+    impl->has_ended = true;
+    impl->cond_ready.notify_all();
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
@@ -570,6 +580,21 @@ bool DirectoryMonitor::ready() const
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+
+bool DirectoryMonitor::wait_until_ready() const
+{
+  try
+  {
+    std::unique_lock<std::mutex> lock(impl->m_ready);
+    impl->cond_ready.wait(lock, [this]() -> bool { return impl->has_ended || impl->isready; });
+    return impl->isready && !impl->has_ended && !impl->stop;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 }  // namespace Fmi
 
 // ======================================================================

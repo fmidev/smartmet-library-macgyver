@@ -1,6 +1,7 @@
 #include "DirectoryMonitor.h"
 #include <boost/chrono.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/scope_exit.hpp>
 #include <boost/thread.hpp>
 #include <regression/tframe.h>
 #include <atomic>
@@ -80,6 +81,11 @@ void interruption_test()
     monitor.run();
   });
 
+  BOOST_SCOPE_EXIT(&monitor, &task) {
+      monitor.stop();
+      task.join();
+  } BOOST_SCOPE_EXIT_END;
+
   {
     std::unique_lock<std::mutex> lock(m);
     if (not started)
@@ -95,8 +101,69 @@ void interruption_test()
   if (!joined)
   {
     TEST_FAILED("Interrupting request did not stop directory monitor");
-    monitor.stop();
-    task.join();
+  }
+
+  TEST_PASSED();
+}
+
+void wait_until_ready_test_1()
+{
+  Fmi::DirectoryMonitor monitor;
+  monitor.watch(
+      ".",
+      [](Fmi::DirectoryMonitor::Watcher,
+         const fs::path&,
+         const boost::regex,
+         const Fmi::DirectoryMonitor::Status&) {},
+      [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+      },
+      10);
+  boost::thread task([&monitor]() {
+    monitor.run();
+  });
+
+  BOOST_SCOPE_EXIT(&monitor, &task) {
+      monitor.stop();
+      task.join();
+  } BOOST_SCOPE_EXIT_END;
+
+  bool ok = monitor.wait_until_ready();
+  if (not ok) {
+    TEST_FAILED("Waiting for first scan returned false");
+  }
+
+  TEST_PASSED();
+}
+
+void wait_until_ready_test_2()
+{
+  Fmi::DirectoryMonitor monitor;
+  monitor.watch(
+      ".",
+      [](Fmi::DirectoryMonitor::Watcher,
+         const fs::path&,
+         const boost::regex,
+         const Fmi::DirectoryMonitor::Status&) {},
+      [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+      },
+      10);
+
+
+  boost::thread task([&monitor]() {
+    monitor.run();
+  });
+
+  BOOST_SCOPE_EXIT(&monitor, &task) {
+      monitor.stop();
+      task.join();
+  } BOOST_SCOPE_EXIT_END;
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  monitor.stop();
+
+  bool ok = monitor.wait_until_ready();
+  if (ok) {
+    TEST_FAILED("Monitor already ended. Should have returned false");
   }
 
   TEST_PASSED();
@@ -114,6 +181,8 @@ class tests : public tframe::tests
   {
     TEST(stopping_test);
     TEST(interruption_test);
+    TEST(wait_until_ready_test_1);
+    TEST(wait_until_ready_test_2);
   }
 
 };  // class tests

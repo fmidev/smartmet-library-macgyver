@@ -103,6 +103,9 @@ class DirectoryMonitor : private boost::noncopyable
   // Return true if at least once scan has been completed
   bool ready() const;
 
+  // Returns when first scanning of directory is done or method run() has ended for any reason
+  bool wait_until_ready() const;
+
  private:
   DirectoryMonitor(const DirectoryMonitor& other);
   DirectoryMonitor& operator=(const DirectoryMonitor& other);
