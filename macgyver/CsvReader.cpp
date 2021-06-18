@@ -40,7 +40,8 @@ void myerror(const string& prefix, const string& filename, ifstream& file)
   try
   {
     string::size_type pos = static_cast<string::size_type>(file.tellg()) - 1;
-    throw Fmi::Exception(BCP, prefix + " in file '" + filename + "' at position " + Fmi::to_string(pos));
+    throw Fmi::Exception(BCP,
+                         prefix + " in file '" + filename + "' at position " + Fmi::to_string(pos));
   }
   catch (...)
   {
@@ -163,8 +164,6 @@ void read(const string& filename, Callback callback, char delimiter)
               state = ExpectingField;
             }
           }
-          else if (isspace(ch))
-            field += static_cast<char>(ch);
           else if (ch == doublequote)
             state = DoubleQuote;
           else

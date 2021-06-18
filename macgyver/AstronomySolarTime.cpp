@@ -22,16 +22,8 @@
 #include "AstronomyHelperFunctions.h"
 #include "AstronomyJulianTime.h"
 #include "Exception.h"
-
 #include <cmath>
 #include <vector>
-
-using namespace std;
-using boost::gregorian::date;
-using boost::local_time::local_date_time;
-using boost::local_time::time_zone_ptr;
-using boost::posix_time::not_a_date_time;
-using boost::posix_time::ptime;
 
 /*=== Public interface =====================*/
 
@@ -42,7 +34,7 @@ namespace Astronomy
 /*
  * Calculate sunrise, sunset and noon times on a certain day
  */
-solar_time_t solar_time(const local_date_time& ldt, double lon_e, double lat)
+solar_time_t solar_time(const boost::local_time::local_date_time& ldt, double lon_e, double lat)
 {
   try
   {
@@ -94,7 +86,7 @@ solar_time_t solar_time(const local_date_time& ldt, double lon_e, double lat)
       } while (jt[i].JulianDay() == 0.0);
     }
 
-    time_zone_ptr tz = ldt.zone();
+    auto tz = ldt.zone();
     return solar_time_t(jt[0].ldt(tz), jt[1].ldt(tz), noon.ldt(tz));
   }
   catch (...)

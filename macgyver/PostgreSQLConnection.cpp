@@ -68,7 +68,7 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
     pqxx::result result_set = executeNonTransaction("select typname,oid from pg_type");
     for (auto row : result_set)
     {
-      std::string datatype = row[0].as<std::string>();
+      auto datatype = row[0].as<std::string>();
       unsigned int oid = row[1].as<unsigned int>();
       itsDataTypes.insert(std::make_pair(oid, datatype));
     }

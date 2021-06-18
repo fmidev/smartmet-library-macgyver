@@ -5,18 +5,9 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-
 #include <cmath>
 #include <limits>
 #include <vector>
-
-using namespace std;
-using boost::gregorian::date;
-using boost::local_time::local_date_time;
-using boost::local_time::time_zone_ptr;
-using boost::posix_time::not_a_date_time;
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
 
 /*=== Public interface =====================*/
 
@@ -26,7 +17,6 @@ namespace Astronomy
 {
 namespace
 {
-
 std::vector<double> quad(double ym, double yz, double yp)
 {
   try
@@ -272,7 +262,7 @@ std::string lunar_time_t::as_string_long(SetAndRiseOccurence occ) const
         (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
                         : (occ == FIRST_SET ? moonset : moonset2));
 
-    cout << occ_ldt;
+    std::cout << occ_ldt;
 
     if (occ_ldt.is_not_a_date_time())
       ss << occ_ldt;
@@ -333,17 +323,17 @@ std::ostream& operator<<(std::ostream& ostream, const lunar_time_t& lt)
   }
 }
 
-bool dst_on(const ptime& theTime, const boost::local_time::local_date_time& ldt)
+bool dst_on(const boost::posix_time::ptime& theTime, const boost::local_time::local_date_time& ldt)
 {
   try
   {
-    time_zone_ptr zone = ldt.zone();
+    auto zone = ldt.zone();
 
     bool dst_on(false);
     if (zone->has_dst())
     {
-      ptime dst_starttime(zone->dst_local_start_time(ldt.local_time().date().year()));
-      ptime dst_endtime(zone->dst_local_end_time(ldt.local_time().date().year()));
+      auto dst_starttime = zone->dst_local_start_time(ldt.local_time().date().year());
+      auto dst_endtime = zone->dst_local_end_time(ldt.local_time().date().year());
 
       if (dst_starttime < dst_endtime)
       {
@@ -368,7 +358,7 @@ double timezone_offset(const boost::local_time::local_date_time& ldt)
 {
   try
   {
-    time_zone_ptr zone = ldt.zone();
+    auto zone = ldt.zone();
 
     double base_offset(zone->base_utc_offset().hours() +
                        (static_cast<float>(zone->base_utc_offset().minutes()) / 60.0));
@@ -403,7 +393,8 @@ void get_hours_and_minutes(double hours, int& hr, int& min)
   }
 }
 
-local_date_time parse_local_date_time(const boost::local_time::local_date_time& ldt, double hours)
+boost::local_time::local_date_time parse_local_date_time(
+    const boost::local_time::local_date_time& ldt, double hours)
 {
   try
   {
@@ -413,12 +404,12 @@ local_date_time parse_local_date_time(const boost::local_time::local_date_time& 
 
     get_hours_and_minutes(hrs, hour, min);
     // utc time of the beginning of the day
-    ptime utc_ptime(ldt.utc_time());
+    auto utc_ptime = ldt.utc_time();
     // add hour offset
-    utc_ptime += time_duration(hour, min, 0, 0);
+    utc_ptime += boost::posix_time::time_duration(hour, min, 0, 0);
 
     // return local time
-    local_date_time ldt_riseset(utc_ptime, ldt.zone());
+    boost::local_time::local_date_time ldt_riseset(utc_ptime, ldt.zone());
 
     return ldt_riseset;
   }
@@ -444,10 +435,11 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
     double utset2(0.0);
 
     // beginning of the day
-    local_date_time ldt_beg(ldt.local_time().date(),
-                            time_duration(0, 0, 0, 0),
-                            ldt.zone(),
-                            local_date_time::NOT_DATE_TIME_ON_ERROR);
+    boost::local_time::local_date_time ldt_beg(
+        ldt.local_time().date(),
+        boost::posix_time::time_duration(0, 0, 0, 0),
+        ldt.zone(),
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
 
     double date = ldt_beg.local_time().date().modjulian_day();
 
@@ -539,7 +531,7 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
           }
         }
       }
-  #ifdef MYDEBUG
+#ifdef MYDEBUG
       std::cout << "nz: " << nz << endl;
       std::cout << "z1: " << z1 << endl;
       std::cout << "z2: " << z2 << endl;
@@ -553,13 +545,13 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
       std::cout << "rise2: " << rise2 << endl;
       std::cout << "set: " << set << endl;
       std::cout << "set2: " << set2 << endl << endl;
-  #endif
+#endif
 
       ym = yp;
       hour += 2.0;
     }
 
-  #ifdef MYDEBUG
+#ifdef MYDEBUG
     cout << "\noffset: " << offset << endl;
     cout << "rise: " << rise << endl;
     cout << "rise2: " << rise2 << endl;
@@ -574,13 +566,17 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
     cout << "ldt.local_time(): " << ldt.local_time() << endl;
     cout << "ldt.utc_time(): " << ldt.utc_time() << endl;
     cout << "ldt_beg: " << ldt_beg << endl;
-  #endif
+#endif
 
     lunar_time_t retval(
-        (rise ? parse_local_date_time(ldt_beg, utrise) : local_date_time(not_a_date_time)),
-        (set ? parse_local_date_time(ldt_beg, utset) : local_date_time(not_a_date_time)),
-        (rise2 ? parse_local_date_time(ldt_beg, utrise2) : local_date_time(not_a_date_time)),
-        (set2 ? parse_local_date_time(ldt_beg, utset2) : local_date_time(not_a_date_time)),
+        (rise ? parse_local_date_time(ldt_beg, utrise)
+              : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
+        (set ? parse_local_date_time(ldt_beg, utset)
+             : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
+        (rise2 ? parse_local_date_time(ldt_beg, utrise2)
+               : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
+        (set2 ? parse_local_date_time(ldt_beg, utset2)
+              : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
         rise,
         set,
         rise2,
@@ -600,16 +596,19 @@ lunar_time_t lunar_time_i(const boost::local_time::local_date_time& ldt, double 
   try
   {
     // beginning of the day
-    local_date_time ldt_beg(ldt.local_time().date(),
-                            time_duration(0, 0, 0, 0),
-                            ldt.zone(),
-                            local_date_time::NOT_DATE_TIME_ON_ERROR);
-    local_date_time ldt_end(ldt.local_time().date(),
-                            time_duration(23, 59, 59, 0),
-                            ldt.zone(),
-                            local_date_time::NOT_DATE_TIME_ON_ERROR);
+    boost::local_time::local_date_time ldt_beg(
+        ldt.local_time().date(),
+        boost::posix_time::time_duration(0, 0, 0, 0),
+        ldt.zone(),
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
+    boost::local_time::local_date_time ldt_end(
+        ldt.local_time().date(),
+        boost::posix_time::time_duration(23, 59, 59, 0),
+        ldt.zone(),
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
 
-    ptime dst_endtime(ldt.zone()->dst_local_end_time(ldt.local_time().date().year()));
+    boost::posix_time::ptime dst_endtime(
+        ldt.zone()->dst_local_end_time(ldt.local_time().date().year()));
     bool dst_ends_today(ldt_beg.local_time().date() == dst_endtime.date());
 
     double offset_before_dst_ends = timezone_offset(ldt_beg);
@@ -638,15 +637,16 @@ lunar_time_t lunar_time_i(const boost::local_time::local_date_time& ldt, double 
       if (lt_after.moonset2_today())
         lt_after.moonset2 += boost::posix_time::hours(1);
 
-      lunar_time_t lt_combined(lt_before.moonrise_today() ? lt_before.moonrise : lt_after.moonrise,
-                               lt_before.moonset_today() ? lt_before.moonset : lt_after.moonset,
-                               lt_before.moonrise2_today() ? lt_before.moonrise2 : lt_after.moonrise2,
-                               lt_before.moonset2_today() ? lt_before.moonset2 : lt_after.moonset2,
-                               lt_before.rise_today,
-                               lt_before.set_today,
-                               lt_before.rise2_today,
-                               lt_before.set2_today,
-                               lt_before.above_hz_24h && lt_after.above_hz_24h);
+      lunar_time_t lt_combined(
+          lt_before.moonrise_today() ? lt_before.moonrise : lt_after.moonrise,
+          lt_before.moonset_today() ? lt_before.moonset : lt_after.moonset,
+          lt_before.moonrise2_today() ? lt_before.moonrise2 : lt_after.moonrise2,
+          lt_before.moonset2_today() ? lt_before.moonset2 : lt_after.moonset2,
+          lt_before.rise_today,
+          lt_before.set_today,
+          lt_before.rise2_today,
+          lt_before.set2_today,
+          lt_before.above_hz_24h && lt_after.above_hz_24h);
 
       retval = lt_combined;
     }

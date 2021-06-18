@@ -149,10 +149,10 @@ std::string decode(const std::string& str)
           char_array_4[i] = static_cast<char>(base64_chars.find(char_array_4[i]));
 
         char_array_3[0] =
-            static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30u) >> 4));
+            static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30U) >> 4));
         char_array_3[1] =
-            static_cast<char>(((char_array_4[1] & 0xfu) << 4) + ((char_array_4[2] & 0x3cu) >> 2));
-        char_array_3[2] = static_cast<char>(((char_array_4[2] & 0x3u) << 6) + char_array_4[3]);
+            static_cast<char>(((char_array_4[1] & 0xfU) << 4) + ((char_array_4[2] & 0x3cU) >> 2));
+        char_array_3[2] = static_cast<char>(((char_array_4[2] & 0x3U) << 6) + char_array_4[3]);
 
         for (i = 0; (i < 3); i++)
           ret += char_array_3[i];
@@ -168,10 +168,11 @@ std::string decode(const std::string& str)
       for (j = 0; j < 4; j++)
         char_array_4[j] = static_cast<char>(base64_chars.find(char_array_4[j]));
 
-      char_array_3[0] = static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30u) >> 4));
+      char_array_3[0] =
+          static_cast<char>((char_array_4[0] << 2) + ((char_array_4[1] & 0x30U) >> 4));
       char_array_3[1] =
-          static_cast<char>(((char_array_4[1] & 0xfu) << 4) + ((char_array_4[2] & 0x3cu) >> 2));
-      char_array_3[2] = static_cast<char>(((char_array_4[2] & 0x3u) << 6) + char_array_4[3]);
+          static_cast<char>(((char_array_4[1] & 0xfU) << 4) + ((char_array_4[2] & 0x3cU) >> 2));
+      char_array_3[2] = static_cast<char>(((char_array_4[2] & 0x3U) << 6) + char_array_4[3]);
 
       for (j = 0; (j < i - 1); j++)
         ret += char_array_3[j];

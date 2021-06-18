@@ -282,7 +282,7 @@ double Stat::min(const boost::posix_time::ptime& startTime /*= not_a_date_time *
 #endif
     DataVector subvector;
 
-    if (!get_subvector(subvector, startTime, endTime) || subvector.size() == 0)
+    if (!get_subvector(subvector, startTime, endTime) || subvector.empty())
       return itsMissingValue;
 
     return std::min_element(subvector.begin(), subvector.end(), comp_value)->value;
@@ -381,7 +381,7 @@ double Stat::change(const boost::posix_time::ptime& startTime /*= not_a_date_tim
 #endif
     DataVector subvector;
 
-    if (!get_subvector(subvector, startTime, endTime) || subvector.size() == 0)
+    if (!get_subvector(subvector, startTime, endTime) || subvector.empty())
       return itsMissingValue;
 
     if (itsDegrees)
@@ -433,7 +433,7 @@ double Stat::trend(const boost::posix_time::ptime& startTime /*= not_a_date_time
     long negativeChanges(0);
     double lastValue = 0;
 
-    for (DataIterator iter = subvector.begin(); iter != subvector.end(); iter++)
+    for (auto iter = subvector.begin(); iter != subvector.end(); iter++)
     {
       if (iter != subvector.begin())
       {
@@ -477,8 +477,8 @@ unsigned int Stat::count(double lowerLimit,
   try
   {
 #ifdef MYDEBUG
-    std::cout << "count(" << lowerLimit << ", " << upperLimit << ", " << startTime << ", " << endTime
-              << ")" << std::endl;
+    std::cout << "count(" << lowerLimit << ", " << upperLimit << ", " << startTime << ", "
+              << endTime << ")" << std::endl;
 #endif
     DataVector subvector;
 
@@ -528,8 +528,8 @@ double Stat::percentage(double lowerLimit,
     if (occurances == 0)
       return 0.0;
 
-    return static_cast<double>((static_cast<double>(occurances) / static_cast<double>(total_count)) *
-                               100.0);
+    return static_cast<double>(
+        (static_cast<double>(occurances) / static_cast<double>(total_count)) * 100.0);
   }
   catch (...)
   {
@@ -547,7 +547,7 @@ double Stat::median(const boost::posix_time::ptime& startTime /*= not_a_date_tim
 #endif
     DataVector subvector;
 
-    if (!get_subvector(subvector, startTime, endTime) || subvector.size() == 0)
+    if (!get_subvector(subvector, startTime, endTime) || subvector.empty())
       return itsMissingValue;
     else if (subvector.size() == 1)
       return subvector[0].value;
@@ -556,8 +556,9 @@ double Stat::median(const boost::posix_time::ptime& startTime /*= not_a_date_tim
 
     for (const DataItem& item : subvector)
     {
-      double_vector.insert(
-          double_vector.end(), static_cast<std::size_t>(itsWeights ? item.weight : 1.0), item.value);
+      double_vector.insert(double_vector.end(),
+                           static_cast<std::size_t>(itsWeights ? item.weight : 1.0),
+                           item.value);
     }
 
     std::size_t vector_size = double_vector.size();
@@ -593,7 +594,7 @@ double Stat::variance(const boost::posix_time::ptime& startTime /*= not_a_date_t
 #endif
     DataVector subvector;
 
-    if (!get_subvector(subvector, startTime, endTime) || subvector.size() == 0)
+    if (!get_subvector(subvector, startTime, endTime) || subvector.empty())
       return itsMissingValue;
 
     accumulator_set<double, stats<tag::variance>, double> acc;
@@ -623,7 +624,7 @@ double Stat::stddev(const boost::posix_time::ptime& startTime /*= not_a_date_tim
     {
       DataVector subvector;
 
-      if (!get_subvector(subvector, startTime, endTime) || subvector.size() == 0)
+      if (!get_subvector(subvector, startTime, endTime) || subvector.empty())
         return itsMissingValue;
 
       double sum = 0;
@@ -686,7 +687,7 @@ double Stat::nearest(const boost::posix_time::ptime& timestep,
 
     DataVector subvector;
 
-    if (!get_subvector(subvector, startTime, endTime, false) || subvector.size() == 0)
+    if (!get_subvector(subvector, startTime, endTime, false) || subvector.empty())
       return itsMissingValue;
     else if (subvector.size() == 1)
       return subvector[0].value;
@@ -720,7 +721,7 @@ double Stat::interpolate(const boost::posix_time::ptime& timestep,
   {
 #ifdef MYDEBUG
     std::cout << "interpolate(" << timestep << ", " << startTime << ", " << endTime << ")"
-        << std::endl;
+              << std::endl;
 #endif
 
     if (timestep == not_a_date_time)
@@ -832,7 +833,8 @@ bool extract_subvector(const DataVector& itsData,
       return false;
 
     boost::posix_time::ptime firstTimestamp(
-        (startTime == not_a_date_time || startTime < itsData[0].time) ? itsData[0].time : startTime);
+        (startTime == not_a_date_time || startTime < itsData[0].time) ? itsData[0].time
+                                                                      : startTime);
     boost::posix_time::ptime lastTimestamp(
         (endTime == not_a_date_time || endTime > itsData[itsData.size() - 1].time)
             ? itsData[itsData.size() - 1].time
@@ -902,8 +904,9 @@ bool extract_subvector(const DataVector& itsData,
           {
             if (intersection_period.begin() >
                 halfway_time)  // intersection_period is in the second half
-              subvector.push_back(DataItem(
-                  (iter + 1)->time, (iter + 1)->value, intersection_period.length().total_seconds()));
+              subvector.push_back(DataItem((iter + 1)->time,
+                                           (iter + 1)->value,
+                                           intersection_period.length().total_seconds()));
             else  // intersection_period must be in the first half
               subvector.push_back(
                   DataItem(iter->time, iter->value, intersection_period.length().total_seconds()));
@@ -931,12 +934,12 @@ bool Stat::get_subvector(DataVector& subvector,
     {
       if (startTime != not_a_date_time || endTime != not_a_date_time)
       {
-        throw Fmi::Exception(BCP,
-            "Error: startTime or endTime defined, but data contains invalid timestamps!");
+        throw Fmi::Exception(
+            BCP, "Error: startTime or endTime defined, but data contains invalid timestamps!");
       }
       else
       {
-        for (DataConstIterator iter = itsData.begin(); iter != itsData.end(); iter++)
+        for (auto iter = itsData.begin(); iter != itsData.end(); iter++)
         {
           if (iter->value == itsMissingValue)
             return false;

@@ -376,7 +376,8 @@ struct RandomEviction
                       std::size_t& currentSize,
                       std::size_t maxSize)
   {
-    static std::mt19937 generator(time(nullptr));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
 
     while (currentSize > maxSize)
     {
@@ -402,7 +403,8 @@ struct RandomEviction
                       std::size_t maxSize,
                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static std::mt19937 generator(time(nullptr));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
 
     while (currentSize > maxSize)
     {
@@ -789,7 +791,8 @@ struct CoinFlipExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
     static std::uniform_int_distribution<> dist(0, 1);
 
     // Max value means tag is valid
@@ -808,16 +811,10 @@ struct CoinFlipExpire
         FMI_CACHE_EXPIRED_DELETED;
         return true;
       }
-      else
-      {
-        FMI_CACHE_EXPIRED_RETURNED;
-        return false;
-      }
-    }
-    else
-    {
+      FMI_CACHE_EXPIRED_RETURNED;
       return false;
     }
+    return false;
   }
 
   // Expired tags older than 2*timeConstant are deleted
@@ -825,14 +822,7 @@ struct CoinFlipExpire
   {
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > 2 * timeConstant)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return ((now - theTagTime) > 2 * timeConstant);
   }
 };
 
@@ -843,7 +833,8 @@ struct LinearTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
     static std::uniform_real_distribution<> dist(0.0, 1.0);
 
     // Max value means tag is valid
@@ -864,11 +855,8 @@ struct LinearTimeExpire
       FMI_CACHE_EXPIRED_DELETED;
       return true;
     }
-    else
-    {
-      FMI_CACHE_EXPIRED_RETURNED;
-      return false;
-    }
+    FMI_CACHE_EXPIRED_RETURNED;
+    return false;
   }
 
   // Expired tags with >100% removal probability are deleted
@@ -876,14 +864,7 @@ struct LinearTimeExpire
   {
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > timeConstant)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return ((now - theTagTime) > timeConstant);
   }
 };
 
@@ -894,7 +875,8 @@ struct SigmoidTimeExpire
                                             const std::time_t& theTagTime,
                                             long timeConstant)
   {
-    static std::mt19937 generator(static_cast<unsigned int>(time(nullptr)));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
     static std::uniform_real_distribution<> dist(0.0, 1.0);
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -914,11 +896,8 @@ struct SigmoidTimeExpire
       FMI_CACHE_EXPIRED_DELETED;
       return true;
     }
-    else
-    {
-      FMI_CACHE_EXPIRED_RETURNED;
-      return false;
-    }
+    FMI_CACHE_EXPIRED_RETURNED;
+    return false;
   }
 
   // Expired tags are removed when their return probability is less than 1%
@@ -930,14 +909,7 @@ struct SigmoidTimeExpire
         double(timeConstant);
     std::time_t now = std::time(nullptr);
 
-    if (static_cast<double>((now - theTagTime)) > eliminationAge)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (static_cast<double>((now - theTagTime)) > eliminationAge);
   }
 };
 

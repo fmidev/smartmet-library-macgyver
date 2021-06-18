@@ -49,12 +49,9 @@ inline std::size_t hash_value(const boost::optional<T>& obj)
 {
   if (!obj)
     return std::hash<bool>{}(false);
-  else
-  {
-    std::size_t hash = std::hash<bool>{}(true);
-    hash_combine(hash, hash_value(*obj));
-    return hash;
-  }
+  std::size_t hash = std::hash<bool>{}(true);
+  hash_combine(hash, hash_value(*obj));
+  return hash;
 }
 
 // std::shared_ptr
@@ -63,12 +60,9 @@ inline std::size_t hash_value(const std::shared_ptr<T>& obj)
 {
   if (!obj)
     return std::hash<bool>{}(false);
-  else
-  {
-    std::size_t hash = std::hash<bool>{}(true);
-    hash_combine(hash, hash_value(*obj));
-    return hash;
-  }
+  std::size_t hash = std::hash<bool>{}(true);
+  hash_combine(hash, hash_value(*obj));
+  return hash;
 }
 
 // boost::shared ptr
@@ -77,12 +71,9 @@ inline std::size_t hash_value(const boost::shared_ptr<T>& obj)
 {
   if (!obj)
     return std::hash<bool>{}(false);
-  else
-  {
-    std::size_t hash = std::hash<bool>{}(true);
-    hash_combine(hash, hash_value(*obj));
-    return hash;
-  }
+  std::size_t hash = std::hash<bool>{}(true);
+  hash_combine(hash, hash_value(*obj));
+  return hash;
 }
 
 // Maps
