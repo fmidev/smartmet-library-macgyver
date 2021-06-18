@@ -17,7 +17,7 @@ BuildRequires: fmt-devel >= 7.1.3
 BuildRequires: gcc-c++
 BuildRequires: imake
 BuildRequires: libicu-devel
-BuildRequires: libpqxx-devel
+BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-timezones >= 21.2.2
@@ -30,10 +30,9 @@ Requires: boost169-thread
 Requires: ctpp2
 Requires: fmt >= 7.1.3
 Requires: libicu >= 50.2
-Requires: libpqxx
+Requires: libpqxx < 1:7.0
 #TestRequires: boost169-devel
 #TestRequires: fmt-devel
-#TestRequires: libpqxx
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql12-libs
