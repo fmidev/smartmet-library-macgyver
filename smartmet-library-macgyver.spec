@@ -1,3 +1,4 @@
+%bcond_with tests
 %define DIRNAME macgyver
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
@@ -21,6 +22,9 @@ BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-timezones >= 21.2.2
+%if %{with tests}
+BuildRequires: smartmet-library-regression
+%endif
 Requires: boost169-chrono
 Requires: boost169-date-time
 Requires: boost169-filesystem
@@ -55,6 +59,9 @@ rm -rf %{SPECNAME}
  
 %build
 make %{_smp_mflags}
+%if %{with tests}
+make test %{_smp_mflags}
+%endif
 
 %install
 %makeinstall
