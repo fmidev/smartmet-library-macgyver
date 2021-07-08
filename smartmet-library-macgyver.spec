@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.6.18
+Version: 21.7.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -105,6 +105,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Thu Jul  8 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.8-1.fmi
+- Use libpqxx7 for RHEL8
+
 * Fri Jun 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.18-1.fmi
 - Silenced some CodeChecker warnings
 
