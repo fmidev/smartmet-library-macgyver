@@ -18,7 +18,6 @@ BuildRequires: fmt-devel >= 7.1.3
 BuildRequires: gcc-c++
 BuildRequires: imake
 BuildRequires: libicu-devel
-BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-timezones >= 21.2.2
@@ -34,7 +33,20 @@ Requires: boost169-thread
 Requires: ctpp2
 Requires: fmt >= 7.1.3
 Requires: libicu >= 50.2
+
+%if %{defined el7}
 Requires: libpqxx < 1:7.0
+BuildRequires: libpqxx-devel < 1:7.0
+%else
+%if %{defined el8}
+Requires: libpqxx >= 1:7.0
+BuildRequires: libpqxx-devel >= 1:7.0
+%else
+Requires: libpqxx
+BuildRequires: libpqxx-devel
+%endif
+%endif
+
 #TestRequires: boost169-devel
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
