@@ -139,6 +139,7 @@ std::string PostgreSQLConnection::quote(const std::string& theString) const
 
 pqxx::result PostgreSQLConnection::executeNonTransaction(const std::string& theSQLStatement) const
 {
+  // FIXME: should we fail if transaction is active?
   try
   {
     if (itsDebug)
@@ -174,56 +175,17 @@ pqxx::result PostgreSQLConnection::executeNonTransaction(const std::string& theS
   }
 }
 
-void PostgreSQLConnection::startTransaction()
+pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) const
 {
   try
   {
-    itsTransaction = boost::make_shared<pqxx::work>(*itsConnection);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-pqxx::result PostgreSQLConnection::executeTransaction(const std::string& theSQLStatement) const
-{
-  try
-  {
-    if (itsDebug)
-      std::cout << "SQL: " << theSQLStatement << std::endl;
-
-    try
+    if (itsTransaction)
     {
       return itsTransaction->exec(theSQLStatement);
     }
-    catch (const std::exception& e)
+    else
     {
-      throw Fmi::Exception(
-          BCP,
-          std::string("Execution of SQL statement (transaction mode) failed: ").append(e.what()));
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-void PostgreSQLConnection::commitTransaction()
-{
-  try
-  {
-    try
-    {
-      itsTransaction->commit();
-      itsTransaction.reset();
-    }
-    catch (const std::exception& e)
-    {
-      // If we get here, Xaction has been rolled back
-      itsTransaction.reset();
-      throw Fmi::Exception(BCP, std::string("Commiting transaction failed: ").append(e.what()));
+      return executeNonTransaction(theSQLStatement);
     }
   }
   catch (...)
@@ -255,6 +217,104 @@ void PostgreSQLConnection::setClientEncoding(const std::string& theEncoding) con
     catch (const std::exception& e)
     {
       throw Fmi::Exception(BCP, std::string("set_client_encoding failed: ").append(e.what()));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn)
+  : conn(conn)
+{
+  try
+  {
+    if (conn.itsTransaction)
+    {
+      throw Fmi::Exception(BCP, "Recursive transactions are not supported");
+    }
+    else
+    {
+      conn.itsTransaction = boost::make_shared<pqxx::work>(*conn.itsConnection);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+PostgreSQLConnection::Transaction::~Transaction()
+{
+  conn.itsTransaction.reset();
+}
+
+pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQLStatement) const
+{
+  try
+  {
+    if (conn.itsTransaction)
+    {
+      if (conn.itsDebug)
+      {
+	std::cout << "SQL: " << theSQLStatement << std::endl;
+      }
+      return conn.itsTransaction->exec(theSQLStatement);
+    }
+    else
+    {
+      throw Fmi::Exception(BCP, "[Logic error] Called after transaction commit or rollback");
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+void PostgreSQLConnection::Transaction::commit()
+{
+  try
+  {
+    if (conn.itsTransaction)
+    {
+      try
+      {	
+        conn.itsTransaction->commit();
+        conn.itsTransaction.reset();
+      }
+      catch (const std::exception& e)
+      {
+	// If we get here, Xaction has been rolled back
+	conn.itsTransaction.reset();
+	throw Fmi::Exception(BCP, std::string("Commiting transaction failed: ").append(e.what()));
+      }
+    }
+    else
+    {
+      throw Fmi::Exception(BCP, "[Logic error] No transaction to commit"
+			   " (already commited or rolled back)");
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+void PostgreSQLConnection::Transaction::rollback()
+{
+  try
+  {
+    if (conn.itsTransaction)
+    {
+      conn.itsTransaction.reset();
+    }
+    else
+    {
+      throw Fmi::Exception(BCP, "[Logic error] No transaction to roll back"
+			   " (already commited or rolled back)");
     }
   }
   catch (...)

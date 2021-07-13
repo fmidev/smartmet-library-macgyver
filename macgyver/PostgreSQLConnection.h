@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <list>
 #include <pqxx/pqxx>
@@ -29,7 +30,21 @@ struct PostgreSQLConnectionOptions
 
 class PostgreSQLConnection
 {
- public:
+  public:
+  class Transaction final : public virtual boost::noncopyable
+  {
+  public:
+    Transaction(PostgreSQLConnection& conn);
+    ~Transaction();
+    pqxx::result execute(const std::string& theSQLStatement) const;
+    void commit();
+    void rollback();
+  private:
+    PostgreSQLConnection& conn;
+  };
+
+ 
+  public:
   ~PostgreSQLConnection() { close(); }
   PostgreSQLConnection(bool theDebug = false) : itsDebug(theDebug), itsCollate(false) {}
   PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions);
@@ -42,14 +57,19 @@ class PostgreSQLConnection
   void setClientEncoding(const std::string& theEncoding) const;
   void setDebug(bool debug) { itsDebug = debug; }
   pqxx::result executeNonTransaction(const std::string& theSQLStatement) const;
-  void startTransaction();
-  pqxx::result executeTransaction(const std::string& theSQLStatement) const;
-  void commitTransaction();
+
+  /**
+   *   @brief Execute SQL statement in current transaction or call executeNonTransaction if no
+   *          transaction is active
+   */
+  pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
   bool collateSupported() { return itsCollate; }
   std::string quote(const std::string& theString) const;
   const std::map<unsigned int, std::string>& dataTypes() const { return itsDataTypes; }
+
+  std::shared_ptr<Transaction> transaction() { return std::make_shared<Transaction>(*this); }
 
  private:
   boost::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
