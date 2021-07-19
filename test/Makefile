@@ -1,4 +1,4 @@
-REQUIRES = fmt
+REQUIRES = fmt libpqxx
 
 include ../makefile.inc
 

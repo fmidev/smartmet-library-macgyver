@@ -26,6 +26,11 @@ struct PostgreSQLConnectionOptions
   std::string encoding = "UTF8";
   unsigned int connect_timeout = 0;
   bool debug = false;
+
+  PostgreSQLConnectionOptions() = default;
+  PostgreSQLConnectionOptions(const std::string& conn_str);
+
+  operator std::string() const;
 };
 
 class PostgreSQLConnection

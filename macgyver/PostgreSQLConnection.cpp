@@ -1,12 +1,114 @@
 #include "PostgreSQLConnection.h"
 #include "Exception.h"
+#include "TypeName.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/variant.hpp>
+#include <cassert>
 #include <iostream>
+#include <sstream>
+#include <vector>
+
+namespace ba = boost::algorithm;
 
 namespace Fmi
 {
 namespace Database
 {
+
+namespace
+{
+  typedef unsigned int PostgreSQLConnectionOptions::*uint_member_ptr;
+  typedef std::string PostgreSQLConnectionOptions::*string_member_ptr;
+
+  struct Ignore {} ignore;
+
+  const std::map<std::string, boost::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def =
+    {
+     {"host", &PostgreSQLConnectionOptions::host}
+     ,{"dbname", &PostgreSQLConnectionOptions::database}
+     ,{"port", &PostgreSQLConnectionOptions::port}
+     ,{"user", &PostgreSQLConnectionOptions::username}
+     ,{"password", &PostgreSQLConnectionOptions::password}
+     ,{"client_encoding", &PostgreSQLConnectionOptions::encoding}
+     ,{"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
+     // FIXME: add parameters we ignore
+     ,{"options", ignore}
+    };
+}
+
+PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn_str)
+{
+  try
+  {
+    std::vector<std::string> parts;
+    ba::split(parts, conn_str, ba::is_any_of(" \t"), ba::token_compress_on);
+    for (const std::string& part : parts)
+    {
+      const std::size_t p = part.find('=');
+      if (p == std::string::npos)
+      {
+	throw Fmi::Exception(BCP, "Unrecognized part '" + part + "'");
+      }
+      else
+      {
+	const std::string name = part.substr(0, p);
+	const std::string value = part.substr(p + 1);
+	const auto it = field_def.find(name);
+	if (it == field_def.end())
+	{
+	  throw Fmi::Exception(BCP, "Unrecognized field '" + part + "'");
+	}
+	else
+	{
+	  switch (it->second.which())
+	  {
+	  case 0:
+	    //std::cout << METHOD_NAME << ": field '" << part << "' ignored" << std::endl;
+	    break;
+	  case 1:
+	    this->*boost::get<uint_member_ptr>(it->second) = boost::lexical_cast<unsigned int>(value);
+	    break;
+	  case 2:
+	    this->*boost::get<string_member_ptr>(it->second) = value;
+	    break;
+
+	  default: // Not supposed to be here
+	    assert("Not supposed to be here");
+	  }
+	}
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Failed to parse connection string '" + conn_str + "'");
+  }
+}
+
+PostgreSQLConnectionOptions::operator std::string() const
+{
+  std::ostringstream ss;
+
+  // clang-format off
+  ss << "host="      << host
+     << " dbname="   << database
+     << " port="    << port
+     << " user="     << username
+     << " password=" << password
+#if 0
+     << " client_encoding=" << encoding
+#endif
+       ;
+  // clang-format on
+
+  if (connect_timeout > 0)
+    ss << " connect_timeout=" << connect_timeout;
+
+  return ss.str();
+}
+
 PostgreSQLConnection::PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions)
     : itsDebug(theConnectionOptions.debug),
       itsCollate(false),
@@ -30,26 +132,11 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
 
     close();
 
-    std::stringstream ss;
-
-    // clang-format off
-    ss << "host="      << itsConnectionOptions.host
-       << " dbname="   << itsConnectionOptions.database
-       << " port= "    << itsConnectionOptions.port
-       << " user="     << itsConnectionOptions.username
-       << " password=" << itsConnectionOptions.password
-#if 0
-       << " client_encoding=" << itsConnectionOptions.encoding
-#endif
-       ;
-    // clang-format on
-
-    if (itsConnectionOptions.connect_timeout > 0)
-      ss << " connect_timeout=" << itsConnectionOptions.connect_timeout;
+    const std::string conn_str = itsConnectionOptions;
 
     try
     {
-      itsConnection = boost::make_shared<pqxx::connection>(ss.str());
+      itsConnection = boost::make_shared<pqxx::connection>(conn_str);
       /*
         if(PostgreSQL > 9.1)
         itsCollate = true;
