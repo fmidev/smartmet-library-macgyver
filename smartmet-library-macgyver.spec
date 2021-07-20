@@ -112,7 +112,7 @@ FMI MacGyver library development files
 - Fmi::Database::PostgreSQLConnection: added parsing connection string
 
 * Tue Jul 13 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.13-1.fmi
-- Add class Fmi::Database::PostgreSQLConnection::Trasnaction and remove old transaction API
+- Add class Fmi::Database::PostgreSQLConnection::Transaction and remove old transaction API
 
 * Thu Jul  8 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.8-1.fmi
 - Use libpqxx7 for RHEL8
