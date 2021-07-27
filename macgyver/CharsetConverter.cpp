@@ -3,7 +3,7 @@
 #include <cstring>
 #include <mutex>
 #include <iconv.h>
-#include <macgyver/Exception.h>
+#include "Exception.h"
 
 struct Fmi::CharsetConverter::Impl
 {
