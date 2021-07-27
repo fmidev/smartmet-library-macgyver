@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.7.20
+Version: 21.7.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -108,6 +108,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Tue Jul 27 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.27-1.fmi
+- Added class Fmi::CharsetConverter
+
 * Tue Jul 20 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.20-1.fmi
 - Fmi::Database::PostgreSQLConnection: added parsing connection string
 
