@@ -29,7 +29,9 @@ void Fmi::ReferenceEllipsoid::to_geodetic(const boost::array<double, 3> &x,
   *lon = atan2(x[1], x[0]);
 
   const double xy = hypot(x[0], x[1]);
-  double v, prev_lat, h = 0;
+  double v;
+  double prev_lat;
+  double h = 0;
   *lat = atan2(x[2], xy);
 
   do

@@ -456,7 +456,8 @@ std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t has
   try
   {
     std::ostringstream out;
-    std::string subDirectory, fileName;
+    std::string subDirectory;
+    std::string fileName;
 
     out << std::hex;
 

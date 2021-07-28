@@ -228,7 +228,8 @@ int stoi(const std::string& str)
   try
   {
     long result;
-    std::string::const_iterator begin = str.begin(), end = str.end();
+    auto begin = str.cbegin();
+    auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
       if (begin == end)
         return boost::numeric_cast<int>(result);
@@ -246,7 +247,8 @@ long stol(const std::string& str)
   try
   {
     long result;
-    std::string::const_iterator begin = str.begin(), end = str.end();
+    auto begin = str.cbegin();
+    auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
       if (begin == end)
         return result;
@@ -264,7 +266,8 @@ unsigned long stoul(const std::string& str)
   try
   {
     unsigned long result;
-    std::string::const_iterator begin = str.begin(), end = str.end();
+    auto begin = str.cbegin();
+    auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::ulong_, result))
       if (begin == end)
         return result;
@@ -285,7 +288,8 @@ float stof(const std::string& str)
     // http://stackoverflow.com/questions/17391348/boost-spirit-floating-number-parser-precision
 
     double result;
-    std::string::const_iterator begin = str.begin(), end = str.end();
+    auto begin = str.cbegin();
+    auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))
     {
       if (begin == end)
@@ -309,7 +313,8 @@ double stod(const std::string& str)
   try
   {
     double result;
-    std::string::const_iterator begin = str.begin(), end = str.end();
+    auto begin = str.cbegin();
+    auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))
     {
       if (begin == end)

@@ -37,7 +37,9 @@ boost::posix_time::ptime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
 {
   try
   {
-    unsigned int hour = 0, minute = 0, second = 0;
+    unsigned int hour = 0;
+    unsigned int minute = 0;
+    unsigned int second = 0;
     if (target.hour)
       hour = *target.hour;
     if (target.minute)
@@ -72,7 +74,9 @@ boost::posix_time::ptime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
 {
   try
   {
-    unsigned int hour = 0, minute = 0, second = 0;
+    unsigned int hour = 0;
+    unsigned int minute = 0;
+    unsigned int second = 0;
 
     if (target.hour)
       hour = *target.hour;
@@ -528,9 +532,13 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
   try
   {
     std::uint16_t year = 0;
-    std::uint16_t month = 1, day = 1;
-    std::uint16_t hour = 0, minute = 0, second = 0;
-    std::uint16_t houroffset = 0, minuteoffset = 0;
+    std::uint16_t month = 1;
+    std::uint16_t day = 1;
+    std::uint16_t hour = 0;
+    std::uint16_t minute = 0;
+    std::uint16_t second = 0;
+    std::uint16_t houroffset = 0;
+    std::uint16_t minuteoffset = 0;
     bool positiveoffset = false;
 
     const char* ptr = str.c_str();

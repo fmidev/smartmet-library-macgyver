@@ -502,9 +502,13 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
   try
   {
     std::uint16_t year = 0;
-    std::uint16_t month = 1, day = 1;
-    std::uint16_t hour = 0, minute = 0, second = 0;
-    std::uint16_t houroffset = 0, minuteoffset = 0;
+    std::uint16_t month = 1;
+    std::uint16_t day = 1;
+    std::uint16_t hour = 0;
+    std::uint16_t minute = 0;
+    std::uint16_t second = 0;
+    std::uint16_t houroffset = 0;
+    std::uint16_t minuteoffset = 0;
     bool positiveoffset = false;
 
     const char* ptr = str.c_str();
@@ -1308,8 +1312,12 @@ boost::posix_time::ptime DateTimeParser::parse_http(const std::string& str) cons
       std::vector<std::string> parts;
       boost::algorithm::split(parts, s, boost::algorithm::is_any_of(" "));
 
-      std::uint16_t dd, yy, mm;
-      std::uint16_t hh, mi, ss;
+      std::uint16_t dd;
+      std::uint16_t yy;
+      std::uint16_t mm;
+      std::uint16_t hh;
+      std::uint16_t mi;
+      std::uint16_t ss;
       std::string hms;
 
       switch (parts.size())

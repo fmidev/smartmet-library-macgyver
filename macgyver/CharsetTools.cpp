@@ -884,7 +884,7 @@ bool is_utf8(const std::string& src)
     const auto* str = reinterpret_cast<const unsigned char*>(src.c_str());
     const unsigned char* end = str + src.length();
     unsigned char byte;
-    unsigned int code_length, i;
+    unsigned int code_length;
     uint32_t ch;
     while (str != end)
     {
@@ -918,7 +918,7 @@ bool is_utf8(const std::string& src)
 
       /* Check continuation bytes: bit 7 should be set, bit 6 should be
        * unset (b10xxxxxx). */
-      for (i = 1; i < code_length; i++)
+      for (unsigned int i = 1; i < code_length; i++)
       {
         if ((str[i] & 0xC0) != 0x80)
           return false;
