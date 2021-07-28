@@ -123,9 +123,9 @@ class Stat
   bool invalid_timestamps() const;
 
   DataVector itsData;
-  double itsMissingValue;
-  bool itsWeights;
-  bool itsDegrees;
+  double itsMissingValue = 0;
+  bool itsWeights = false;
+  bool itsDegrees = false;
 };
 
 }  // namespace Stat

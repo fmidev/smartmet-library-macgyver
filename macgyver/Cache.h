@@ -1510,13 +1510,13 @@ class Cache : public boost::noncopyable
 
 #ifndef NDEBUG
   // Debugging parameters
-  unsigned long cacheHits;
+  unsigned long cacheHits = 0;
 
-  unsigned long cacheMisses;
+  unsigned long cacheMisses = 0;
 
-  unsigned long expiredReturned;
+  unsigned long expiredReturned = 0;
 
-  unsigned long expiredDeleted;
+  unsigned long expiredDeleted = 0;
 #endif
 };
 

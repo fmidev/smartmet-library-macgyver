@@ -74,13 +74,13 @@ class HelmertTransformation
       enum FmiSphereConvScalingType scaling_type = FMI_SPHERE_NO_SCALING);
 
  public:
-  double m;
-  double ex;
-  double ey;
-  double ez;
-  double tx;
-  double ty;
-  double tz;
+  double m = 0;
+  double ex = 0;
+  double ey = 0;
+  double ez = 0;
+  double tx = 0;
+  double ty = 0;
+  double tz = 0;
 };
 
 /**

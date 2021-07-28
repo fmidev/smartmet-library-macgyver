@@ -90,15 +90,15 @@ enum SetAndRiseOccurence
 
 struct lunar_time_t
 {
-  boost::local_time::local_date_time moonrise;
-  boost::local_time::local_date_time moonset;
-  boost::local_time::local_date_time moonrise2;
-  boost::local_time::local_date_time moonset2;
-  bool rise_today;
-  bool set_today;
-  bool rise2_today;
-  bool set2_today;
-  bool above_hz_24h;
+  boost::local_time::local_date_time moonrise{boost::local_time::not_a_date_time};
+  boost::local_time::local_date_time moonset{boost::local_time::not_a_date_time};
+  boost::local_time::local_date_time moonrise2{boost::local_time::not_a_date_time};
+  boost::local_time::local_date_time moonset2{boost::local_time::not_a_date_time};
+  bool rise_today = false;
+  bool set_today = false;
+  bool rise2_today = false;
+  bool set2_today = false;
+  bool above_hz_24h = false;
 
   lunar_time_t(const boost::local_time::local_date_time& mr,
                const boost::local_time::local_date_time& ms,
@@ -121,18 +121,7 @@ struct lunar_time_t
   {
   }
 
-  lunar_time_t()
-      : moonrise(boost::local_time::not_a_date_time),
-        moonset(boost::local_time::not_a_date_time),
-        moonrise2(boost::local_time::not_a_date_time),
-        moonset2(boost::local_time::not_a_date_time),
-        rise_today(false),
-        set_today(false),
-        rise2_today(false),
-        set2_today(false),
-        above_hz_24h(false)
-  {
-  }
+  lunar_time_t() = default;
 
   const boost::local_time::local_date_time& risesettime(SetAndRiseOccurence occ) const;
 

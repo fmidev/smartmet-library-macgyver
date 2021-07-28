@@ -12,10 +12,10 @@ namespace Fmi
 
 struct TemplateInfo
 {
-  std::time_t modtime;
+  std::time_t modtime = 0;
   SharedFormatter formatter;
 
-  TemplateInfo() : modtime(0), formatter() {}
+  TemplateInfo() = default;
 };
 
 using TemplateMap = std::map<boost::filesystem::path, TemplateInfo>;

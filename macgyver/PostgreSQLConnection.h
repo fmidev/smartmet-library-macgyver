@@ -79,8 +79,8 @@ class PostgreSQLConnection
  private:
   boost::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
   boost::shared_ptr<pqxx::work> itsTransaction;       // PostgreSQL transaction
-  bool itsDebug;
-  bool itsCollate;
+  bool itsDebug = false;
+  bool itsCollate = false;
   PostgreSQLConnectionOptions itsConnectionOptions;
   std::map<unsigned int, std::string> itsDataTypes;
 };  // class PostgreSQLConnection

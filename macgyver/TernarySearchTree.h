@@ -40,7 +40,7 @@ class TernarySearchTree : private boost::noncopyable
 
   void collect(Node* node, result_type& results) const;
   Node* root;
-  size_t count;
+  size_t count = 0;
 
  public:
   ~TernarySearchTree();
