@@ -859,7 +859,7 @@ bool extract_subvector(const DataVector& itsData,
     std::cout << "query_period: " << query_period << std::endl;
 #endif
 
-    for (DataConstIterator iter = itsData.begin(); iter != itsData.end(); iter++)
+    for (auto iter = itsData.begin(); iter != itsData.end(); iter++)
     {
       if (iter->value == itsMissingValue)
       {

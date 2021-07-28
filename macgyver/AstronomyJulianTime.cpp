@@ -89,7 +89,7 @@ ptime JulianTime::ptime_utc() const
 
     date date(year, month, day);
 
-    unsigned int ss = (unsigned)floor(f * (24 * 60 * 60));  // f: [0,1)
+    auto ss = (unsigned)floor(f * (24 * 60 * 60));  // f: [0,1)
 
     return ptime(date, boost::posix_time::seconds(ss));
   }
@@ -383,7 +383,7 @@ JulianTime SolNoon(const local_date_time& ldt, double lon_e)
     // '.julian_day()' gives us the noon (start of a Julian day),
     // 'lon_e/360.0' adjusts it -12..+12 hours.
     //
-    JulianTime jt = JulianTime(JD - lon_e / 360.0);
+    auto jt = JulianTime(JD - lon_e / 360.0);
 
     // Second round
     //

@@ -881,7 +881,7 @@ bool is_utf8(const std::string& src)
 {
   try
   {
-    const unsigned char* str = reinterpret_cast<const unsigned char*>(src.c_str());
+    const auto* str = reinterpret_cast<const unsigned char*>(src.c_str());
     const unsigned char* end = str + src.length();
     unsigned char byte;
     unsigned int code_length, i;

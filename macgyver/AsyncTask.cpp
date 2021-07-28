@@ -68,7 +68,7 @@ bool Fmi::AsyncTask::wait_for(double sec)
 {
   if (task_thread.joinable())
   {
-    int64_t mks = int64_t(std::ceil(1000000.0 * sec));
+    auto mks = int64_t(std::ceil(1000000.0 * sec));
     bool is_done = task_thread.try_join_for(boost::chrono::microseconds(mks));
     if (is_done)
     {
