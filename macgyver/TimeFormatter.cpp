@@ -98,7 +98,7 @@ TimeFormatter::~TimeFormatter() = default;
 
 struct IsoFormatter : public TimeFormatter
 {
-  IsoFormatter() : TimeFormatter() {}
+  IsoFormatter() = default;
   std::string format(const boost::posix_time::ptime& t) const override;
   std::string format(const boost::local_time::local_date_time& t) const override;
 };
@@ -113,7 +113,7 @@ struct IsoFormatter : public TimeFormatter
 
 struct SqlFormatter : public TimeFormatter
 {
-  SqlFormatter() : TimeFormatter() {}
+  SqlFormatter() = default;
   std::string format(const boost::posix_time::ptime& t) const override;
   std::string format(const boost::local_time::local_date_time& t) const override;
 };
@@ -128,7 +128,7 @@ struct SqlFormatter : public TimeFormatter
 
 struct XmlFormatter : public TimeFormatter
 {
-  XmlFormatter() : TimeFormatter() {}
+  XmlFormatter() = default;
   std::string format(const boost::posix_time::ptime& t) const override;
   std::string format(const boost::local_time::local_date_time& t) const override;
 };
@@ -143,7 +143,7 @@ struct XmlFormatter : public TimeFormatter
 
 struct EpochFormatter : public TimeFormatter
 {
-  EpochFormatter() : TimeFormatter() {}
+  EpochFormatter() = default;
   std::string format(const boost::posix_time::ptime& t) const override;
   std::string format(const boost::local_time::local_date_time& t) const override;
 };
@@ -158,7 +158,7 @@ struct EpochFormatter : public TimeFormatter
 
 struct TimeStampFormatter : public TimeFormatter
 {
-  TimeStampFormatter() : TimeFormatter() {}
+  TimeStampFormatter() = default;
   std::string format(const boost::posix_time::ptime& t) const override;
   std::string format(const boost::local_time::local_date_time& t) const override;
 };
@@ -173,7 +173,7 @@ struct TimeStampFormatter : public TimeFormatter
 
 struct HttpFormatter : public TimeFormatter
 {
-  HttpFormatter() : TimeFormatter() {}
+  HttpFormatter() = default;
   std::string format(const boost::posix_time::ptime& t) const override;
   std::string format(const boost::local_time::local_date_time& t) const override;
 };
