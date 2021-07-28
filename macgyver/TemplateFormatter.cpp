@@ -28,7 +28,7 @@ class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
  public:
   explicit OutputCollector(std::string& the_out) : out(the_out) {}
 
-  virtual INT_32 Collect(const void* vData, const UINT_32 datalength);
+  INT_32 Collect(const void* vData, const UINT_32 datalength) override;
 };
 
 INT_32 Fmi::TemplateFormatter::OutputCollector::Collect(const void* vData, const UINT_32 datalength)
@@ -63,7 +63,7 @@ class Fmi::TemplateFormatter::Logger : public CTPP::Logger
 #pragma clang diagnostic pop
 #endif
 
-  virtual INT_32 WriteLog(const UINT_32 priority, CCHAR_P szString, const UINT_32 stringlen);
+  INT_32 WriteLog(const UINT_32 priority, CCHAR_P szString, const UINT_32 stringlen) override;
 };
 
 INT_32 Fmi::TemplateFormatter::Logger::WriteLog(const UINT_32 priority,
