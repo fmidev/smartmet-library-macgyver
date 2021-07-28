@@ -64,7 +64,6 @@ class AsyncTask : private virtual boost::noncopyable
   void handle_result(Status stat, std::exception_ptr exc = nullptr);
   std::exception_ptr get_exception() const;
 
- private:
   const std::string name;
   mutable std::mutex m1;
   std::atomic<Status> status;

@@ -95,7 +95,6 @@ class AsyncTaskGroup : public boost::noncopyable
   bool wait_some();
   void on_task_completed_callback(std::size_t task_id);
 
- private:
   std::atomic_size_t counter;
   std::size_t max_paralell_tasks;
   mutable std::mutex m1;

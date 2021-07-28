@@ -49,7 +49,6 @@ class PostgreSQLConnection
     PostgreSQLConnection& conn;
   };
 
- public:
   ~PostgreSQLConnection() { close(); }
   PostgreSQLConnection(bool theDebug = false) : itsDebug(theDebug), itsCollate(false) {}
   PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions);
