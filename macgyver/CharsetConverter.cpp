@@ -35,7 +35,7 @@ Fmi::CharsetConverter::CharsetConverter(const std::string& from,
 {
 }
 
-Fmi::CharsetConverter::~CharsetConverter() {}
+Fmi::CharsetConverter::~CharsetConverter() = default;
 
 std::string Fmi::CharsetConverter::convert(const std::string& src) const
 {

@@ -64,7 +64,7 @@ class TimeZones::Pimple
  */
 // ----------------------------------------------------------------------
 
-TimeZones::~TimeZones() {}
+TimeZones::~TimeZones() = default;
 // ----------------------------------------------------------------------
 /*!
  * \brief Default constructor

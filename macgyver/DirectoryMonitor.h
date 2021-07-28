@@ -47,6 +47,9 @@ class DirectoryMonitor : private boost::noncopyable
   DirectoryMonitor();
   ~DirectoryMonitor();
 
+  DirectoryMonitor(const DirectoryMonitor& other) = delete;
+  DirectoryMonitor& operator=(const DirectoryMonitor& other) = delete;
+
   // Callback interfaces. Note that const references could be used
   // since a write lock exists during the callback. However, if
   // the callback instantiates a new thread and passes the
@@ -107,9 +110,6 @@ class DirectoryMonitor : private boost::noncopyable
   bool wait_until_ready() const;
 
  private:
-  DirectoryMonitor(const DirectoryMonitor& other);
-  DirectoryMonitor& operator=(const DirectoryMonitor& other);
-
   class Pimple;
   std::unique_ptr<Pimple> impl;
 

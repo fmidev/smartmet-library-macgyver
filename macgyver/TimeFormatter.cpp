@@ -87,7 +87,7 @@ namespace Fmi
  */
 // ----------------------------------------------------------------------
 
-TimeFormatter::~TimeFormatter() {}
+TimeFormatter::~TimeFormatter() = default;
 // ----------------------------------------------------------------------
 /*!
  * \brief ISO-formatter (see boost manuals)

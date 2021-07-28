@@ -72,7 +72,7 @@ TimeZoneFactory::TimeZoneFactory() : m_Impl(new Impl()) {}
  */
 // ----------------------------------------------------------------------
 
-TimeZoneFactory::~TimeZoneFactory() {}
+TimeZoneFactory::~TimeZoneFactory() = default;
 
 // ----------------------------------------------------------------------
 /*!

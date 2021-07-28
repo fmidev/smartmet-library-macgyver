@@ -19,7 +19,7 @@
 #include <ostream>
 #include <string>
 
-Fmi::TemplateFormatter::~TemplateFormatter() {}
+Fmi::TemplateFormatter::~TemplateFormatter() = default;
 
 class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
 {

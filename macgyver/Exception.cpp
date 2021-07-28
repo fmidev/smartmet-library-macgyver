@@ -111,7 +111,7 @@ Exception::Exception(const char* _filename, int _line, const char* _function, st
   message = std::move(_message);
 }
 
-Exception::~Exception() {}
+Exception::~Exception() = default;
 
 std::string Exception::getFilename() const
 {

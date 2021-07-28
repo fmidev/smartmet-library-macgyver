@@ -51,7 +51,7 @@ class JulianTime
    * Construction from a Julian day number
    */
   JulianTime(double jd_ = 0.0) : jd(jd_) {}
-  JulianTime(const JulianTime& other) : jd(other.jd) {}
+  JulianTime(const JulianTime& other) = default;
   JulianTime& operator=(const JulianTime& other)
   {
     if (this != &other)
