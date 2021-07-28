@@ -907,13 +907,13 @@ bool is_utf8(const std::string& src)
       else
       {
         /* invalid first byte of a multibyte character */
-        return 0;
+        return false;
       }
 
       if (str + (code_length - 1) >= end)
       {
         /* truncated string or invalid byte sequence */
-        return 0;
+        return false;
       }
 
       /* Check continuation bytes: bit 7 should be set, bit 6 should be
@@ -921,7 +921,7 @@ bool is_utf8(const std::string& src)
       for (i = 1; i < code_length; i++)
       {
         if ((str[i] & 0xC0) != 0x80)
-          return 0;
+          return false;
       }
 
       if (code_length == 2)
@@ -938,12 +938,12 @@ bool is_utf8(const std::string& src)
         /* (0xff & 0x0f) << 12 | (0xff & 0x3f) << 6 | (0xff & 0x3f) = 0xffff,
            so ch <= 0xffff */
         if (ch < 0x0800)
-          return 0;
+          return false;
 
         /* surrogates (U+D800-U+DFFF) are invalid in UTF-8:
            test if (0xD800 <= ch && ch <= 0xDFFF) */
         if ((ch >> 11) == 0x1b)
-          return 0;
+          return false;
       }
       else if (code_length == 4)
       {
@@ -951,11 +951,11 @@ bool is_utf8(const std::string& src)
         ch = ((str[0] & 0x07) << 18) + ((str[1] & 0x3f) << 12) + ((str[2] & 0x3f) << 6) +
              (str[3] & 0x3f);
         if ((ch < 0x10000) || (0x10FFFF < ch))
-          return 0;
+          return false;
       }
       str += code_length;
     }
-    return 1;
+    return true;
   }
   catch (...)
   {
