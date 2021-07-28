@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.7.27
+Version: 21.7.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -40,9 +40,9 @@ BuildRequires: libpqxx-devel < 1:7.0
 #TestRequires: libpqxx-devel < 1:7.0
 %else
 %if %{defined el8}
-Requires: libpqxx >= 1:7.0
-BuildRequires: libpqxx-devel >= 1:7.0
-#TestRequires: libpqxx-devel >= 1:7.0
+Requires: libpqxx >= 5.0.1
+BuildRequires: libpqxx-devel >= 5.0.1
+#TestRequires: libpqxx-devel >= 5.0.1
 %else
 Requires: libpqxx
 BuildRequires: libpqxx-devel
@@ -108,6 +108,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Wed Jul 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.7.28-1.fmi
+- Silenced compiler warnings
+
 * Tue Jul 27 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.27-1.fmi
 - Added class Fmi::CharsetConverter
 
