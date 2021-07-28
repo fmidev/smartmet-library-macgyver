@@ -7,6 +7,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <fmt/format.h>
 #include <fmt/printf.h>
+#include <array>
 #include <cmath>
 #include <stdexcept>
 
@@ -15,12 +16,12 @@ namespace
 const char* weekdays = "SunMonTueWedThuFriSatSun";
 const char* months = "   JanFebMarAprMayJunJulAugSepOctNovDec";
 
-const char digits[] =
+const std::array<char, 201> digits{
     "0001020304050607080910111213141516171819"
     "2021222324252627282930313233343536373839"
     "4041424344454647484950515253545556575859"
     "6061626364656667686970717273747576777879"
-    "8081828384858687888990919293949596979899";
+    "8081828384858687888990919293949596979899"};
 
 }  // namespace
 
@@ -345,8 +346,8 @@ std::string to_iso_string(const boost::posix_time::time_duration& duration)
     if (duration.is_special())
       return boost::posix_time::to_iso_string(duration);
 
-    char buffer[8];
-    char* ptr = buffer + 8;
+    std::array<char, 8> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = duration.seconds() * 2;
     *--ptr = digits[index + 1];
@@ -383,8 +384,8 @@ std::string to_simple_string(const boost::posix_time::time_duration& duration)
     if (duration.is_special())
       return boost::posix_time::to_simple_string(duration);
 
-    char buffer[10];
-    char* ptr = buffer + 10;
+    std::array<char, 10> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = duration.seconds() * 2;
     *--ptr = digits[index + 1];
@@ -433,8 +434,8 @@ std::string to_simple_string(const boost::gregorian::date& date)
   try
   {
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
-    char buffer[12];
-    char* ptr = buffer + 12;
+    std::array<char, 12> buffer;
+    char* ptr = buffer.data() + buffer.size();
     unsigned index = ymd.day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
@@ -464,8 +465,8 @@ std::string to_iso_string(const boost::gregorian::date& date)
   try
   {
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
-    char buffer[9];
-    char* ptr = buffer + 9;
+    std::array<char, 9> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = ymd.day * 2;
     *--ptr = digits[index + 1];
@@ -493,8 +494,8 @@ std::string to_iso_extended_string(const boost::gregorian::date& date)
   try
   {
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
-    char buffer[11];
-    char* ptr = buffer + 11;
+    std::array<char, 11> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = ymd.day * 2;
     *--ptr = digits[index + 1];
@@ -530,8 +531,8 @@ std::string to_iso_string(const boost::posix_time::ptime& time)
     const auto& duration = time.time_of_day();
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
 
-    char buffer[16];
-    char* ptr = buffer + 16;
+    std::array<char, 16> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = duration.seconds() * 2;
     *--ptr = digits[index + 1];
@@ -579,8 +580,8 @@ std::string to_iso_string(const std::time_t time)
     struct tm tt;
     gmtime_r(&time, &tt);
 
-    char buffer[16];
-    char* ptr = buffer + 16;
+    std::array<char, 16> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = tt.tm_sec * 2;
     *--ptr = digits[index + 1];
@@ -626,8 +627,8 @@ std::string to_timestamp_string(const boost::posix_time::ptime& time)
     const auto& duration = time.time_of_day();
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
 
-    char buffer[13];
-    char* ptr = buffer + 13;
+    std::array<char, 13> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     auto index = duration.minutes() * 2;
     *--ptr = digits[index + 1];
@@ -667,8 +668,8 @@ std::string to_iso_extended_string(const boost::posix_time::ptime& time)
     const auto& duration = time.time_of_day();
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
 
-    char buffer[20];
-    char* ptr = buffer + 20;
+    std::array<char, 20> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = duration.seconds() * 2;
     *--ptr = digits[index + 1];
@@ -724,8 +725,8 @@ std::string to_simple_string(const boost::posix_time::ptime& time)
     const auto& duration = time.time_of_day();
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
 
-    char buffer[30];
-    char* ptr = buffer + 30;
+    std::array<char, 30> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = duration.seconds() * 2;
     *--ptr = digits[index + 1];
@@ -784,8 +785,8 @@ std::string to_http_string(const boost::posix_time::ptime& time)
     const auto& duration = time.time_of_day();
     boost::gregorian::greg_year_month_day ymd = date.year_month_day();
 
-    char buffer[30];
-    char* ptr = buffer + 30;
+    std::array<char, 30> buffer;
+    char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     *--ptr = 'T';
     *--ptr = 'M';

@@ -22,6 +22,7 @@
 #include "AstronomyHelperFunctions.h"
 #include "AstronomyJulianTime.h"
 #include "Exception.h"
+#include <array>
 #include <cmath>
 #include <vector>
 
@@ -38,7 +39,7 @@ solar_time_t solar_time(const boost::local_time::local_date_time& ldt, double lo
 {
   try
   {
-    JulianTime jt[2];
+    std::array<JulianTime, 2> jt;
 
     check_lonlat(lon_e, lat);
 

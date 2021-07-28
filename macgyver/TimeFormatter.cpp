@@ -12,6 +12,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <fmt/format.h>
 #include <fmt/printf.h>
+#include <array>
 #include <stdexcept>
 
 // ----------------------------------------------------------------------
@@ -41,7 +42,7 @@ static time_t my_timegm(struct tm* t)
     const int DAY = 24 * HOUR;
     const int YEAR = 365 * DAY;
 
-    const int mon[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    const std::array<int, 12> mon{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     if (t->tm_year < 70)
       return (static_cast<time_t>(-1));
