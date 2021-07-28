@@ -30,11 +30,13 @@ void stopping_test()
       },
       10);
   const pt::ptime start = pt::microsec_clock::universal_time();
-  std::thread t([&monitor, &started, &c]() {
-    started = true;
-    c.notify_all();
-    monitor.run();
-  });
+  std::thread t(
+      [&monitor, &started, &c]()
+      {
+        started = true;
+        c.notify_all();
+        monitor.run();
+      });
 
   {
     std::unique_lock<std::mutex> lock(m);
@@ -75,16 +77,20 @@ void interruption_test()
       [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
       },
       10);
-  boost::thread task([&monitor, &started, &c]() {
-    started = true;
-    c.notify_all();
-    monitor.run();
-  });
+  boost::thread task(
+      [&monitor, &started, &c]()
+      {
+        started = true;
+        c.notify_all();
+        monitor.run();
+      });
 
-  BOOST_SCOPE_EXIT(&monitor, &task) {
-      monitor.stop();
-      task.join();
-  } BOOST_SCOPE_EXIT_END;
+  BOOST_SCOPE_EXIT(&monitor, &task)
+  {
+    monitor.stop();
+    task.join();
+  }
+  BOOST_SCOPE_EXIT_END;
 
   {
     std::unique_lock<std::mutex> lock(m);
@@ -118,17 +124,18 @@ void wait_until_ready_test_1()
       [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
       },
       10);
-  boost::thread task([&monitor]() {
-    monitor.run();
-  });
+  boost::thread task([&monitor]() { monitor.run(); });
 
-  BOOST_SCOPE_EXIT(&monitor, &task) {
-      monitor.stop();
-      task.join();
-  } BOOST_SCOPE_EXIT_END;
+  BOOST_SCOPE_EXIT(&monitor, &task)
+  {
+    monitor.stop();
+    task.join();
+  }
+  BOOST_SCOPE_EXIT_END;
 
   bool ok = monitor.wait_until_ready();
-  if (not ok) {
+  if (not ok)
+  {
     TEST_FAILED("Waiting for first scan returned false");
   }
 
@@ -148,21 +155,21 @@ void wait_until_ready_test_2()
       },
       10);
 
+  boost::thread task([&monitor]() { monitor.run(); });
 
-  boost::thread task([&monitor]() {
-    monitor.run();
-  });
-
-  BOOST_SCOPE_EXIT(&monitor, &task) {
-      monitor.stop();
-      task.join();
-  } BOOST_SCOPE_EXIT_END;
+  BOOST_SCOPE_EXIT(&monitor, &task)
+  {
+    monitor.stop();
+    task.join();
+  }
+  BOOST_SCOPE_EXIT_END;
 
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   monitor.stop();
 
   bool ok = monitor.wait_until_ready();
-  if (ok) {
+  if (ok)
+  {
     TEST_FAILED("Monitor already ended. Should have returned false");
   }
 

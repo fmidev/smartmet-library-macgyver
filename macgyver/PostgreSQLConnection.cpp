@@ -16,27 +16,27 @@ namespace Fmi
 {
 namespace Database
 {
-
 namespace
 {
-  typedef unsigned int PostgreSQLConnectionOptions::*uint_member_ptr;
-  typedef std::string PostgreSQLConnectionOptions::*string_member_ptr;
+typedef unsigned int PostgreSQLConnectionOptions::*uint_member_ptr;
+typedef std::string PostgreSQLConnectionOptions::*string_member_ptr;
 
-  struct Ignore {} ignore;
+struct Ignore
+{
+} ignore;
 
-  const std::map<std::string, boost::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def =
-    {
-     {"host", &PostgreSQLConnectionOptions::host}
-     ,{"dbname", &PostgreSQLConnectionOptions::database}
-     ,{"port", &PostgreSQLConnectionOptions::port}
-     ,{"user", &PostgreSQLConnectionOptions::username}
-     ,{"password", &PostgreSQLConnectionOptions::password}
-     ,{"client_encoding", &PostgreSQLConnectionOptions::encoding}
-     ,{"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
+const std::map<std::string, boost::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def =
+    {{"host", &PostgreSQLConnectionOptions::host},
+     {"dbname", &PostgreSQLConnectionOptions::database},
+     {"port", &PostgreSQLConnectionOptions::port},
+     {"user", &PostgreSQLConnectionOptions::username},
+     {"password", &PostgreSQLConnectionOptions::password},
+     {"client_encoding", &PostgreSQLConnectionOptions::encoding},
+     {"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
      // FIXME: add parameters we ignore
-     ,{"options", ignore}
-    };
-}
+     ,
+     {"options", ignore}};
+}  // namespace
 
 PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn_str)
 {
@@ -49,35 +49,36 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
       const std::size_t p = part.find('=');
       if (p == std::string::npos)
       {
-	throw Fmi::Exception(BCP, "Unrecognized part '" + part + "'");
+        throw Fmi::Exception(BCP, "Unrecognized part '" + part + "'");
       }
       else
       {
-	const std::string name = part.substr(0, p);
-	const std::string value = part.substr(p + 1);
-	const auto it = field_def.find(name);
-	if (it == field_def.end())
-	{
-	  throw Fmi::Exception(BCP, "Unrecognized field '" + part + "'");
-	}
-	else
-	{
-	  switch (it->second.which())
-	  {
-	  case 0:
-	    //std::cout << METHOD_NAME << ": field '" << part << "' ignored" << std::endl;
-	    break;
-	  case 1:
-	    this->*boost::get<uint_member_ptr>(it->second) = boost::lexical_cast<unsigned int>(value);
-	    break;
-	  case 2:
-	    this->*boost::get<string_member_ptr>(it->second) = value;
-	    break;
+        const std::string name = part.substr(0, p);
+        const std::string value = part.substr(p + 1);
+        const auto it = field_def.find(name);
+        if (it == field_def.end())
+        {
+          throw Fmi::Exception(BCP, "Unrecognized field '" + part + "'");
+        }
+        else
+        {
+          switch (it->second.which())
+          {
+            case 0:
+              // std::cout << METHOD_NAME << ": field '" << part << "' ignored" << std::endl;
+              break;
+            case 1:
+              this->*boost::get<uint_member_ptr>(it->second) =
+                  boost::lexical_cast<unsigned int>(value);
+              break;
+            case 2:
+              this->*boost::get<string_member_ptr>(it->second) = value;
+              break;
 
-	  default: // Not supposed to be here
-	    assert("Not supposed to be here");
-	  }
-	}
+            default:  // Not supposed to be here
+              assert("Not supposed to be here");
+          }
+        }
       }
     }
   }
@@ -194,12 +195,13 @@ void PostgreSQLConnection::close()
     // TODO:checked whether this works with libpqxx7
     try
     {
-      if(itsConnection->is_open())
+      if (itsConnection->is_open())
         itsConnection->close();
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-      throw Fmi::Exception(BCP, std::string("Failed to close connection to PostgreSQL: ") + e.what());
+      throw Fmi::Exception(BCP,
+                           std::string("Failed to close connection to PostgreSQL: ") + e.what());
     }
 #endif
   }
@@ -312,8 +314,7 @@ void PostgreSQLConnection::setClientEncoding(const std::string& theEncoding) con
   }
 }
 
-PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn)
-  : conn(conn)
+PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn) : conn(conn)
 {
   try
   {
@@ -345,7 +346,7 @@ pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQ
     {
       if (conn.itsDebug)
       {
-	std::cout << "SQL: " << theSQLStatement << std::endl;
+        std::cout << "SQL: " << theSQLStatement << std::endl;
       }
       return conn.itsTransaction->exec(theSQLStatement);
     }
@@ -367,21 +368,22 @@ void PostgreSQLConnection::Transaction::commit()
     if (conn.itsTransaction)
     {
       try
-      {	
+      {
         conn.itsTransaction->commit();
         conn.itsTransaction.reset();
       }
       catch (const std::exception& e)
       {
-	// If we get here, Xaction has been rolled back
-	conn.itsTransaction.reset();
-	throw Fmi::Exception(BCP, std::string("Commiting transaction failed: ").append(e.what()));
+        // If we get here, Xaction has been rolled back
+        conn.itsTransaction.reset();
+        throw Fmi::Exception(BCP, std::string("Commiting transaction failed: ").append(e.what()));
       }
     }
     else
     {
-      throw Fmi::Exception(BCP, "[Logic error] No transaction to commit"
-			   " (already commited or rolled back)");
+      throw Fmi::Exception(BCP,
+                           "[Logic error] No transaction to commit"
+                           " (already commited or rolled back)");
     }
   }
   catch (...)
@@ -400,8 +402,9 @@ void PostgreSQLConnection::Transaction::rollback()
     }
     else
     {
-      throw Fmi::Exception(BCP, "[Logic error] No transaction to roll back"
-			   " (already commited or rolled back)");
+      throw Fmi::Exception(BCP,
+                           "[Logic error] No transaction to roll back"
+                           " (already commited or rolled back)");
     }
   }
   catch (...)

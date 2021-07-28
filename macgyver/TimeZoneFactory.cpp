@@ -175,9 +175,10 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(floa
     string tz = m_Impl->m_Coordinates->zone_name(lon, lat);
     boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
     if (!ptr)
-      throw Fmi::Exception(BCP, "TimeZoneFactory could not convert given coordinate " +
-                          Fmi::to_string(lon) + "," + Fmi::to_string(lat) +
-                          " to a valid time zone name");
+      throw Fmi::Exception(BCP,
+                           "TimeZoneFactory could not convert given coordinate " +
+                               Fmi::to_string(lon) + "," + Fmi::to_string(lat) +
+                               " to a valid time zone name");
 
     return ptr;
   }

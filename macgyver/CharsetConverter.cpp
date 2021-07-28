@@ -1,23 +1,21 @@
 #include "CharsetConverter.h"
+#include "Exception.h"
 #include <cerrno>
 #include <cstring>
-#include <mutex>
 #include <iconv.h>
-#include "Exception.h"
+#include <mutex>
 
 struct Fmi::CharsetConverter::Impl
 {
   Impl(const std::string& from, const std::string& to)
-    : itsIconv(::iconv_open(to.c_str(), from.c_str()))
+      : itsIconv(::iconv_open(to.c_str(), from.c_str()))
   {
     if (itsIconv == (iconv_t)-1)
     {
-      throw Fmi::Exception(BCP, "Initializing iconv from " + from + " to "
-			   + to + " failed");
+      throw Fmi::Exception(BCP, "Initializing iconv from " + from + " to " + to + " failed");
     }
   }
 
-	       
   ~Impl()
   {
     if (itsIconv != (iconv_t)-1)
@@ -30,18 +28,14 @@ struct Fmi::CharsetConverter::Impl
   std::mutex m;
 };
 
-Fmi::CharsetConverter::CharsetConverter(const std::string& from, const std::string& to,
-			    std::size_t max_len)
-  : from(from)
-  , to(to)
-  , max_len(max_len)
-  , impl(new Impl(from, to))
+Fmi::CharsetConverter::CharsetConverter(const std::string& from,
+                                        const std::string& to,
+                                        std::size_t max_len)
+    : from(from), to(to), max_len(max_len), impl(new Impl(from, to))
 {
 }
 
-Fmi::CharsetConverter::~CharsetConverter()
-{
-}
+Fmi::CharsetConverter::~CharsetConverter() {}
 
 std::string Fmi::CharsetConverter::convert(const std::string& src) const
 {
@@ -50,8 +44,9 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
   std::size_t i_len = src.length();
   if (max_len > 0U && i_len > max_len)
   {
-    throw Fmi::Exception(BCP, "Provided string is too long (" + std::to_string(int(i_len))
-			 + " > " + std::to_string(int(max_len)));
+    throw Fmi::Exception(BCP,
+                         "Provided string is too long (" + std::to_string(int(i_len)) + " > " +
+                             std::to_string(int(max_len)));
   }
   std::size_t o_len = 1024;
   char* out = s_out;
@@ -69,16 +64,18 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
       in = const_cast<char*>(src.c_str());
       i_len = src.length();
       o_len = 4 * i_len;
-      char* x_out = new char [o_len + 1];
+      char* x_out = new char[o_len + 1];
       out = out_ptr = x_out;
       result = ::iconv(impl->itsIconv, &in, &i_len, &out_ptr, &o_len);
       if (result != (std::size_t)-1)
       {
-	std::string retval(x_out, out_ptr);
-	delete [] x_out;
-	return retval;
-      } else {
-	delete [] x_out;
+        std::string retval(x_out, out_ptr);
+        delete[] x_out;
+        return retval;
+      }
+      else
+      {
+        delete[] x_out;
       }
     }
 
@@ -86,15 +83,16 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
 
     switch (errno)
     {
-    case E2BIG:
-      throw Fmi::Exception(BCP, "Not enough memory for converting from " + from
-			   + " to " + to);
-    case EILSEQ:
-      throw Fmi::Exception(BCP, "An invalid multibyte sequence has been encountered in the input");
-    case EINVAL:
-      throw Fmi::Exception(BCP, "An incomplete multibyte sequence has been encountered in the input");
-    default:
-      throw Fmi::Exception(BCP, std::string("Unexpected error: ") + strerror(errno));
+      case E2BIG:
+        throw Fmi::Exception(BCP, "Not enough memory for converting from " + from + " to " + to);
+      case EILSEQ:
+        throw Fmi::Exception(BCP,
+                             "An invalid multibyte sequence has been encountered in the input");
+      case EINVAL:
+        throw Fmi::Exception(BCP,
+                             "An incomplete multibyte sequence has been encountered in the input");
+      default:
+        throw Fmi::Exception(BCP, std::string("Unexpected error: ") + strerror(errno));
     }
   }
   else

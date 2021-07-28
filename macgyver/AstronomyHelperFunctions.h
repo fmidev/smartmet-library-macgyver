@@ -74,7 +74,6 @@ inline void check_lonlat(double& lon, double& lat)
   clamp_to(lat, -89.8, 89.8);  // exclude poles
 }
 
-
 /*
  * hour angle of the Sun at sunrise for the latitude
  *

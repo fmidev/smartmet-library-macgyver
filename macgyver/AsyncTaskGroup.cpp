@@ -1,6 +1,6 @@
 #include "AsyncTaskGroup.h"
-#include "TypeName.h"
 #include "Exception.h"
+#include "TypeName.h"
 
 Fmi::AsyncTaskGroup::AsyncTaskGroup(std::size_t max_paralell_tasks)
     : counter(0),
@@ -79,10 +79,12 @@ bool Fmi::AsyncTaskGroup::wait_some()
 {
   std::mutex m2;
   std::unique_lock<std::mutex> lock(m2);
-  cond.wait(lock, [this]() {
-    std::unique_lock<std::mutex> lock(m1);
-    return active_tasks.empty() || !completed_tasks.empty();
-  });
+  cond.wait(lock,
+            [this]()
+            {
+              std::unique_lock<std::mutex> lock(m1);
+              return active_tasks.empty() || !completed_tasks.empty();
+            });
   lock.unlock();
 
   return handle_finished();
@@ -121,8 +123,9 @@ bool Fmi::AsyncTaskGroup::handle_finished()
     if (stop_on_error_ && some_failed)
     {
       stop();
-      throw Fmi::Exception(BCP, "One ore more tasks failed with C++ exceptions."
-                               " Stopping remaining tasks");
+      throw Fmi::Exception(BCP,
+                           "One ore more tasks failed with C++ exceptions."
+                           " Stopping remaining tasks");
     }
 
     return true;
@@ -136,8 +139,8 @@ void Fmi::AsyncTaskGroup::on_task_completed_callback(std::size_t task_id)
   if (it == active_tasks.end())
   {
     // Should never happen
-    throw Fmi::Exception(BCP, " [INTERNAL ERROR] : task " +
-                             std::to_string(task_id) + " is not found");
+    throw Fmi::Exception(BCP,
+                         " [INTERNAL ERROR] : task " + std::to_string(task_id) + " is not found");
   }
   else
   {

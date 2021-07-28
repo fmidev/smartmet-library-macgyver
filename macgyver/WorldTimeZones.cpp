@@ -93,7 +93,8 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
   try
   {
     if (lon < itsLon1 || lon > itsLon2 || lat < itsLat1 || lat > itsLat2)
-      throw Fmi::Exception(BCP, "Invalid lon-lat given to WorldTimeZones::zone_name: " +
+      throw Fmi::Exception(BCP,
+                           "Invalid lon-lat given to WorldTimeZones::zone_name: " +
                                Fmi::to_string(lon) + "," + Fmi::to_string(lat));
 
     // Calculate the index of the coordinate
@@ -127,8 +128,9 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
     uint16_t attr = read_attr(lo, itsData);
 
     if (attr <= 0 || static_cast<size_t>(attr) > itsZones.size())
-      throw Fmi::Exception(BCP, "Failed to find a timezone for coordinate " + Fmi::to_string(lon) +
-                               "," + Fmi::to_string(lat));
+      throw Fmi::Exception(BCP,
+                           "Failed to find a timezone for coordinate " + Fmi::to_string(lon) + "," +
+                               Fmi::to_string(lat));
 
     return itsZones[attr - 1];
   }

@@ -102,7 +102,8 @@ void utf8_to_utf16()
 
 void utf8_validation()
 {
-  const auto check = [](bool expected, const std::string& src) {
+  const auto check = [](bool expected, const std::string& src)
+  {
     bool result = Fmi::is_utf8(src);
     if (result ^ expected)
     {

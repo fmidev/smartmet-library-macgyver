@@ -5,7 +5,6 @@ namespace Fmi
 {
 namespace Cache
 {
-
 bool parse_size_t(const std::string& input, std::size_t& result)
 {
   try
@@ -47,8 +46,8 @@ FileCache::FileCache(const fs::path& directory, std::size_t maxSize)
     {
       if (!fs::is_directory(itsDirectory))
       {
-        throw Fmi::Exception(BCP, "File Cache Directory '" + itsDirectory.string() +
-                                 "' is not a directory");
+        throw Fmi::Exception(
+            BCP, "File Cache Directory '" + itsDirectory.string() + "' is not a directory");
       }
 
       // Write a test file to see that we have write permissions
@@ -56,8 +55,8 @@ FileCache::FileCache(const fs::path& directory, std::size_t maxSize)
       bool res = writeFile(itsDirectory, "testfile", test);
       if (!res)
       {
-        throw Fmi::Exception(BCP, "Unable to write to directory '" + itsDirectory.string() +
-                                 "', check permissions");
+        throw Fmi::Exception(
+            BCP, "Unable to write to directory '" + itsDirectory.string() + "', check permissions");
       }
 
       fs::remove(itsDirectory / "testfile");
@@ -163,9 +162,9 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
 
     if (!isValid)
     {
-  #ifdef MYDEBUG
+#ifdef MYDEBUG
       std::cout << "Insert: No disk space for key: " << key << std::endl;
-  #endif
+#endif
       return false;  // Not possible to cache this value
     }
 
@@ -173,9 +172,9 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
 
     if (!isValid)
     {
-  #ifdef MYDEBUG
+#ifdef MYDEBUG
       std::cout << "Insert: Unable to write key: " << key << std::endl;
-  #endif
+#endif
       return false;  // Something went wrong with file write
     }
 
@@ -379,7 +378,7 @@ bool FileCache::writeFile(const fs::path& theDir,
 // Could not open file
 #ifdef MYDEBUG
       std::cout << "WriteFile: Unable to open file. Path: " << (theDir / fileName).string()
-                  << std::endl;
+                << std::endl;
 #endif
       return false;
     }

@@ -13,7 +13,6 @@
 
 namespace PostgreSQLConnectionOptionsTest
 {
-
 void parse_options_1()
 {
   const std::string conn_str = "host=db.example.com dbname=example port=8001 user=foo password=bar";
@@ -36,7 +35,8 @@ void parse_options_1()
   }
   if (opt.port != 8001)
   {
-    TEST_FAILED("opt.port='" + boost::lexical_cast<std::string>(opt.port) + "' but not expected 8001");
+    TEST_FAILED("opt.port='" + boost::lexical_cast<std::string>(opt.port) +
+                "' but not expected 8001");
   }
   if (opt.encoding != "UTF8")
   {
@@ -44,7 +44,8 @@ void parse_options_1()
   }
   if (opt.connect_timeout != 0)
   {
-    TEST_FAILED("opt.connect_timeout=" + boost::lexical_cast<std::string>(opt.connect_timeout) + "' but not expected 0");
+    TEST_FAILED("opt.connect_timeout=" + boost::lexical_cast<std::string>(opt.connect_timeout) +
+                "' but not expected 0");
   }
 
   const std::string new_conn_str = opt;
@@ -59,10 +60,7 @@ void parse_options_1()
 class tests : public tframe::tests
 {
   virtual const char* error_message_prefix() const { return "\n\t"; }
-  void test(void)
-  {
-    TEST(parse_options_1);
-  }
+  void test(void) { TEST(parse_options_1); }
 };
 
 }  // namespace PostgreSQLConnectionOptionsTest
@@ -75,4 +73,3 @@ int main(void)
   PostgreSQLConnectionOptionsTest::tests t;
   return t.run();
 }
-

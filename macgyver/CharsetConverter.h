@@ -1,12 +1,11 @@
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <memory>
 #include <string>
-#include <boost/noncopyable.hpp>
 
 namespace Fmi
 {
-
 class CharsetConverter : public boost::noncopyable
 {
  public:
@@ -24,4 +23,4 @@ class CharsetConverter : public boost::noncopyable
   std::unique_ptr<Impl> impl;
 };
 
-}
+}  // namespace Fmi

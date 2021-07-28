@@ -46,7 +46,8 @@ class ScopedTimer
  *   @endcode
  */
 #define SHOW_EXCEPTIONS(x)                                                                        \
-  [&]() {                                                                                         \
+  [&]()                                                                                           \
+  {                                                                                               \
     try                                                                                           \
     {                                                                                             \
       return x;                                                                                   \

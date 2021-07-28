@@ -6,8 +6,8 @@
 // ======================================================================
 
 #include "AsyncTaskGroup.h"
-#include "TypeName.h"
 #include "Exception.h"
+#include "TypeName.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <regression/tframe.h>
 #include <atomic>
@@ -25,10 +25,12 @@ void not_waiting_for_result()
 {
   std::unique_ptr<std::string> test(new std::string);
   std::unique_ptr<Fmi::AsyncTaskGroup> tg(new Fmi::AsyncTaskGroup);
-  tg->add("not waiting for result", [&]() {
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    *test = "foobar";
-  });
+  tg->add("not waiting for result",
+          [&]()
+          {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            *test = "foobar";
+          });
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   tg.reset();
   test.reset();
@@ -80,10 +82,12 @@ void task_throws_not_std_exception()
   std::string exception_name;
   std::string task_name;
   Fmi::AsyncTaskGroup tg;
-  tg.on_task_error([&](const std::string& name) {
-    exception_name = Fmi::current_exception_type();
-    task_name = name;
-  });
+  tg.on_task_error(
+      [&](const std::string& name)
+      {
+        exception_name = Fmi::current_exception_type();
+        task_name = name;
+      });
   tg.add("foobar", []() { throw TestException(); });
   tg.wait();
   if (exception_name != "AsyncTaskGroupTest::TestException")
@@ -104,10 +108,12 @@ void large_number_of_tasks()
   Fmi::AsyncTaskGroup tg(10);
   for (int i = 0; i < 100; i++)
   {
-    tg.add("test", [&]() {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      test++;
-    });
+    tg.add("test",
+           [&]()
+           {
+             std::this_thread::sleep_for(std::chrono::milliseconds(10));
+             test++;
+           });
   }
   if (not failed and tg.get_num_active_tasks() > 10)
   {
@@ -178,7 +184,8 @@ void try_adding_task_after_stop_request()
 void test_stop_on_error()
 {
   std::atomic<int> counter(0);
-  const auto task_1 = [&]() {
+  const auto task_1 = [&]()
+  {
     for (int i = 0; i < 10; i++)
     {
       Fmi::AsyncTask::interruption_point();

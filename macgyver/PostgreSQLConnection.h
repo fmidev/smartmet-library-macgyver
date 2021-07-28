@@ -35,21 +35,21 @@ struct PostgreSQLConnectionOptions
 
 class PostgreSQLConnection
 {
-  public:
+ public:
   class Transaction final : public virtual boost::noncopyable
   {
-  public:
+   public:
     Transaction(PostgreSQLConnection& conn);
     ~Transaction();
     pqxx::result execute(const std::string& theSQLStatement) const;
     void commit();
     void rollback();
-  private:
+
+   private:
     PostgreSQLConnection& conn;
   };
 
- 
-  public:
+ public:
   ~PostgreSQLConnection() { close(); }
   PostgreSQLConnection(bool theDebug = false) : itsDebug(theDebug), itsCollate(false) {}
   PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions);

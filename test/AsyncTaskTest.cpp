@@ -27,14 +27,17 @@ struct TestException
 void not_waiting_for_result()
 {
   std::atomic<int> test(0);
-  std::unique_ptr<Fmi::AsyncTask> task(new Fmi::AsyncTask("not waiting for result", [&]() {
-    for (int i = 0; i < 100; i++)
-    {
-      Fmi::AsyncTask::interruption_point();
-      std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
-    test = 1;
-  }));
+  std::unique_ptr<Fmi::AsyncTask> task(new Fmi::AsyncTask("not waiting for result",
+                                                          [&]()
+                                                          {
+                                                            for (int i = 0; i < 100; i++)
+                                                            {
+                                                              Fmi::AsyncTask::interruption_point();
+                                                              std::this_thread::sleep_for(
+                                                                  std::chrono::milliseconds(5));
+                                                            }
+                                                            test = 1;
+                                                          }));
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   ptime t1 = microsec_clock::universal_time();
   task.reset();
@@ -106,13 +109,15 @@ void task_throws_not_std_exception()
 
 void test_cancel_task()
 {
-  Fmi::AsyncTask task("foobar", []() {
-    for (int i = 0; i < 100; i++)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      Fmi::AsyncTask::interruption_point();
-    }
-  });
+  Fmi::AsyncTask task("foobar",
+                      []()
+                      {
+                        for (int i = 0; i < 100; i++)
+                        {
+                          std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                          Fmi::AsyncTask::interruption_point();
+                        }
+                      });
 
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   ptime t1 = microsec_clock::universal_time();
@@ -157,7 +162,8 @@ void stop_attempt_after_task_end()
   std::condition_variable cond;
   Fmi::AsyncTask task(
       "foobar",
-      []() {
+      []()
+      {
         /* Do nothing */
       },
       [&cond]() { cond.notify_all(); });

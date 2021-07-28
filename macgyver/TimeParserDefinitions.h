@@ -80,11 +80,14 @@ BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeOffset,
                           (char, sign)(unsigned int, value)(Fmi::TimeParser::OptionalChar, unit))
 
 BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeStamp,
-                          (unsigned short, year)(unsigned short, month)(unsigned short, day)(
-                              Fmi::TimeParser::OptionalInt,
-                              hour)(Fmi::TimeParser::OptionalInt,
-                                    minute)(Fmi::TimeParser::OptionalInt,
-                                            second)(Fmi::TimeParser::TimeZoneOffset, tz))
+                          (unsigned short,
+                           year)(unsigned short,
+                                 month)(unsigned short,
+                                        day)(Fmi::TimeParser::OptionalInt,
+                                             hour)(Fmi::TimeParser::OptionalInt,
+                                                   minute)(Fmi::TimeParser::OptionalInt,
+                                                           second)(Fmi::TimeParser::TimeZoneOffset,
+                                                                   tz))
 
 namespace Fmi
 {

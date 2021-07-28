@@ -777,8 +777,8 @@ std::string to_http_string(const boost::posix_time::ptime& time)
   try
   {
     if (time.is_special())
-      throw Fmi::Exception(BCP,
-          "Unable to format special boost::posix_time::ptime objects for HTTP responses");
+      throw Fmi::Exception(
+          BCP, "Unable to format special boost::posix_time::ptime objects for HTTP responses");
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();

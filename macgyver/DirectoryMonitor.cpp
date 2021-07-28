@@ -215,10 +215,10 @@ class DirectoryMonitor::Pimple
  public:
   MutexType mutex;
   Schedule schedule;
-  std::atomic<bool> running{false};  // true if run() has not exited
-  std::atomic<bool> stop{false};     // true if stop request is pending
-  std::atomic<bool> isready{false};  // true if at least one scan has completed
-  std::atomic<bool> has_ended{false}; // true if run() has ended due to any reason
+  std::atomic<bool> running{false};    // true if run() has not exited
+  std::atomic<bool> stop{false};       // true if stop request is pending
+  std::atomic<bool> isready{false};    // true if at least one scan has completed
+  std::atomic<bool> has_ended{false};  // true if run() has ended due to any reason
 
   std::mutex m2;
   std::mutex m_ready;
@@ -268,8 +268,8 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
   try
   {
     if (interval < 1)
-      throw Fmi::Exception(BCP, "DirectoryMonitor: Too small update interval: " +
-                               Fmi::to_string(interval));
+      throw Fmi::Exception(
+          BCP, "DirectoryMonitor: Too small update interval: " + Fmi::to_string(interval));
 
     if ((mask & ALL) == 0)
       throw Fmi::Exception(BCP, "DirectoryMonitor: Empty mask, nothing to monitor");
@@ -341,8 +341,8 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(
   try
   {
     if (interval < 1)
-      throw Fmi::Exception(BCP, "DirectoryMonitor: Too small update interval: " +
-                               Fmi::to_string(interval));
+      throw Fmi::Exception(
+          BCP, "DirectoryMonitor: Too small update interval: " + Fmi::to_string(interval));
 
     if ((mask & ALL) == 0)
       throw Fmi::Exception(BCP, "DirectoryMonitor: Empty mask, nothing to monitor");
@@ -396,7 +396,7 @@ void DirectoryMonitor::run()
         return;
 
       impl->running = true;
-      impl->has_ended = false; // FIXME: race if run() called more than once
+      impl->has_ended = false;  // FIXME: race if run() called more than once
 
       while (!impl->stop && !impl->schedule.empty())
       {
@@ -484,9 +484,9 @@ void DirectoryMonitor::run()
             }
             catch (std::exception& e)
             {
-    #ifdef DEBUG
+#ifdef DEBUG
               std::cerr << "Warning: " << e.what() << std::endl;
-    #endif
+#endif
 
               if ((mon.mask & ERROR) != 0)
               {
@@ -500,9 +500,10 @@ void DirectoryMonitor::run()
         }
 
         // One scan has now been completed
-        if (!impl->isready.exchange(true)) {
-	  impl->cond_ready.notify_all();
-	}
+        if (!impl->isready.exchange(true))
+        {
+          impl->cond_ready.notify_all();
+        }
 
         long sleeptime = 0;
         {

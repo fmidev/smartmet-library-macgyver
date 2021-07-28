@@ -213,7 +213,7 @@ bool is_short_weekday(const std::string& str)
   try
   {
     return (str == "Sun" || str == "Mon" || str == "Tue" || str == "Wed" || str == "Thu" ||
-          str == "Fri" || str == "Sat");
+            str == "Fri" || str == "Sat");
   }
   catch (...)
   {
@@ -593,7 +593,7 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
     if (*ptr != 'Z' && *ptr != '+' && *ptr != '-')
       return bad_time;
 
-zone_began:
+  zone_began:
 
     *isutc = true;
     if (*ptr == 'Z')
@@ -622,7 +622,7 @@ zone_began:
     if (*ptr != '\0')
       return bad_time;
 
-build_iso:
+  build_iso:
 
     boost::posix_time::ptime t(boost::gregorian::date(year, month, day),
                                boost::posix_time::hours(hour) + boost::posix_time::minutes(minute) +
