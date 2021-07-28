@@ -21,7 +21,7 @@ class AsyncTask : private virtual boost::noncopyable
     interrupted
   };
 
-  typedef void notify_finished_t(const std::string&, Status);
+  using nodify_finished_t = void(const std::string&, Status);
 
   static bool silent;
 

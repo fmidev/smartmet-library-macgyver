@@ -18,8 +18,8 @@ namespace Database
 {
 namespace
 {
-typedef unsigned int PostgreSQLConnectionOptions::*uint_member_ptr;
-typedef std::string PostgreSQLConnectionOptions::*string_member_ptr;
+using uint_member_ptr = unsigned int PostgreSQLConnectionOptions::*;
+using string_member_ptr = std::string PostgreSQLConnectionOptions::*;
 
 struct Ignore
 {
