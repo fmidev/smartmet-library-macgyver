@@ -48,37 +48,30 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
     {
       const std::size_t p = part.find('=');
       if (p == std::string::npos)
-      {
         throw Fmi::Exception(BCP, "Unrecognized part '" + part + "'");
-      }
-      else
-      {
-        const std::string name = part.substr(0, p);
-        const std::string value = part.substr(p + 1);
-        const auto it = field_def.find(name);
-        if (it == field_def.end())
-        {
-          throw Fmi::Exception(BCP, "Unrecognized field '" + part + "'");
-        }
-        else
-        {
-          switch (it->second.which())
-          {
-            case 0:
-              // std::cout << METHOD_NAME << ": field '" << part << "' ignored" << std::endl;
-              break;
-            case 1:
-              this->*boost::get<uint_member_ptr>(it->second) =
-                  boost::lexical_cast<unsigned int>(value);
-              break;
-            case 2:
-              this->*boost::get<string_member_ptr>(it->second) = value;
-              break;
 
-            default:  // Not supposed to be here
-              assert("Not supposed to be here");
-          }
-        }
+      const std::string name = part.substr(0, p);
+      const std::string value = part.substr(p + 1);
+      const auto it = field_def.find(name);
+      if (it == field_def.end())
+      {
+        throw Fmi::Exception(BCP, "Unrecognized field '" + part + "'");
+      }
+
+      switch (it->second.which())
+      {
+        case 0:
+          // std::cout << METHOD_NAME << ": field '" << part << "' ignored" << std::endl;
+          break;
+        case 1:
+          this->*boost::get<uint_member_ptr>(it->second) = boost::lexical_cast<unsigned int>(value);
+          break;
+        case 2:
+          this->*boost::get<string_member_ptr>(it->second) = value;
+          break;
+
+        default:  // Not supposed to be here
+          assert("Not supposed to be here");
       }
     }
   }
@@ -269,13 +262,9 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   try
   {
     if (itsTransaction)
-    {
       return itsTransaction->exec(theSQLStatement);
-    }
-    else
-    {
-      return executeNonTransaction(theSQLStatement);
-    }
+
+    return executeNonTransaction(theSQLStatement);
   }
   catch (...)
   {
@@ -319,13 +308,9 @@ PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn) : con
   try
   {
     if (conn.itsTransaction)
-    {
       throw Fmi::Exception(BCP, "Recursive transactions are not supported");
-    }
-    else
-    {
-      conn.itsTransaction = boost::make_shared<pqxx::work>(*conn.itsConnection);
-    }
+
+    conn.itsTransaction = boost::make_shared<pqxx::work>(*conn.itsConnection);
   }
   catch (...)
   {
@@ -350,10 +335,8 @@ pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQ
       }
       return conn.itsTransaction->exec(theSQLStatement);
     }
-    else
-    {
-      throw Fmi::Exception(BCP, "[Logic error] Called after transaction commit or rollback");
-    }
+
+    throw Fmi::Exception(BCP, "[Logic error] Called after transaction commit or rollback");
   }
   catch (...)
   {

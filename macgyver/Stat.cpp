@@ -231,8 +231,8 @@ double Stat::integ(const boost::posix_time::ptime& startTime /*= not_a_date_time
 
     if (itsDegrees)
       return fmod(boost::accumulators::sum(acc), MODULO_VALUE_360) / 3600.0;
-    else
-      return boost::accumulators::sum(acc) / 3600.0;
+
+    return boost::accumulators::sum(acc) / 3600.0;
   }
   catch (...)
   {
@@ -263,8 +263,8 @@ double Stat::sum(const boost::posix_time::ptime& startTime /*= not_a_date_time *
 
     if (itsDegrees)
       return fmod(boost::accumulators::sum(acc), MODULO_VALUE_360);
-    else
-      return boost::accumulators::sum(acc);
+
+    return boost::accumulators::sum(acc);
   }
   catch (...)
   {
@@ -549,7 +549,8 @@ double Stat::median(const boost::posix_time::ptime& startTime /*= not_a_date_tim
 
     if (!get_subvector(subvector, startTime, endTime) || subvector.empty())
       return itsMissingValue;
-    else if (subvector.size() == 1)
+
+    if (subvector.size() == 1)
       return subvector[0].value;
 
     vector<double> double_vector;
@@ -660,8 +661,8 @@ double Stat::stddev(const boost::posix_time::ptime& startTime /*= not_a_date_tim
       double tmp = squaredSum - sum * sum / subvector.size();
       if (tmp < 0)
         return 0.0;
-      else
-        return sqrt(tmp / subvector.size());
+
+      return sqrt(tmp / subvector.size());
     }
 
     return sqrt(variance(startTime, endTime));
@@ -689,7 +690,8 @@ double Stat::nearest(const boost::posix_time::ptime& timestep,
 
     if (!get_subvector(subvector, startTime, endTime, false) || subvector.empty())
       return itsMissingValue;
-    else if (subvector.size() == 1)
+
+    if (subvector.size() == 1)
       return subvector[0].value;
 
     double nearest_value = itsMissingValue;
@@ -938,16 +940,14 @@ bool Stat::get_subvector(DataVector& subvector,
         throw Fmi::Exception(
             BCP, "Error: startTime or endTime defined, but data contains invalid timestamps!");
       }
-      else
+
+      for (const auto& val : itsData)
       {
-        for (const auto& val : itsData)
-        {
-          if (val.value == itsMissingValue)
-            return false;
-          subvector.push_back(val);
-        }
-        return true;
+        if (val.value == itsMissingValue)
+          return false;
+        subvector.push_back(val);
       }
+      return true;
     }
     bool applyWeights = (useWeights == false ? false : itsWeights);
     return extract_subvector(itsData, subvector, startTime, endTime, itsMissingValue, applyWeights);

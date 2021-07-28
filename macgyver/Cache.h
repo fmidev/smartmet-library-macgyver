@@ -732,14 +732,7 @@ struct StaticExpire
   static bool toDelete(const std::time_t& theTagTime, long timeConstant)
   {
     (void)timeConstant;
-    if (theTagTime != std::numeric_limits<std::time_t>::max())
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (theTagTime != std::numeric_limits<std::time_t>::max());
   }
 };
 
@@ -774,14 +767,7 @@ struct InstantExpire
   {
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > timeConstant)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return ((now - theTagTime) > timeConstant);
   }
 };
 
@@ -1315,11 +1301,8 @@ class Cache : public boost::noncopyable
       return boost::optional<ValueType>(it->second.itsValue);
     }
 
-    else
-    {
-      FMI_CACHE_MISS;
-      return boost::optional<ValueType>();
-    }
+    FMI_CACHE_MISS;
+    return boost::optional<ValueType>();
   }
 
   // Find value from cache and return also its hits

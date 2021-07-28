@@ -211,12 +211,12 @@ const boost::local_time::local_date_time& lunar_time_t::risesettime(SetAndRiseOc
   {
     if (occ == FIRST_RISE)
       return moonrise;
-    else if (occ == SECOND_RISE)
+    if (occ == SECOND_RISE)
       return moonrise2;
-    else if (occ == FIRST_SET)
+    if (occ == FIRST_SET)
       return moonset;
-    else
-      return moonset2;
+
+    return moonset2;
   }
   catch (...)
   {

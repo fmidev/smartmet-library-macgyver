@@ -141,25 +141,17 @@ const char* Exception::what() const noexcept(true)
 const Exception* Exception::getPrevException() const
 {
   if (prevException)
-  {
     return prevException.get();
-  }
-  else
-  {
-    return nullptr;
-  }
+
+  return nullptr;
 }
 
 const Exception* Exception::getFirstException() const
 {
   if (prevException)
-  {
     return prevException->getFirstException();
-  }
-  else
-  {
-    return this;
-  }
+
+  return this;
 }
 
 ExceptionTimeStamp Exception::getTimeStamp() const

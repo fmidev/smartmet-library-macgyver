@@ -277,7 +277,7 @@ bool skip_separator(const char** str, char separator, bool extended_format)
   {
     if (!extended_format)
       return true;
-    else if (**str != separator)
+    if (**str != separator)
       return false;
     ++*str;
     return true;
@@ -859,11 +859,11 @@ std::string DateTimeParser::Impl::looks(const std::string& str) const
   {
     if (looks_offset(str))
       return "offset";
-    else if (looks_iso(str))
+    if (looks_iso(str))
       return "iso";
-    else if (looks_sql(str))
+    if (looks_sql(str))
       return "sql";
-    else if (looks_epoch(str))
+    if (looks_epoch(str))
       return "epoch";
 
     throw Fmi::Exception(BCP, "Unrecognizable time format in string '" + str + "'");

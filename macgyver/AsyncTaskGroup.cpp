@@ -94,42 +94,38 @@ bool Fmi::AsyncTaskGroup::handle_finished()
 {
   std::unique_lock<std::mutex> lock2(m1);
   if (completed_tasks.empty())
-  {
     return false;
-  }
-  else
+
+  bool some_failed = false;
+  std::shared_ptr<AsyncTask> task = completed_tasks.front();
+  completed_tasks.pop();
+  lock2.unlock();
+  try
   {
-    bool some_failed = false;
-    std::shared_ptr<AsyncTask> task = completed_tasks.front();
-    completed_tasks.pop();
-    lock2.unlock();
-    try
+    task->wait();
+    // Notify through signal only if done not interrupted
+    if (task->get_status() == AsyncTask::ok)
     {
-      task->wait();
-      // Notify through signal only if done not interrupted
-      if (task->get_status() == AsyncTask::ok)
-      {
-        signal_task_ended(task->get_name());
-        num_suceeded++;
-      }
+      signal_task_ended(task->get_name());
+      num_suceeded++;
     }
-    catch (...)
-    {
-      some_failed = true;
-      num_failed++;
-      signal_task_failed(task->get_name());
-    }
-
-    if (stop_on_error_ && some_failed)
-    {
-      stop();
-      throw Fmi::Exception(BCP,
-                           "One ore more tasks failed with C++ exceptions."
-                           " Stopping remaining tasks");
-    }
-
-    return true;
   }
+  catch (...)
+  {
+    some_failed = true;
+    num_failed++;
+    signal_task_failed(task->get_name());
+  }
+
+  if (stop_on_error_ && some_failed)
+  {
+    stop();
+    throw Fmi::Exception(BCP,
+                         "One ore more tasks failed with C++ exceptions."
+                         " Stopping remaining tasks");
+  }
+
+  return true;
 }
 
 void Fmi::AsyncTaskGroup::on_task_completed_callback(std::size_t task_id)
@@ -142,11 +138,9 @@ void Fmi::AsyncTaskGroup::on_task_completed_callback(std::size_t task_id)
     throw Fmi::Exception(BCP,
                          " [INTERNAL ERROR] : task " + std::to_string(task_id) + " is not found");
   }
-  else
-  {
-    completed_tasks.push(it->second);
-    active_tasks.erase(it);
-    lock.unlock();
-    cond.notify_all();
-  }
+
+  completed_tasks.push(it->second);
+  active_tasks.erase(it);
+  lock.unlock();
+  cond.notify_all();
 }

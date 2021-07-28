@@ -110,15 +110,15 @@ boost::posix_time::time_duration solar_time_t::daylength() const
     {
       if (sunset_today())
         return sunset - sunrise;
-      else
-        return boost::posix_time::hours(24) - sunrise.local_time().time_of_day();
+
+      return boost::posix_time::hours(24) - sunrise.local_time().time_of_day();
     }
-    else if (sunset_today())
+    if (sunset_today())
       return sunset.local_time().time_of_day();
-    else if (polar_night())
+    if (polar_night())
       return boost::posix_time::seconds(0);
-    else
-      return boost::posix_time::hours(24);
+
+    return boost::posix_time::hours(24);
   }
   catch (...)
   {

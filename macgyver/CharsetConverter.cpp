@@ -73,10 +73,8 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
         delete[] x_out;
         return retval;
       }
-      else
-      {
-        delete[] x_out;
-      }
+
+      delete[] x_out;
     }
 
     ::iconv(impl->itsIconv, nullptr, nullptr, nullptr, nullptr);
