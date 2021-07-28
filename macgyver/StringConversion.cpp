@@ -838,10 +838,10 @@ void ascii_tolower(std::string& input)
 {
   try
   {
-    for (std::string::iterator it = input.begin(); it != input.end(); ++it)
+    for (auto& chr : input)
     {
-      if (*it > 64 && *it < 91)
-        *it += 32;
+      if (chr > 64 && chr < 91)
+        chr += 32;
     }
   }
   catch (...)
@@ -855,10 +855,10 @@ void ascii_toupper(std::string& input)
 {
   try
   {
-    for (std::string::iterator it = input.begin(); it != input.end(); ++it)
+    for (auto& chr : input)
     {
-      if (*it > 96 && *it < 123)
-        *it -= 32;
+      if (chr > 96 && chr < 123)
+        chr -= 32;
     }
   }
   catch (...)

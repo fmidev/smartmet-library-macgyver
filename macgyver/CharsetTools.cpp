@@ -761,9 +761,9 @@ std::wstring utf8_to_utf16(const std::string& str)
     int bytes = 0;
     unsigned int err = L'?';
 
-    for (std::string::size_type i = 0; i < str.size(); i++)
+    for (auto chr : str)
     {
-      unsigned char c = static_cast<unsigned char>(str[i]);
+      auto c = static_cast<unsigned char>(chr);
 
       if (c <= 0x7fU)
       {
@@ -838,9 +838,8 @@ std::string utf16_to_utf8(const std::wstring& str)
   {
     std::string out;
 
-    for (std::wstring::size_type i = 0; i < str.size(); i++)
+    for (auto w : str)
     {
-      unsigned int w = str[i];
       if (w <= 0x7f)
         out.push_back(static_cast<char>(w));
       else if (w <= 0x7ff)

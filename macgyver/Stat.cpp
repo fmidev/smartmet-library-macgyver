@@ -742,16 +742,17 @@ double Stat::interpolate(const boost::posix_time::ptime& timestep,
       return itsMissingValue;
 
     std::vector<int> indicator_vector;  // -1 indicates earliter, + 1 later than requested timestep
-    for (unsigned int i = 0; i < subvector.size(); i++)
+
+    for (const auto& val : subvector)
     {
-      if (subvector[i].value == itsMissingValue)
+      if (val.value == itsMissingValue)
         continue;
-      if (subvector[i].time < timestep)
+      if (val.time < timestep)
         indicator_vector.push_back(-1);
-      else if (subvector[i].time > timestep)
+      else if (val.time > timestep)
         indicator_vector.push_back(1);
-      else if (subvector[i].time == timestep)
-        return subvector[i].value;  // Exact timestep found
+      else if (val.time == timestep)
+        return val.value;  // Exact timestep found
     }
 
     if (indicator_vector.size() < 2)
@@ -939,11 +940,11 @@ bool Stat::get_subvector(DataVector& subvector,
       }
       else
       {
-        for (auto iter = itsData.begin(); iter != itsData.end(); iter++)
+        for (const auto& val : itsData)
         {
-          if (iter->value == itsMissingValue)
+          if (val.value == itsMissingValue)
             return false;
-          subvector.push_back(*iter);
+          subvector.push_back(val);
         }
         return true;
       }
