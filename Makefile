@@ -103,7 +103,8 @@ rpm: clean $(SPEC).spec
 objdir:
 	mkdir -p $(objdir)
 
-obj/%.o : %.cpp objdir
+obj/%.o : %.cpp
+	@mkdir -p $(objdir)
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
 ifneq ($(wildcard obj/*.d),)
