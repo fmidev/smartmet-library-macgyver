@@ -265,9 +265,9 @@ endif
 ifneq ($(filter mariadb,$(REQUIRES)),)
   REQUIRES_LEFT := $(filter-out mariadb, $(REQUIRES_LEFT))
   INCLUDES += $(shell mariadb_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-  MYSQL_LIBS = $(shell mariadb_config --libs_r 2>/dev/null)
+  MARIADB_LIBS = $(shell mariadb_config --libs_r 2>/dev/null)
   ifeq ($(MARIADB_LIBS),)
-    REQUIRES_MISSING +=
+    REQUIRES_MISSING += mariadb
   endif
   ifneq ($(filter mysql,$(REQUIRES)),)
     $(error Only one of requires mysql and mariadb may be specified)
