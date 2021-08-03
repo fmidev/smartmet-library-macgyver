@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.7.28
+Version: 21.8.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -108,6 +108,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Tue Aug  3 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.8.3-1.fmi
+- Add support of mariadb in makefile.inc
+
 * Wed Jul 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.7.28-1.fmi
 - Silenced compiler warnings
 
