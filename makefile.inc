@@ -262,6 +262,19 @@ ifneq ($(filter mysql,$(REQUIRES)),)
   REQUIRED_LIBS += $(MYSQL_LIBS)
 endif
 
+ifneq ($(filter mariadb,$(REQUIRES)),)
+  REQUIRES_LEFT := $(filter-out mariadb, $(REQUIRES_LEFT))
+  INCLUDES += $(shell mariadb_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
+  MYSQL_LIBS = $(shell mariadb_config --libs_r 2>/dev/null)
+  ifeq ($(MARIADB_LIBS),)
+    REQUIRES_MISSING +=
+  endif
+  ifneq ($(filter mysql,$(REQUIRES)),)
+    $(error Only one of requires mysql and mariadb may be specified)
+  endif
+  REQUIRED_LIBS += $(MARIADB_LIBS)
+endif
+
 ifneq ($(filter xerces-c,$(REQUIRES)),)
   REQUIRES_LEFT := $(filter-out xerces-c, $(REQUIRES_LEFT))
   INCLUDES += $(shell pkg-config --cflags xerces-c --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
