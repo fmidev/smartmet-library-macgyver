@@ -253,26 +253,22 @@ ifneq ($(filter librsvg,$(REQUIRES)),)
 endif
 
 ifneq ($(filter mysql,$(REQUIRES)),)
+  $(warning Use mariadb instead of mysql in REQUIRES list)
   REQUIRES_LEFT := $(filter-out mysql, $(REQUIRES_LEFT))
-  INCLUDES += $(shell mysql_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-  MYSQL_LIBS = $(shell mysql_config --libs_r 2>/dev/null)
-  ifeq ($(MYSQL_LIBS),)
-    REQUIRES_MISSING += mysql
+  ifeq ($(filter mariadb,$(REQUIRES)),)
+     REQUIRES += mariadb
   endif
-  REQUIRED_LIBS += $(MYSQL_LIBS)
 endif
 
 ifneq ($(filter mariadb,$(REQUIRES)),)
   REQUIRES_LEFT := $(filter-out mariadb, $(REQUIRES_LEFT))
-  INCLUDES += $(shell mariadb_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
-  MARIADB_LIBS = $(shell mariadb_config --libs_r 2>/dev/null)
+  MARIADB_LIBS = $(shell mysql_config --libs_r 2>/dev/null)
+  INCLUDES += $(shell mysql_config --cflags 2>/dev/null | sed -r 's/-I[[:space:]]*/-isystem /g')
   ifeq ($(MARIADB_LIBS),)
     REQUIRES_MISSING += mariadb
   endif
-  ifneq ($(filter mysql,$(REQUIRES)),)
-    $(error Only one of requires mysql and mariadb may be specified)
-  endif
   REQUIRED_LIBS += $(MARIADB_LIBS)
+  MYSQL_LIBS := $(MARIADB_LIBS)
 endif
 
 ifneq ($(filter xerces-c,$(REQUIRES)),)
@@ -286,9 +282,16 @@ ifneq ($(filter xerces-c,$(REQUIRES)),)
 endif
 
 ifneq ($(REQUIRES_MISSING),)
-  ifeq (,$(filter test,$(MAKECMDGOALS)))
-    ifeq (,$(filter test-installed,$(MAKECMDGOALS)))
+  ifeq ($(wildcard smartmet-*.spec),)
+    ifneq ($(filter all release debug profile rpm test%,$(MAKECMDGOALS)),)
       $(error Development files missing for: $(REQUIRES_MISSING))
+    endif
+  else
+    ifneq ($(filter all release debug profile rpm,$(MAKECMDGOALS)),)
+       $(error Development files missing for: $(REQUIRES_MISSING))
+    endif
+    ifeq ($(MAKECMDGOALS),)
+       $(error Development files missing for: $(REQUIRES_MISSING))
     endif
   endif
 endif
