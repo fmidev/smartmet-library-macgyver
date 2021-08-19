@@ -35,58 +35,46 @@ std::size_t hash_value(const std::string& str)
 
 std::size_t hash_value(const boost::gregorian::date& date)
 {
-  std::size_t hash = 0;
-
   if (!date.is_special())
   {
     const auto ymd = date.year_month_day();
-    hash_combine(hash, hash_value(ymd.year));
+    auto hash = hash_value(ymd.year);
     hash_combine(hash, hash_value(ymd.month));
     hash_combine(hash, hash_value(ymd.day));
+    return hash;
   }
-  else
-  {
-    hash_combine(hash, hash_value(date.is_infinity()));
-    hash_combine(hash, hash_value(date.is_neg_infinity()));
-    hash_combine(hash, hash_value(date.is_pos_infinity()));
-    hash_combine(hash, hash_value(date.is_not_a_date()));
-  }
+
+  auto hash = hash_value(date.is_infinity());
+  hash_combine(hash, hash_value(date.is_neg_infinity()));
+  hash_combine(hash, hash_value(date.is_pos_infinity()));
+  hash_combine(hash, hash_value(date.is_not_a_date()));
   return hash;
 }
 
 std::size_t hash_value(const boost::posix_time::time_duration& duration)
 {
-  std::size_t hash = 0;
-
   if (!duration.is_special())
-  {
-    hash_combine(hash, hash_value(duration.total_nanoseconds()));
-  }
-  else
-  {
-    hash_combine(hash, hash_value(duration.is_neg_infinity()));
-    hash_combine(hash, hash_value(duration.is_pos_infinity()));
-    hash_combine(hash, hash_value(duration.is_not_a_date_time()));
-  }
+    return hash_value(duration.total_nanoseconds());
+
+  auto hash = hash_value(duration.is_neg_infinity());
+  hash_combine(hash, hash_value(duration.is_pos_infinity()));
+  hash_combine(hash, hash_value(duration.is_not_a_date_time()));
   return hash;
 }
 
 std::size_t hash_value(const boost::posix_time::ptime& time)
 {
-  std::size_t hash = 0;
-
   if (!time.is_special())
   {
-    hash_combine(hash, hash_value(time.date()));
+    auto hash = hash_value(time.date());
     hash_combine(hash, hash_value(time.time_of_day()));
+    return hash;
   }
-  else
-  {
-    hash_combine(hash, hash_value(time.is_infinity()));
-    hash_combine(hash, hash_value(time.is_neg_infinity()));
-    hash_combine(hash, hash_value(time.is_pos_infinity()));
-    hash_combine(hash, hash_value(time.is_not_a_date_time()));
-  }
+
+  auto hash = hash_value(time.is_infinity());
+  hash_combine(hash, hash_value(time.is_neg_infinity()));
+  hash_combine(hash, hash_value(time.is_pos_infinity()));
+  hash_combine(hash, hash_value(time.is_not_a_date_time()));
   return hash;
 }
 
