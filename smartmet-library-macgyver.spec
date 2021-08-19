@@ -111,6 +111,12 @@ FMI MacGyver library development files
 * Thu Aug 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.19-1.fmi
 - Calculate hash value for Boost local_date_time from utc_time() instead of local_time() for much better speed
 
+* Thu Aug  5 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.8.5-1.fmi
+- Update error handling and mariadb support in makefile.inc
+
+* Tue Aug  3 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.8.3-1.fmi, 21.8.3-2.fmi
+- Add support of mariadb in makefile.inc
+
 * Wed Jul 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.7.28-1.fmi
 - Silenced compiler warnings
 
