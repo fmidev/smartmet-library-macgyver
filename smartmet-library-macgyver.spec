@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.7.28
+Version: 21.8.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -108,6 +108,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Thu Aug 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.19-1.fmi
+- Calculate hash value for Boost local_date_time from utc_time() instead of local_time() for much better speed
+
 * Wed Jul 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.7.28-1.fmi
 - Silenced compiler warnings
 
