@@ -39,9 +39,10 @@ std::size_t hash_value(const boost::gregorian::date& date)
 
   if (!date.is_special())
   {
-    hash_combine(hash, hash_value(date.year()));
-    hash_combine(hash, hash_value(date.month()));
-    hash_combine(hash, hash_value(date.day()));
+    const auto ymd = date.year_month_day();
+    hash_combine(hash, hash_value(ymd.year));
+    hash_combine(hash, hash_value(ymd.month));
+    hash_combine(hash, hash_value(ymd.day));
   }
   else
   {

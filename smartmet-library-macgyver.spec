@@ -110,6 +110,7 @@ FMI MacGyver library development files
 %changelog
 * Thu Aug 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.19-1.fmi
 - Calculate hash value for Boost local_date_time from utc_time() instead of local_time() for much better speed
+- Calculate hash value for Boost Gregorian date using year_month_day() for speed
 
 * Thu Aug  5 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.8.5-1.fmi
 - Update error handling and mariadb support in makefile.inc
