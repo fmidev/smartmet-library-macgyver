@@ -46,7 +46,7 @@ std::string to_string(size_t value)
 {
   try
   {
-    return fmt::sprintf("%zu", value);
+    return fmt::format_int(value).str();
   }
   catch (...)
   {
@@ -58,7 +58,7 @@ std::string to_string(time_t value)
 {
   try
   {
-    return fmt::sprintf("%zd", value);
+    return fmt::format_int(value).str();
   }
   catch (...)
   {
