@@ -29,6 +29,8 @@
 #include <sstream>
 #include <utility>
 
+#include "CacheStats.h"
+
 // #ifndef NDEBUG
 #if 0
 
@@ -57,6 +59,8 @@ namespace Cache
 {
 using MutexType = boost::mutex;
 using Lock = boost::lock_guard<MutexType>;
+
+const CacheStats EMPTY_CACHE_STATS;
 
 // ----------------------------------------------------------------------
 /*!
@@ -959,6 +963,13 @@ class Cache : public boost::noncopyable
     //		itsMap.bucket_size(itsMaxSize);
   }
 
+  // ----------------------------------------------------------------------
+  /*!
+   * \brief Get cache statistics
+   */
+  // ----------------------------------------------------------------------
+  const CacheStats& statistics() const { return itsCacheStats; }
+
   // Insert with a list of tags
   template <class ListType>
   bool insert(const KeyType& key, const ValueType& value, const ListType& tags)
@@ -1294,6 +1305,7 @@ class Cache : public boost::noncopyable
           itsMap, it);
 
       FMI_CACHE_HIT;
+	  itsCacheStats.hit();
 
       // Update hit count for this entry
       ++it->second.itsHits;
@@ -1302,6 +1314,7 @@ class Cache : public boost::noncopyable
     }
 
     FMI_CACHE_MISS;
+	itsCacheStats.miss();
     return boost::optional<ValueType>();
   }
 
@@ -1343,7 +1356,8 @@ class Cache : public boost::noncopyable
           itsMap, it);
 
       FMI_CACHE_HIT;
-
+	  itsCacheStats.hit();
+	  
       // Update hit count for this entry
 
       hits = ++it->second.itsHits;
@@ -1354,6 +1368,7 @@ class Cache : public boost::noncopyable
     else
     {
       FMI_CACHE_MISS;
+	  itsCacheStats.miss();
       return boost::optional<ValueType>();
     }
   }
@@ -1491,6 +1506,8 @@ class Cache : public boost::noncopyable
 
   long itsTimeConstant;
 
+  CacheStats itsCacheStats;
+
 #ifndef NDEBUG
   // Debugging parameters
   unsigned long cacheHits = 0;
@@ -1586,6 +1603,14 @@ class FileCache : boost::noncopyable
 
   bool clean(std::size_t spaceNeeded);
 
+  // ----------------------------------------------------------------------
+  /*!
+   * \brief Get cache statistics
+   */
+  // ----------------------------------------------------------------------
+
+  const CacheStats& statistics() const { return itsCacheStats; }
+
  private:
   // ----------------------------------------------------------------------
   /*!
@@ -1643,6 +1668,8 @@ class FileCache : boost::noncopyable
   MapType itsContentMap;
 
   MutexType itsMutex;
+
+  CacheStats itsCacheStats;
 };
 
 }  // namespace Cache

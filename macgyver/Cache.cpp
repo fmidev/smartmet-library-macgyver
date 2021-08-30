@@ -91,6 +91,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
 
     if (it == itsContentMap.left.end())
     {
+	  itsCacheStats.miss();
       return boost::optional<std::string>();
     }
 
@@ -101,6 +102,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     if (!fs::exists(fullPath, err))
     {
       // Should we remove the entry here? It will be re-inserted anyways eventually
+	  itsCacheStats.miss();
       return boost::optional<std::string>();
     }
 
@@ -112,6 +114,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     if (!file)
     {
       // Report file opening error
+	  itsCacheStats.miss();
       return boost::optional<std::string>();
     }
 
@@ -123,6 +126,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     UpgradeWriteLock ugLock(theLock);
     itsContentMap.right.relocate(itsContentMap.right.end(), itsContentMap.project_right(it));
 
+	itsCacheStats.hit();
     return boost::optional<std::string>(std::move(ret));
   }
   catch (...)
