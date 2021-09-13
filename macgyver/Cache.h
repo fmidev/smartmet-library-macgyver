@@ -1203,7 +1203,8 @@ class Cache : public boost::noncopyable
         {
           // Tag has expired and tag map has been cleaned. Remove from cache
           itsMap.left.erase(it);
-          return boost::optional<ValueType>();
+          itsCacheStats.miss();
+          return {};
         }
 
         // If one of the tags is expired, remove object from cache
@@ -1211,8 +1212,8 @@ class Cache : public boost::noncopyable
         {
           // This tag expired, erase the object from cache and return empty
           itsMap.left.erase(it);
-
-          return boost::optional<ValueType>();
+          itsCacheStats.miss();
+          return {};
         }
       }
 
@@ -1224,12 +1225,12 @@ class Cache : public boost::noncopyable
       // Update hit count for this entry
       ++it->second.itsHits;
 
-      return boost::optional<ValueType>(it->second.itsValue);
+      return it->second.itsValue;
     }
 
     itsCacheStats.miss();
 
-    return boost::optional<ValueType>();
+    return {};
   }
 
   // Find value from cache and return also its hits
@@ -1250,7 +1251,8 @@ class Cache : public boost::noncopyable
         {
           // Tag has expired and tag map has been cleaned. Remove from cache
           itsMap.left.erase(it);
-          return boost::optional<ValueType>();
+          itsCacheStats.miss();
+          return {};
         }
 
         // If one of the tags is expired, remove object from cache
@@ -1259,8 +1261,8 @@ class Cache : public boost::noncopyable
         {
           // This tag expired, erase the object from cache and return empty
           itsMap.left.erase(it);
-
-          return boost::optional<ValueType>();
+          itsCacheStats.miss();
+          return {};
         }
       }
 
@@ -1273,14 +1275,11 @@ class Cache : public boost::noncopyable
 
       hits = ++it->second.itsHits;
 
-      return boost::optional<ValueType>(it->second.itsValue);
+      return it->second.itsValue;
     }
 
-    else
-    {
-      itsCacheStats.miss();
-      return boost::optional<ValueType>();
-    }
+    itsCacheStats.miss();
+    return {};
   }
 
   void expire(const TagType& tagToExpire, const std::time_t& expirationTime = std::time(nullptr))

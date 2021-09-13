@@ -223,7 +223,7 @@ std::string to_string(unsigned long value)
  */
 // ----------------------------------------------------------------------
 
-int stoi(const std::string& str)
+boost::optional<int> stoi_opt(const std::string& str)
 {
   try
   {
@@ -233,8 +233,41 @@ int stoi(const std::string& str)
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
       if (begin == end)
         return boost::numeric_cast<int>(result);
+    return {};
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+int stoi(const std::string& str)
+{
+  try
+  {
+    auto result = stoi_opt(str);
+    if (result)
+      return *result;
 
     throw Fmi::Exception(BCP, "Fmi::stoi failed to convert '" + str + "' to integer");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+boost::optional<long> stol_opt(const std::string& str)
+{
+  try
+  {
+    long result;
+    auto begin = str.cbegin();
+    auto end = str.cend();
+    if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
+      if (begin == end)
+        return result;
+    return {};
   }
   catch (...)
   {
@@ -246,14 +279,29 @@ long stol(const std::string& str)
 {
   try
   {
-    long result;
-    auto begin = str.cbegin();
-    auto end = str.cend();
-    if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
-      if (begin == end)
-        return result;
+    auto result = stol_opt(str);
+    if (result)
+      return *result;
 
     throw Fmi::Exception(BCP, "Fmi::stol failed to convert '" + str + "' to long");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+boost::optional<unsigned long> stoul_opt(const std::string& str)
+{
+  try
+  {
+    unsigned long result;
+    auto begin = str.cbegin();
+    auto end = str.cend();
+    if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::ulong_, result))
+      if (begin == end)
+        return result;
+    return {};
   }
   catch (...)
   {
@@ -265,12 +313,9 @@ unsigned long stoul(const std::string& str)
 {
   try
   {
-    unsigned long result;
-    auto begin = str.cbegin();
-    auto end = str.cend();
-    if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::ulong_, result))
-      if (begin == end)
-        return result;
+    auto result = stoul_opt(str);
+    if (result)
+      return *result;
 
     throw Fmi::Exception(BCP, "Fmi::stoul failed to convert '" + str + "' to unsigned long");
   }
@@ -280,7 +325,7 @@ unsigned long stoul(const std::string& str)
   }
 }
 
-float stof(const std::string& str)
+boost::optional<float> stof_opt(const std::string& str)
 {
   try
   {
@@ -300,6 +345,21 @@ float stof(const std::string& str)
         throw Fmi::Exception(BCP, "Infinite numbers are not allowed: '" + str + "' in Fmi::stof");
       }
     }
+    return {};
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+float stof(const std::string& str)
+{
+  try
+  {
+    auto result = stof_opt(str);
+    if (result)
+      return *result;
     throw Fmi::Exception(BCP, "Fmi::stof failed to convert '" + str + "' to float");
   }
   catch (...)
@@ -308,7 +368,7 @@ float stof(const std::string& str)
   }
 }
 
-double stod(const std::string& str)
+boost::optional<double> stod_opt(const std::string& str)
 {
   try
   {
@@ -325,6 +385,21 @@ double stod(const std::string& str)
         throw Fmi::Exception(BCP, "Infinite numbers are not allowed: '" + str + "' in Fmi::stod");
       }
     }
+    return {};
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+double stod(const std::string& str)
+{
+  try
+  {
+    auto result = stod_opt(str);
+    if (result)
+      return *result;
     throw Fmi::Exception(BCP, "Fmi::stod failed to convert '" + str + "' to double");
   }
   catch (...)

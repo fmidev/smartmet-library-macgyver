@@ -8,6 +8,7 @@
 #include "Exception.h"
 #include "StringConversion.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/optional/optional_io.hpp>
 #include <boost/test/included/unit_test.hpp>
 
 using namespace boost::unit_test;
@@ -124,6 +125,104 @@ BOOST_AUTO_TEST_CASE(stod)
   BOOST_CHECK_THROW(Fmi::stod("INF"), Fmi::Exception);
   BOOST_CHECK_THROW(Fmi::stod("+INF"), Fmi::Exception);
   BOOST_CHECK_THROW(Fmi::stod("-INF"), Fmi::Exception);
+}
+
+BOOST_AUTO_TEST_CASE(stoi_opt)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::stoi_opt()");
+  BOOST_CHECK_EQUAL(0, Fmi::stoi_opt("0"));
+  BOOST_CHECK_EQUAL(0, Fmi::stoi_opt("+0"));
+  BOOST_CHECK_EQUAL(0, Fmi::stoi_opt("-0"));
+  BOOST_CHECK_EQUAL(123, Fmi::stoi_opt("123"));
+  BOOST_CHECK_EQUAL(-123, Fmi::stoi_opt("-123"));
+
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoi_opt("321.1234"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoi_opt("ABC"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoi_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoi_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoi_opt("12 "));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoi_opt(" 12"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoi_opt(" 12 "));
+}
+
+BOOST_AUTO_TEST_CASE(stol_opt)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::stol_opt()");
+  BOOST_CHECK_EQUAL(0L, Fmi::stol_opt("0"));
+  BOOST_CHECK_EQUAL(0L, Fmi::stol_opt("+0"));
+  BOOST_CHECK_EQUAL(0L, Fmi::stol_opt("-0"));
+  BOOST_CHECK_EQUAL(123L, Fmi::stol_opt("123"));
+  BOOST_CHECK_EQUAL(-123L, Fmi::stol_opt("-123"));
+  BOOST_CHECK_EQUAL(123456789012, Fmi::stol_opt("123456789012"));
+
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stol_opt("321.1234"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stol_opt("ABC"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stol_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stol_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stol_opt("12 "));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stol_opt(" 12"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stol_opt(" 12 "));
+}
+
+BOOST_AUTO_TEST_CASE(stoul_opt)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::stoul_opt()");
+  BOOST_CHECK_EQUAL(0UL, Fmi::stoul_opt("0"));
+  BOOST_CHECK_EQUAL(123UL, Fmi::stoul_opt("123"));
+  BOOST_CHECK_EQUAL(123456789012UL, Fmi::stoul_opt("123456789012"));
+
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("+0"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("-0"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("-123"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("321.1234"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("ABC"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt("12 "));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt(" 12"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stoul_opt(" 12 "));
+}
+
+BOOST_AUTO_TEST_CASE(stof_opt)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::stof_opt()");
+  BOOST_CHECK_EQUAL(0.f, Fmi::stof_opt("0"));
+  BOOST_CHECK_EQUAL(0.f, Fmi::stof_opt("+0"));
+  BOOST_CHECK_EQUAL(0.f, Fmi::stof_opt("-0"));
+  BOOST_CHECK_EQUAL(123.f, Fmi::stof_opt("123"));
+  BOOST_CHECK_EQUAL(-123.f, Fmi::stof_opt("-123"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stof_opt("ABC"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stof_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stof_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stof_opt("12 "));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stof_opt(" 12"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stof_opt(" 12 "));
+  BOOST_CHECK_THROW(Fmi::stof_opt("NaN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof_opt("NAN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof_opt("INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof_opt("+INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stof_opt("-INF"), Fmi::Exception);
+}
+
+BOOST_AUTO_TEST_CASE(stod_opt)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::stod_opt()");
+  BOOST_CHECK_EQUAL(0.0, Fmi::stod_opt("0"));
+  BOOST_CHECK_EQUAL(0.0, Fmi::stod_opt("+0"));
+  BOOST_CHECK_EQUAL(0.0, Fmi::stod_opt("-0"));
+  BOOST_CHECK_EQUAL(123.0, Fmi::stod_opt("123"));
+  BOOST_CHECK_EQUAL(-123.0, Fmi::stod_opt("-123"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stod_opt("ABC"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stod_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stod_opt("12A"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stod_opt("12 "));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stod_opt(" 12"));
+  BOOST_CHECK_EQUAL(boost::none, Fmi::stod_opt(" 12 "));
+  BOOST_CHECK_THROW(Fmi::stod_opt("NaN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod_opt("NAN"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod_opt("INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod_opt("+INF"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stod_opt("-INF"), Fmi::Exception);
 }
 
 BOOST_AUTO_TEST_CASE(to_string)
