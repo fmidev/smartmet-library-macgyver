@@ -5,7 +5,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 21.9.13
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -108,6 +108,9 @@ FMI MacGyver library development files
 %{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Mon Sep 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.9.13-2.fmi
+- Fixed Fmi::Cache to increment cache misses in all possible cases
+
 * Mon Sep 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.9.13-1.fmi
 - Added stoi_opt, stol_opt, stoul_opt, stof_opt and stod_opt to avoid exceptions in normal execution paths
 
