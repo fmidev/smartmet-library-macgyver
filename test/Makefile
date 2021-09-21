@@ -1,6 +1,6 @@
 REQUIRES = fmt libpqxx
 
-include ../makefile.inc
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 

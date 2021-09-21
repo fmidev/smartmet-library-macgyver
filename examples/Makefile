@@ -1,6 +1,6 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *.cpp))
 
-include ../makefile.inc
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 INCLUDES += -I../macgyver \
         -I/usr/include/smartmet
