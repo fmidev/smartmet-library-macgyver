@@ -13,10 +13,6 @@
 using std::string;
 using namespace Fmi::Stat;
 
-#ifndef _MSC_VER
-using std::isnan;
-#endif
-
 // Protection against conflicts with global functions
 namespace StatTest
 {

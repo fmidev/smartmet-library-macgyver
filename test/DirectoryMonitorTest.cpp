@@ -117,7 +117,7 @@ void interruption_test()
   {
     const pt::ptime t2 = pt::microsec_clock::universal_time();
     const auto dt = 1.0e-6 * (t2-t1).total_microseconds();
-    std::cout << "\nWait time dt seconds is too long" << std::endl;
+    std::cout << "\nWait time " << dt << " seconds is too long" << std::endl;
     TEST_FAILED("Interrupting request did not stop directory monitor");
   }
 
