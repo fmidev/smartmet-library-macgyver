@@ -100,11 +100,20 @@ void interruption_test()
     }
   }
 
-  // const pt::ptime t1 = pt::microsec_clock::universal_time();
+  const pt::ptime t1 = pt::microsec_clock::universal_time();
   // std::cout << t1 - start << std::endl;
   task.interrupt();
-  bool joined = task.try_join_for(boost::chrono::milliseconds(200));
-  if (!joined)
+  bool joined = task.try_join_for(boost::chrono::milliseconds(1000));
+  if (joined)
+  {
+    const pt::ptime t2 = pt::microsec_clock::universal_time();
+    const auto dt = 1.0e-6 * (t2-t1).total_microseconds();
+    if (dt > 0.1)
+    {
+        std::cout << "\nStopping time dt seconds after interruption" << std::endl;
+    }
+  }
+  else
   {
     TEST_FAILED("Interrupting request did not stop directory monitor");
   }
