@@ -206,7 +206,7 @@ void sum()
   // starttime later than endtime
   sum = stat.sum(boost::posix_time::time_from_string("2013-12-02 17:00:00"),
                  boost::posix_time::time_from_string("2013-12-02 15:00:00"));
-  if (!isnan(sum))
+  if (!std::isnan(sum))
   {
     std::stringstream ss;
     ss << "when starttime is later than endtime result must be nan, not " << sum;
