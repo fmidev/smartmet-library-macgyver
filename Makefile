@@ -13,7 +13,7 @@ DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
 REQUIRES := libpqxx icu-i18n fmt ctpp2
 
-include makefile.inc
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 INCLUDES += $(pkg-config --cflags icu-i18n)
 
@@ -85,9 +85,6 @@ install:
 	done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
-	@mkdir -p $(datadir)/smartmet/devel
-	$(INSTALL_DATA) makefile.inc $(datadir)/smartmet/devel/makefile.inc
-	$(INSTALL_DATA) makefile-abicheck.inc $(datadir)/smartmet/devel/makefile-abicheck.inc
 
 test test-installed:
 	$(MAKE) -C test $@
@@ -111,4 +108,4 @@ ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)
 endif
 
-include makefile-abicheck.inc
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile-abicheck.inc

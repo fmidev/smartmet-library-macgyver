@@ -4,8 +4,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.9.13
-Release: 2%{?dist}.fmi
+Version: 21.9.21
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -21,6 +21,7 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-timezones >= 21.2.2
+BuildRequires: smartmet-utils-devel
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -57,6 +58,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: postgresql12-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 21.2.2
+#TestRequires: smartmet-utils-devel
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -96,6 +98,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
+Requires: smartmet-utils-devel
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -104,10 +107,11 @@ FMI MacGyver library development files
 %files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
-%{_datadir}/smartmet/devel/makefile.inc
-%{_datadir}/smartmet/devel/makefile-abicheck.inc
 
 %changelog
+* Tue Sep 21 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.9.21-1.fmi
+- Move makefile*.inc to smartmet-util package
+
 * Mon Sep 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.9.13-2.fmi
 - Fixed Fmi::Cache to increment cache misses in all possible cases
 
