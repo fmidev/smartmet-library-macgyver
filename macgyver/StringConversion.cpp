@@ -464,7 +464,7 @@ std::string to_simple_string(const boost::posix_time::time_duration& duration)
     if (duration.is_special())
       return boost::posix_time::to_simple_string(duration);
 
-    std::array<char, 10> buffer;
+    std::array<char, 40> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = duration.seconds() * 2;
@@ -475,9 +475,26 @@ std::string to_simple_string(const boost::posix_time::time_duration& duration)
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.hours() * 2;
-    *--ptr = digits[index + 1];
-    *--ptr = digits[index];
+
+    auto hours = duration.hours();
+
+    while (true)
+    {
+      auto h = hours % 100;
+
+      index = h * 2;
+      *--ptr = digits[index + 1];
+      *--ptr = digits[index];
+
+      hours /= 100;
+      if (hours == 0)
+        break;
+    }
+
+    // Avoid 0123:mm:ss
+    if (duration.hours() >= 100 && *ptr == '0')
+      ++ptr;
+
     if (duration.is_negative())
       *--ptr = '-';
     std::string ret(ptr);
