@@ -813,7 +813,7 @@ void missing_value()
                                  boost::posix_time::time_from_string("2013-12-02 17:00:00"),
                                  boost::posix_time::time_from_string("2013-12-02 14:00:00"));
 
-  if (!isnan(value))
+  if (!std::isnan(value))
   {
     std::stringstream ss;
     ss << "Default missing value should be nan, not " << value;
