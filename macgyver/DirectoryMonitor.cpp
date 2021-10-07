@@ -25,13 +25,13 @@
 #include "DirectoryMonitor.h"
 #include "Exception.h"
 #include "StringConversion.h"
+#include <boost/chrono.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <atomic>
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
 #include <stdexcept>
 
 // scoped read/write lock types
@@ -220,10 +220,10 @@ class DirectoryMonitor::Pimple
   std::atomic<bool> isready{false};    // true if at least one scan has completed
   std::atomic<bool> has_ended{false};  // true if run() has ended due to any reason
 
-  std::mutex m2;
-  std::mutex m_ready;
-  std::condition_variable cond;
-  std::condition_variable cond_ready;
+  boost::mutex m2;
+  boost::mutex m_ready;
+  boost::condition_variable cond;
+  boost::condition_variable cond_ready;
 
   Watcher nextid = 0;
 };
@@ -515,9 +515,9 @@ void DirectoryMonitor::run()
 
         if (sleeptime > 0)
         {
-          std::unique_lock<std::mutex> lock(impl->m2);
+          boost::unique_lock<boost::mutex> lock(impl->m2);
           impl->cond.wait_for(
-              lock, std::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
+              lock, boost::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
         }
       }
 
@@ -586,7 +586,7 @@ bool DirectoryMonitor::wait_until_ready() const
 {
   try
   {
-    std::unique_lock<std::mutex> lock(impl->m_ready);
+    boost::unique_lock<boost::mutex> lock(impl->m_ready);
     impl->cond_ready.wait(lock, [this]() -> bool { return impl->has_ended || impl->isready; });
     return impl->isready && !impl->has_ended && !impl->stop;
   }

@@ -126,64 +126,83 @@ void interruption_test()
 
 void wait_until_ready_test_1()
 {
-  Fmi::DirectoryMonitor monitor;
-  monitor.watch(
-      ".",
-      [](Fmi::DirectoryMonitor::Watcher,
-         const fs::path&,
-         const boost::regex,
-         const Fmi::DirectoryMonitor::Status&) {},
-      [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
-      },
-      10);
-  boost::thread task([&monitor]() { monitor.run(); });
+  static const auto t1 = boost::posix_time::microsec_clock::universal_time();
 
-  BOOST_SCOPE_EXIT(&monitor, &task)
-  {
-    monitor.stop();
-    task.join();
-  }
-  BOOST_SCOPE_EXIT_END;
+  do {
+    Fmi::DirectoryMonitor monitor;
+    monitor.watch(
+		  ".",
+		  [](Fmi::DirectoryMonitor::Watcher,
+		     const fs::path&,
+		     const boost::regex,
+		     const Fmi::DirectoryMonitor::Status&) {},
+		  [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+		  },
+		  10);
 
-  bool ok = monitor.wait_until_ready();
-  if (not ok)
-  {
-    TEST_FAILED("Waiting for first scan returned false");
-  }
+    boost::thread task([&monitor]() { monitor.run(); });
+
+    BOOST_SCOPE_EXIT(&monitor, &task)
+      {
+	monitor.stop();
+	task.join();
+	const auto t2 = boost::posix_time::microsec_clock::universal_time();
+	const auto dt = (t2 - t1).total_milliseconds();
+	if (dt > 250) {
+	  TEST_FAILED("Waiting for first scan took " + std::to_string(dt) + " millisec > 250");
+	}
+      }
+    BOOST_SCOPE_EXIT_END;
+
+    bool ok = monitor.wait_until_ready();
+    if (not ok)
+      {
+	TEST_FAILED("Waiting for first scan returned false");
+      }
+  } while (false);
 
   TEST_PASSED();
 }
 
 void wait_until_ready_test_2()
 {
-  Fmi::DirectoryMonitor monitor;
-  monitor.watch(
-      ".",
-      [](Fmi::DirectoryMonitor::Watcher,
-         const fs::path&,
-         const boost::regex,
-         const Fmi::DirectoryMonitor::Status&) {},
-      [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
-      },
-      10);
+  static const auto t1 = boost::posix_time::microsec_clock::universal_time();
 
-  boost::thread task([&monitor]() { monitor.run(); });
+  do {
+    Fmi::DirectoryMonitor monitor;
+    monitor.watch(
+		  ".",
+		  [](Fmi::DirectoryMonitor::Watcher,
+		     const fs::path&,
+		     const boost::regex,
+		     const Fmi::DirectoryMonitor::Status&) {},
+		  [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+		  },
+		  10);
 
-  BOOST_SCOPE_EXIT(&monitor, &task)
-  {
+    boost::thread task([&monitor]() { monitor.run(); });
+
+    BOOST_SCOPE_EXIT(&monitor, &task)
+      {
+	monitor.stop();
+	task.join();
+	const auto t2 = boost::posix_time::microsec_clock::universal_time();
+	const auto dt = (t2 - t1).total_milliseconds();
+	if (dt > 250) {
+	  TEST_FAILED("Waiting for first scan took " + std::to_string(dt) + " millisec > 250");
+	}
+      }
+    BOOST_SCOPE_EXIT_END;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     monitor.stop();
-    task.join();
-  }
-  BOOST_SCOPE_EXIT_END;
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  monitor.stop();
-
-  bool ok = monitor.wait_until_ready();
-  if (ok)
-  {
-    TEST_FAILED("Monitor already ended. Should have returned false");
-  }
+    bool ok = monitor.wait_until_ready();
+    if (ok)
+      {
+	TEST_FAILED("Monitor already ended. Should have returned false");
+      }
+  } while (false);
 
   TEST_PASSED();
 }
