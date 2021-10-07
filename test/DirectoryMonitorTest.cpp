@@ -146,11 +146,6 @@ void wait_until_ready_test_1()
       {
 	monitor.stop();
 	task.join();
-	const auto t2 = boost::posix_time::microsec_clock::universal_time();
-	const auto dt = (t2 - t1).total_milliseconds();
-	if (dt > 250) {
-	  TEST_FAILED("Waiting for first scan took " + std::to_string(dt) + " millisec > 250");
-	}
       }
     BOOST_SCOPE_EXIT_END;
 
@@ -160,6 +155,12 @@ void wait_until_ready_test_1()
 	TEST_FAILED("Waiting for first scan returned false");
       }
   } while (false);
+
+  const auto t2 = boost::posix_time::microsec_clock::universal_time();
+  const auto dt = (t2 - t1).total_milliseconds();
+  if (dt > 250) {
+    TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 250");
+  }
 
   TEST_PASSED();
 }
@@ -186,11 +187,6 @@ void wait_until_ready_test_2()
       {
 	monitor.stop();
 	task.join();
-	const auto t2 = boost::posix_time::microsec_clock::universal_time();
-	const auto dt = (t2 - t1).total_milliseconds();
-	if (dt > 250) {
-	  TEST_FAILED("Waiting for first scan took " + std::to_string(dt) + " millisec > 250");
-	}
       }
     BOOST_SCOPE_EXIT_END;
 
@@ -203,6 +199,12 @@ void wait_until_ready_test_2()
 	TEST_FAILED("Monitor already ended. Should have returned false");
       }
   } while (false);
+
+  const auto t2 = boost::posix_time::microsec_clock::universal_time();
+  const auto dt = (t2 - t1).total_milliseconds();
+  if (dt > 250) {
+    TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 250");
+  }
 
   TEST_PASSED();
 }
