@@ -31,10 +31,12 @@ void stopping_test()
       10);
   const pt::ptime start = pt::microsec_clock::universal_time();
   std::thread t(
-      [&monitor, &started, &c]()
+      [&monitor, &started, &m, &c]()
       {
+	std::unique_lock<std::mutex> lock(m);
         started = true;
         c.notify_all();
+	lock.unlock();
         monitor.run();
       });
 
@@ -78,10 +80,12 @@ void interruption_test()
       },
       10);
   boost::thread task(
-      [&monitor, &started, &c]()
+      [&monitor, &started, &m, &c]()
       {
+	std::unique_lock<std::mutex> lock(m);
         started = true;
         c.notify_all();
+	lock.unlock();
         monitor.run();
       });
 
