@@ -130,7 +130,7 @@ void interruption_test()
 
 void wait_until_ready_test_1()
 {
-  static const auto t1 = boost::posix_time::microsec_clock::universal_time();
+  pt::ptime t2, t3;
 
   do {
     Fmi::DirectoryMonitor monitor;
@@ -145,6 +145,7 @@ void wait_until_ready_test_1()
 		  10);
 
     boost::thread task([&monitor]() { monitor.run(); });
+    t2 = pt::microsec_clock::universal_time();
 
     BOOST_SCOPE_EXIT(&monitor, &task)
       {
@@ -160,10 +161,12 @@ void wait_until_ready_test_1()
       }
   } while (false);
 
-  const auto t2 = boost::posix_time::microsec_clock::universal_time();
-  const auto dt = (t2 - t1).total_milliseconds();
-  if (dt > 250) {
-    TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 250");
+  // Timing could be extremly unreliable especially in virtual machines
+  // (at least under Virtual Box)
+  t3 = pt::microsec_clock::universal_time();
+  const auto dt = (t3 - t2).total_milliseconds();
+  if (dt > 750) {
+    TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 750");
   }
 
   TEST_PASSED();
@@ -171,7 +174,7 @@ void wait_until_ready_test_1()
 
 void wait_until_ready_test_2()
 {
-  static const auto t1 = boost::posix_time::microsec_clock::universal_time();
+  static pt::ptime t1;
 
   do {
     Fmi::DirectoryMonitor monitor;
@@ -181,7 +184,8 @@ void wait_until_ready_test_2()
 		     const fs::path&,
 		     const boost::regex,
 		     const Fmi::DirectoryMonitor::Status&) {},
-		  [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+		  [](Fmi::DirectoryMonitor::Watcher, const fs::path&,
+		     const boost::regex&, const std::string&) {
 		  },
 		  10);
 
@@ -195,10 +199,11 @@ void wait_until_ready_test_2()
     BOOST_SCOPE_EXIT_END;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    monitor.stop();
+
+    t1 = boost::posix_time::microsec_clock::universal_time();
 
     bool ok = monitor.wait_until_ready();
-    if (ok)
+    if (!ok)
       {
 	TEST_FAILED("Monitor already ended. Should have returned false");
       }
