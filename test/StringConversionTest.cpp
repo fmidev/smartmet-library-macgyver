@@ -306,6 +306,15 @@ BOOST_AUTO_TEST_CASE(to_simple_string)
 
   ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
   BOOST_CHECK_EQUAL("2002-Jan-01 01:02:03,004000", Fmi::to_simple_string(time2));
+
+  time_duration dura1(123, 45, 43);
+  BOOST_CHECK_EQUAL("123:45:43", Fmi::to_simple_string(dura1));
+
+  time_duration dura2(123456, 45, 43);
+  BOOST_CHECK_EQUAL("123456:45:43", Fmi::to_simple_string(dura2));
+
+  time_duration dura3(0, 45, 43);
+  BOOST_CHECK_EQUAL("00:45:43", Fmi::to_simple_string(dura3));
 }
 
 BOOST_AUTO_TEST_CASE(to_http_string)

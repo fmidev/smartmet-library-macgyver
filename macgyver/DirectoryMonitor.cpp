@@ -25,13 +25,13 @@
 #include "DirectoryMonitor.h"
 #include "Exception.h"
 #include "StringConversion.h"
+#include <boost/chrono.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <atomic>
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
 #include <stdexcept>
 
 // scoped read/write lock types
@@ -215,15 +215,15 @@ class DirectoryMonitor::Pimple
  public:
   MutexType mutex;
   Schedule schedule;
-  std::atomic<bool> running{false};    // true if run() has not exited
-  std::atomic<bool> stop{false};       // true if stop request is pending
-  std::atomic<bool> isready{false};    // true if at least one scan has completed
-  std::atomic<bool> has_ended{false};  // true if run() has ended due to any reason
+  bool running{false};                 // true if run() has not exited
+  bool stop{false};                    // true if stop request is pending
+  bool isready{false};                 // true if at least one scan has completed
+  bool has_ended{false};               // true if run() has ended due to any reason
 
-  std::mutex m2;
-  std::mutex m_ready;
-  std::condition_variable cond;
-  std::condition_variable cond_ready;
+  boost::mutex m2;
+  boost::mutex m_ready;
+  boost::condition_variable cond;
+  boost::condition_variable cond_ready;
 
   Watcher nextid = 0;
 };
@@ -392,11 +392,14 @@ void DirectoryMonitor::run()
     {
       // Do not start if already running
 
-      if (impl->running)
-        return;
+      do {
+	boost::unique_lock<boost::mutex> lock(impl->m_ready);
+	if (impl->running)
+	  return;
 
-      impl->running = true;
-      impl->has_ended = false;  // FIXME: race if run() called more than once
+	impl->running = true;
+	impl->has_ended = false;
+      } while (false);
 
       while (!impl->stop && !impl->schedule.empty())
       {
@@ -499,11 +502,14 @@ void DirectoryMonitor::run()
           }
         }
 
-        // One scan has now been completed
-        if (!impl->isready.exchange(true))
-        {
-          impl->cond_ready.notify_all();
-        }
+	{
+	  boost::unique_lock<boost::mutex> lock(impl->m2);
+	  if (!impl->isready)
+	  {
+	    impl->isready = true;
+	    impl->cond_ready.notify_all();
+	  }
+	}
 
         long sleeptime = 0;
         {
@@ -515,17 +521,19 @@ void DirectoryMonitor::run()
 
         if (sleeptime > 0)
         {
-          std::unique_lock<std::mutex> lock(impl->m2);
+          boost::unique_lock<boost::mutex> lock(impl->m2);
           impl->cond.wait_for(
-              lock, std::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
+              lock, boost::chrono::seconds(sleeptime), [this]() -> bool { return impl->stop; });
         }
       }
 
-      // Not running anymore. This order so that locking is not necessary
-      impl->has_ended = true;
-      impl->stop = false;
-      impl->running = false;
-      impl->cond_ready.notify_all();
+      {
+	boost::unique_lock<boost::mutex> lock(impl->m_ready);
+	impl->has_ended = true;
+	impl->stop = false;
+	impl->running = false;
+	impl->cond_ready.notify_all();
+      }
     }
     catch (const boost::thread_interrupted&)
     {
@@ -535,6 +543,7 @@ void DirectoryMonitor::run()
   }
   catch (...)
   {
+    boost::unique_lock<boost::mutex> lock(impl->m_ready);
     impl->has_ended = true;
     impl->cond_ready.notify_all();
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
@@ -555,6 +564,7 @@ void DirectoryMonitor::stop()
 {
   try
   {
+    boost::unique_lock<boost::mutex> lock(impl->m2);
     impl->stop = true;
     impl->cond.notify_all();
   }
@@ -586,7 +596,7 @@ bool DirectoryMonitor::wait_until_ready() const
 {
   try
   {
-    std::unique_lock<std::mutex> lock(impl->m_ready);
+    boost::unique_lock<boost::mutex> lock(impl->m_ready);
     impl->cond_ready.wait(lock, [this]() -> bool { return impl->has_ended || impl->isready; });
     return impl->isready && !impl->has_ended && !impl->stop;
   }
