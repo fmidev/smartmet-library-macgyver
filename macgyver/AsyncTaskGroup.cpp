@@ -77,12 +77,10 @@ bool Fmi::AsyncTaskGroup::stop_on_error(bool enable)
 
 bool Fmi::AsyncTaskGroup::wait_some()
 {
-  std::mutex m2;
-  std::unique_lock<std::mutex> lock(m2);
+  std::unique_lock<std::mutex> lock(m1);
   cond.wait(lock,
             [this]()
             {
-              std::unique_lock<std::mutex> lock(m1);
               return active_tasks.empty() || !completed_tasks.empty();
             });
   lock.unlock();
