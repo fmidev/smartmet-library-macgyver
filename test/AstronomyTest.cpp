@@ -372,24 +372,6 @@ static void prepare_test_data()
                                   time_duration(11, 56, 8),
                                   time_duration(12, 20, 58)));
 
-  /* Apia, Samoa (+13h, DST)
-   */
-
-  test_data.push_back(test_data_t("Apia (+13)",
-                                  "Pacific/Apia",
-                                  LON_W(171, 46, 1),
-                                  LAT_S(13, 50, 0),
-                                  //
-                                  ptime(OCT_7_2013, time_duration(8, 0, 0)),
-                                  -5.38392,  // declination
-                                  92.6229,   // azimuth
-                                  12.2396,   // elevation
-                                  //
-                                  ptime(OCT_7_2013, time_duration(7, 6, 19)),
-                                  ptime(OCT_7_2013, time_duration(19, 23, 52)),
-                                  time_duration(13, 15, 8),
-                                  time_duration(12, 17, 33)));
-
   /* Pago Pago, American Samoa (-11, no DST)
    */
 
