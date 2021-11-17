@@ -13,9 +13,7 @@ DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
 REQUIRES := libpqxx icu-i18n fmt ctpp2
 
-include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
-
-INCLUDES += $(pkg-config --cflags icu-i18n)
+include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
 
 LIBS += -L$(libdir) \
 	-lboost_date_time \
