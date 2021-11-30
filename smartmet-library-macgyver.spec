@@ -41,9 +41,9 @@ BuildRequires: libpqxx-devel < 1:7.0
 #TestRequires: libpqxx-devel < 1:7.0
 %else
 %if %{defined el8}
-Requires: libpqxx >= 5.0.1
-BuildRequires: libpqxx-devel >= 5.0.1
-#TestRequires: libpqxx-devel >= 5.0.1
+Requires: libpqxx >= 1:7.6.0, libpqxx < 1:7.7.0
+BuildRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
+#TestRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
 %else
 Requires: libpqxx
 BuildRequires: libpqxx-devel
