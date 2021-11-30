@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.10.4
+Version: 21.11.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -109,6 +109,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Nov 30 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.11.30-1.fmi
+- [Staging] Use PostgreSQL 13 and GDAL-3.3
+
 * Mon Oct  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.10.4-1.fmi
 - Fixed to_simple_string to handle hours>=100.
 
