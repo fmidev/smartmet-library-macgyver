@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.11.30
+Version: 21.12.01
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -21,7 +21,7 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-timezones >= 21.2.2
-BuildRequires: smartmet-utils-devel >= 21.11.4
+BuildRequires: smartmet-utils-devel >= 21.11.23
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
