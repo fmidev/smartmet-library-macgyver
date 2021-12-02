@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.12.01
+Version: 21.12.1
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
