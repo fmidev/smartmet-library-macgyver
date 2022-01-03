@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.10.4
+Version: 21.12.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -21,7 +21,7 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-timezones >= 21.2.2
-BuildRequires: smartmet-utils-devel >= 21.11.4
+BuildRequires: smartmet-utils-devel >= 21.11.23
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -41,9 +41,9 @@ BuildRequires: libpqxx-devel < 1:7.0
 #TestRequires: libpqxx-devel < 1:7.0
 %else
 %if %{defined el8}
-Requires: libpqxx >= 5.0.1
-BuildRequires: libpqxx-devel >= 5.0.1
-#TestRequires: libpqxx-devel >= 5.0.1
+Requires: libpqxx >= 1:7.6.0, libpqxx < 1:7.7.0
+BuildRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
+#TestRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
 %else
 Requires: libpqxx
 BuildRequires: libpqxx-devel
@@ -55,7 +55,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
 #TestRequires: make
-#TestRequires: postgresql12-libs
+#TestRequires: postgresql13-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 21.2.2
 #TestRequires: smartmet-utils-devel >= 21.11.4
@@ -109,6 +109,12 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
+- Update to postgresql 13 and gdal 3.3
+
+* Tue Nov 30 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.11.30-1.fmi
+- [Staging] Use PostgreSQL 13 and GDAL-3.3
+
 * Mon Oct  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.10.4-1.fmi
 - Fixed to_simple_string to handle hours>=100.
 
