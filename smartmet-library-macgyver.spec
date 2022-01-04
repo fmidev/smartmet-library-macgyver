@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.12.7
+Version: 22.1.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -109,6 +109,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Jan 4 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.1.4-1.fmi
+- Fixed lunar_time calculation (BRAINSTORM-2188)
+
 * Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
 - Update to postgresql 13 and gdal 3.3
 

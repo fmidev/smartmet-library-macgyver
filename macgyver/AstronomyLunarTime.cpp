@@ -5,6 +5,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/make_shared.hpp>
 #include <cmath>
 #include <limits>
 #include <vector>
@@ -595,20 +596,22 @@ lunar_time_t lunar_time_i(const boost::local_time::local_date_time& ldt, double 
 {
   try
   {
+	boost::local_time::time_zone_ptr tz_ptr = (ldt.zone() ? ldt.zone() : boost::make_shared<boost::local_time::posix_time_zone>("UTC"));
+
     // beginning of the day
     boost::local_time::local_date_time ldt_beg(
         ldt.local_time().date(),
         boost::posix_time::time_duration(0, 0, 0, 0),
-        ldt.zone(),
+        tz_ptr,
         boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
     boost::local_time::local_date_time ldt_end(
         ldt.local_time().date(),
         boost::posix_time::time_duration(23, 59, 59, 0),
-        ldt.zone(),
+        tz_ptr,
         boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
 
     boost::posix_time::ptime dst_endtime(
-        ldt.zone()->dst_local_end_time(ldt.local_time().date().year()));
+        tz_ptr->dst_local_end_time(ldt.local_time().date().year()));
     bool dst_ends_today(ldt_beg.local_time().date() == dst_endtime.date());
 
     double offset_before_dst_ends = timezone_offset(ldt_beg);
