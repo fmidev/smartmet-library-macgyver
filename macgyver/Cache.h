@@ -1229,6 +1229,7 @@ class Cache : public boost::noncopyable
     }
 
     itsCacheStats.miss();
+
     return {};
   }
 
