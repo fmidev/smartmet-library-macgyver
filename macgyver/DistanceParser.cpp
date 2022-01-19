@@ -37,175 +37,175 @@ static const char* NUMBER_SIGNS = "+-. 1234567890";
 	  {
 		if(format == METER)
 		  return (value * 1000.0);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value * 100000.0);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value * 1000000.0);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 0.621371);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.539957);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 1093.61);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 3280.84);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 39370.1);
 	  }
 	else if(unit == M)
 	  {
 		if(format == KILOMETER)
 		  return (value / 1000.0);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value / 0.01);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value / 0.001);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 0.000621371);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.000539957);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 1.09361);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 3.28084);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 39.3701);
 	  }
 	else if(unit == CM)
 	  {
 		if(format == METER)
 		  return (value / 100.0);
-		else if(format == KILOMETER)
+		if(format == KILOMETER)
 		  return (value / 100000.0);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value * 10.0);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 0.00000621371);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.00000539957);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 0.0109361);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 0.0328084);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 0.393701);
 	  }
 	else if(unit == MM)
 	  {
 		if(format == KILOMETER)
 		  return (value / 1000000.0);
-		else if(format == METER)
+		if(format == METER)
 		  return (value / 1000.0);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value / 10.0);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 0.000000621371);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.000000539957);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 0.00109361);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 0.00328084);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 0.0393701);
 	  }
 	else if(unit == MI)
 	  {
 		if(format == KILOMETER)
 		  return (value * 1.609344);
-		else if(format == METER)
+		if(format == METER)
 		  return (value * 1609.344);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value * 160934.4);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value * 1609344.0);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.868976);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 1760.0);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 5280.0);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 63360);
 	  }
 	else if(unit == NMI)
 	  {
 		if(format == KILOMETER)
 		  return (value * 1.852);
-		else if(format == METER)
+		if(format == METER)
 		  return (value * 1852.0);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value * 185200.0);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value * 1852000.0);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 1.15078);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 2025.37);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 6076.12);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 72913.4);
 	  }
 	else if(unit == YD)
 	  {
 		if(format == KILOMETER)
 		  return (value * 0.0009144);
-		else if(format == METER)
+		if(format == METER)
 		  return (value * 0.9144);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value * 91.44);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value * 914.40);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 0.000568182);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.000493737);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 3.0);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 36.0);
 	  }
 	else if(unit == FT)
 	  {
 		if(format == KILOMETER)
 		  return (value * 0.0003048);
-		else if(format == METER)
+		if(format == METER)
 		  return (value * 0.3048);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value * 30.48);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value * 304.80);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 0.000189394);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.000164579);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 0.333333);
-		else if(format == INCH)
+		if(format == INCH)
 		  return (value * 12.0);
 	  }
 	else if(unit == IN)
 	  {
 		if(format == KILOMETER)
 		  return (value * 0.0000254);
-		else if(format == METER)
+		if(format == METER)
 		  return (value * 0.0254);
-		else if(format == CENTIMETER)
+		if(format == CENTIMETER)
 		  return (value * 2.54);
-		else if(format == MILLIMETER)
+		if(format == MILLIMETER)
 		  return (value * 25.4);
-		else if(format == MILE)
+		if(format == MILE)
 		  return (value * 0.0000157828);
-		else if(format == NAUTICAL_MILE)
+		if(format == NAUTICAL_MILE)
 		  return (value * 0.0000137149);
-		else if(format == YARD)
+		if(format == YARD)
 		  return (value * 0.0277778);
-		else if(format == FOOT)
+		if(format == FOOT)
 		  return (value * 0.0833333);
 	  }
-	else
-      throw Fmi::Exception(BCP, "Invalid unit: " + unit);
+        else
+          throw Fmi::Exception(BCP, "Invalid unit: " + unit);
 
 	return value;
   }
