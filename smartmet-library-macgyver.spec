@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.1.18
+Version: 22.1.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -21,7 +21,7 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-timezones >= 21.2.2
-BuildRequires: smartmet-utils-devel >= 21.11.23
+BuildRequires: smartmet-utils-devel >= 22.1.20
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -58,7 +58,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: postgresql13-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 21.2.2
-#TestRequires: smartmet-utils-devel >= 21.11.4
+#TestRequires: smartmet-utils-devel >= 22.1.20
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -98,7 +98,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 21.11.4
+Requires: smartmet-utils-devel >= 22.1.20
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -109,6 +109,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
+- Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
+
 * Tue Jan 18 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.1.18-1.fmi
 - Added DistanceParser class (BRAINSTORM-605)
 
