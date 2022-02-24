@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.1.21
+Version: 22.2.24
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -109,6 +109,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Feb 24 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.2.24-1.fmi
+- Added template class Fmi::TypeMap
+
 * Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
 - Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
 
