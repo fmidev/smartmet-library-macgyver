@@ -22,6 +22,7 @@ LIBS += -L$(libdir) \
 	-lboost_chrono \
 	-lboost_thread \
 	-lboost_system \
+	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
 	-lpthread -lrt
 

@@ -20,6 +20,7 @@ BuildRequires: imake
 BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
+BuildRequires: double-conversion-devel
 BuildRequires: smartmet-timezones >= 21.2.2
 BuildRequires: smartmet-utils-devel >= 22.1.20
 %if %{with tests}
@@ -31,6 +32,7 @@ Requires: boost169-filesystem
 Requires: boost169-regex
 Requires: boost169-system
 Requires: boost169-thread
+Requires: double-conversion
 Requires: ctpp2
 Requires: fmt >= 7.1.3
 Requires: libicu >= 50.2
