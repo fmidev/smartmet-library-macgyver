@@ -88,7 +88,7 @@ std::string ValueFormatter::format_double_conversion_scientific(double theValue,
 {
   try
   {
-    if (isnan(theValue))
+    if (std::isnan(theValue))
       return itsFormatterParam.missingText;
 
     using namespace double_conversion;
@@ -129,7 +129,7 @@ std::string ValueFormatter::format_double_conversion_fixed(double theValue, int 
 {
   try
   {
-    if (isnan(theValue))
+    if (std::isnan(theValue))
       return itsFormatterParam.missingText;
 
     bool negativeValue = (theValue < 0);
