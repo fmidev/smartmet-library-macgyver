@@ -58,7 +58,7 @@ class PostgreSQLConnection
 
   void close();
   bool isConnected() const { return itsConnection->is_open(); }
-  void setClientEncoding(const std::string& theEncoding) const;
+  void setClientEncoding(const std::string& theEncoding);
   void setDebug(bool debug) { itsDebug = debug; }
   pqxx::result executeNonTransaction(const std::string& theSQLStatement) const;
 

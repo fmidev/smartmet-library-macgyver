@@ -288,13 +288,17 @@ void PostgreSQLConnection::cancel()
   }
 }
 
-void PostgreSQLConnection::setClientEncoding(const std::string& theEncoding) const
+void PostgreSQLConnection::setClientEncoding(const std::string& theEncoding)
 {
   try
   {
     try
     {
-      itsConnection->set_client_encoding(theEncoding);
+      if (itsConnection)
+      {
+        itsConnection->set_client_encoding(theEncoding);
+      }
+      itsConnectionOptions.encoding = theEncoding;
     }
     catch (const std::exception& e)
     {
