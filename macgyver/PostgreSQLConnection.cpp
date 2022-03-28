@@ -187,7 +187,7 @@ void PostgreSQLConnection::close()
 #else
     try
     {
-      if (itsConnection->is_open())
+      if (itsConnection && itsConnection->is_open())
         itsConnection->close();
       itsConnection.reset();
     }
