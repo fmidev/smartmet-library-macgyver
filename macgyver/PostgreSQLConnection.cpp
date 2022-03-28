@@ -185,7 +185,6 @@ void PostgreSQLConnection::close()
 #if PQXX_VERSION_MAJOR < 7
     itsConnection->disconnect();
 #else
-    // TODO:checked whether this works with libpqxx7
     try
     {
       if (itsConnection->is_open())
