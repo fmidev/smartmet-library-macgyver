@@ -190,6 +190,7 @@ void PostgreSQLConnection::close()
     {
       if (itsConnection->is_open())
         itsConnection->close();
+      itsConnection.reset();
     }
     catch (const std::exception& e)
     {
@@ -276,7 +277,10 @@ void PostgreSQLConnection::cancel()
 {
   try
   {
-    itsConnection->cancel_query();
+    if (itsConnection)
+    {
+      itsConnection->cancel_query();
+    }
   }
   catch (const std::exception& e)
   {
