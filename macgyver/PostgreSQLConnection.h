@@ -76,6 +76,8 @@ class PostgreSQLConnection
   std::shared_ptr<Transaction> transaction() { return std::make_shared<Transaction>(*this); }
 
  private:
+  void check_connection() const;
+ private:
   boost::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
   boost::shared_ptr<pqxx::work> itsTransaction;       // PostgreSQL transaction
   bool itsDebug = false;

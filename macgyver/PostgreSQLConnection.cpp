@@ -179,24 +179,7 @@ void PostgreSQLConnection::close()
 {
   try
   {
-    if (!itsConnection)
-      return;
-
-#if PQXX_VERSION_MAJOR < 7
-    itsConnection->disconnect();
-#else
-    try
-    {
-      if (itsConnection && itsConnection->is_open())
-        itsConnection->close();
-      itsConnection.reset();
-    }
-    catch (const std::exception& e)
-    {
-      throw Fmi::Exception(BCP,
-                           std::string("Failed to close connection to PostgreSQL: ") + e.what());
-    }
-#endif
+    itsConnection.reset();
   }
   catch (...)
   {
@@ -226,6 +209,8 @@ pqxx::result PostgreSQLConnection::executeNonTransaction(const std::string& theS
   {
     if (itsDebug)
       std::cout << "SQL: " << theSQLStatement << std::endl;
+
+    check_connection();
 
     try
     {
@@ -262,6 +247,7 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   try
   {
     if (itsTransaction)
+      check_connection();
       return itsTransaction->exec(theSQLStatement);
 
     return executeNonTransaction(theSQLStatement);
@@ -308,6 +294,12 @@ void PostgreSQLConnection::setClientEncoding(const std::string& theEncoding)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+void PostgreSQLConnection::check_connection() const
+{
+  if (!itsConnection)
+    throw Fmi::Exception(BCP, "Not connected");
 }
 
 PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn) : conn(conn)
