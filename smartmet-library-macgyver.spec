@@ -4,7 +4,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.3.8
+Version: 22.3.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -111,6 +111,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Mar 28 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.3.28-1.fmi
+- Fmi::PostgreSQLConnection changes
+
 * Tue Mar 8 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.3.8-1.fmi
 - Stat-functions moved to timeseries-library (BRAINSTORM-2259)
 
