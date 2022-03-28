@@ -5,7 +5,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 22.3.28
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -111,6 +111,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Mar 28 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.3.28-2.fmi
+- Fmi::PostgreSQLConnection: update handling cases when there is no connection
+
 * Mon Mar 28 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.3.28-1.fmi
 - Fmi::PostgreSQLConnection changes
 
