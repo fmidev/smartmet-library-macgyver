@@ -4,7 +4,6 @@
 #include <boost/thread.hpp>
 
 #include <atomic>
-#include <condition_variable>
 #include <mutex>
 
 namespace Fmi
