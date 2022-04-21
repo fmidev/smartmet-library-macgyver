@@ -247,8 +247,10 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   try
   {
     if (itsTransaction)
+    {
       check_connection();
       return itsTransaction->exec(theSQLStatement);
+    }
 
     return executeNonTransaction(theSQLStatement);
   }
