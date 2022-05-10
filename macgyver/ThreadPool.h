@@ -320,17 +320,15 @@ class ThreadPool : public boost::noncopyable
   bool schedule(const Task& newTask)
   {
     bool inserted;
+    Lock lock(itsMutex);
     {
-      Lock lock(itsMutex);
       inserted = itsScheduler.push(newTask);
+      if (inserted)
+      {
+          // Tell threads that new data is available
+          itsDataEvent.notify_one();
+      }
     }
-
-    if (inserted)
-    {
-      // Tell threads that new data is available
-      itsDataEvent.notify_one();
-    }
-
     return inserted;
   }
 
@@ -525,26 +523,24 @@ class ThreadPool : public boost::noncopyable
 
   void workerDied(boost::shared_ptr<Worker<PoolType> > theWorkerThatDied)
   {
+    // Is called from the worker thread, must lock the pool mutex
+    Lock lock(itsMutex);
+
+    itsWorkers.erase(theWorkerThatDied->getLocation());
+    --itsWorkerCount;
+    --itsActiveCount;
+#ifndef NDEBUG
+    std::cout << "Thread " << boost::this_thread::get_id() << " dies" << std::endl;
+    std::cout << "Workers left: " << itsWorkerCount << std::endl;
+#endif
+
+    // Replace the killed worker if necessary
+    if (itsTargetWorkerCount > itsWorkerCount)
     {
-      // Is called from the worker thread, must lock the pool mutex
-      Lock lock(itsMutex);
-
-      itsWorkers.erase(theWorkerThatDied->getLocation());
-      --itsWorkerCount;
-      --itsActiveCount;
 #ifndef NDEBUG
-      std::cout << "Thread " << boost::this_thread::get_id() << " dies" << std::endl;
-      std::cout << "Workers left: " << itsWorkerCount << std::endl;
+      std::cout << "Recreating worker" << std::endl;
 #endif
-
-      // Replace the killed worker if necessary
-      if (itsTargetWorkerCount > itsWorkerCount)
-      {
-#ifndef NDEBUG
-        std::cout << "Recreating worker" << std::endl;
-#endif
-        addWorker();
-      }
+      addWorker();
     }
 
     // Notify that thread has been destructed
