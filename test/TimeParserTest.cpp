@@ -30,9 +30,7 @@ void parse_timestamp()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
-
-  std::vector<Fmi::Test::TimeParseTest> should_pass = {
+  std::vector<Fmi::Test::TimeParseTest<boost::posix_time::ptime> > should_pass = {
       {"20070102T0500", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
       {"20000228T0515", ptime(date(2000, 2, 28), hours(5) + minutes(15))}};
 
@@ -52,9 +50,7 @@ void parse_epoch()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
-
-  std::vector<Fmi::Test::TimeParseTest> should_pass = {
+  std::vector<Fmi::Test::TimeParseTest<boost::posix_time::ptime> > should_pass = {
       // date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
       {"1167714000", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
       // date +%s --date="2000-02-28 05:15:00 UTC" --> 951714900
@@ -82,9 +78,7 @@ void parse_iso()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
-
-  std::vector<Fmi::Test::TimeParseTest> should_pass = {
+  std::vector<Fmi::Test::TimeParseTest<boost::posix_time::ptime> > should_pass = {
       {"20070102T050000", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
       {"20000228T051500", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
       {"2007-01-02T05:00:00", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
@@ -151,9 +145,7 @@ void parse_fmi()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
-
-  std::vector<Fmi::Test::TimeParseTest> should_pass = {
+  std::vector<Fmi::Test::TimeParseTest<boost::posix_time::ptime> > should_pass = {
       {"200912120500", ptime(date(2009, 12, 12), hours(5) + minutes(0))},
       {"180001011500", ptime(date(1800, 1, 1), hours(15) + minutes(0))}};
 
@@ -177,9 +169,8 @@ void try_parse_iso()
   using namespace boost::gregorian;
 
   bool utc;
-  ptime res, ok;
 
-  std::vector<Fmi::Test::TimeParseTest> should_pass = {
+  std::vector<Fmi::Test::TimeParseTest<boost::posix_time::ptime> > should_pass = {
       {"20070102T050000", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
       {"20000228T051500", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
       {"2000-02-28T05:15:10Z", ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10))},
@@ -201,9 +192,7 @@ void parse_sql()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
-
-  std::vector<Fmi::Test::TimeParseTest> should_pass = {
+  std::vector<Fmi::Test::TimeParseTest<boost::posix_time::ptime> > should_pass = {
       {"2007-01-02 05:00:00", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
       {"2000-02-28 05:15:00", ptime(date(2000, 2, 28), hours(5) + minutes(15))},
       {"2000-02-28 05", ptime(date(2000, 2, 28), hours(5))},
@@ -357,7 +346,7 @@ void try_parse_offset()
   else
     now -= seconds(secs);
 
-  ptime res, ok;
+  ptime res;
 
   res = TimeParser::try_parse_offset("0");
   if (res - now != minutes(0))
@@ -443,7 +432,7 @@ void parse_offset()
   else
     now -= seconds(secs);
 
-  ptime res, ok;
+  ptime res;
 
   res = TimeParser::parse("0");
   if (res - now != minutes(0))
@@ -508,7 +497,7 @@ void try_parse_duration()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  time_duration res, ok;
+  time_duration res;
 
   res = TimeParser::try_parse_duration("0");
   if (res != seconds(0))
@@ -561,7 +550,7 @@ void parse_duration()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  time_duration res, ok;
+  time_duration res;
 
   res = TimeParser::parse_duration("0");
   if (res != seconds(0))
@@ -728,38 +717,30 @@ void looks_utc()
 {
   using namespace Fmi;
 
-  if (TimeParser::looks_utc("200701020500"))
-    TEST_FAILED("200701020500 should look like local time");
+  std::vector<Test::TimeParseTest<bool> > data =
+      {
+          {"200701020500", false}
+          ,{"20000228T051500", false}
+          ,{"2007-01-02T05:00:00", false}
+          ,{"2000-02-28T05:15:00", false}
+          ,{"2000-02-28T05:15:10", false}
+          ,{"2000-02-28T05:15:10Z", true}
+          ,{"2000-02-28T05:15:10+01:00", false}
+          ,{"2000-02-28T05:15:10-02", false}
+          ,{"2007-01-02 05:00:00", false}
+          ,{"2000-02-28 05:15:00", false}
+          ,{"1167714000", true}
+      };
 
-  if (TimeParser::looks_utc("20000228T051500"))
-    TEST_FAILED("20000228T051500 should look like local time");
-
-  if (TimeParser::looks_utc("2007-01-02T05:00:00"))
-    TEST_FAILED("2007-01-02T05:00:00 should look like local time");
-
-  if (TimeParser::looks_utc("2000-02-28T05:15:00"))
-    TEST_FAILED("2000-02-28T05:15:00 should look like local time");
-
-  if (TimeParser::looks_utc("2000-02-28T05:15:10"))
-    TEST_FAILED("2000-02-28T05:15:10 should look like local time");
-
-  if (!TimeParser::looks_utc("2000-02-28T05:15:10Z"))
-    TEST_FAILED("2000-02-28T05:15:10Z should look like UTC time");
-
-  if (!TimeParser::looks_utc("2000-02-28T05:15:10+01:00"))
-    TEST_FAILED("2000-02-28T05:15:10Z should look like UTC time");
-
-  if (!TimeParser::looks_utc("2000-02-28T05:15:10-02"))
-    TEST_FAILED("2000-02-28T05:15:10Z should look like UTC time");
-
-  if (TimeParser::looks_utc("2007-01-02 05:00:00"))
-    TEST_FAILED("2007-01-02 05:00:00 should look like local time");
-
-  if (TimeParser::looks_utc("2000-02-28 05:15:00"))
-    TEST_FAILED("2000-02-28 05:15:00 should look like local time");
-
-  if (!TimeParser::looks_utc("1167714000"))
-    TEST_FAILED("1167714000 should look like UTC time");
+  for (const auto& item : data)
+  {
+      if (item.expected ^ TimeParser::looks_utc(item.src))
+      {
+          TEST_FAILED((item.src + " should look like "
+                  + (item.expected ? "UTC" : "local")
+                  + " time").c_str());
+      }
+  }
 
   TEST_PASSED();
 }

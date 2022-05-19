@@ -8,19 +8,20 @@
 namespace Fmi {
   namespace Test {
 
+    template <typename ResponseType>
     struct TimeParseTest
     {
       std::string src;
-      boost::posix_time::ptime expected;
+      ResponseType expected;
     };
 
-    bool check_time_parse(const std::vector<TimeParseTest>& data,
+    bool check_time_parse(const std::vector<TimeParseTest<boost::posix_time::ptime> >& data,
                           std::function<boost::posix_time::ptime(const std::string&)> parser)
     {
       using boost::posix_time::ptime;
       int num_tests = 0;
       int num_passed = 0;
-      for (const TimeParseTest& item : data) {
+      for (const auto& item : data) {
         ptime result;
         num_tests++;
         try {
