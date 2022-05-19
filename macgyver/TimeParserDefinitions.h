@@ -297,9 +297,15 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
         (qi::omit[qi::lit(':')] >> uint12 >> &qi::omit[(qi::lit('.') | qi::lit('Z') | qi::eoi)]) |
         (optional_colon >> uint2);
 
-    isostamp = year >> optional_dash >> month >> optional_dash >> mday >> date_time_separator >>
-               -hmin >> optional_colon >> -hmin >> -second >> optional_period >> -qi::omit[uint3] >>
-               tz_parser >> qi::eoi;
+    isostamp_ext = year >> optional_dash >> month >> optional_dash >> mday >> date_time_separator
+                        >> -hmin >> optional_colon >> -hmin >> -second >> optional_period >> -qi::omit[uint3]
+                        >> tz_parser >> qi::eoi;
+
+    // Support separately format YYYYMMDD[T]HHMM[SS] <tz>
+    isostamp_basic = uint4 >> uint2 >> uint2 >> qi::omit[-date_time_separator]
+                           >> uint2 >> uint2 >> -uint2 >> tz_parser >> qi::eoi;
+
+    isostamp = isostamp_basic | isostamp_ext;
 
 #ifdef MYDEBUG
     BOOST_SPIRIT_DEBUG_NODE(dash);
@@ -325,6 +331,9 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
   qi::rule<Iterator, void()> optional_period;
   qi::rule<Iterator, void()> date_time_separator;
   TimeZoneParser<Iterator> tz_parser;
+
+  qi::rule<Iterator, TimeStamp()> isostamp_ext;
+  qi::rule<Iterator, TimeStamp()> isostamp_basic;
 
   qi::rule<Iterator, TimeStamp()> isostamp;
 };
