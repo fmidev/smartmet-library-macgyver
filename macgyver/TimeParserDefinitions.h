@@ -34,6 +34,8 @@ using OptionalChar = boost::optional<char>;
 
 struct TimeZoneOffset
 {
+  bool present;
+
   char sign;
 
   unsigned int hours;
@@ -74,7 +76,7 @@ struct TimeStamp
 // Adapt structs, so they behave like boost::fusion::vector's
 
 BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeZoneOffset,
-                          (char, sign)(unsigned int, hours)(unsigned int, minutes))
+                          (char, sign)(unsigned int, hours)(unsigned int, minutes)(bool, present))
 
 BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeOffset,
                           (char, sign)(unsigned int, value)(Fmi::TimeParser::OptionalChar, unit))
@@ -107,21 +109,27 @@ struct TimeZoneParser : qi::grammar<Iterator, TimeZoneOffset()>
 
   TimeZoneParser() : TimeZoneParser::base_type(tz_offset)
   {
-    tz_offset =
-        (qi::lit('Z') >> qi::attr('+') >> qi::attr(0) >> qi::attr(0))  // Z means zero offset
-        |
-        ((qi::char_("+") | qi::char_("-")) >>
-         (two_digits >>
-          (two_digits | ((qi::lit(':') >> two_digits) |
-                         qi::attr(0)))))  // sign with hours followed by optional colon and minutes
-        | (qi::attr('+') >> qi::attr(0) >>
-           qi::attr(0));  // If parse failed, default to 0 hours 0 minutes
+    tz_utc = qi::lit('Z') >> qi::attr('+') >> qi::attr(0) >> qi::attr(0) >> qi::attr(true);
+
+    tz_hhmm =
+      (qi::char_("+") | qi::char_("-")) >>
+      two_digits >>
+      (two_digits | ((qi::lit(':') >> two_digits) | qi::attr(0))) >>  // sign with hours followed by optional colon and minutes
+      qi::attr(true);
+
+    tz_missing = qi::eps >> qi::attr('+') >> qi::attr(0) >> qi::attr(0) >> qi::attr(false);
+
+    tz_offset = tz_utc | tz_hhmm | tz_missing;
 
 #ifdef MYDEBUG
     BOOST_SPIRIT_DEBUG_NODE(two_digits);
     BOOST_SPIRIT_DEBUG_NODE(tz_offset);
 #endif
   }
+
+  qi::rule<Iterator, TimeZoneOffset()> tz_utc;
+  qi::rule<Iterator, TimeZoneOffset()> tz_hhmm;
+  qi::rule<Iterator, TimeZoneOffset()> tz_missing;
 
   qi::rule<Iterator, TimeZoneOffset()> tz_offset;
   TwoDigitNumber two_digits;
