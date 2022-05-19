@@ -529,149 +529,43 @@ boost::posix_time::ptime try_parse_offset(const std::string& str)
 
 boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
 {
+  using namespace boost::posix_time;
   try
   {
-    std::uint16_t year = 0;
-    std::uint16_t month = 1;
-    std::uint16_t day = 1;
-    std::uint16_t hour = 0;
-    std::uint16_t minute = 0;
-    std::uint16_t second = 0;
-    std::uint16_t houroffset = 0;
-    std::uint16_t minuteoffset = 0;
-    bool positiveoffset = false;
+    using iterator = std::string::const_iterator;
+    ISOParser<iterator> theParser;
+    TimeStamp target;
+    ptime t = bad_time;
 
-    const char* ptr = str.c_str();
+    iterator start = str.begin();
+    iterator finish = str.end();
 
-    // By default the time is in local time
-    *isutc = false;
+    bool success = qi::parse(start, finish, theParser, target);
 
-    // Year
-
-    if (!parse_uint16(&ptr, 4, &year))
-      return bad_time;
-
-    // Quick sanity check to prevent further useless parsing
-    // - boost library version 1.34 or greater support dates
-    //   at least in the range 1400-Jan-01 to 9999-Dec-31
-    // - Dates prior to 1582 using the Julian Calendar
-    if (year < 1582 || year > 5000)
-      return bad_time;
-
-    // Establish whether we have basic or extended format
-
-    bool extended_format = (*ptr == '-');
-
-    // Month
-
-    if (!skip_separator(&ptr, '-', extended_format))
-      return bad_time;  // should never happen though
-    if (!parse_uint16(&ptr, 2, &month))
-      return bad_time;  // YYYY is not allowed
-    if (month == 0 || month > 12)
-      return bad_time;
-
-    if (*ptr == '\0')
+    if (success)
     {
-      if (!extended_format)
-        return bad_time;  // YYYYMM is not allowed
-      goto build_iso;     // YYYY-MM is allowed
+      try
+      {
+        t = buildFromISO(target);
+
+        if (target.tz.present)
+        {
+          *isutc = target.tz.hours == 0 && target.tz.minutes == 0;
+        }
+        else
+        {
+          *isutc = false;
+        }
+      }
+      catch (...)
+      {
+        // We do not want to get exception thrown on invalid input
+      }
     }
-
-    // Day
-
-    if (!skip_separator(&ptr, '-', extended_format))
-      return bad_time;
-    if (!parse_uint16(&ptr, 2, &day))
-      return bad_time;
-    if (day == 0 || day > 31)
-      return bad_time;
-    if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DD is allowed
-
-    // We permit omitting 'T' to enable old YYYYMMDDHHMI timestamp format
-
-    if (*ptr == 'T')
-      ++ptr;
-    if (!parse_uint16(&ptr, 2, &hour))
-      return bad_time;
-    if (hour > 23)
-      return bad_time;
-    if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DDTHH is allowed
-
-    if (*ptr == 'Z' || *ptr == '+' || *ptr == '-')
-      goto zone_began;
-
-    if (!skip_separator(&ptr, ':', extended_format))
-      return bad_time;
-    if (!parse_uint16(&ptr, 2, &minute))
-      return bad_time;
-    if (minute > 59)
-      return bad_time;
-    if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DDTHH:MI is allowed
-
-    if (*ptr == 'Z' || *ptr == '+' || *ptr == '-')
-      goto zone_began;
-
-    if (!skip_separator(&ptr, ':', extended_format))
-      return bad_time;
-    if (!parse_uint16(&ptr, 2, &second))
-      return bad_time;
-    if (second > 59)
-      return bad_time;
-    if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DDTHH:MI:SS is allowed
-
-    if (*ptr != 'Z' && *ptr != '+' && *ptr != '-')
-      return bad_time;
-
-  zone_began:
-
-    *isutc = true;
-    if (*ptr == 'Z')
+    else
     {
-      ++ptr;
-      if (*ptr != '\0')
-        return bad_time;
-      goto build_iso;
+      *isutc = true;
     }
-
-    positiveoffset = (*ptr == '+');
-    ptr++;
-
-    if (!parse_uint16(&ptr, 2, &houroffset))
-      return bad_time;
-    if (houroffset >= 14)
-      return bad_time;  // some offsets are > 12
-
-    if (*ptr == '\0')
-      goto build_iso;
-
-    if (!skip_separator(&ptr, ':', extended_format))
-      return bad_time;
-    if (!parse_uint16(&ptr, 2, &minuteoffset))
-      return bad_time;
-    if (*ptr != '\0')
-      return bad_time;
-
-  build_iso:
-
-    boost::posix_time::ptime t(boost::gregorian::date(year, month, day),
-                               boost::posix_time::hours(hour) + boost::posix_time::minutes(minute) +
-                                   boost::posix_time::seconds(second));
-
-    // Adjust if necessary
-
-    if (houroffset != 0 || minuteoffset != 0)
-    {
-      if (positiveoffset)
-        t -= (boost::posix_time::hours(houroffset) + boost::posix_time::minutes(minuteoffset));
-      else
-        t += (boost::posix_time::hours(houroffset) + boost::posix_time::minutes(minuteoffset));
-    }
-
     return t;
   }
   catch (...)
