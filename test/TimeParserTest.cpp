@@ -678,6 +678,9 @@ void looks()
   if ((res = TimeParser::looks("2000-02-28T05:15:10-02")) != "iso")
     TEST_FAILED("2000-02-28T05:15:10Z should look like an ISO date time");
 
+  if ((res = TimeParser::looks("2022-05-19T21:00:00.000Z")) != "iso")
+    TEST_FAILED("2022-05-19T21:00:00.000Z should look like an ISO date time");
+
   if ((res = TimeParser::looks("2007-01-02 05:00:00")) != "sql")
     TEST_FAILED("2007-01-02 05:00:00 should look like a SQL date time");
 
