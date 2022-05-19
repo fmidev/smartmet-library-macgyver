@@ -84,7 +84,7 @@ class WorkQueue : std::mutex, std::condition_variable
   Queue queue;
   struct : std::vector<std::thread>
   {
-    void join() { std::for_each(begin(), end(), mem_fun_ref(&value_type::join)); }
+    void join() { for (auto& t : *this) { t.join(); } }
   } threads;
 
   using lock_guard = std::lock_guard<std::mutex>;
