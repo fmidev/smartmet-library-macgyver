@@ -547,15 +547,7 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
       try
       {
         t = buildFromISO(target);
-
-        if (target.tz.present)
-        {
-          *isutc = target.tz.hours == 0 && target.tz.minutes == 0;
-        }
-        else
-        {
-          *isutc = false;
-        }
+        *isutc = target.tz.present;
       }
       catch (...)
       {
