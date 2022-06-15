@@ -2,6 +2,17 @@
 %define DIRNAME macgyver
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
+
+%if 0%{?rhel} && 0%{rhel} < 9
+%define smartmet_boost boost169
+%define smartmet_fmt_min 7.1.3
+%define smartmet_fmt_max 7.2.0
+%else
+%define smartmet_boost boost
+%define smartmet_fmt_min 8.1.1
+%define smartmet_fmt_max 8.2.0
+%endif
+
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 22.5.24
@@ -12,9 +23,9 @@ URL: https://github.com/fmidev/smartmet-library-macgyver
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: boost169-devel
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: ctpp2-devel
-BuildRequires: fmt-devel >= 7.1.3
+BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: gcc-c++
 BuildRequires: imake
 BuildRequires: libicu-devel
@@ -26,34 +37,40 @@ BuildRequires: smartmet-utils-devel >= 22.1.20
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
-Requires: boost169-chrono
-Requires: boost169-date-time
-Requires: boost169-filesystem
-Requires: boost169-regex
-Requires: boost169-system
-Requires: boost169-thread
+Requires: %{smartmet_boost}-chrono
+Requires: %{smartmet_boost}-date-time
+Requires: %{smartmet_boost}-filesystem
+Requires: %{smartmet_boost}-regex
+Requires: %{smartmet_boost}-system
+Requires: %{smartmet_boost}-thread
 Requires: double-conversion
 Requires: ctpp2
-Requires: fmt >= 7.1.3
+Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: libicu >= 50.2
 
-%if %{defined el7}
+%if 0%{?rhel} && 0%{rhel} == 7
 Requires: libpqxx < 1:7.0
 BuildRequires: libpqxx-devel < 1:7.0
 #TestRequires: libpqxx-devel < 1:7.0
 %else
-%if %{defined el8}
+%if 0%{?rhel} && 0%{rhel} == 8
 Requires: libpqxx >= 1:7.6.0, libpqxx < 1:7.7.0
 BuildRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
 #TestRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
+%else
+%if 0%{?rhel} && 0%{rhel} == 9
+Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
+BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
+#TestRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
 %else
 Requires: libpqxx
 BuildRequires: libpqxx-devel
 #TestRequires: libpqxx-devel
 %endif
 %endif
+%endif
 
-#TestRequires: boost169-devel
+#TestRequires: %{smartmet_boost}-devel
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
 #TestRequires: make
