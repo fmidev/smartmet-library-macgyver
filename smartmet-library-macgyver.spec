@@ -15,7 +15,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.5.24
+Version: 22.6.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -128,6 +128,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jun 15 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.6.15-1.fmi
+- Add RHEL 9 support
+
 * Tue May 24 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.5.24-1.fmi
 - Update time ISO format parser
 
