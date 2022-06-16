@@ -5,13 +5,12 @@
 
 %if 0%{?rhel} && 0%{rhel} < 9
 %define smartmet_boost boost169
-%define smartmet_fmt_min 7.1.3
-%define smartmet_fmt_max 7.2.0
 %else
 %define smartmet_boost boost
+%endif
+
 %define smartmet_fmt_min 8.1.1
 %define smartmet_fmt_max 8.2.0
-%endif
 
 Summary: macgyver library
 Name: %{SPECNAME}
@@ -53,12 +52,7 @@ Requires: libpqxx < 1:7.0
 BuildRequires: libpqxx-devel < 1:7.0
 #TestRequires: libpqxx-devel < 1:7.0
 %else
-%if 0%{?rhel} && 0%{rhel} == 8
-Requires: libpqxx >= 1:7.6.0, libpqxx < 1:7.7.0
-BuildRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
-#TestRequires: libpqxx-devel >= 1:7.6.0, libpqxx-devel < 1:7.7.0
-%else
-%if 0%{?rhel} && 0%{rhel} == 9
+%if 0%{?rhel} && 0%{rhel} >= 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
 BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
 #TestRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
@@ -66,7 +60,6 @@ BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
 Requires: libpqxx
 BuildRequires: libpqxx-devel
 #TestRequires: libpqxx-devel
-%endif
 %endif
 %endif
 
