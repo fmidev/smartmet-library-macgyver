@@ -5,6 +5,7 @@
 #include <atomic>
 #include <list>
 #include <memory>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -91,8 +92,11 @@ class Exception : public std::exception
 
   Exception& disableLogging();
   Exception& disableStackTrace();
+  Exception& disableStackTraceRecursive();
 
   void printError() const;
+
+  void printOn(std::ostream& out) const;
 
  protected:
   ExceptionTimeStamp timestamp;
@@ -109,6 +113,8 @@ class Exception : public std::exception
  public:
   static std::atomic<bool> force_stack_trace;
 };
+
+std::ostream& operator << (std::ostream& out, const Exception& e);
 
 // Next is to be replaced later on with std::source_location, which is currently experimental
 // Static cast explanation: https://github.com/isocpp/CppCoreGuidelines/issues/765

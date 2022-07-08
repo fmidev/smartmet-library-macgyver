@@ -302,6 +302,15 @@ Exception& Exception::disableStackTrace()
   return *this;
 }
 
+Exception& Exception::disableStackTraceRecursive()
+{
+  disableStackTrace();
+  if (prevException) {
+    prevException->disableStackTraceRecursive();
+  }
+  return *this;
+}
+
 std::string Exception::getStackTrace() const
 {
   if (!force_stack_trace && (mLoggingDisabled || mStackTraceDisabled))
@@ -456,6 +465,26 @@ void Exception::printError() const
     }
 #endif
   }
+}
+
+void Exception::printOn(std::ostream& out) const
+{
+  if (!loggingDisabled()) {
+    // Skip levels for which stack trace is disabled
+    const Exception* exc = this;
+    while (exc->getPrevException() && exc->stackTraceDisabled())
+      {
+	exc = exc->getPrevException();
+      }
+
+    out << exc->getStackTrace();
+  }
+}
+
+std::ostream& operator << (std::ostream& out, const Exception& e)
+{
+  e.printOn(out);
+  return out;
 }
 
 }  // namespace Fmi
