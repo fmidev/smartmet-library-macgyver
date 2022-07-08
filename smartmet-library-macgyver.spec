@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.6.16
+Version: 22.7.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jul  8 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.8-1.fmi
+- Fmi::Exception improvements (new methods)
+
 * Thu Jun 16 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.6.16-1.fmi
 - Add support of HEL9, upgrade to libpqxx-7.7.0 (rhel8+) and fmt-8.1.1
 
