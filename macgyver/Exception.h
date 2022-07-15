@@ -37,6 +37,18 @@ class Exception : public std::exception
                          const char* _function,
                          std::string _message);
 
+  /**
+   *  @brief Returns a copy of deepest level Fmi::Exception object or new one when none is found
+   *
+   *  Useful when one is not interested in intermediate back-trace levels, but only in
+   *  initial exception. One can for example add details and/or parameters to the copy of
+   *  initial exception and rethrow it or use for generating error message
+   */
+  static Exception SquashTrace(const char* _filename,
+                               int _line,
+                               const char* _function,
+                               std::string _message);
+
   // TODO: Make this private to enforce using Exception::Trace
   Exception(const char* _filename,
             int _line,

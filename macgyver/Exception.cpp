@@ -53,6 +53,16 @@ Exception Exception::Trace(const char* _filename,
   return Exception(_filename, _line, _function, std::move(_message), nullptr);
 }
 
+Exception Exception::SquashTrace(const char* _filename,
+                                 int _line,
+                                 const char* _function,
+                                 std::string _message)
+{
+    Exception top(_filename, _line, _function, std::move(_message), nullptr);
+    const Fmi::Exception* first = top.getFirstException();
+    return *first;
+}
+
 Exception::Exception(const char* _filename,
                      int _line,
                      const char* _function,
