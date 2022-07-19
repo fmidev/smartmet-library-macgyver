@@ -37,18 +37,39 @@ void Fmi::AsyncTaskGroup::add(const std::string& name, std::function<void()> tas
 
 void Fmi::AsyncTaskGroup::wait()
 {
-  while (wait_some())
+  std::exception_ptr first_exception;
+  const auto wait_some_wrapper =
+      [this, &first_exception] () -> bool
+      {
+          try {
+              return wait_some();
+          } catch (...) {
+              if (not first_exception) {
+                  first_exception = std::current_exception();
+              }
+              // FIXME: should we report other exceptions there if any
+              return true;
+          }
+      };
+
+  while (wait_some_wrapper())
   {
+  }
+
+  if (first_exception) {
+      std::rethrow_exception(first_exception);
   }
 }
 
 void Fmi::AsyncTaskGroup::stop()
 {
   std::unique_lock<std::mutex> lock(m1);
-  stop_requested = true;
-  for (const auto& item : active_tasks)
+  if (not stop_requested.exchange(true))
   {
-    item.second->cancel();
+    for (const auto& item : active_tasks)
+    {
+      item.second->cancel();
+    }
   }
 }
 
