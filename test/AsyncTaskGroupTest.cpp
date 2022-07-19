@@ -181,7 +181,7 @@ void try_adding_task_after_stop_request()
   TEST_PASSED();
 }
 
-void test_stop_on_error()
+void test_stop_on_error_1()
 {
   std::atomic<int> counter(0);
   const auto task_1 = [&]()
@@ -231,6 +231,45 @@ void test_stop_on_error()
   TEST_PASSED();
 }
 
+void test_stop_on_error_2()
+{
+  std::string tmp;
+  std::string* tmp_ptr = &tmp;
+
+  const auto task_1 = [&]()
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    *tmp_ptr = "foo";
+  };
+
+  const auto task_2 = []() { throw std::runtime_error("An error"); };
+
+  std::unique_ptr<Fmi::AsyncTaskGroup> tg(new Fmi::AsyncTaskGroup(10));
+  tg->stop_on_error(true);
+  tg->add("task 1", task_1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  tg->add("task_2", task_2);
+
+  try
+  {
+    tg->wait();
+    TEST_FAILED("Excepted exception not thrown");
+  }
+  catch (const tframe::failed&)
+  {
+    throw;
+  }
+  catch (const Fmi::Exception&)
+  {
+  }
+
+  tmp_ptr = nullptr;
+
+  tg->wait();
+
+  TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * The actual test suite
@@ -251,7 +290,8 @@ class tests : public tframe::tests
     TEST(large_number_of_tasks);
     TEST(test_interrupting_1);
     TEST(try_adding_task_after_stop_request);
-    TEST(test_stop_on_error);
+    TEST(test_stop_on_error_1);
+    TEST(test_stop_on_error_2);
   }
 };
 
