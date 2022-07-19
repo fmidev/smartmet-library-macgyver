@@ -1,4 +1,5 @@
 #include "AsyncTaskGroup.h"
+#include <sstream>
 #include "Exception.h"
 #include "TypeName.h"
 
@@ -79,6 +80,44 @@ std::size_t Fmi::AsyncTaskGroup::get_num_active_tasks() const
   return active_tasks.size();
 }
 
+std::list<std::pair<std::string, std::exception_ptr> >
+Fmi::AsyncTaskGroup::get_exception_info() const
+{
+  std::unique_lock<std::mutex> lock(m1);
+  return exception_info;
+}
+
+std::list<std::pair<std::string, std::exception_ptr> >
+Fmi::AsyncTaskGroup::get_and_clear_exception_info()
+{
+  std::list<std::pair<std::string, std::exception_ptr> > tmp;
+  std::unique_lock<std::mutex> lock(m1);
+  std::swap(exception_info, tmp);
+  lock.unlock();
+  return tmp;
+}
+
+void Fmi::AsyncTaskGroup::dump_and_clear_exception_info(std::ostream& os)
+{
+  const auto exc_info = get_and_clear_exception_info();
+  for (const auto& item : exc_info)
+  {
+    try
+    {
+      std::rethrow_exception(item.second);
+    }
+    catch (...)
+    {
+      std::ostringstream msg;
+      msg << "Fmi::AsyncTaskGroup: task '" << item.first
+          << "' terminated by exception of type '"
+          << Fmi::current_exception_type() << '\'';
+      const auto e  = Fmi::Exception::Trace(BCP, msg.str());
+      os << e << std::endl;
+    }
+  }
+}
+
 boost::signals2::connection Fmi::AsyncTaskGroup::on_task_ended(
     std::function<void(const std::string&)> callback)
 {
@@ -133,6 +172,10 @@ bool Fmi::AsyncTaskGroup::handle_finished()
   {
     some_failed = true;
     num_failed++;
+    while (exception_info.size() >= MAX_EXCEPTIONS) {
+      exception_info.pop_front();
+    }
+    exception_info.emplace_back(task->get_name(), std::current_exception());
     signal_task_failed(task->get_name());
   }
 
