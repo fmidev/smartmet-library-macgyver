@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.7.15
+Version: 22.7.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jul 20 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.20-1.fmi
+- Fmi::AsyncTaskGroup: ensure that all tasks end before return from Fmi::AsynctaskGroup::wait()
+
 * Fri Jul 15 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.15-1.fmi
 - Exception: new static method SquashTrace(): returns copy of initial exception
 
