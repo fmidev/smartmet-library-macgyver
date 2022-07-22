@@ -62,6 +62,7 @@ class AsyncTask : private virtual boost::noncopyable
   void run(std::function<void()> task);
   void handle_result(Status stat, std::exception_ptr exc = nullptr);
   std::exception_ptr get_exception() const;
+  static void log_event_time(const AsyncTask* task, const std::string& desc);
 
   const std::string name;
   mutable std::mutex m1;
@@ -70,5 +71,8 @@ class AsyncTask : private virtual boost::noncopyable
   const std::function<void()> notify;
   std::exception_ptr ex;
   boost::thread task_thread;
+
+public:
+  static bool log_time;
 };
 }  // namespace Fmi

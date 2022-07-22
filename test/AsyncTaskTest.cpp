@@ -273,6 +273,8 @@ class tests : public tframe::tests
   void test(void)
   {
     Fmi::AsyncTask::silent = true;
+    //Fmi::AsyncTask::log_time = true;
+
     TEST(not_waiting_for_result);
     TEST(not_waiting_for_result_2);
     TEST(single_task);
