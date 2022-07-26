@@ -498,3 +498,15 @@ std::ostream& operator << (std::ostream& out, const Exception& e)
 }
 
 }  // namespace Fmi
+
+void Fmi::ignore_exceptions()
+{
+  if (std::current_exception())
+  {
+    try {
+      throw;
+    } catch (const::boost::thread_interrupted&) {
+      throw;
+    }
+  }
+}

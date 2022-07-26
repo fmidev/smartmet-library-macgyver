@@ -128,6 +128,20 @@ class Exception : public std::exception
 
 std::ostream& operator << (std::ostream& out, const Exception& e);
 
+/**
+ *  @brief Intended to be used in catch block to ignore exceptions thrown except some predefined ones
+ *
+ *  Following exceptions are thrown again:
+ *    - boost::thread_interrupted - required for support of boost::thread::interrupt (so also
+ *                for Fmi::AsyncTask)
+ *
+ *  Notes:
+ *    - Fmi::Exception::Trace already provides current handling of boost::thread_interrupted
+ *    - using empty catch block interferes with boost::thread::interrupt - use this method in throw
+ *      block instead of leaving it empty
+ */
+void ignore_exceptions();
+
 // Next is to be replaced later on with std::source_location, which is currently experimental
 // Static cast explanation: https://github.com/isocpp/CppCoreGuidelines/issues/765
 
