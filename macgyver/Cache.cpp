@@ -91,7 +91,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
 
     if (it == itsContentMap.left.end())
     {
-	  itsCacheStats.miss();
+      ++itsMissCount;
       return boost::optional<std::string>();
     }
 
@@ -102,7 +102,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     if (!fs::exists(fullPath, err))
     {
       // Should we remove the entry here? It will be re-inserted anyways eventually
-	  itsCacheStats.miss();
+      ++itsMissCount;
       return boost::optional<std::string>();
     }
 
@@ -114,7 +114,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     if (!file)
     {
       // Report file opening error
-	  itsCacheStats.miss();
+      ++itsMissCount;
       return boost::optional<std::string>();
     }
 
@@ -126,7 +126,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     UpgradeWriteLock ugLock(theLock);
     itsContentMap.right.relocate(itsContentMap.right.end(), itsContentMap.project_right(it));
 
-	itsCacheStats.hit();
+    ++itsHitCount;
     return boost::optional<std::string>(std::move(ret));
   }
   catch (...)
@@ -189,6 +189,8 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
     // Successfull insert. Update cache size information
     itsSize += fileSize;
 
+    ++itsInsertCount;
+
     return true;
   }
   catch (...)
@@ -197,7 +199,7 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
   }
 }
 
-std::vector<std::size_t> FileCache::getContent()
+std::vector<std::size_t> FileCache::getContent() const
 {
   try
   {
@@ -216,7 +218,13 @@ std::vector<std::size_t> FileCache::getContent()
   }
 }
 
-std::size_t FileCache::getSize()
+CacheStats FileCache::statistics() const
+{
+  ReadLock lock(itsMutex);
+  return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount);
+}
+
+std::size_t FileCache::getSize() const
 {
   try
   {
@@ -337,7 +345,7 @@ void FileCache::update()
 
 bool FileCache::writeFile(const fs::path& theDir,
                           const std::string& fileName,
-                          const std::string& theValue)
+                          const std::string& theValue) const
 {
   try
   {
@@ -455,7 +463,7 @@ bool FileCache::checkForDiskSpace(const fs::path& thePath,
   }
 }
 
-std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t hashValue)
+std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t hashValue) const
 {
   try
   {
@@ -483,7 +491,9 @@ std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t has
   }
 }
 
-bool FileCache::getKey(const std::string& directory, const std::string& filename, std::size_t& key)
+bool FileCache::getKey(const std::string& directory,
+                       const std::string& filename,
+                       std::size_t& key) const
 {
   try
   {

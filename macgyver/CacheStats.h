@@ -7,35 +7,40 @@
 #pragma once
 
 #include <boost/date_time/posix_time/ptime.hpp>
-#include <atomic>
 #include <map>
 
 namespace Fmi
 {
 namespace Cache
 {
-
-class CacheStats
+struct CacheStats
 {
-public:
-  CacheStats() {}
- CacheStats(size_t hits, size_t misses, const boost::posix_time::ptime& t): mHits(hits), mMisses(misses), mStartTime(t) {}
-  CacheStats(const CacheStats& stats)
-	: mHits(stats.hits()) ,mMisses(stats.misses()) ,mStartTime(stats.startTime()) {}
-  void hit() { ++mHits; }
-  void miss() { ++mMisses; }
-  std::size_t hits() const { return mHits; }
-  std::size_t misses() const { return mMisses; }
-  const boost::posix_time::ptime& startTime() const { return mStartTime; }
-private:
-  std::atomic_size_t mHits{0};
-  std::atomic_size_t mMisses{0};
-  const boost::posix_time::ptime mStartTime{boost::posix_time::second_clock::universal_time()};
+  CacheStats() = default;
+  CacheStats(const boost::posix_time::ptime& t) : starttime(t) {}
+  CacheStats(const boost::posix_time::ptime& t,
+             std::size_t maxsize_,
+             std::size_t size_,
+             std::size_t inserts_,
+             std::size_t hits_,
+             std::size_t misses_)
+      : starttime(t),
+        maxsize(maxsize_),
+        size(size_),
+        inserts(inserts_),
+        hits(hits_),
+        misses(misses_)
+  {
+  }
+
+  boost::posix_time::ptime starttime;
+  std::size_t maxsize = 0;
+  std::size_t size = 0;
+  std::size_t inserts = 0;
+  std::size_t hits = 0;
+  std::size_t misses = 0;
 };
 
 using CacheStatistics = std::map<std::string, CacheStats>;
 
 }  // namespace Cache
 }  // namespace Fmi
-
-// ======================================================================

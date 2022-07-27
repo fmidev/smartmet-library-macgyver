@@ -496,35 +496,48 @@ void testcounters()
 {
   Cache<int, string> thisCache(5);
 
-  auto& stats = thisCache.statistics();
-  if (stats.hits() != 0)
+  auto stats = thisCache.statistics();
+  if (stats.size != 0)
+    TEST_FAILED("Empty cache size should be zero");
+  if (stats.inserts != 0)
+    TEST_FAILED("Empty cache insert count should be zero");
+  if (stats.hits != 0)
     TEST_FAILED("Empty cache hits should be zero");
-  if (stats.misses() != 0)
+  if (stats.misses != 0)
     TEST_FAILED("Empty cache misses should be zero");
 
   auto value = thisCache.find(1);
-  if (stats.hits() != 0)
+  stats = thisCache.statistics();
+  if (stats.hits != 0)
     TEST_FAILED("Empty cache hits should be zero after one find call");
-  if (stats.misses() != 1)
+  if (stats.misses != 1)
     TEST_FAILED("Empty cache misses should be one after one find call");
 
-  thisCache.insert(1, "eka");
-  thisCache.insert(2, "toka");
-  thisCache.insert(3, "kolmas");
-  thisCache.insert(4, "neljas");
-  thisCache.insert(5, "viides");
+  thisCache.insert(1, "one");
+  thisCache.insert(2, "two");
+  thisCache.insert(3, "three");
+  thisCache.insert(4, "four");
+  thisCache.insert(5, "five");
+
+  stats = thisCache.statistics();
+  if (stats.inserts != 5)
+    TEST_FAILED("Cache insert could should be five after five inserts");
 
   value = thisCache.find(3);
-  if (stats.hits() != 1)
+  stats = thisCache.statistics();
+
+  if (stats.hits != 1)
     TEST_FAILED("Cache hits should be one after one succesful find call");
-  if (stats.misses() != 1)
+  if (stats.misses != 1)
     TEST_FAILED("Cache misses should be one after one failed find call");
 
   value = thisCache.find(4);
   value = thisCache.find(-1);
-  if (stats.hits() != 2)
+  stats = thisCache.statistics();
+
+  if (stats.hits != 2)
     TEST_FAILED("Cache hits should be two after two succesful find calls");
-  if (stats.misses() != 2)
+  if (stats.misses != 2)
     TEST_FAILED("Cache misses should be two after two failed find calls");
 
   TEST_PASSED();

@@ -885,7 +885,11 @@ class Cache : public boost::noncopyable
    * \brief Get cache statistics
    */
   // ----------------------------------------------------------------------
-  const CacheStats& statistics() const { return itsCacheStats; }
+  CacheStats statistics() const
+  {
+    Lock lock(itsMutex);
+    return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount);
+  }
 
   // Insert with a list of tags
   template <class ListType>
@@ -913,6 +917,8 @@ class Cache : public boost::noncopyable
 
       if (result)
       {
+        ++itsInsertCount;
+
         // Successful insertion
         for (const auto& tag : tags)
         {
@@ -980,6 +986,9 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
+
+        ++itsInsertCount;
+
         for (const auto& tag : tags)
         {
           // Check and update tags
@@ -1038,6 +1047,9 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
+
+        ++itsInsertCount;
+
         // Check if tag exists in tag map, if not, insert default  value
         auto tagIt = itsTagMap.find(tag);
         if (tagIt == itsTagMap.end())
@@ -1097,6 +1109,9 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
+
+        ++itsInsertCount;
+
         // Check if tag exists in tag map, if not, insert default  value
         auto tagIt = itsTagMap.find(tag);
         if (tagIt == itsTagMap.end())
@@ -1143,6 +1158,9 @@ class Cache : public boost::noncopyable
       result =
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize);
+
+      if (result)
+        ++itsInsertCount;
     }
 
     else
@@ -1174,6 +1192,8 @@ class Cache : public boost::noncopyable
       result =
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize, evictedItems);
+      if (result)
+        ++itsInsertCount;
     }
 
     else
@@ -1203,7 +1223,7 @@ class Cache : public boost::noncopyable
         {
           // Tag has expired and tag map has been cleaned. Remove from cache
           itsMap.left.erase(it);
-          itsCacheStats.miss();
+          ++itsMissCount;
           return {};
         }
 
@@ -1212,7 +1232,7 @@ class Cache : public boost::noncopyable
         {
           // This tag expired, erase the object from cache and return empty
           itsMap.left.erase(it);
-          itsCacheStats.miss();
+          ++itsMissCount;
           return {};
         }
       }
@@ -1220,7 +1240,7 @@ class Cache : public boost::noncopyable
       EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onAccess(
           itsMap, it);
 
-      itsCacheStats.hit();
+      ++itsHitCount;
 
       // Update hit count for this entry
       ++it->second.itsHits;
@@ -1228,7 +1248,7 @@ class Cache : public boost::noncopyable
       return it->second.itsValue;
     }
 
-    itsCacheStats.miss();
+    ++itsMissCount;
 
     return {};
   }
@@ -1251,7 +1271,7 @@ class Cache : public boost::noncopyable
         {
           // Tag has expired and tag map has been cleaned. Remove from cache
           itsMap.left.erase(it);
-          itsCacheStats.miss();
+          ++itsMissCount;
           return {};
         }
 
@@ -1261,7 +1281,7 @@ class Cache : public boost::noncopyable
         {
           // This tag expired, erase the object from cache and return empty
           itsMap.left.erase(it);
-          itsCacheStats.miss();
+          ++itsMissCount;
           return {};
         }
       }
@@ -1269,7 +1289,7 @@ class Cache : public boost::noncopyable
       EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onAccess(
           itsMap, it);
 
-      itsCacheStats.hit();
+      ++itsHitCount;
 
       // Update hit count for this entry
 
@@ -1278,7 +1298,7 @@ class Cache : public boost::noncopyable
       return it->second.itsValue;
     }
 
-    itsCacheStats.miss();
+    ++itsMissCount;
     return {};
   }
 
@@ -1336,23 +1356,23 @@ class Cache : public boost::noncopyable
         itsMap, itsTagMap, itsSize, itsMaxSize, evictedItems);
   }
 
-  std::size_t size()
+  std::size_t size() const
   {
     Lock lock(itsMutex);
     return itsSize;
   }
 
-  std::size_t maxSize()
+  std::size_t maxSize() const
   {
     Lock lock(itsMutex);
     return itsMaxSize;
   }
 
-  std::list<CacheReportingObjectType> getContent()
+  std::list<CacheReportingObjectType> getContent() const
   {
     Lock lock(itsMutex);
     std::list<CacheReportingObjectType> result;
-    for (RightIteratorType it = itsMap.right.begin(); it != itsMap.right.end(); ++it)
+    for (auto it = itsMap.right.begin(); it != itsMap.right.end(); ++it)
     {
       result.push_back(CacheReportingObjectType(it->second,
                                                 it->first.itsValue,
@@ -1363,17 +1383,18 @@ class Cache : public boost::noncopyable
     return result;
   }
 
-  std::string getTextContent()
+  std::string getTextContent() const
   {
     std::stringstream output;
     Lock lock(itsMutex);
-    auto lastReal = itsMap.right.end();
-    std::advance(lastReal, -1);
-    for (auto it = itsMap.right.begin(); it != lastReal; ++it)
+    auto n = 0UL;
+
+    for (auto it = itsMap.right.begin(); it != itsMap.right.end(); ++it, ++n)
     {
-      output << it->first.itsValue << ",";
+      if (n > 0)
+        output << ',';
+      output << it->first.itsValue;
     }
-    output << lastReal->first.itsValue;
 
     return output.str();
   }
@@ -1396,18 +1417,20 @@ class Cache : public boost::noncopyable
   }
 
   MapType itsMap;
-
   TagMapType itsTagMap;
 
-  MutexType itsMutex;
+  mutable MutexType itsMutex;
 
   std::size_t itsSize = 0;
-
   std::size_t itsMaxSize = 0;
 
-  long itsTimeConstant = 0;
+  std::size_t itsInsertCount = 0;
+  std::size_t itsMissCount = 0;
+  std::size_t itsHitCount = 0;
 
-  CacheStats itsCacheStats;
+  const boost::posix_time::ptime itsStartTime = boost::posix_time::second_clock::universal_time();
+
+  long itsTimeConstant = 0;
 };
 
 // Size_t parser for the FileCache
@@ -1476,7 +1499,7 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  std::vector<std::size_t> getContent();
+  std::vector<std::size_t> getContent() const;
 
   // ----------------------------------------------------------------------
   /*!
@@ -1484,7 +1507,8 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  std::size_t getSize();
+  std::size_t getSize() const;
+
   // ----------------------------------------------------------------------
   /*!
    * \brief Do manual cleanup of the cache
@@ -1499,7 +1523,7 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  const CacheStats& statistics() const { return itsCacheStats; }
+  CacheStats statistics() const;
 
  private:
   // ----------------------------------------------------------------------
@@ -1524,7 +1548,10 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  bool writeFile(const fs::path& theDir, const std::string& fileName, const std::string& theValue);
+  bool writeFile(const fs::path& theDir,
+                 const std::string& fileName,
+                 const std::string& theValue) const;
+
   // ----------------------------------------------------------------------
   /*!
    * \brief Checks that entry can be written to disk
@@ -1539,7 +1566,7 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  std::pair<std::string, std::string> getFileDirAndName(std::size_t hashValue);
+  std::pair<std::string, std::string> getFileDirAndName(std::size_t hashValue) const;
 
   // ----------------------------------------------------------------------
   /*!
@@ -1547,19 +1574,23 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  bool getKey(const std::string& directory, const std::string& filename, std::size_t& key);
+  bool getKey(const std::string& directory, const std::string& filename, std::size_t& key) const;
 
   std::size_t itsSize = 0;
 
   std::size_t itsMaxSize = 0;
 
+  std::size_t itsInsertCount = 0;
+  std::size_t itsMissCount = 0;
+  std::size_t itsHitCount = 0;
+
+  const boost::posix_time::ptime itsStartTime = boost::posix_time::second_clock::universal_time();
+
   fs::path itsDirectory;
 
   MapType itsContentMap;
 
-  MutexType itsMutex;
-
-  CacheStats itsCacheStats;
+  mutable MutexType itsMutex;
 };
 
 }  // namespace Cache
