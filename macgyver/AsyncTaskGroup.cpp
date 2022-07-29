@@ -1,4 +1,5 @@
 #include "AsyncTaskGroup.h"
+#include <algorithm>
 #include <sstream>
 #include "Exception.h"
 #include "TypeName.h"
@@ -78,6 +79,15 @@ std::size_t Fmi::AsyncTaskGroup::get_num_active_tasks() const
 {
   std::unique_lock<std::mutex> lock(m1);
   return active_tasks.size();
+}
+
+std::vector<std::string> Fmi::AsyncTaskGroup::active_task_names() const
+{
+  std::vector<std::string> result;
+  std::unique_lock<std::mutex> lock(m1);
+  std::transform(active_tasks.begin(), active_tasks.end(), std::back_inserter(result),
+      [](const decltype(active_tasks)::value_type& item) { return item.second->get_name(); });
+  return result;
 }
 
 std::list<std::pair<std::string, std::exception_ptr> >
