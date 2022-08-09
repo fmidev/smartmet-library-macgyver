@@ -12,6 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <vector>
 
 namespace Fmi
 {
@@ -89,6 +90,11 @@ class AsyncTaskGroup : public boost::noncopyable
   std::size_t get_num_failures() const { return num_failed; }
 
   std::size_t get_num_active_tasks() const;
+
+  /**
+   *  @brief Get names of active tasks
+   */
+  std::vector<std::string> active_task_names() const;
 
   /**
    *  @brief Specifies callback to be called when task has ended succesfully

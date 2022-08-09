@@ -35,6 +35,11 @@ class ScopedTimer
 };
 
 /**
+ *  @brief Returns tracer PID under Linux (or always 0 for Windows)
+ */
+int tracerPid();
+
+/**
  *   @brief Debugging macro for showing exceptions thrown by a function
  *
  *   Possible use:

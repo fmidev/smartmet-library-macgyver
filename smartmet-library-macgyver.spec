@@ -124,6 +124,9 @@ FMI MacGyver library development files
 * Tue Aug  9 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.9-1.fmi
 - Automatic 10 retries for PostgreSQL connection open calls at 10 second intervals
 
+* Fri Jul 29 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.29-1.fmi
+- Add method active_task_names() to AsyncTaskGroup and method traceId
+
 * Wed Jul 27 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.7.27-1.fmi
 - Improved cache statistics
 
