@@ -5,9 +5,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/variant.hpp>
+#include <fmt/format.h>
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include <thread>
 #include <vector>
 
 namespace ba = boost::algorithm;
@@ -128,22 +130,44 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
 
     const std::string conn_str = itsConnectionOptions;
 
-    try
+    std::string error_message;
+    // Retriy connections automatically. Especially useful after boots if the database is in the
+    // same server.
+    for (auto retries = 10; retries > 0; --retries)
     {
-      itsConnection = boost::make_shared<pqxx::connection>(conn_str);
-      /*
-        if(PostgreSQL > 9.1)
-        itsCollate = true;
-        pqxx::result res = executeNonTransaction("SELECT version()");
-      */
+      try
+      {
+        itsConnection = boost::make_shared<pqxx::connection>(conn_str);
+        /*
+          if(PostgreSQL > 9.1)
+          itsCollate = true;
+          pqxx::result res = executeNonTransaction("SELECT version()");
+        */
+      }
+      catch (const pqxx::broken_connection& e)
+      {
+        if (retries > 0)
+        {
+          std::string msg = e.what();
+          boost::algorithm::replace_all(msg, "\n", " ");
+          std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
+          std::this_thread::sleep_for(std::chrono::seconds(10));
+        }
+        else
+          error_message = e.what();
+      }
+      catch (const std::exception& e)
+      {
+        error_message = e.what();
+        break;
+      }
     }
-    catch (const std::exception& e)
-    {
+
+    if (!error_message.empty())
       throw Fmi::Exception(BCP,
                            "Failed to connect to " + itsConnectionOptions.username + "@" +
                                itsConnectionOptions.database + ":" +
-                               std::to_string(itsConnectionOptions.port) + " : " + e.what());
-    }
+                               std::to_string(itsConnectionOptions.port) + " : " + error_message);
 
     // Store info of data types
     pqxx::result result_set = executeNonTransaction("select typname,oid from pg_type");
