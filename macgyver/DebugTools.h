@@ -40,6 +40,9 @@ public:
     Redirecter(std::ostream& dest, std::ostream& src);
     virtual ~Redirecter();
 
+    Redirecter(const Redirecter&) = delete;
+    Redirecter& operator = (const Redirecter&) = delete;
+
 private:
     std::ostream& src;
     std::streambuf* sbuf;
