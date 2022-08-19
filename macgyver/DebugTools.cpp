@@ -47,6 +47,19 @@ Fmi::ScopedTimer::~ScopedTimer()
 #endif
 }
 
+Fmi::Redirecter::Redirecter(std::ostream& dest, std::ostream& src)
+    : src(src)
+{
+    src << std::flush;
+    sbuf = src.rdbuf(dest.rdbuf());
+}
+
+Fmi::Redirecter::~Redirecter()
+{
+    src << std::flush;
+    src.rdbuf(sbuf);
+}
+
 int Fmi::tracerPid()
 {
 #ifndef _MSC_VER
