@@ -22,7 +22,7 @@ static const std::map<std::string, std::string> exception_name_map = {
     {"std::logic_error", "Logic error"}};
 }
 
-std::atomic<bool> Exception::force_stack_trace(false);
+thread_local bool Exception::force_stack_trace = false;
 
 Exception::Exception()
 {
@@ -323,10 +323,16 @@ Exception& Exception::disableStackTraceRecursive()
 
 std::string Exception::getStackTrace() const
 {
-  if (!force_stack_trace && (mLoggingDisabled || mStackTraceDisabled))
+  if (!force_stack_trace && mLoggingDisabled)
     return "";
 
   const Exception* e = this;
+
+  // Skip levels for which stack trace is disabled
+  while (e->getPrevException() && (!force_stack_trace && e->stackTraceDisabled()))
+  {
+    e = e->getPrevException();
+  }
 
   std::string out = fmt::format("\n{}{}{} #### {} #### {}{}{}\n\n",
                                 ANSI_BG_RED,
@@ -455,39 +461,13 @@ std::string Exception::getHtmlStackTrace() const
 
 void Exception::printError() const
 {
-  if (!stackTraceDisabled())
-    std::cerr << getStackTrace() << std::flush;
-  else
-  {
-#if 0
-    // Disabled for now due to too many trivial client errors. We need better
-    // control of error logging and preferably on-the-fly modifications to it.
-    
-    std::cerr << Spine::log_time_str() << " Error: " << what() << std::endl;
-
-    // Print parameters for top level exception, if there are any. Usually
-    // plugins set the URI to the top level exception.
-
-    if (!parameterVector.empty())
-    {
-      for (const auto& param_value : parameterVector)
-        std::cerr << "   - " << param_value.first << " = " << param_value.second << std::endl;
-    }
-#endif
-  }
+  std::cerr << *this << std::flush;
 }
 
 void Exception::printOn(std::ostream& out) const
 {
-  if (!loggingDisabled()) {
-    // Skip levels for which stack trace is disabled
-    const Exception* exc = this;
-    while (exc->getPrevException() && exc->stackTraceDisabled())
-      {
-	exc = exc->getPrevException();
-      }
-
-    out << exc->getStackTrace();
+  if (force_stack_trace || !loggingDisabled()) {
+    out << getStackTrace();
   }
 }
 
@@ -495,6 +475,17 @@ std::ostream& operator << (std::ostream& out, const Exception& e)
 {
   e.printOn(out);
   return out;
+}
+
+Exception::ForceStackTrace::ForceStackTrace()
+{
+    prev = true;
+    std::swap(force_stack_trace, prev);
+}
+
+Exception::ForceStackTrace::~ForceStackTrace()
+{
+    force_stack_trace = prev;
 }
 
 }  // namespace Fmi
