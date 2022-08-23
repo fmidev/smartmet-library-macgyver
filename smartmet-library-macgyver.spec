@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.7.29
+Version: 22.8.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Aug 23 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.8.23-1.fmi
+- Fmi::Exception update
+
 * Fri Jul 29 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.29-1.fmi
 - Add method active_task_names() to AsyncTaskGroup and method traceId
 
