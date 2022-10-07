@@ -3,8 +3,11 @@
 #include <future>
 #include <iostream>
 #include <string>
+#include <boost/algorithm/string.hpp>
 
 using std::string;
+
+namespace ba = boost::algorithm;
 
 #define TEST_FAILED_UNLESS(pred)             \
   if (!(pred))                               \
@@ -195,6 +198,50 @@ void throw_nested_fmi_exception_in_async_call()
   }
 }
 
+void test_squashing_stack_trace()
+{
+    bool catched = false;
+    try
+    {
+        try
+        {
+            try
+            {
+                Fmi::Exception exc(BCP, "Test exception");
+                exc.addParameter("test", "42");
+                throw exc;
+            }
+            catch (...)
+            {
+                throw Fmi::Exception::Trace(BCP, "rethrowing 1");
+            }
+        }
+        catch (...)
+        {
+            throw Fmi::Exception::Trace(BCP, "rethrowing 2");
+        }
+    }
+    catch (const Fmi::Exception& e)
+    {
+        auto e1 = Fmi::Exception::SquashTrace(BCP, "Testing");
+        const std::string what = e1.getWhat();
+        if (what != "Test exception")
+        {
+            TEST_FAILED("Expected exception message 'Test exception', got '" + what + "'");
+        }
+        const char* p = e1.getParameterValue("test");
+        if (!p || p  != std::string("42"))
+        {
+            TEST_FAILED("parameter 'test' is expected to exist and have value '42'");
+        }
+        catched = true;
+    }
+    if (!catched) {
+        TEST_FAILED("Expected to get an exception");
+    }
+    TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * The actual test suite
@@ -211,6 +258,7 @@ class tests : public tframe::tests
     TEST(test_other_exception_reporting_1);
     TEST(throw_fmi_exception_in_async_call);
     TEST(throw_nested_fmi_exception_in_async_call);
+    TEST(test_squashing_stack_trace);
   }
 };
 

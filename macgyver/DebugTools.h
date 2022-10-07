@@ -1,9 +1,9 @@
 #pragma once
 
+#include "TypeName.h"
 #include <exception>
 #include <iostream>
 #include <string>
-#include "TypeName.h"
 
 namespace Fmi
 {
@@ -34,6 +34,25 @@ class ScopedTimer
   double start;
 };
 
+class Redirecter final
+{
+public:
+    Redirecter(std::ostream& dest, std::ostream& src);
+    virtual ~Redirecter();
+
+    Redirecter(const Redirecter&) = delete;
+    Redirecter& operator = (const Redirecter&) = delete;
+
+private:
+    std::ostream& src;
+    std::streambuf* sbuf;
+};
+
+/**
+ *  @brief Returns tracer PID under Linux (or always 0 for Windows)
+ */
+int tracerPid();
+
 /**
  *   @brief Debugging macro for showing exceptions thrown by a function
  *
@@ -45,13 +64,20 @@ class ScopedTimer
  *   BOOST_CHECK_NO_THROW(foo = SHOW_EXCEPTIONS(bar());
  *   @endcode
  */
-#define SHOW_EXCEPTIONS(x)						                           \
-  [&]() { try { return x; } catch (const std::exception& e)		                           \
-  {									                           \
-    std::cout << "Exception " << Fmi::current_exception_type() << ": " << e.what() << std::endl    \
-	      << "    thrown by '" << #x << '\'' << std::endl	                                   \
-	      << "    in " << __FILE__ << " at line " << __LINE__ << std::endl;	                   \
-    throw;								                           \
-  }}()
+#define SHOW_EXCEPTIONS(x)                                                                        \
+  [&]()                                                                                           \
+  {                                                                                               \
+    try                                                                                           \
+    {                                                                                             \
+      return x;                                                                                   \
+    }                                                                                             \
+    catch (const std::exception& e)                                                               \
+    {                                                                                             \
+      std::cout << "Exception " << Fmi::current_exception_type() << ": " << e.what() << std::endl \
+                << "    thrown by '" << #x << '\'' << std::endl                                   \
+                << "    in " << __FILE__ << " at line " << __LINE__ << std::endl;                 \
+      throw;                                                                                      \
+    }                                                                                             \
+  }()
 
 }  // namespace Fmi

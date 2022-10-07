@@ -5,6 +5,7 @@
 // ======================================================================
 
 #include "TimeZoneFactory.h"
+#include "Exception.h"
 #include "StringConversion.h"
 #include "WorldTimeZones.h"
 #include <iostream>
@@ -44,10 +45,17 @@ class TimeZoneFactory::Impl
 
 TimeZoneFactory::Impl::Impl()
 {
-  m_Regions.reset(new boost::local_time::tz_database());
-  m_Regions->load_from_file(default_regions);
+  try
+  {
+    m_Regions.reset(new boost::local_time::tz_database());
+    m_Regions->load_from_file(default_regions);
 
-  m_Coordinates.reset(new WorldTimeZones(default_coordinates));
+    m_Coordinates.reset(new WorldTimeZones(default_coordinates));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -64,7 +72,7 @@ TimeZoneFactory::TimeZoneFactory() : m_Impl(new Impl()) {}
  */
 // ----------------------------------------------------------------------
 
-TimeZoneFactory::~TimeZoneFactory() {}
+TimeZoneFactory::~TimeZoneFactory() = default;
 
 // ----------------------------------------------------------------------
 /*!
@@ -72,7 +80,7 @@ TimeZoneFactory::~TimeZoneFactory() {}
  */
 // ----------------------------------------------------------------------
 
-void TimeZoneFactory::set_coordinate_file(const string& )
+void TimeZoneFactory::set_coordinate_file(const string&)
 {
   std::cerr << "Warning: TimeZOneFactor::set_coordinate_file is deprecated\n" << std::flush;
 }
@@ -83,7 +91,7 @@ void TimeZoneFactory::set_coordinate_file(const string& )
  */
 // ----------------------------------------------------------------------
 
-void TimeZoneFactory::set_region_file(const string& )
+void TimeZoneFactory::set_region_file(const string&)
 {
   std::cerr << "Warning: TimeZoneFactory::set_region_file is deprecated\n" << std::flush;
 }
@@ -94,7 +102,17 @@ void TimeZoneFactory::set_region_file(const string& )
  */
 // ----------------------------------------------------------------------
 
-vector<string> TimeZoneFactory::region_list() { return m_Impl->m_Regions->region_list(); }
+vector<string> TimeZoneFactory::region_list()
+{
+  try
+  {
+    return m_Impl->m_Regions->region_list();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
 
 // ----------------------------------------------------------------------
 /*!
@@ -104,9 +122,18 @@ vector<string> TimeZoneFactory::region_list() { return m_Impl->m_Regions->region
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const string& id)
 {
-  boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(id);
-  if (!ptr) throw runtime_error("TimeZoneFactory does not recognize region '" + id + "'");
-  return ptr;
+  try
+  {
+    boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(id);
+    if (!ptr)
+      throw Fmi::Exception(BCP, "TimeZoneFactory does not recognize region '" + id + "'");
+
+    return ptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -117,15 +144,22 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const st
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const string& desc)
 {
-  // Try region name at first
-  boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(desc);
-  if (!ptr)
+  try
   {
-    // Region name not found: try POSIX TZ description (may throw exception)
-    ptr.reset(new boost::local_time::posix_time_zone(desc));
-  }
+    // Try region name at first
+    boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(desc);
+    if (!ptr)
+    {
+      // Region name not found: try POSIX TZ description (may throw exception)
+      ptr.reset(new boost::local_time::posix_time_zone(desc));
+    }
 
-  return ptr;
+    return ptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -136,14 +170,22 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const st
 
 boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(float lon, float lat)
 {
-  string tz = m_Impl->m_Coordinates->zone_name(lon, lat);
-  boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
-  if (!ptr)
-    throw runtime_error("TimeZoneFactory could not convert given coordinate " +
-                        Fmi::to_string(lon) + "," + Fmi::to_string(lat) +
-                        " to a valid time zone name");
+  try
+  {
+    string tz = m_Impl->m_Coordinates->zone_name(lon, lat);
+    boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
+    if (!ptr)
+      throw Fmi::Exception(BCP,
+                           "TimeZoneFactory could not convert given coordinate " +
+                               Fmi::to_string(lon) + "," + Fmi::to_string(lat) +
+                               " to a valid time zone name");
 
-  return ptr;
+    return ptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -154,7 +196,14 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(floa
 
 std::string TimeZoneFactory::zone_name_from_coordinate(float lon, float lat)
 {
-  return m_Impl->m_Coordinates->zone_name(lon, lat);
+  try
+  {
+    return m_Impl->m_Coordinates->zone_name(lon, lat);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -165,8 +214,15 @@ std::string TimeZoneFactory::zone_name_from_coordinate(float lon, float lat)
 
 TimeZoneFactory& TimeZoneFactory::instance()
 {
-  static TimeZoneFactory obj;
-  return obj;
+  try
+  {
+    static TimeZoneFactory obj;
+    return obj;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Fmi

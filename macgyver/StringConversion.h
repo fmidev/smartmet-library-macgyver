@@ -12,6 +12,7 @@
 #pragma once
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/optional.hpp>
 #include <string>
 
 namespace Fmi
@@ -41,6 +42,12 @@ unsigned long stoul(const std::string& str);
 
 float stof(const std::string& str);
 double stod(const std::string& str);
+
+boost::optional<int> stoi_opt(const std::string& str);
+boost::optional<long> stol_opt(const std::string& str);
+boost::optional<unsigned long> stoul_opt(const std::string& str);
+boost::optional<float> stof_opt(const std::string& str);
+boost::optional<double> stod_opt(const std::string& str);
 
 std::string to_iso_string(const std::time_t time);
 std::string to_iso_string(const boost::posix_time::time_duration& duration);

@@ -67,7 +67,8 @@ void size()
 
 void empty()
 {
-  if (tree.empty()) TEST_FAILED("Test tree should not be empty");
+  if (tree.empty())
+    TEST_FAILED("Test tree should not be empty");
   TEST_PASSED();
 }
 
@@ -77,21 +78,24 @@ void nearest()
 {
   {
     auto ret = tree.nearest(NearTreeType(25, 60));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 25,60");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 25,60");
     if (names.at(ret->ID()) != "Helsinki")
       TEST_FAILED("Closest point to 25,60 should be Helsinki, not " + names.at(ret->ID()));
   }
 
   {
     auto ret = tree.nearest(NearTreeType(0, 0));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 0,0");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 0,0");
     if (names.at(ret->ID()) != "Hanko")
       TEST_FAILED("Closest point to 0,0 should be Hanko, not " + names.at(ret->ID()));
   }
 
   {
     auto ret = tree.nearest(NearTreeType(25, 80));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 25,80");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 25,80");
     if (names.at(ret->ID()) != "Utsjoki")
       TEST_FAILED("Closest point to 25,80 should be Utsjoki, not " + names.at(ret->ID()));
   }
@@ -105,14 +109,16 @@ void farthest()
 {
   {
     auto ret = tree.farthest(NearTreeType(0, 0));
-    if (!ret) TEST_FAILED("Failed to find farthest point for 0,0");
+    if (!ret)
+      TEST_FAILED("Failed to find farthest point for 0,0");
     if (names.at(ret->ID()) != "Utsjoki")
       TEST_FAILED("Farthest point to 0,0 should be Utsjoki, not " + names.at(ret->ID()));
   }
 
   {
     auto ret = tree.farthest(NearTreeType(25, 80));
-    if (!ret) TEST_FAILED("Failed to find farthest point for 25,80");
+    if (!ret)
+      TEST_FAILED("Failed to find farthest point for 25,80");
     if (names.at(ret->ID()) != "Hanko")
       TEST_FAILED("Farthest point to 25,80 should be Hanko, not " + names.at(ret->ID()));
   }

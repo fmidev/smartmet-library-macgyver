@@ -35,7 +35,7 @@ class DirectoryMonitor : private boost::noncopyable
   static const Change CREATE = 0x01;  // new file created (or first pass)
   static const Change DELETE = 0x02;  // old file deleted
   static const Change MODIFY = 0x04;  // old file modified
-  static const Change SCAN = 0x08;  // directory scanned
+  static const Change SCAN = 0x08;    // directory scanned
   static const Change ERROR = 0x10;   // error occured
   static const Change ALL = 0x1F;     // any change
 
@@ -46,6 +46,9 @@ class DirectoryMonitor : private boost::noncopyable
 
   DirectoryMonitor();
   ~DirectoryMonitor();
+
+  DirectoryMonitor(const DirectoryMonitor& other) = delete;
+  DirectoryMonitor& operator=(const DirectoryMonitor& other) = delete;
 
   // Callback interfaces. Note that const references could be used
   // since a write lock exists during the callback. However, if
@@ -103,10 +106,10 @@ class DirectoryMonitor : private boost::noncopyable
   // Return true if at least once scan has been completed
   bool ready() const;
 
- private:
-  DirectoryMonitor(const DirectoryMonitor& other);
-  DirectoryMonitor& operator=(const DirectoryMonitor& other);
+  // Returns when first scanning of directory is done or method run() has ended for any reason
+  bool wait_until_ready() const;
 
+ private:
   class Pimple;
   std::unique_ptr<Pimple> impl;
 

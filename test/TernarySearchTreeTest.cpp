@@ -24,13 +24,17 @@ void insert()
 
   boost::shared_ptr<std::string> foo = boost::make_shared<std::string>("not empty now");
 
-  if (!tree.insert("ii", foo)) TEST_FAILED("Failed to insert ii");
+  if (!tree.insert("ii", foo))
+    TEST_FAILED("Failed to insert ii");
 
-  if (tree.insert("ii", foo)) TEST_FAILED("Succeded to insert ii twice");
+  if (tree.insert("ii", foo))
+    TEST_FAILED("Succeded to insert ii twice");
 
-  if (!tree.insert("imatra", foo)) TEST_FAILED("Failed to insert imatra");
+  if (!tree.insert("imatra", foo))
+    TEST_FAILED("Failed to insert imatra");
 
-  if (tree.insert("imatra", foo)) TEST_FAILED("Succeded to insert imatra twice");
+  if (tree.insert("imatra", foo))
+    TEST_FAILED("Succeded to insert imatra twice");
 
   TEST_PASSED();
 }
@@ -43,13 +47,17 @@ void insert_copy()
 
   std::string foo = "foobar";
 
-  if (!tree.insert("ii", foo)) TEST_FAILED("Failed to insert ii");
+  if (!tree.insert("ii", foo))
+    TEST_FAILED("Failed to insert ii");
 
-  if (tree.insert("ii", foo)) TEST_FAILED("Succeded to insert ii twice");
+  if (tree.insert("ii", foo))
+    TEST_FAILED("Succeded to insert ii twice");
 
-  if (!tree.insert("imatra", foo)) TEST_FAILED("Failed to insert imatra");
+  if (!tree.insert("imatra", foo))
+    TEST_FAILED("Failed to insert imatra");
 
-  if (tree.insert("imatra", foo)) TEST_FAILED("Succeded to insert imatra twice");
+  if (tree.insert("imatra", foo))
+    TEST_FAILED("Succeded to insert imatra twice");
 
   TEST_PASSED();
 }
@@ -72,17 +80,22 @@ void find()
   tree.insert("iisalmi", iisalmi);
 
   res = tree.find("X");
-  if (res != NULL) TEST_FAILED("Should not have found X");
+  if (res != NULL)
+    TEST_FAILED("Should not have found X");
 
   res = tree.find("imatra");
-  if (res == NULL) TEST_FAILED("Should have found imatra");
-  if (*res != "imatra") TEST_FAILED("Should have found imatra result, found " + *res + " instead");
+  if (res == NULL)
+    TEST_FAILED("Should have found imatra");
+  if (*res != "imatra")
+    TEST_FAILED("Should have found imatra result, found " + *res + " instead");
 
   res = tree.find("imatraX");
-  if (res != NULL) TEST_FAILED("Should not have found imatraX");
+  if (res != NULL)
+    TEST_FAILED("Should not have found imatraX");
 
   res = tree.find("Imatr");
-  if (res != NULL) TEST_FAILED("Should not have found Imatr");
+  if (res != NULL)
+    TEST_FAILED("Should not have found Imatr");
 
   TEST_PASSED();
 }
@@ -104,19 +117,24 @@ void findprefix()
   tree.insert("iisalmi", iisalmi);
 
   res = tree.findprefix("X");
-  if (res.size() != 0) TEST_FAILED("Should not have found X");
+  if (res.size() != 0)
+    TEST_FAILED("Should not have found X");
 
   res = tree.findprefix("imatra");
-  if (res.size() != 1) TEST_FAILED("Should have found imatra");
+  if (res.size() != 1)
+    TEST_FAILED("Should have found imatra");
 
   res = tree.findprefix("imatraX");
-  if (res.size() != 0) TEST_FAILED("Should not have found imatraX");
+  if (res.size() != 0)
+    TEST_FAILED("Should not have found imatraX");
 
   res = tree.findprefix("ii");
-  if (res.size() != 2) TEST_FAILED("Should have found ii and iisalmi");
+  if (res.size() != 2)
+    TEST_FAILED("Should have found ii and iisalmi");
 
   res = tree.findprefix("i");
-  if (res.size() != 3) TEST_FAILED("Should have found imatra, ii and iisalmi");
+  if (res.size() != 3)
+    TEST_FAILED("Should have found imatra, ii and iisalmi");
 
   TEST_PASSED();
 }
@@ -127,7 +145,8 @@ void wordlist()
   typedef Fmi::TernarySearchTree<std::string>::element_type element_type;
 
   std::ifstream in("data/words.txt");
-  if (!in) TEST_FAILED("Failed to open data/words.txt for reading");
+  if (!in)
+    TEST_FAILED("Failed to open data/words.txt for reading");
 
   int count = 0;
   element_type dummy = boost::make_shared<std::string>("foobar");

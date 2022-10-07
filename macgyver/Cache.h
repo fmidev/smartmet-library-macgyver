@@ -1,4 +1,3 @@
-
 // ======================================================================
 /*!
  * \brief Tagged multi-strategy caching in multithreaded environment
@@ -29,27 +28,7 @@
 #include <sstream>
 #include <utility>
 
-// #ifndef NDEBUG
-#if 0
-
-#define FMI_CACHE_HIT ++cacheHits
-#define FMI_CACHE_MISS ++cacheMisses
-#define FMI_CACHE_EXPIRED_DELETED ++expiredDeleted
-#define FMI_CACHE_EXPIRED_RETURNED ++expiredReturned
-#define FMI_CACHE_EXPIRATION_FUNCTION(NAME, ...) \
-  NAME(__VA_ARGS__, unsigned long& expiredDeleted, unsigned long& expiredReturned)
-#define FMI_CACHE_EXPIRATION_CALL(NAME, ...) NAME(__VA_ARGS__, expiredReturned, expiredDeleted);
-
-#else
-
-#define FMI_CACHE_HIT
-#define FMI_CACHE_MISS
-#define FMI_CACHE_EXPIRED_DELETED
-#define FMI_CACHE_EXPIRED_RETURNED
-#define FMI_CACHE_EXPIRATION_FUNCTION(NAME, ...) NAME(__VA_ARGS__)
-#define FMI_CACHE_EXPIRATION_CALL(NAME, ...) NAME(__VA_ARGS__)
-
-#endif
+#include "CacheStats.h"
 
 namespace Fmi
 {
@@ -57,6 +36,8 @@ namespace Cache
 {
 using MutexType = boost::mutex;
 using Lock = boost::lock_guard<MutexType>;
+
+const CacheStats EMPTY_CACHE_STATS;
 
 // ----------------------------------------------------------------------
 /*!
@@ -71,7 +52,7 @@ struct CacheObject
               const ValueType& theValue,
               const TagSetType& theSet,
               std::size_t theSize)
-      : itsKey(theKey), itsValue(theValue), itsTagSet(theSet), itsHits(0), itsSize(theSize)
+      : itsKey(theKey), itsValue(theValue), itsTagSet(theSet), itsSize(theSize)
   {
   }
 
@@ -81,9 +62,9 @@ struct CacheObject
 
   TagSetType itsTagSet;
 
-  std::size_t itsHits;
+  std::size_t itsHits = 0;
 
-  std::size_t itsSize;
+  std::size_t itsSize = 0;
 };
 
 template <class KeyType, class ValueType, class TagSetType>
@@ -104,9 +85,9 @@ struct CacheReportingObject
 
   TagSetType itsTagSet;
 
-  std::size_t itsHits;
+  std::size_t itsHits = 0;
 
-  std::size_t itsSize;
+  std::size_t itsSize = 0;
 };
 
 // ----------------------------------------------------------------------
@@ -376,7 +357,8 @@ struct RandomEviction
                       std::size_t& currentSize,
                       std::size_t maxSize)
   {
-    static std::mt19937 generator(time(nullptr));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
 
     while (currentSize > maxSize)
     {
@@ -402,7 +384,8 @@ struct RandomEviction
                       std::size_t maxSize,
                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
   {
-    static std::mt19937 generator(time(nullptr));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
 
     while (currentSize > maxSize)
     {
@@ -711,42 +694,25 @@ struct FILOEviction
 // Tag expiration does not depend on expiration age
 struct StaticExpire
 {
-  static bool FMI_CACHE_EXPIRATION_FUNCTION(isExpired,
-                                            const std::time_t& theTagTime,
-                                            long timeConstant)
+  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
   {
     (void)timeConstant;
     // Max value means tag is valid
-    if (theTagTime == std::numeric_limits<std::time_t>::max())
-    {
-      return false;
-    }
-
-    FMI_CACHE_EXPIRED_DELETED;
-    return true;
+    return (theTagTime != std::numeric_limits<std::time_t>::max());
   }
 
   // All expired tags are deleted
   static bool toDelete(const std::time_t& theTagTime, long timeConstant)
   {
     (void)timeConstant;
-    if (theTagTime != std::numeric_limits<std::time_t>::max())
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (theTagTime != std::numeric_limits<std::time_t>::max());
   }
 };
 
 // Tag expires instantly after expiration age is reached
 struct InstantExpire
 {
-  static bool FMI_CACHE_EXPIRATION_FUNCTION(isExpired,
-                                            const std::time_t& theTagTime,
-                                            long timeConstant)
+  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
   {
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -756,15 +722,7 @@ struct InstantExpire
 
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > timeConstant)
-    {
-      FMI_CACHE_EXPIRED_DELETED;
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return ((now - theTagTime) > timeConstant);
   }
 
   // Expired tags older than timeConstant are deleted
@@ -772,24 +730,16 @@ struct InstantExpire
   {
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > timeConstant)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return ((now - theTagTime) > timeConstant);
   }
 };
 
 struct CoinFlipExpire
 {
-  static bool FMI_CACHE_EXPIRATION_FUNCTION(isExpired,
-                                            const std::time_t& theTagTime,
-                                            long timeConstant)
+  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
   {
-    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
     static std::uniform_int_distribution<> dist(0, 1);
 
     // Max value means tag is valid
@@ -803,21 +753,9 @@ struct CoinFlipExpire
     if ((now - theTagTime) > timeConstant)
     {
       int chance = dist(generator);
-      if (chance == 0)
-      {
-        FMI_CACHE_EXPIRED_DELETED;
-        return true;
-      }
-      else
-      {
-        FMI_CACHE_EXPIRED_RETURNED;
-        return false;
-      }
+      return (chance == 0);
     }
-    else
-    {
-      return false;
-    }
+    return false;
   }
 
   // Expired tags older than 2*timeConstant are deleted
@@ -825,25 +763,17 @@ struct CoinFlipExpire
   {
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > 2 * timeConstant)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return ((now - theTagTime) > 2 * timeConstant);
   }
 };
 
 // Linearly time-dependent expiration
 struct LinearTimeExpire
 {
-  static bool FMI_CACHE_EXPIRATION_FUNCTION(isExpired,
-                                            const std::time_t& theTagTime,
-                                            long timeConstant)
+  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
   {
-    static std::mt19937 generator(static_cast<unsigned int>(std::time(nullptr)));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
     static std::uniform_real_distribution<> dist(0.0, 1.0);
 
     // Max value means tag is valid
@@ -859,16 +789,7 @@ struct LinearTimeExpire
 
     double expirationProbability = double(tagAge) / double(timeConstant);
     double chance = dist(generator);
-    if (chance < expirationProbability)
-    {
-      FMI_CACHE_EXPIRED_DELETED;
-      return true;
-    }
-    else
-    {
-      FMI_CACHE_EXPIRED_RETURNED;
-      return false;
-    }
+    return (chance < expirationProbability);
   }
 
   // Expired tags with >100% removal probability are deleted
@@ -876,25 +797,17 @@ struct LinearTimeExpire
   {
     std::time_t now = std::time(nullptr);
 
-    if ((now - theTagTime) > timeConstant)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return ((now - theTagTime) > timeConstant);
   }
 };
 
 // Sigmoidal time-dependent expiration
 struct SigmoidTimeExpire
 {
-  static bool FMI_CACHE_EXPIRATION_FUNCTION(isExpired,
-                                            const std::time_t& theTagTime,
-                                            long timeConstant)
+  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
   {
-    static std::mt19937 generator(static_cast<unsigned int>(time(nullptr)));
+    static std::random_device dev;
+    static std::mt19937 generator(dev());
     static std::uniform_real_distribution<> dist(0.0, 1.0);
     // Max value means tag is valid
     if (theTagTime == std::numeric_limits<std::time_t>::max())
@@ -911,14 +824,9 @@ struct SigmoidTimeExpire
     double chance = dist(generator);
     if (chance < expirationProbability)
     {
-      FMI_CACHE_EXPIRED_DELETED;
       return true;
     }
-    else
-    {
-      FMI_CACHE_EXPIRED_RETURNED;
-      return false;
-    }
+    return false;
   }
 
   // Expired tags are removed when their return probability is less than 1%
@@ -930,14 +838,7 @@ struct SigmoidTimeExpire
         double(timeConstant);
     std::time_t now = std::time(nullptr);
 
-    if (static_cast<double>((now - theTagTime)) > eliminationAge)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    return (static_cast<double>((now - theTagTime)) > eliminationAge);
   }
 };
 
@@ -971,34 +872,23 @@ class Cache : public boost::noncopyable
   using ItemVector = std::vector<std::pair<KeyType, ValueType> >;
 
   // Default constructor eases the use as data member
-  Cache()
-      : itsSize(0),
-        itsMaxSize(10),
-        itsTimeConstant(0)
-#ifndef NDEBUG
-        ,
-        cacheHits(0),
-        cacheMisses(0),
-        expiredReturned(0),
-        expiredDeleted(0)
-#endif
+  Cache() = default;
+
+  Cache(std::size_t maxSize, long timeConstant = 0)
+      : itsMaxSize(maxSize), itsTimeConstant(timeConstant)
   {
     //		itsMap.bucket_size(itsMaxSize);
   }
 
-  Cache(std::size_t maxSize, long timeConstant = 0)
-      : itsSize(0),
-        itsMaxSize(maxSize),
-        itsTimeConstant(timeConstant)
-#ifndef NDEBUG
-        ,
-        cacheHits(0),
-        cacheMisses(0),
-        expiredReturned(0),
-        expiredDeleted(0)
-#endif
+  // ----------------------------------------------------------------------
+  /*!
+   * \brief Get cache statistics
+   */
+  // ----------------------------------------------------------------------
+  CacheStats statistics() const
   {
-    //		itsMap.bucket_size(itsMaxSize);
+    Lock lock(itsMutex);
+    return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount);
   }
 
   // Insert with a list of tags
@@ -1027,6 +917,8 @@ class Cache : public boost::noncopyable
 
       if (result)
       {
+        ++itsInsertCount;
+
         // Successful insertion
         for (const auto& tag : tags)
         {
@@ -1094,6 +986,9 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
+
+        ++itsInsertCount;
+
         for (const auto& tag : tags)
         {
           // Check and update tags
@@ -1152,6 +1047,9 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
+
+        ++itsInsertCount;
+
         // Check if tag exists in tag map, if not, insert default  value
         auto tagIt = itsTagMap.find(tag);
         if (tagIt == itsTagMap.end())
@@ -1211,6 +1109,9 @@ class Cache : public boost::noncopyable
       if (result)
       {
         // Successful insertion
+
+        ++itsInsertCount;
+
         // Check if tag exists in tag map, if not, insert default  value
         auto tagIt = itsTagMap.find(tag);
         if (tagIt == itsTagMap.end())
@@ -1257,6 +1158,9 @@ class Cache : public boost::noncopyable
       result =
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize);
+
+      if (result)
+        ++itsInsertCount;
     }
 
     else
@@ -1288,6 +1192,8 @@ class Cache : public boost::noncopyable
       result =
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize, evictedItems);
+      if (result)
+        ++itsInsertCount;
     }
 
     else
@@ -1317,37 +1223,34 @@ class Cache : public boost::noncopyable
         {
           // Tag has expired and tag map has been cleaned. Remove from cache
           itsMap.left.erase(it);
-          FMI_CACHE_EXPIRED_DELETED;
-          return boost::optional<ValueType>();
+          ++itsMissCount;
+          return {};
         }
 
         // If one of the tags is expired, remove object from cache
-        if (FMI_CACHE_EXPIRATION_CALL(
-                ExpirationPolicy::isExpired, tagMapIt->second.first, itsTimeConstant))
+        if (ExpirationPolicy::isExpired(tagMapIt->second.first, itsTimeConstant))
         {
           // This tag expired, erase the object from cache and return empty
           itsMap.left.erase(it);
-
-          return boost::optional<ValueType>();
+          ++itsMissCount;
+          return {};
         }
       }
 
       EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onAccess(
           itsMap, it);
 
-      FMI_CACHE_HIT;
+      ++itsHitCount;
 
       // Update hit count for this entry
       ++it->second.itsHits;
 
-      return boost::optional<ValueType>(it->second.itsValue);
+      return it->second.itsValue;
     }
 
-    else
-    {
-      FMI_CACHE_MISS;
-      return boost::optional<ValueType>();
-    }
+    ++itsMissCount;
+
+    return {};
   }
 
   // Find value from cache and return also its hits
@@ -1368,39 +1271,35 @@ class Cache : public boost::noncopyable
         {
           // Tag has expired and tag map has been cleaned. Remove from cache
           itsMap.left.erase(it);
-          FMI_CACHE_EXPIRED_DELETED;
-          return boost::optional<ValueType>();
+          ++itsMissCount;
+          return {};
         }
 
         // If one of the tags is expired, remove object from cache
 
-        if (FMI_CACHE_EXPIRATION_CALL(
-                ExpirationPolicy::isExpired, tagMapIt->second.first, itsTimeConstant))
+        if (ExpirationPolicy::isExpired(tagMapIt->second.first, itsTimeConstant))
         {
           // This tag expired, erase the object from cache and return empty
           itsMap.left.erase(it);
-
-          return boost::optional<ValueType>();
+          ++itsMissCount;
+          return {};
         }
       }
 
       EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onAccess(
           itsMap, it);
 
-      FMI_CACHE_HIT;
+      ++itsHitCount;
 
       // Update hit count for this entry
 
       hits = ++it->second.itsHits;
 
-      return boost::optional<ValueType>(it->second.itsValue);
+      return it->second.itsValue;
     }
 
-    else
-    {
-      FMI_CACHE_MISS;
-      return boost::optional<ValueType>();
-    }
+    ++itsMissCount;
+    return {};
   }
 
   void expire(const TagType& tagToExpire, const std::time_t& expirationTime = std::time(nullptr))
@@ -1457,23 +1356,23 @@ class Cache : public boost::noncopyable
         itsMap, itsTagMap, itsSize, itsMaxSize, evictedItems);
   }
 
-  std::size_t size()
+  std::size_t size() const
   {
     Lock lock(itsMutex);
     return itsSize;
   }
 
-  std::size_t maxSize()
+  std::size_t maxSize() const
   {
     Lock lock(itsMutex);
     return itsMaxSize;
   }
 
-  std::list<CacheReportingObjectType> getContent()
+  std::list<CacheReportingObjectType> getContent() const
   {
     Lock lock(itsMutex);
     std::list<CacheReportingObjectType> result;
-    for (RightIteratorType it = itsMap.right.begin(); it != itsMap.right.end(); ++it)
+    for (auto it = itsMap.right.begin(); it != itsMap.right.end(); ++it)
     {
       result.push_back(CacheReportingObjectType(it->second,
                                                 it->first.itsValue,
@@ -1484,28 +1383,21 @@ class Cache : public boost::noncopyable
     return result;
   }
 
-#ifndef NDEBUG
-
-  unsigned long getHits() { return cacheHits; }
-  unsigned long getMisses() { return cacheMisses; }
-  unsigned long getExpiredReturned() { return expiredReturned; }
-  unsigned long getExpiredDeleted() { return expiredDeleted; }
-  std::string getTextContent()
+  std::string getTextContent() const
   {
     std::stringstream output;
     Lock lock(itsMutex);
-    auto lastReal = itsMap.right.end();
-    std::advance(lastReal, -1);
-    for (auto it = itsMap.right.begin(); it != lastReal; ++it)
+    auto n = 0UL;
+
+    for (auto it = itsMap.right.begin(); it != itsMap.right.end(); ++it, ++n)
     {
-      output << it->first.itsValue << ",";
+      if (n > 0)
+        output << ',';
+      output << it->first.itsValue;
     }
-    output << lastReal->first.itsValue;
 
     return output.str();
   }
-
-#endif
 
  private:
   // Clear expired tags from the tag map
@@ -1525,27 +1417,20 @@ class Cache : public boost::noncopyable
   }
 
   MapType itsMap;
-
   TagMapType itsTagMap;
 
-  MutexType itsMutex;
+  mutable MutexType itsMutex;
 
-  std::size_t itsSize;
+  std::size_t itsSize = 0;
+  std::size_t itsMaxSize = 0;
 
-  std::size_t itsMaxSize;
+  std::size_t itsInsertCount = 0;
+  std::size_t itsMissCount = 0;
+  std::size_t itsHitCount = 0;
 
-  long itsTimeConstant;
+  const boost::posix_time::ptime itsStartTime = boost::posix_time::second_clock::universal_time();
 
-#ifndef NDEBUG
-  // Debugging parameters
-  unsigned long cacheHits;
-
-  unsigned long cacheMisses;
-
-  unsigned long expiredReturned;
-
-  unsigned long expiredDeleted;
-#endif
+  long itsTimeConstant = 0;
 };
 
 // Size_t parser for the FileCache
@@ -1614,7 +1499,7 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  std::vector<std::size_t> getContent();
+  std::vector<std::size_t> getContent() const;
 
   // ----------------------------------------------------------------------
   /*!
@@ -1622,7 +1507,8 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  std::size_t getSize();
+  std::size_t getSize() const;
+
   // ----------------------------------------------------------------------
   /*!
    * \brief Do manual cleanup of the cache
@@ -1630,6 +1516,14 @@ class FileCache : boost::noncopyable
   // ----------------------------------------------------------------------
 
   bool clean(std::size_t spaceNeeded);
+
+  // ----------------------------------------------------------------------
+  /*!
+   * \brief Get cache statistics
+   */
+  // ----------------------------------------------------------------------
+
+  CacheStats statistics() const;
 
  private:
   // ----------------------------------------------------------------------
@@ -1654,7 +1548,10 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  bool writeFile(const fs::path& theDir, const std::string& fileName, const std::string& theValue);
+  bool writeFile(const fs::path& theDir,
+                 const std::string& fileName,
+                 const std::string& theValue) const;
+
   // ----------------------------------------------------------------------
   /*!
    * \brief Checks that entry can be written to disk
@@ -1669,7 +1566,7 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  std::pair<std::string, std::string> getFileDirAndName(std::size_t hashValue);
+  std::pair<std::string, std::string> getFileDirAndName(std::size_t hashValue) const;
 
   // ----------------------------------------------------------------------
   /*!
@@ -1677,17 +1574,23 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
 
-  bool getKey(const std::string& directory, const std::string& filename, std::size_t& key);
+  bool getKey(const std::string& directory, const std::string& filename, std::size_t& key) const;
 
-  std::size_t itsSize;
+  std::size_t itsSize = 0;
 
-  std::size_t itsMaxSize;
+  std::size_t itsMaxSize = 0;
+
+  std::size_t itsInsertCount = 0;
+  std::size_t itsMissCount = 0;
+  std::size_t itsHitCount = 0;
+
+  const boost::posix_time::ptime itsStartTime = boost::posix_time::second_clock::universal_time();
 
   fs::path itsDirectory;
 
   MapType itsContentMap;
 
-  MutexType itsMutex;
+  mutable MutexType itsMutex;
 };
 
 }  // namespace Cache

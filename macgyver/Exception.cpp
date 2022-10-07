@@ -22,7 +22,7 @@ static const std::map<std::string, std::string> exception_name_map = {
     {"std::logic_error", "Logic error"}};
 }
 
-std::atomic<bool> Exception::force_stack_trace(false);
+thread_local bool Exception::force_stack_trace = false;
 
 Exception::Exception()
 {
@@ -51,6 +51,16 @@ Exception Exception::Trace(const char* _filename,
                            std::string _message)
 {
   return Exception(_filename, _line, _function, std::move(_message), nullptr);
+}
+
+Exception Exception::SquashTrace(const char* _filename,
+                                 int _line,
+                                 const char* _function,
+                                 std::string _message)
+{
+    Exception top(_filename, _line, _function, std::move(_message), nullptr);
+    const Fmi::Exception* first = top.getFirstException();
+    return *first;
 }
 
 Exception::Exception(const char* _filename,
@@ -111,7 +121,7 @@ Exception::Exception(const char* _filename, int _line, const char* _function, st
   message = std::move(_message);
 }
 
-Exception::~Exception() {}
+Exception::~Exception() = default;
 
 std::string Exception::getFilename() const
 {
@@ -141,28 +151,20 @@ const char* Exception::what() const noexcept(true)
 const Exception* Exception::getPrevException() const
 {
   if (prevException)
-  {
     return prevException.get();
-  }
-  else
-  {
-    return nullptr;
-  }
+
+  return nullptr;
 }
 
 const Exception* Exception::getFirstException() const
 {
   if (prevException)
-  {
     return prevException->getFirstException();
-  }
-  else
-  {
-    return this;
-  }
+
+  return this;
 }
 
-TimeStamp Exception::getTimeStamp() const
+ExceptionTimeStamp Exception::getTimeStamp() const
 {
   return timestamp;
 }
@@ -194,7 +196,7 @@ const Exception* Exception::getExceptionByIndex(unsigned int _index) const
   return nullptr;
 }
 
-void Exception::setTimeStamp(TimeStamp _timestamp)
+void Exception::setTimeStamp(ExceptionTimeStamp _timestamp)
 {
   timestamp = _timestamp;
 }
@@ -310,12 +312,27 @@ Exception& Exception::disableStackTrace()
   return *this;
 }
 
+Exception& Exception::disableStackTraceRecursive()
+{
+  disableStackTrace();
+  if (prevException) {
+    prevException->disableStackTraceRecursive();
+  }
+  return *this;
+}
+
 std::string Exception::getStackTrace() const
 {
-  if (!force_stack_trace && (mLoggingDisabled || mStackTraceDisabled))
+  if (!force_stack_trace && mLoggingDisabled)
     return "";
 
   const Exception* e = this;
+
+  // Skip levels for which stack trace is disabled
+  while (e->getPrevException() && (!force_stack_trace && e->stackTraceDisabled()))
+  {
+    e = e->getPrevException();
+  }
 
   std::string out = fmt::format("\n{}{}{} #### {} #### {}{}{}\n\n",
                                 ANSI_BG_RED,
@@ -444,26 +461,43 @@ std::string Exception::getHtmlStackTrace() const
 
 void Exception::printError() const
 {
-  if (!stackTraceDisabled())
-    std::cerr << getStackTrace() << std::flush;
-  else
-  {
-#if 0
-    // Disabled for now due to too many trivial client errors. We need better
-    // control of error logging and preferably on-the-fly modifications to it.
-    
-    std::cerr << Spine::log_time_str() << " Error: " << what() << std::endl;
+  std::cerr << *this << std::flush;
+}
 
-    // Print parameters for top level exception, if there are any. Usually
-    // plugins set the URI to the top level exception.
-
-    if (!parameterVector.empty())
-    {
-      for (const auto& param_value : parameterVector)
-        std::cerr << "   - " << param_value.first << " = " << param_value.second << std::endl;
-    }
-#endif
+void Exception::printOn(std::ostream& out) const
+{
+  if (force_stack_trace || !loggingDisabled()) {
+    out << getStackTrace();
   }
 }
 
+std::ostream& operator << (std::ostream& out, const Exception& e)
+{
+  e.printOn(out);
+  return out;
+}
+
+Exception::ForceStackTrace::ForceStackTrace()
+{
+    prev = true;
+    std::swap(force_stack_trace, prev);
+}
+
+Exception::ForceStackTrace::~ForceStackTrace()
+{
+    force_stack_trace = prev;
+}
+
 }  // namespace Fmi
+
+void Fmi::ignore_exceptions()
+{
+  if (std::current_exception())
+  {
+    try {
+      throw;
+    } catch (const::boost::thread_interrupted&) {
+      throw;
+    }
+  }
+}

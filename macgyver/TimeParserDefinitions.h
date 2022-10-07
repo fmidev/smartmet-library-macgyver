@@ -34,6 +34,8 @@ using OptionalChar = boost::optional<char>;
 
 struct TimeZoneOffset
 {
+  bool present;
+
   char sign;
 
   unsigned int hours;
@@ -74,17 +76,20 @@ struct TimeStamp
 // Adapt structs, so they behave like boost::fusion::vector's
 
 BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeZoneOffset,
-                          (char, sign)(unsigned int, hours)(unsigned int, minutes))
+                          (char, sign)(unsigned int, hours)(unsigned int, minutes)(bool, present))
 
 BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeOffset,
                           (char, sign)(unsigned int, value)(Fmi::TimeParser::OptionalChar, unit))
 
 BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeStamp,
-                          (unsigned short, year)(unsigned short, month)(unsigned short, day)(
-                              Fmi::TimeParser::OptionalInt,
-                              hour)(Fmi::TimeParser::OptionalInt,
-                                    minute)(Fmi::TimeParser::OptionalInt,
-                                            second)(Fmi::TimeParser::TimeZoneOffset, tz))
+                          (unsigned short,
+                           year)(unsigned short,
+                                 month)(unsigned short,
+                                        day)(Fmi::TimeParser::OptionalInt,
+                                             hour)(Fmi::TimeParser::OptionalInt,
+                                                   minute)(Fmi::TimeParser::OptionalInt,
+                                                           second)(Fmi::TimeParser::TimeZoneOffset,
+                                                                   tz))
 
 namespace Fmi
 {
@@ -104,21 +109,27 @@ struct TimeZoneParser : qi::grammar<Iterator, TimeZoneOffset()>
 
   TimeZoneParser() : TimeZoneParser::base_type(tz_offset)
   {
-    tz_offset =
-        (qi::lit('Z') >> qi::attr('+') >> qi::attr(0) >> qi::attr(0))  // Z means zero offset
-        |
-        ((qi::char_("+") | qi::char_("-")) >>
-         (two_digits >>
-          (two_digits | ((qi::lit(':') >> two_digits) |
-                         qi::attr(0)))))  // sign with hours followed by optional colon and minutes
-        | (qi::attr('+') >> qi::attr(0) >>
-           qi::attr(0));  // If parse failed, default to 0 hours 0 minutes
+    tz_utc = qi::lit('Z') >> qi::attr('+') >> qi::attr(0) >> qi::attr(0) >> qi::attr(true);
+
+    tz_hhmm =
+      (qi::char_("+") | qi::char_("-")) >>
+      two_digits >>
+      (two_digits | ((qi::lit(':') >> two_digits) | qi::attr(0))) >>  // sign with hours followed by optional colon and minutes
+      qi::attr(true);
+
+    tz_missing = qi::eps >> qi::attr('+') >> qi::attr(0) >> qi::attr(0) >> qi::attr(false);
+
+    tz_offset = tz_utc | tz_hhmm | tz_missing;
 
 #ifdef MYDEBUG
     BOOST_SPIRIT_DEBUG_NODE(two_digits);
     BOOST_SPIRIT_DEBUG_NODE(tz_offset);
 #endif
   }
+
+  qi::rule<Iterator, TimeZoneOffset()> tz_utc;
+  qi::rule<Iterator, TimeZoneOffset()> tz_hhmm;
+  qi::rule<Iterator, TimeZoneOffset()> tz_missing;
 
   qi::rule<Iterator, TimeZoneOffset()> tz_offset;
   TwoDigitNumber two_digits;
@@ -286,9 +297,15 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
         (qi::omit[qi::lit(':')] >> uint12 >> &qi::omit[(qi::lit('.') | qi::lit('Z') | qi::eoi)]) |
         (optional_colon >> uint2);
 
-    isostamp = year >> optional_dash >> month >> optional_dash >> mday >> date_time_separator >>
-               -hmin >> optional_colon >> -hmin >> -second >> optional_period >> -qi::omit[uint3] >>
-               tz_parser >> qi::eoi;
+    isostamp_ext = year >> optional_dash >> month >> optional_dash >> mday >> date_time_separator
+                        >> -hmin >> optional_colon >> -hmin >> -second >> optional_period >> -qi::omit[uint3]
+                        >> tz_parser >> qi::eoi;
+
+    // Support separately format YYYYMMDD[T]HHMM[SS] <tz>
+    isostamp_basic = uint4 >> uint2 >> uint2 >> qi::omit[-date_time_separator]
+                           >> uint2 >> uint2 >> -uint2 >> tz_parser >> qi::eoi;
+
+    isostamp = isostamp_basic | isostamp_ext;
 
 #ifdef MYDEBUG
     BOOST_SPIRIT_DEBUG_NODE(dash);
@@ -314,6 +331,9 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
   qi::rule<Iterator, void()> optional_period;
   qi::rule<Iterator, void()> date_time_separator;
   TimeZoneParser<Iterator> tz_parser;
+
+  qi::rule<Iterator, TimeStamp()> isostamp_ext;
+  qi::rule<Iterator, TimeStamp()> isostamp_basic;
 
   qi::rule<Iterator, TimeStamp()> isostamp;
 };

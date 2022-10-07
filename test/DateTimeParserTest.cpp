@@ -616,17 +616,20 @@ void parse_duration()
   DateTimeParser parser;
 
   res = parser.parse_duration("0");
-  if (res != seconds(0)) TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
+  if (res != seconds(0))
+    TEST_FAILED("Failed to parse 0 correctly, got " + to_simple_string(res));
 
   res = parser.parse_duration("+1");
-  if (res != minutes(1)) TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
+  if (res != minutes(1))
+    TEST_FAILED("Failed to parse +1 correctly, got " + to_simple_string(res));
 
   res = parser.parse_duration("+10m");
   if (res != minutes(10))
     TEST_FAILED("Failed to parse +10m correctly, got " + to_simple_string(res));
 
   res = parser.parse_duration("+3h");
-  if (res != hours(3)) TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
+  if (res != hours(3))
+    TEST_FAILED("Failed to parse +3h correctly, got " + to_simple_string(res));
 
   res = parser.parse_duration("-24h");
   if (res != hours(-24))
@@ -664,7 +667,8 @@ void parse_iso_duration()
     TEST_FAILED("Failed to parse P2W correctly, got " + to_simple_string(res));
 
   res = parser.parse_iso_duration("P1D");
-  if (res != hours(24)) TEST_FAILED("Failed to parse P1D correctly, got " + to_simple_string(res));
+  if (res != hours(24))
+    TEST_FAILED("Failed to parse P1D correctly, got " + to_simple_string(res));
 
   res = parser.parse_iso_duration("P2D");
   if (res != hours(2 * 24))
@@ -683,7 +687,8 @@ void parse_iso_duration()
     TEST_FAILED("Failed to parse PT10M correctly, got " + to_simple_string(res));
 
   res = parser.parse_iso_duration("PT3H");
-  if (res != hours(3)) TEST_FAILED("Failed to parse PT3H correctly, got " + to_simple_string(res));
+  if (res != hours(3))
+    TEST_FAILED("Failed to parse PT3H correctly, got " + to_simple_string(res));
 
   res = parser.parse_iso_duration("P1DT10H20M30S");
   if (res != hours(24) + hours(10) + minutes(20) + seconds(30))
@@ -708,17 +713,20 @@ void parse_wintertime()
   local_date_time ok = local_date_time(
       date(2012, 10, 27), hours(3) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   local_date_time res = parser.parse("201210270330", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   ok = local_date_time(
       date(2012, 10, 27), hours(2) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = parser.parse("201210270230", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   ok = local_date_time(
       date(2012, 10, 27), hours(1) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = parser.parse("201210270130", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   TEST_PASSED();
 }
@@ -737,18 +745,21 @@ void parse_summertime()
   local_date_time ok = local_date_time(
       date(2013, 3, 31), hours(1) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   local_date_time res = parser.parse("201303310130", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   ok = local_date_time(
       date(2013, 3, 31), hours(2) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = parser.parse("201303310230", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   // We expect 04:30 for invalid 03:30!!
   ok = local_date_time(
       date(2013, 3, 31), hours(4) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
   res = parser.parse("201303310330", zone);
-  if (res != ok) TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
+  if (res != ok)
+    TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   TEST_PASSED();
 }

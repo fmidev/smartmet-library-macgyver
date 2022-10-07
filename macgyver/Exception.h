@@ -5,6 +5,7 @@
 #include <atomic>
 #include <list>
 #include <memory>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -12,8 +13,7 @@
 
 namespace Fmi
 {
-
-using TimeStamp = boost::posix_time::ptime;
+using ExceptionTimeStamp = boost::posix_time::ptime;
 using ParameterVector = std::vector<std::pair<std::string, std::string>>;
 using DetailVector = std::vector<std::string>;
 using DetailList = std::list<std::string>;
@@ -36,6 +36,18 @@ class Exception : public std::exception
                          int _line,
                          const char* _function,
                          std::string _message);
+
+  /**
+   *  @brief Returns a copy of deepest level Fmi::Exception object or new one when none is found
+   *
+   *  Useful when one is not interested in intermediate back-trace levels, but only in
+   *  initial exception. One can for example add details and/or parameters to the copy of
+   *  initial exception and rethrow it or use for generating error message
+   */
+  static Exception SquashTrace(const char* _filename,
+                               int _line,
+                               const char* _function,
+                               std::string _message);
 
   // TODO: Make this private to enforce using Exception::Trace
   Exception(const char* _filename,
@@ -81,8 +93,8 @@ class Exception : public std::exception
   const char* getParameterValue(const char* _name) const;
   const char* getParameterValueByIndex(unsigned int _index) const;
 
-  TimeStamp getTimeStamp() const;
-  void setTimeStamp(TimeStamp _timestamp);
+  ExceptionTimeStamp getTimeStamp() const;
+  void setTimeStamp(ExceptionTimeStamp _timestamp);
 
   std::string getStackTrace() const;
   std::string getHtmlStackTrace() const;
@@ -92,11 +104,26 @@ class Exception : public std::exception
 
   Exception& disableLogging();
   Exception& disableStackTrace();
+  Exception& disableStackTraceRecursive();
 
   void printError() const;
 
+  void printOn(std::ostream& out) const;
+
+ public:
+  class ForceStackTrace final
+  {
+  public:
+      ForceStackTrace();
+      ForceStackTrace(const ForceStackTrace&) = delete;
+      virtual ~ForceStackTrace();
+      ForceStackTrace& operator = (const ForceStackTrace&) = delete;
+  private:
+      bool prev;
+  };
+
  protected:
-  TimeStamp timestamp;
+  ExceptionTimeStamp timestamp;
   std::string filename;
   int line;
   std::string function;
@@ -107,9 +134,24 @@ class Exception : public std::exception
   bool mLoggingDisabled = false;
   bool mStackTraceDisabled = false;
 
-public:
-    static std::atomic<bool> force_stack_trace;
+  static thread_local bool force_stack_trace;
 };
+
+std::ostream& operator << (std::ostream& out, const Exception& e);
+
+/**
+ *  @brief Intended to be used in catch block to ignore exceptions thrown except some predefined ones
+ *
+ *  Following exceptions are thrown again:
+ *    - boost::thread_interrupted - required for support of boost::thread::interrupt (so also
+ *                for Fmi::AsyncTask)
+ *
+ *  Notes:
+ *    - Fmi::Exception::Trace already provides current handling of boost::thread_interrupted
+ *    - using empty catch block interferes with boost::thread::interrupt - use this method in throw
+ *      block instead of leaving it empty
+ */
+void ignore_exceptions();
 
 // Next is to be replaced later on with std::source_location, which is currently experimental
 // Static cast explanation: https://github.com/isocpp/CppCoreGuidelines/issues/765
@@ -121,6 +163,5 @@ public:
 
 #define BCP __FILE__, __LINE__, static_cast<const char*>(__PRETTY_FUNCTION__)
 #endif
-  
-} // namespace Fmi
 
+}  // namespace Fmi

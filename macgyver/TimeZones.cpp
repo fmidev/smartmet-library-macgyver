@@ -9,8 +9,8 @@
 #include "StringConversion.h"
 #include "WorldTimeZones.h"
 #include <memory>
-#include <unordered_map>
 #include <stdexcept>
+#include <unordered_map>
 
 using namespace std;
 
@@ -31,19 +31,26 @@ class TimeZones::Pimple
   Pimple(const std::string& regionsFile, const std::string& coordinatesFile)
       : itsRegions(), itsCoordinates(coordinatesFile)
   {
-    itsRegions.load_from_file(regionsFile);
-
-    // Create all known timezones once for better access speed later on.
-    auto regions = itsRegions.region_list();
-    for (const auto& id : regions)
+    try
     {
-      auto ptr = itsRegions.time_zone_from_region(id);
-      if (!ptr)
-        throw Fmi::Exception(BCP, "Unknown timezone definition")
-            .addParameter("Filename", regionsFile)
-            .addParameter("ID", id);
+      itsRegions.load_from_file(regionsFile);
 
-      itsKnownZones[id] = ptr;
+      // Create all known timezones once for better access speed later on.
+      auto regions = itsRegions.region_list();
+      for (const auto& id : regions)
+      {
+        auto ptr = itsRegions.time_zone_from_region(id);
+        if (!ptr)
+          throw Fmi::Exception(BCP, "Unknown timezone definition")
+              .addParameter("Filename", regionsFile)
+              .addParameter("ID", id);
+
+        itsKnownZones[id] = ptr;
+      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
   boost::local_time::tz_database itsRegions;
@@ -57,7 +64,7 @@ class TimeZones::Pimple
  */
 // ----------------------------------------------------------------------
 
-TimeZones::~TimeZones() {}
+TimeZones::~TimeZones() = default;
 // ----------------------------------------------------------------------
 /*!
  * \brief Default constructor
@@ -84,7 +91,14 @@ TimeZones::TimeZones(const std::string& regionsFile, const std::string& coordina
 
 vector<string> TimeZones::region_list() const
 {
-  return itsPimple->itsRegions.region_list();
+  try
+  {
+    return itsPimple->itsRegions.region_list();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 // ----------------------------------------------------------------------
 /*!
@@ -94,11 +108,18 @@ vector<string> TimeZones::region_list() const
 
 boost::local_time::time_zone_ptr TimeZones::time_zone_from_region(const string& id) const
 {
-  auto value = itsPimple->itsKnownZones.find(id);
-  if (value != itsPimple->itsKnownZones.end())
-    return value->second;
+  try
+  {
+    auto value = itsPimple->itsKnownZones.find(id);
+    if (value != itsPimple->itsKnownZones.end())
+      return value->second;
 
-  throw Fmi::Exception(BCP, "TimeZones does not recognize region '" + id + "'");
+    throw Fmi::Exception(BCP, "TimeZones does not recognize region '" + id + "'");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -109,13 +130,20 @@ boost::local_time::time_zone_ptr TimeZones::time_zone_from_region(const string& 
 
 boost::local_time::time_zone_ptr TimeZones::time_zone_from_string(const string& desc) const
 {
-  // Try region name at first
-  auto value = itsPimple->itsKnownZones.find(desc);
-  if (value != itsPimple->itsKnownZones.end())
-    return value->second;
+  try
+  {
+    // Try region name at first
+    auto value = itsPimple->itsKnownZones.find(desc);
+    if (value != itsPimple->itsKnownZones.end())
+      return value->second;
 
-  // Try POSIX TZ description (may throw) if region name is unknown
-  return boost::local_time::time_zone_ptr(new boost::local_time::posix_time_zone(desc));
+    // Try POSIX TZ description (may throw) if region name is unknown
+    return boost::local_time::time_zone_ptr(new boost::local_time::posix_time_zone(desc));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -126,14 +154,21 @@ boost::local_time::time_zone_ptr TimeZones::time_zone_from_string(const string& 
 
 boost::local_time::time_zone_ptr TimeZones::time_zone_from_coordinate(double lon, double lat) const
 {
-  string tz = itsPimple->itsCoordinates.zone_name(lon, lat);
-  boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
-  if (!ptr)
-    throw Fmi::Exception(BCP,
-                         "TimeZones could not convert given coordinate " + Fmi::to_string(lon) +
-                             "," + Fmi::to_string(lat) + " to a valid time zone name");
+  try
+  {
+    string tz = itsPimple->itsCoordinates.zone_name(lon, lat);
+    boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
+    if (!ptr)
+      throw Fmi::Exception(BCP,
+                           "TimeZones could not convert given coordinate " + Fmi::to_string(lon) +
+                               "," + Fmi::to_string(lat) + " to a valid time zone name");
 
-  return ptr;
+    return ptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -144,7 +179,14 @@ boost::local_time::time_zone_ptr TimeZones::time_zone_from_coordinate(double lon
 
 std::string TimeZones::zone_name_from_coordinate(double lon, double lat) const
 {
-  return itsPimple->itsCoordinates.zone_name(lon, lat);
+  try
+  {
+    return itsPimple->itsCoordinates.zone_name(lon, lat);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Fmi

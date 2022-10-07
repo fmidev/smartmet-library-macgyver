@@ -1,9 +1,20 @@
+%bcond_with tests
 %define DIRNAME macgyver
 %define LIBNAME smartmet-%{DIRNAME}
 %define SPECNAME smartmet-library-%{DIRNAME}
+
+%if 0%{?rhel} && 0%{rhel} < 9
+%define smartmet_boost boost169
+%else
+%define smartmet_boost boost
+%endif
+
+%define smartmet_fmt_min 8.1.1
+%define smartmet_fmt_max 8.2.0
+
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 21.1.25
+Version: 22.8.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -11,33 +22,55 @@ URL: https://github.com/fmidev/smartmet-library-macgyver
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: boost169-devel
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: ctpp2-devel
-BuildRequires: fmt-devel >= 7.1.3
+BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: gcc-c++
 BuildRequires: imake
 BuildRequires: libicu-devel
-BuildRequires: libpqxx-devel < 1:7.0
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-timezones >= 21.1.5
-Requires: boost169-chrono
-Requires: boost169-date-time
-Requires: boost169-filesystem
-Requires: boost169-regex
-Requires: boost169-system
-Requires: boost169-thread
+BuildRequires: double-conversion-devel
+BuildRequires: smartmet-timezones >= 21.2.2
+BuildRequires: smartmet-utils-devel >= 22.1.20
+%if %{with tests}
+BuildRequires: smartmet-library-regression
+%endif
+Requires: %{smartmet_boost}-chrono
+Requires: %{smartmet_boost}-date-time
+Requires: %{smartmet_boost}-filesystem
+Requires: %{smartmet_boost}-regex
+Requires: %{smartmet_boost}-system
+Requires: %{smartmet_boost}-thread
+Requires: double-conversion
 Requires: ctpp2
-Requires: fmt >= 7.1.3
+Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: libicu >= 50.2
+
+%if 0%{?rhel} && 0%{rhel} == 7
 Requires: libpqxx < 1:7.0
-#TestRequires: boost169-devel
+BuildRequires: libpqxx-devel < 1:7.0
+#TestRequires: libpqxx-devel < 1:7.0
+%else
+%if 0%{?rhel} && 0%{rhel} >= 8
+Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
+BuildRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
+#TestRequires: libpqxx-devel >= 1:7.7.0, libpqxx-devel < 1:7.8.0
+%else
+Requires: libpqxx
+BuildRequires: libpqxx-devel
+#TestRequires: libpqxx-devel
+%endif
+%endif
+
+#TestRequires: %{smartmet_boost}-devel
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
 #TestRequires: make
-#TestRequires: postgresql12-libs
+#TestRequires: postgresql13-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 21.1.5
+#TestRequires: smartmet-timezones >= 21.2.2
+#TestRequires: smartmet-utils-devel >= 22.1.20
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -55,6 +88,9 @@ rm -rf %{SPECNAME}
  
 %build
 make %{_smp_mflags}
+%if %{with tests}
+make test %{_smp_mflags}
+%endif
 
 %install
 %makeinstall
@@ -74,6 +110,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
+Requires: smartmet-utils-devel >= 22.1.20
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -82,9 +119,140 @@ FMI MacGyver library development files
 %files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
-%{_datadir}/smartmet/devel/makefile.inc
 
 %changelog
+* Tue Aug 23 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.8.23-1.fmi
+- Fmi::Exception update
+
+* Fri Jul 29 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.29-1.fmi
+- Add method active_task_names() to AsyncTaskGroup and method traceId
+
+* Wed Jul 27 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.7.27-1.fmi
+- Improved cache statistics
+
+* Wed Jul 20 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.20-1.fmi
+- Fmi::AsyncTaskGroup: ensure that all tasks end before return from Fmi::AsynctaskGroup::wait()
+
+* Fri Jul 15 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.15-1.fmi
+- Exception: new static method SquashTrace(): returns copy of initial exception
+
+* Fri Jul  8 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.7.8-1.fmi
+- Fmi::Exception improvements (new methods)
+
+* Thu Jun 16 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.6.16-1.fmi
+- Add support of HEL9, upgrade to libpqxx-7.7.0 (rhel8+) and fmt-8.1.1
+
+* Tue May 24 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.5.24-1.fmi
+- Update time ISO format parser
+
+* Mon Mar 28 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.3.28-2.fmi
+- Fmi::PostgreSQLConnection: update handling cases when there is no connection
+
+* Mon Mar 28 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.3.28-1.fmi
+- Fmi::PostgreSQLConnection changes
+
+* Tue Mar 8 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.3.8-1.fmi
+- Stat-functions moved to timeseries-library (BRAINSTORM-2259)
+
+* Thu Feb 24 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.2.24-1.fmi
+- Added template class Fmi::TypeMap
+
+* Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
+- Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
+
+* Tue Jan 18 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.1.18-1.fmi
+- Added DistanceParser class (BRAINSTORM-605)
+
+* Mon Jan 10 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.10-1.fmi
+- Add template class Fmi::WorkerPool<>
+
+* Tue Jan 4 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.1.4-1.fmi
+- Fixed lunar_time calculation (BRAINSTORM-2188)
+
+* Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
+- Update to postgresql 13 and gdal 3.3
+
+* Tue Nov 30 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.11.30-1.fmi
+- [Staging] Use PostgreSQL 13 and GDAL-3.3
+
+* Mon Oct  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.10.4-1.fmi
+- Fixed to_simple_string to handle hours>=100.
+
+* Tue Sep 21 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.9.21-1.fmi
+- Move makefile*.inc to smartmet-util package
+
+* Mon Sep 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.9.13-2.fmi
+- Fixed Fmi::Cache to increment cache misses in all possible cases
+
+* Mon Sep 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.9.13-1.fmi
+- Added stoi_opt, stol_opt, stoul_opt, stof_opt and stod_opt to avoid exceptions in normal execution paths
+
+* Mon Aug 30 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.8.30-1.fmi
+- Cache counters added (BRAINSTORM-1005)
+
+* Fri Aug 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.20-1.fmi
+- Use fmt::format_int also for size_t and time_t
+
+* Thu Aug 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.19-1.fmi
+- Calculate hash value for Boost local_date_time from utc_time() instead of local_time() for much better speed
+- Calculate hash value for Boost Gregorian date using year_month_day() for speed
+- Avoid unnecessary hash_combine calculations with zero
+
+* Thu Aug  5 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.8.5-1.fmi
+- Update error handling and mariadb support in makefile.inc
+
+* Tue Aug  3 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.8.3-1.fmi, 21.8.3-2.fmi
+- Add support of mariadb in makefile.inc
+
+* Wed Jul 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.7.28-1.fmi
+- Silenced compiler warnings
+
+* Tue Jul 27 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.27-1.fmi
+- Added class Fmi::CharsetConverter
+
+* Tue Jul 20 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.20-1.fmi
+- Fmi::Database::PostgreSQLConnection: added parsing connection string
+
+* Tue Jul 13 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.13-1.fmi
+- Add class Fmi::Database::PostgreSQLConnection::Transaction and remove old transaction API
+
+* Thu Jul  8 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.7.8-1.fmi
+- Use libpqxx7 for RHEL8
+
+* Fri Jun 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.18-1.fmi
+- Silenced some CodeChecker warnings
+
+* Thu Jun 17 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.17-1.fmi
+- Try reopening a PostgreSQL connection if the connection has been lost
+
+* Wed Jun 16 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.16-1.fmi
+- Use Fmi::Exception in the library itself
+
+* Thu Jun 10 2021 Andris Pavenis <andris.pavenis@fmi.fi> 21.6.10-1.fmi
+- Fmi::PostgreSQLConnection: new method cancel
+
+* Mon May 31 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.31-1.fmi
+- Improved hash_value functions for boost date_time objects
+
+* Fri May 21 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.21-1.fmi
+- Improved hash_value not to return zero for zero input
+- Improved hash_combine not to use 32-bit helper functions
+
+* Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-3.fmi
+- Fixed hash_combine not to unnecessarily double hash the second input
+
+* Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-2.fmi
+- Specialized hash_value for bool, integer and float types since hash_combine works poorly with values 0 and 1
+
+* Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-1.fmi
+- Added hash_value for boost::shared_ptr, std::shared_ptr and boost time_zone_ptr
+
+* Wed May 19 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.19-1.fmi
+- Added Hash.h since boost::hash_combine produces too many collisions
+
+* Thu Feb 25 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.2.25-1.fmi
+- Added support for running ABI checker from make
+
 * Mon Jan 25 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi
 - Added SCAN obervable event in DirectoryMonitor (BRAINSTORM-1981)
 

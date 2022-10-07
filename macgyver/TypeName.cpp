@@ -1,4 +1,3 @@
-
 #include "TypeName.h"
 #include <boost/core/demangle.hpp>
 #include <cstdlib>
@@ -10,9 +9,9 @@ std::string Fmi::demangle_cpp_type_name(const std::string& src)
 
 std::string Fmi::current_exception_type()
 {
-#ifdef UNIX
+#ifndef _MSC_VER
   return demangle_cpp_type_name(abi::__cxa_current_exception_type()->name());
 #else
-  return "";
+  return "No-exception-type-support-in-VC++";
 #endif
 }

@@ -1,93 +1,221 @@
 #include "DirectoryMonitor.h"
-#include <atomic>
-#include <chrono>
-#include <thread>
-#include <condition_variable>
 #include <boost/chrono.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/scope_exit.hpp>
 #include <boost/thread.hpp>
 #include <regression/tframe.h>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <thread>
 
 namespace fs = boost::filesystem;
 namespace pt = boost::posix_time;
 
-namespace DirectoryMonitorTests {
-
+namespace DirectoryMonitorTests
+{
 void stopping_test()
 {
-    std::atomic<bool> started(false);
-    std::mutex m;
-    std::condition_variable c;
-    Fmi::DirectoryMonitor monitor;
-    monitor.watch(".",
-        [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex, const Fmi::DirectoryMonitor::Status&) {},
-        [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {},
-        10);
-    const pt::ptime start = pt::microsec_clock::universal_time();
-    std::thread t(
-        [&monitor, &started, &c]() {
-            started = true;
-            c.notify_all();
-            monitor.run();
-        });
+  std::atomic<bool> started(false);
+  std::mutex m;
+  std::condition_variable c;
+  Fmi::DirectoryMonitor monitor;
+  monitor.watch(
+      ".",
+      [](Fmi::DirectoryMonitor::Watcher,
+         const fs::path&,
+         const boost::regex,
+         const Fmi::DirectoryMonitor::Status&) {},
+      [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+      },
+      10);
+  const pt::ptime start = pt::microsec_clock::universal_time();
+  std::thread t(
+      [&monitor, &started, &m, &c]()
+      {
+	std::unique_lock<std::mutex> lock(m);
+        started = true;
+        c.notify_all();
+	lock.unlock();
+        monitor.run();
+      });
 
+  {
+    std::unique_lock<std::mutex> lock(m);
+    if (not started)
     {
-        std::unique_lock<std::mutex> lock(m);
-        if (not started) {
-            c.wait_for(lock, std::chrono::seconds(5), [&started]()->bool { return started; });
-        }
+      c.wait_for(lock, std::chrono::seconds(5), [&started]() -> bool { return started; });
     }
+  }
 
-    //const pt::ptime t1 = pt::microsec_clock::universal_time();
-    //std::cout << t1 - start << std::endl;
-    monitor.stop();
-    t.join();
+  // const pt::ptime t1 = pt::microsec_clock::universal_time();
+  // std::cout << t1 - start << std::endl;
+  monitor.stop();
+  t.join();
 
-    const pt::ptime done = pt::microsec_clock::universal_time();
-    if ((done - start).total_milliseconds() > 500) {
-        std::ostringstream tmp;
-        tmp << (done - start);
-        TEST_FAILED("Stopping Fmi::DirectoryMonitor takes too long (" + tmp.str() + ")");
-    }
+  const pt::ptime done = pt::microsec_clock::universal_time();
+  if ((done - start).total_milliseconds() > 500)
+  {
+    std::ostringstream tmp;
+    tmp << (done - start);
+    TEST_FAILED("Stopping Fmi::DirectoryMonitor takes too long (" + tmp.str() + ")");
+  }
 
-    TEST_PASSED();
+  TEST_PASSED();
 }
 
 void interruption_test()
 {
-    std::atomic<bool> started(false);
-    std::mutex m;
-    std::condition_variable c;
-    Fmi::DirectoryMonitor monitor;
-    monitor.watch(".",
-        [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex, const Fmi::DirectoryMonitor::Status&) {},
-        [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {},
-        10);
-    boost::thread task(
-        [&monitor, &started, &c]() {
-            started = true;
-            c.notify_all();
-            monitor.run();
-        });
+  std::atomic<bool> started(false);
+  std::mutex m;
+  std::condition_variable c;
+  Fmi::DirectoryMonitor monitor;
+  monitor.watch(
+      ".",
+      [](Fmi::DirectoryMonitor::Watcher,
+         const fs::path&,
+         const boost::regex,
+         const Fmi::DirectoryMonitor::Status&) {},
+      [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+      },
+      10);
+  boost::thread task(
+      [&monitor, &started, &m, &c]()
+      {
+	std::unique_lock<std::mutex> lock(m);
+        started = true;
+        c.notify_all();
+	lock.unlock();
+        monitor.run();
+      });
 
+  BOOST_SCOPE_EXIT(&monitor, &task)
+  {
+    monitor.stop();
+    task.join();
+  }
+  BOOST_SCOPE_EXIT_END;
+
+  {
+    std::unique_lock<std::mutex> lock(m);
+    if (not started)
     {
-        std::unique_lock<std::mutex> lock(m);
-        if (not started) {
-            c.wait_for(lock, std::chrono::seconds(5), [&started]()->bool { return started; });
-        }
+      c.wait_for(lock, std::chrono::seconds(5), [&started]() -> bool { return started; });
     }
+  }
 
-    //const pt::ptime t1 = pt::microsec_clock::universal_time();
-    //std::cout << t1 - start << std::endl;
-    task.interrupt();
-    bool joined = task.try_join_for(boost::chrono::milliseconds(200));
-    if (!joined) {
-        TEST_FAILED("Interrupting request did not stop directory monitor");
-        monitor.stop();
-        task.join();
+  const pt::ptime t1 = pt::microsec_clock::universal_time();
+  // std::cout << t1 - start << std::endl;
+  task.interrupt();
+  bool joined = task.try_join_for(boost::chrono::milliseconds(1000));
+  if (joined)
+  {
+    const pt::ptime t2 = pt::microsec_clock::universal_time();
+    const auto dt = 1.0e-6 * (t2-t1).total_microseconds();
+    if (dt > 0.1)
+    {
+        std::cout << "\nStopping time dt seconds after interruption" << std::endl;
     }
+  }
+  else
+  {
+    const pt::ptime t2 = pt::microsec_clock::universal_time();
+    const auto dt = 1.0e-6 * (t2-t1).total_microseconds();
+    std::cout << "\nWait time " << dt << " seconds is too long" << std::endl;
+    TEST_FAILED("Interrupting request did not stop directory monitor");
+  }
 
-    TEST_PASSED();
+  TEST_PASSED();
+}
+
+void wait_until_ready_test_1()
+{
+  pt::ptime t2, t3;
+
+  do {
+    Fmi::DirectoryMonitor monitor;
+    monitor.watch(
+		  ".",
+		  [](Fmi::DirectoryMonitor::Watcher,
+		     const fs::path&,
+		     const boost::regex,
+		     const Fmi::DirectoryMonitor::Status&) {},
+		  [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
+		  },
+		  10);
+
+    boost::thread task([&monitor]() { monitor.run(); });
+    t2 = pt::microsec_clock::universal_time();
+
+    BOOST_SCOPE_EXIT(&monitor, &task)
+      {
+	monitor.stop();
+	task.join();
+      }
+    BOOST_SCOPE_EXIT_END;
+
+    bool ok = monitor.wait_until_ready();
+    if (not ok)
+      {
+	TEST_FAILED("Waiting for first scan returned false");
+      }
+  } while (false);
+
+  // Timing could be extremly unreliable especially in virtual machines
+  // (at least under Virtual Box)
+  t3 = pt::microsec_clock::universal_time();
+  const auto dt = (t3 - t2).total_milliseconds();
+  if (dt > 750) {
+    TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 750");
+  }
+
+  TEST_PASSED();
+}
+
+void wait_until_ready_test_2()
+{
+  static pt::ptime t1;
+
+  do {
+    Fmi::DirectoryMonitor monitor;
+    monitor.watch(
+		  ".",
+		  [](Fmi::DirectoryMonitor::Watcher,
+		     const fs::path&,
+		     const boost::regex,
+		     const Fmi::DirectoryMonitor::Status&) {},
+		  [](Fmi::DirectoryMonitor::Watcher, const fs::path&,
+		     const boost::regex&, const std::string&) {
+		  },
+		  10);
+
+    boost::thread task([&monitor]() { monitor.run(); });
+
+    BOOST_SCOPE_EXIT(&monitor, &task)
+      {
+	monitor.stop();
+	task.join();
+      }
+    BOOST_SCOPE_EXIT_END;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    t1 = boost::posix_time::microsec_clock::universal_time();
+
+    bool ok = monitor.wait_until_ready();
+    if (!ok)
+      {
+	TEST_FAILED("Monitor already ended. Should have returned false");
+      }
+  } while (false);
+
+  const auto t2 = boost::posix_time::microsec_clock::universal_time();
+  const auto dt = (t2 - t1).total_milliseconds();
+  if (dt > 250) {
+    TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 250");
+  }
+
+  TEST_PASSED();
 }
 
 // ----------------------------------------------------------------------
@@ -102,6 +230,8 @@ class tests : public tframe::tests
   {
     TEST(stopping_test);
     TEST(interruption_test);
+    TEST(wait_until_ready_test_1);
+    TEST(wait_until_ready_test_2);
   }
 
 };  // class tests
@@ -110,8 +240,9 @@ class tests : public tframe::tests
 
 int main(void)
 {
-  std::cout << std::endl << "DirectoryMonitor tester" << std::endl
-                         << "=======================" << std::endl;
+  std::cout << std::endl
+            << "DirectoryMonitor tester" << std::endl
+            << "=======================" << std::endl;
   DirectoryMonitorTests::tests t;
   return t.run();
 }

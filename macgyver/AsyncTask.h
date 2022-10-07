@@ -4,7 +4,6 @@
 #include <boost/thread.hpp>
 
 #include <atomic>
-#include <condition_variable>
 #include <mutex>
 
 namespace Fmi
@@ -21,7 +20,7 @@ class AsyncTask : private virtual boost::noncopyable
     interrupted
   };
 
-  typedef void notify_finished_t(const std::string&, Status);
+  using nodify_finished_t = void(const std::string&, Status);
 
   static bool silent;
 
@@ -63,8 +62,8 @@ class AsyncTask : private virtual boost::noncopyable
   void run(std::function<void()> task);
   void handle_result(Status stat, std::exception_ptr exc = nullptr);
   std::exception_ptr get_exception() const;
+  static void log_event_time(const AsyncTask* task, const std::string& desc);
 
- private:
   const std::string name;
   mutable std::mutex m1;
   std::atomic<Status> status;
@@ -72,5 +71,8 @@ class AsyncTask : private virtual boost::noncopyable
   const std::function<void()> notify;
   std::exception_ptr ex;
   boost::thread task_thread;
+
+public:
+  static bool log_time;
 };
 }  // namespace Fmi

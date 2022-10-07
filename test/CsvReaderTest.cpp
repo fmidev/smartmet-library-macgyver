@@ -1,9 +1,10 @@
 #include "CsvReader.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regression/tframe.h>
 
 using namespace std;
+using namespace boost::placeholders;
 
 namespace CsvReaderTest
 {
@@ -22,7 +23,8 @@ ostream& operator<<(ostream& os, const TableBuilder& tb)
     os << "Row " << row << ':';
     for (unsigned int col = 0; col < tb.table[row].size(); ++col)
     {
-      if (col > 0) os << ',';
+      if (col > 0)
+        os << ',';
       os << '"' << tb.table[row][col] << '"';
     }
     os << endl;
@@ -49,11 +51,16 @@ void trimming()
     TEST_FAILED("File should contain one row, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 5)
     TEST_FAILED("File should contain 5 fields, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != "1") TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
-  if (tb.table[0][1] != "2") TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
-  if (tb.table[0][2] != "3") TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
-  if (tb.table[0][3] != "4") TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
-  if (tb.table[0][4] != "5") TEST_FAILED("Field 5 should be '5', not '" + tb.table[0][4] + "'");
+  if (tb.table[0][0] != "1")
+    TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][1] != "2")
+    TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][2] != "3")
+    TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
+  if (tb.table[0][3] != "4")
+    TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
+  if (tb.table[0][4] != "5")
+    TEST_FAILED("Field 5 should be '5', not '" + tb.table[0][4] + "'");
 
   TEST_PASSED();
 }
@@ -71,11 +78,16 @@ void emptyfields()
     TEST_FAILED("File should contain one row, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 6)
     TEST_FAILED("File should contain 6 fields, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != "") TEST_FAILED("Field 1 should be '', not '" + tb.table[0][0] + "'");
-  if (tb.table[0][1] != "") TEST_FAILED("Field 2 should be '', not '" + tb.table[0][1] + "'");
-  if (tb.table[0][2] != "") TEST_FAILED("Field 3 should be '', not '" + tb.table[0][2] + "'");
-  if (tb.table[0][3] != "") TEST_FAILED("Field 4 should be '', not '" + tb.table[0][3] + "'");
-  if (tb.table[0][4] != "") TEST_FAILED("Field 5 should be '', not '" + tb.table[0][4] + "'");
+  if (tb.table[0][0] != "")
+    TEST_FAILED("Field 1 should be '', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][1] != "")
+    TEST_FAILED("Field 2 should be '', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][2] != "")
+    TEST_FAILED("Field 3 should be '', not '" + tb.table[0][2] + "'");
+  if (tb.table[0][3] != "")
+    TEST_FAILED("Field 4 should be '', not '" + tb.table[0][3] + "'");
+  if (tb.table[0][4] != "")
+    TEST_FAILED("Field 5 should be '', not '" + tb.table[0][4] + "'");
 
   TEST_PASSED();
 }
@@ -93,9 +105,12 @@ void quotes()
     TEST_FAILED("File should contain one row, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 3)
     TEST_FAILED("File should contain 3 fields, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != ",") TEST_FAILED("Field 1 should be ',', not '" + tb.table[0][0] + "'");
-  if (tb.table[0][1] != ",") TEST_FAILED("Field 2 should be ',', not '" + tb.table[0][1] + "'");
-  if (tb.table[0][2] != "") TEST_FAILED("Field 3 should be '', not '" + tb.table[0][2] + "'");
+  if (tb.table[0][0] != ",")
+    TEST_FAILED("Field 1 should be ',', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][1] != ",")
+    TEST_FAILED("Field 2 should be ',', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][2] != "")
+    TEST_FAILED("Field 3 should be '', not '" + tb.table[0][2] + "'");
 
   TEST_PASSED();
 }
@@ -132,7 +147,8 @@ void doublequotes()
     TEST_FAILED("File should contain 6 fields, not " + tostr(tb.table[0].size()));
   if (tb.table[0][0] != "\"a,b\"")
     TEST_FAILED("Field 1 should be '\"a,b\"', not '" + tb.table[0][0] + "'");
-  if (tb.table[0][1] != "") TEST_FAILED("Field 2 should be '', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][1] != "")
+    TEST_FAILED("Field 2 should be '', not '" + tb.table[0][1] + "'");
   if (tb.table[0][2] != " \"\" ")
     TEST_FAILED("Field 3 should be ' \"\" ', not '" + tb.table[0][2] + "'");
   if (tb.table[0][3] != "\"\" ")
@@ -162,7 +178,8 @@ void notrimming()
     TEST_FAILED("Field 1 should be ' a, b ,c ', not '" + tb.table[0][0] + "'");
   if (tb.table[0][1] != "a b  c")
     TEST_FAILED("Field 2 should be 'a b  c', not '" + tb.table[0][1] + "'");
-  if (tb.table[0][2] != "") TEST_FAILED("Field 3 should be '', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][2] != "")
+    TEST_FAILED("Field 3 should be '', not '" + tb.table[0][1] + "'");
 
   TEST_PASSED();
 }
@@ -230,7 +247,8 @@ void onefield()
     TEST_FAILED("File should contain one row, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 1)
     TEST_FAILED("File should contain 1 field, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != "a") TEST_FAILED("Field 1 should be 'a', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][0] != "a")
+    TEST_FAILED("Field 1 should be 'a', not '" + tb.table[0][0] + "'");
 
   TEST_PASSED();
 }
@@ -248,10 +266,14 @@ void fourfields()
     TEST_FAILED("File should contain one row, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 4)
     TEST_FAILED("File should contain 4 fields, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != "1") TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
-  if (tb.table[0][1] != "2") TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
-  if (tb.table[0][2] != "3") TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
-  if (tb.table[0][3] != "4") TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
+  if (tb.table[0][0] != "1")
+    TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][1] != "2")
+    TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][2] != "3")
+    TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
+  if (tb.table[0][3] != "4")
+    TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
 
   TEST_PASSED();
 }
@@ -283,7 +305,8 @@ void onequote()
     TEST_FAILED("File should contain one row, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 1)
     TEST_FAILED("File should contain 1 field, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != "abc") TEST_FAILED("Field 1 should be 'abc', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][0] != "abc")
+    TEST_FAILED("Field 1 should be 'abc', not '" + tb.table[0][0] + "'");
 
   TEST_PASSED();
 }
@@ -301,11 +324,16 @@ void semicolon()
     TEST_FAILED("File should contain one row, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 5)
     TEST_FAILED("File should contain 5 fields, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != "1") TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
-  if (tb.table[0][1] != "2") TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
-  if (tb.table[0][2] != "3") TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
-  if (tb.table[0][3] != "4") TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
-  if (tb.table[0][4] != "5") TEST_FAILED("Field 5 should be '5', not '" + tb.table[0][4] + "'");
+  if (tb.table[0][0] != "1")
+    TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][1] != "2")
+    TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][2] != "3")
+    TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
+  if (tb.table[0][3] != "4")
+    TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
+  if (tb.table[0][4] != "5")
+    TEST_FAILED("Field 5 should be '5', not '" + tb.table[0][4] + "'");
 
   TEST_PASSED();
 }
@@ -323,15 +351,23 @@ void comments()
     TEST_FAILED("File should contain two rows, not " + tostr(tb.table.size()));
   if (tb.table[0].size() != 5)
     TEST_FAILED("File should contain 5 fields, not " + tostr(tb.table[0].size()));
-  if (tb.table[0][0] != "1") TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
-  if (tb.table[0][1] != "2") TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
-  if (tb.table[0][2] != "3") TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
-  if (tb.table[0][3] != "4") TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
-  if (tb.table[0][4] != "5") TEST_FAILED("Field 5 should be '5', not '" + tb.table[0][4] + "'");
+  if (tb.table[0][0] != "1")
+    TEST_FAILED("Field 1 should be '1', not '" + tb.table[0][0] + "'");
+  if (tb.table[0][1] != "2")
+    TEST_FAILED("Field 2 should be '2', not '" + tb.table[0][1] + "'");
+  if (tb.table[0][2] != "3")
+    TEST_FAILED("Field 3 should be '3', not '" + tb.table[0][2] + "'");
+  if (tb.table[0][3] != "4")
+    TEST_FAILED("Field 4 should be '4', not '" + tb.table[0][3] + "'");
+  if (tb.table[0][4] != "5")
+    TEST_FAILED("Field 5 should be '5', not '" + tb.table[0][4] + "'");
 
-  if (tb.table[1][0] != "1") TEST_FAILED("Field 1 should be '1', not '" + tb.table[1][0] + "'");
-  if (tb.table[1][1] != "#") TEST_FAILED("Field 2 should be '#', not '" + tb.table[1][1] + "'");
-  if (tb.table[1][2] != "3") TEST_FAILED("Field 3 should be '3', not '" + tb.table[1][2] + "'");
+  if (tb.table[1][0] != "1")
+    TEST_FAILED("Field 1 should be '1', not '" + tb.table[1][0] + "'");
+  if (tb.table[1][1] != "#")
+    TEST_FAILED("Field 2 should be '#', not '" + tb.table[1][1] + "'");
+  if (tb.table[1][2] != "3")
+    TEST_FAILED("Field 3 should be '3', not '" + tb.table[1][2] + "'");
 
   TEST_PASSED();
 }

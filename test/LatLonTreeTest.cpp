@@ -67,7 +67,8 @@ void size()
 
 void empty()
 {
-  if (latlontree.empty()) TEST_FAILED("Test tree should not be empty");
+  if (latlontree.empty())
+    TEST_FAILED("Test tree should not be empty");
   TEST_PASSED();
 }
 
@@ -77,20 +78,24 @@ void nearest()
 {
   {
     auto ret = latlontree.nearest(Point(25, 60));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 25,60");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 25,60");
     if (ret->name != "Helsinki")
       TEST_FAILED("Closest point to 25,60 should be Helsinki, not " + ret->name);
   }
 
   {
     auto ret = latlontree.nearest(Point(0, 0));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 0,0");
-    if (ret->name != "Hanko") TEST_FAILED("Closest point to 0,0 should be Hanko, not " + ret->name);
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 0,0");
+    if (ret->name != "Hanko")
+      TEST_FAILED("Closest point to 0,0 should be Hanko, not " + ret->name);
   }
 
   {
     auto ret = latlontree.nearest(Point(25, 80));
-    if (!ret) TEST_FAILED("Failed to find nearest point for 25,80");
+    if (!ret)
+      TEST_FAILED("Failed to find nearest point for 25,80");
     if (ret->name != "Utsjoki")
       TEST_FAILED("Closest point to 25,80 should be Utsjoki, not " + ret->name);
   }
@@ -104,14 +109,16 @@ void farthest()
 {
   {
     auto ret = latlontree.farthest(Point(0, 0));
-    if (!ret) TEST_FAILED("Failed to find farthest point for 0,0");
+    if (!ret)
+      TEST_FAILED("Failed to find farthest point for 0,0");
     if (ret->name != "Utsjoki")
       TEST_FAILED("Farthest point to 0,0 should be Utsjoki, not " + ret->name);
   }
 
   {
     auto ret = latlontree.farthest(Point(25, 80));
-    if (!ret) TEST_FAILED("Failed to find farthest point for 25,80");
+    if (!ret)
+      TEST_FAILED("Failed to find farthest point for 25,80");
     if (ret->name != "Hanko")
       TEST_FAILED("Farthest point to 25,80 should be Hanko, not " + ret->name);
   }

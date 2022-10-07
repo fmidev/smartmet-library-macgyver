@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Exception.h"
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
 #include <chrono>
@@ -106,7 +107,8 @@ class Cache
   {
     Lock lock(mMutex);
 
-    if (mMaxSize == 0) return false;
+    if (mMaxSize == 0)
+      return false;
 
     TimeType now = ClockType::now();
     auto mapIt = mKeyTimeValueMap.find(key);
@@ -152,7 +154,7 @@ class Cache
     }
 
     if (mKeyTimeValueList.size() >= mMaxSize)
-      throw std::runtime_error("Object cache is still full after cleaning");
+      throw Fmi::Exception(BCP, "Object cache is still full after cleaning");
 
     mCacheStatistics.insertSuccess();
     TimeType evictionTime = now + duration;
@@ -211,12 +213,13 @@ class Cache
     // Move the object to the begin of the list (LRU).
     mKeyTimeValueList.splice(mKeyTimeValueList.begin(), mKeyTimeValueList, listIt);
     listIt = mKeyTimeValueList.begin();
-    if (listIt->first != key) throw std::runtime_error("Mixed keys after a splice of cache list");
+    if (listIt->first != key)
+      throw Fmi::Exception(BCP, "Mixed keys after a splice of cache list");
 
     // Update the reference of object to the map.
     mapIt = mKeyTimeValueMap.find(listIt->first);
     if (mapIt == mKeyTimeValueMap.end())
-      throw std::runtime_error("Map object not found after a splice of cache list");
+      throw Fmi::Exception(BCP, "Map object not found after a splice of cache list");
     mapIt->second = listIt;
 
     mCacheStatistics.hit();

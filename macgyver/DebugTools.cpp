@@ -4,6 +4,11 @@
 #include <iostream>
 #include <sstream>
 
+#include <fstream>
+#include <vector>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #ifndef _MSC_VER
 #include <sys/time.h>
 #endif
@@ -40,4 +45,35 @@ Fmi::ScopedTimer::~ScopedTimer()
 #else
   std::cout << "Fmi::ScopedTimer not implemented with Visual C++" << std::flush;
 #endif
+}
+
+Fmi::Redirecter::Redirecter(std::ostream& dest, std::ostream& src)
+    : src(src)
+{
+    src << std::flush;
+    sbuf = src.rdbuf(dest.rdbuf());
+}
+
+Fmi::Redirecter::~Redirecter()
+{
+    src << std::flush;
+    src.rdbuf(sbuf);
+}
+
+int Fmi::tracerPid()
+{
+#ifndef _MSC_VER
+    using namespace boost::algorithm;
+    std::string line;
+    std::ifstream input("/proc/self/status");
+    while (std::getline(input, line))
+    {
+        std::vector<std::string> parts;
+        split(parts, line, is_any_of(" \t\r\n"), token_compress_on);
+        if (parts.size() == 2 && parts[0] == "TracerPid:") {
+            return atoi(parts[1].c_str());
+        }
+    }
+#endif
+    return 0;
 }

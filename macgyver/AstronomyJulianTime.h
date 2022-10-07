@@ -22,15 +22,8 @@
 #pragma once
 
 #include "AstronomyHelperFunctions.h"
-
 #include <boost/date_time/local_time/local_time.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-
-using boost::gregorian::date;
-using boost::local_time::local_date_time;
-using boost::local_time::time_zone_ptr;
-using boost::posix_time::not_a_date_time;
-using boost::posix_time::ptime;
 
 namespace Fmi
 {
@@ -58,8 +51,13 @@ class JulianTime
    * Construction from a Julian day number
    */
   JulianTime(double jd_ = 0.0) : jd(jd_) {}
-  JulianTime(const JulianTime& other) : jd(other.jd) {}
-  JulianTime& operator = (const JulianTime& other) { jd = other.jd; return *this; }
+  JulianTime(const JulianTime& other) = default;
+  JulianTime& operator=(const JulianTime& other)
+  {
+    if (this != &other)
+      jd = other.jd;
+    return *this;
+  }
   bool operator==(const JulianTime& other) { return jd == other.jd; }
   bool operator!=(const JulianTime& other) { return jd != other.jd; }
   /*
@@ -69,18 +67,18 @@ class JulianTime
    *       at noon. The beginning of a Gregorian day is -12h on the earlier
    *       Julian day.
    */
-  JulianTime(const ptime& utc);
+  JulianTime(const boost::posix_time::ptime& utc);
 
   double JulianDay() const { return jd; }
   bool valid() const { return jd != 0.0; }
   /*
    * Convert to Gregorian UTC
    */
-  ptime ptime_utc() const;
+  boost::posix_time::ptime ptime_utc() const;
   /*
    * Convert to local Gregorian time
    */
-  local_date_time ldt(const time_zone_ptr& tz) const;
+  boost::local_time::local_date_time ldt(const boost::local_time::time_zone_ptr& tz) const;
 
   /* Back/forward 24hrs
    */
@@ -97,12 +95,14 @@ class JulianTime
 
   JulianTime& operator+=(double diff)
   {
-    if (jd != 0) jd += diff;
+    if (jd != 0)
+      jd += diff;
     return *this;
   }
   JulianTime& operator-=(double diff)
   {
-    if (jd != 0) jd -= diff;
+    if (jd != 0)
+      jd -= diff;
     return *this;
   }
 
@@ -146,7 +146,7 @@ class JulianTime
 /*
  * Solar noon for the given day at the given location on Earth
  */
-JulianTime SolNoon(const local_date_time& ldt, double lon_e);
+JulianTime SolNoon(const boost::local_time::local_date_time& ldt, double lon_e);
 
 /*
  * UTC of sunrise/sunset for the given day at the given location on Earth

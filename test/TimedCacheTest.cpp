@@ -12,9 +12,11 @@ namespace CacheTest
 void constructorDefault()
 {
   Fmi::TimedCache::Cache<std::string, std::string> cache;
-  if (cache.maxSize() != 10) TEST_FAILED("Default max size is not 10");
+  if (cache.maxSize() != 10)
+    TEST_FAILED("Default max size is not 10");
 
-  if (cache.size() != 0) TEST_FAILED("Default size is not 0");
+  if (cache.size() != 0)
+    TEST_FAILED("Default size is not 0");
 
   TEST_PASSED();
 }
@@ -25,7 +27,8 @@ void insertValues()
   Fmi::TimedCache::Cache<std::string, std::string> cache;
 
   cache.insert("0", "0");
-  if (cache.size() != 1) TEST_FAILED("After inserting one object to cache, size is not 1");
+  if (cache.size() != 1)
+    TEST_FAILED("After inserting one object to cache, size is not 1");
 
   for (auto item : valueList)
     cache.insert(item, item);
@@ -71,7 +74,8 @@ void findAndInsert(Fmi::TimedCache::Cache<std::string, std::string>& cache,
     const std::string key = boost::lexical_cast<std::string>(nbr);
     const std::string& value = key;
 
-    if (not cache.find(key)) cache.insert(key, value);
+    if (not cache.find(key))
+      cache.insert(key, value);
   }
 }
 
@@ -132,7 +136,8 @@ void timeEviction()
 
   cache.insert(valueList.front(), valueList.front());
   std::this_thread::sleep_for(std::chrono::microseconds(2100000));
-  if (cache.find(valueList.front())) TEST_FAILED("Time eviction failed: one object stored");
+  if (cache.find(valueList.front()))
+    TEST_FAILED("Time eviction failed: one object stored");
 
   for (auto item : valueList)
     cache.insert(item, item);
@@ -191,9 +196,11 @@ void cacheStatisticsInsertSuccess()
       timeLimitHigh < statistics.getConstructionTime())
     TEST_FAILED("CacheStatistics does not create construction time correctly.");
 
-  if (statistics.getHits() != 0) TEST_FAILED("CacheStatistics does not count hits correctly.");
+  if (statistics.getHits() != 0)
+    TEST_FAILED("CacheStatistics does not count hits correctly.");
 
-  if (statistics.getMisses() != 0) TEST_FAILED("CacheStatistics does not count misses correctly.");
+  if (statistics.getMisses() != 0)
+    TEST_FAILED("CacheStatistics does not count misses correctly.");
 
   if (statistics.getEvictions() != 0)
     TEST_FAILED("CacheStatistics does not count evictions correctly.");
@@ -218,7 +225,8 @@ void cacheStatisticsMisses()
   }
 
   auto statistics = cache.getCacheStatistics();
-  if (statistics.getHits() != 0) TEST_FAILED("CacheStatistics does not count hits correctly.");
+  if (statistics.getHits() != 0)
+    TEST_FAILED("CacheStatistics does not count hits correctly.");
 
   if (statistics.getMisses() != valueList.size())
     TEST_FAILED("CacheStatistics does not count misses correctly.");
@@ -250,7 +258,8 @@ void cacheStatisticsHits()
   if (statistics.getHits() != valueList.size())
     TEST_FAILED("CacheStatistics does not count hits correctly.");
 
-  if (statistics.getMisses() != 0) TEST_FAILED("CacheStatistics does not count misses correctly.");
+  if (statistics.getMisses() != 0)
+    TEST_FAILED("CacheStatistics does not count misses correctly.");
 
   if (statistics.getEvictions() != 0)
     TEST_FAILED("CacheStatistics does not count evictions correctly.");
@@ -285,9 +294,11 @@ void cacheStatisticsEvictions()
   cache.insert(valueList.front(), valueList.front());
 
   statistics = cache.getCacheStatistics();
-  if (statistics.getHits() != 0) TEST_FAILED("CacheStatistics does not count hits correctly.");
+  if (statistics.getHits() != 0)
+    TEST_FAILED("CacheStatistics does not count hits correctly.");
 
-  if (statistics.getMisses() != 0) TEST_FAILED("CacheStatistics does not count misses correctly.");
+  if (statistics.getMisses() != 0)
+    TEST_FAILED("CacheStatistics does not count misses correctly.");
 
   if (statistics.getEvictions() != 2)
     TEST_FAILED("CacheStatistics does not count evictions correctly (part 2).");
@@ -328,8 +339,7 @@ class tests : public tframe::tests
 int main(void)
 {
   using namespace std;
-  std::cout << endl << "TimedCache::Cache" << endl
-                    << "=================" << endl;
+  std::cout << endl << "TimedCache::Cache" << endl << "=================" << endl;
   CacheTest::tests t;
   return t.run();
 }

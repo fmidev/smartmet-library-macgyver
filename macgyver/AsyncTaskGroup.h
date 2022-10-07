@@ -7,10 +7,12 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <list>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <vector>
 
 namespace Fmi
 {
@@ -63,6 +65,24 @@ class AsyncTaskGroup : public boost::noncopyable
   std::size_t get_tasks_succeeded() const { return num_suceeded; }
 
   /**
+   *  @brief Get list of C++ exceptions that has caused async tasks to fail
+   *
+   *  Only last MAX_EXCEPTIONS entries are preserved
+   */
+  std::list<std::pair<std::string, std::exception_ptr> > get_exception_info() const;
+
+  /**
+   *  @brief Get list of C++ exceptions that has caused async tasks to fail and clear it
+   */
+  std::list<std::pair<std::string, std::exception_ptr> > get_and_clear_exception_info();
+
+  /**
+   *  @brief Dump information C++ about exceptions that has caused async tasks to fail
+   *         and clear exception info
+   */
+  void dump_and_clear_exception_info(std::ostream& os);
+
+  /**
    *  @brief Get number of failed tasks
    *
    *  Only those which has thrown an exception. Canceled tasks are not included
@@ -70,6 +90,11 @@ class AsyncTaskGroup : public boost::noncopyable
   std::size_t get_num_failures() const { return num_failed; }
 
   std::size_t get_num_active_tasks() const;
+
+  /**
+   *  @brief Get names of active tasks
+   */
+  std::vector<std::string> active_task_names() const;
 
   /**
    *  @brief Specifies callback to be called when task has ended succesfully
@@ -95,7 +120,6 @@ class AsyncTaskGroup : public boost::noncopyable
   bool wait_some();
   void on_task_completed_callback(std::size_t task_id);
 
- private:
   std::atomic_size_t counter;
   std::size_t max_paralell_tasks;
   mutable std::mutex m1;
@@ -108,5 +132,12 @@ class AsyncTaskGroup : public boost::noncopyable
   boost::signals2::signal<void(const std::string&)> signal_task_failed;
   std::atomic_bool stop_requested;
   std::atomic_bool stop_on_error_;
+
+  /**
+   *   @brief Information about exceptions that have caused termination of async tasks
+   */
+  std::list<std::pair<std::string, std::exception_ptr> > exception_info;
+
+  static constexpr std::size_t MAX_EXCEPTIONS = 100;
 };
 }  // namespace Fmi
