@@ -110,6 +110,18 @@ class Exception : public std::exception
 
   void printOn(std::ostream& out) const;
 
+ public:
+  class ForceStackTrace final
+  {
+  public:
+      ForceStackTrace();
+      ForceStackTrace(const ForceStackTrace&) = delete;
+      virtual ~ForceStackTrace();
+      ForceStackTrace& operator = (const ForceStackTrace&) = delete;
+  private:
+      bool prev;
+  };
+
  protected:
   ExceptionTimeStamp timestamp;
   std::string filename;
@@ -122,8 +134,7 @@ class Exception : public std::exception
   bool mLoggingDisabled = false;
   bool mStackTraceDisabled = false;
 
- public:
-  static std::atomic<bool> force_stack_trace;
+  static thread_local bool force_stack_trace;
 };
 
 std::ostream& operator << (std::ostream& out, const Exception& e);

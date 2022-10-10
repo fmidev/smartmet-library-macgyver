@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.8.9
+Version: 22.8.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Aug 23 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.8.23-1.fmi
+- Fmi::Exception update
+
 * Tue Aug  9 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.9-1.fmi
 - Automatic 10 retries for PostgreSQL connection open calls at 10 second intervals
 
