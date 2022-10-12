@@ -58,9 +58,9 @@ Exception Exception::SquashTrace(const char* _filename,
                                  const char* _function,
                                  std::string _message)
 {
-    Exception top(_filename, _line, _function, std::move(_message), nullptr);
-    const Fmi::Exception* first = top.getFirstException();
-    return *first;
+  Exception top(_filename, _line, _function, std::move(_message), nullptr);
+  const Fmi::Exception* first = top.getFirstException();
+  return *first;
 }
 
 Exception::Exception(const char* _filename,
@@ -315,7 +315,8 @@ Exception& Exception::disableStackTrace()
 Exception& Exception::disableStackTraceRecursive()
 {
   disableStackTrace();
-  if (prevException) {
+  if (prevException)
+  {
     prevException->disableStackTraceRecursive();
   }
   return *this;
@@ -328,12 +329,6 @@ std::string Exception::getStackTrace() const
 
   const Exception* e = this;
 
-  // Skip levels for which stack trace is disabled
-  while (e->getPrevException() && (!force_stack_trace && e->stackTraceDisabled()))
-  {
-    e = e->getPrevException();
-  }
-
   std::string out = fmt::format("\n{}{}{} #### {} #### {}{}{}\n\n",
                                 ANSI_BG_RED,
                                 ANSI_FG_WHITE,
@@ -343,21 +338,36 @@ std::string Exception::getStackTrace() const
                                 ANSI_FG_DEFAULT,
                                 ANSI_BG_DEFAULT);
 
+  // Skip levels when stack trace is disabled, but if there is detail/parameter information add the
+  // function info with the details and parameters. For example the WMS plugin may disable
+  // stack traces for user errors, but we still want to know the URI and the IP added by the
+  // top level exception. In general, any information added during the trace is likely to be
+  // of importance. Any less important information can be added directly to the error message
+  // using for example fmt::format.
+
+  bool last_ex_only = (!force_stack_trace && e->stackTraceDisabled());
+
   while (e != nullptr)
   {
-    out += fmt::format("{}{}EXCEPTION {}{}{}\n{} * Function   : {}{}\n{} * Location   : {}{}:{}\n",
-                       ANSI_FG_RED,
-                       ANSI_BOLD_ON,
-                       ANSI_BOLD_OFF,
-                       e->message,
-                       ANSI_FG_DEFAULT,
-                       ANSI_BOLD_ON,
-                       ANSI_BOLD_OFF,
-                       e->function,
-                       ANSI_BOLD_ON,
-                       ANSI_BOLD_OFF,
-                       e->filename,
-                       e->line);
+    // Print function information if not disabled or if there is extra information
+    bool print_func = (!last_ex_only || e->getDetailCount() > 0 || e->getParameterCount() > 0);
+    if (print_func)
+    {
+      out +=
+          fmt::format("{}{}EXCEPTION {}{}{}\n{} * Function   : {}{}\n{} * Location   : {}{}:{}\n",
+                      ANSI_FG_RED,
+                      ANSI_BOLD_ON,
+                      ANSI_BOLD_OFF,
+                      e->message,
+                      ANSI_FG_DEFAULT,
+                      ANSI_BOLD_ON,
+                      ANSI_BOLD_OFF,
+                      e->function,
+                      ANSI_BOLD_ON,
+                      ANSI_BOLD_OFF,
+                      e->filename,
+                      e->line);
+    }
 
     size_t size = e->detailVector.size();
     if (size > 0)
@@ -466,12 +476,13 @@ void Exception::printError() const
 
 void Exception::printOn(std::ostream& out) const
 {
-  if (force_stack_trace || !loggingDisabled()) {
+  if (force_stack_trace || !loggingDisabled())
+  {
     out << getStackTrace();
   }
 }
 
-std::ostream& operator << (std::ostream& out, const Exception& e)
+std::ostream& operator<<(std::ostream& out, const Exception& e)
 {
   e.printOn(out);
   return out;
@@ -479,13 +490,13 @@ std::ostream& operator << (std::ostream& out, const Exception& e)
 
 Exception::ForceStackTrace::ForceStackTrace()
 {
-    prev = true;
-    std::swap(force_stack_trace, prev);
+  prev = true;
+  std::swap(force_stack_trace, prev);
 }
 
 Exception::ForceStackTrace::~ForceStackTrace()
 {
-    force_stack_trace = prev;
+  force_stack_trace = prev;
 }
 
 }  // namespace Fmi
@@ -494,9 +505,12 @@ void Fmi::ignore_exceptions()
 {
   if (std::current_exception())
   {
-    try {
+    try
+    {
       throw;
-    } catch (const::boost::thread_interrupted&) {
+    }
+    catch (const ::boost::thread_interrupted&)
+    {
       throw;
     }
   }
