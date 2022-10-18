@@ -30,6 +30,21 @@
 
 #include "CacheStats.h"
 
+#ifdef _MSC_VER
+// Cache.h is included at very low level every where.
+// In Visual C++ on Win32 'side' of code there are macro definitions for min and max that will 
+// generate tons of compiler errors all around Win32 codes, unless these macros are undefined here.
+// In this header there is a lot of calls for with std::numeric_limits<type>::max() which will
+// generate the error if max(x,y) type macro is defined before including this header.
+// min/max macros have to be pushed into stack, so that they can be later restored
+#pragma push_macro("max")
+#pragma push_macro("min")
+#ifdef max
+#undef max
+#undef min
+#endif  // max
+#endif  // _MSC_VER
+
 namespace Fmi
 {
 namespace Cache
@@ -1596,3 +1611,8 @@ class FileCache : boost::noncopyable
 }  // namespace Cache
 
 }  // namespace Fmi
+
+#ifdef _MSC_VER
+#pragma pop_macro("max")
+#pragma pop_macro("min")
+#endif  // _MSC_VER

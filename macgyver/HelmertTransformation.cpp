@@ -5,10 +5,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#ifdef _MSC_VER
-#define __PRETTY_FUNCTION__ BOOST_CURRENT_FUNCTION
-#endif
-
 Fmi::HelmertTransformation::HelmertTransformation() : m(1), ex(0), ey(0), ez(0), tx(0), ty(0), tz(0)
 {
 }

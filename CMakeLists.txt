@@ -10,6 +10,8 @@ file(
 
 list(
     REMOVE_ITEM SOURCE_FILES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/CharsetConverter.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/CharsetConverter.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateFormatter.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateFormatter.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateFormatterMT.h"
@@ -20,6 +22,10 @@ list(
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/TemplateFactory.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/PostgreSQLConnection.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/PostgreSQLConnection.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/ValueFormatter.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/ValueFormatter.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/AsyncTaskGroup.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/macgyver/AsyncTaskGroup.cpp"
     )
 
 add_library( 
