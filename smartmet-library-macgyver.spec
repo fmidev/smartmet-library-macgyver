@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 22.10.12
+Version: 22.10.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Oct 20 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.10.20-1.fmi
+- Fixed exception mechanisim to always print the first exception
+
 * Wed Oct 12 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.10.12-1.fmi
 - Improved exception mechanism to print extra details even when a full stack trace has been disabled
 
