@@ -3,7 +3,6 @@
 #include "TypeName.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/variant.hpp>
 #include <fmt/format.h>
 #include <cassert>
@@ -125,7 +124,18 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
   try
   {
     itsConnectionOptions = theConnectionOptions;
+    return reopen();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
 
+bool PostgreSQLConnection::reopen() const
+{
+  try
+  {
     close();
 
     const std::string conn_str = itsConnectionOptions;
@@ -137,7 +147,7 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
     {
       try
       {
-        itsConnection = boost::make_shared<pqxx::connection>(conn_str);
+        itsConnection = std::make_shared<pqxx::connection>(conn_str);
         /*
           if(PostgreSQL > 9.1)
           itsCollate = true;
@@ -186,20 +196,7 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
   }
 }
 
-bool PostgreSQLConnection::reopen()
-{
-  try
-  {
-    close();
-    return open(itsConnectionOptions);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-void PostgreSQLConnection::close()
+void PostgreSQLConnection::close() const
 {
   try
   {
@@ -325,7 +322,7 @@ void PostgreSQLConnection::setClientEncoding(const std::string& theEncoding)
 void PostgreSQLConnection::check_connection() const
 {
   if (!itsConnection)
-    throw Fmi::Exception(BCP, "Not connected");
+    reopen();
 }
 
 PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn) : conn(conn)
@@ -335,7 +332,7 @@ PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn) : con
     if (conn.itsTransaction)
       throw Fmi::Exception(BCP, "Recursive transactions are not supported");
 
-    conn.itsTransaction = boost::make_shared<pqxx::work>(*conn.itsConnection);
+    conn.itsTransaction = std::make_shared<pqxx::work>(*conn.itsConnection);
   }
   catch (...)
   {
