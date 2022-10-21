@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <memory>
 #include <pqxx/pqxx>
 #include <string>
 
@@ -53,17 +54,20 @@ class PostgreSQLConnection
     PostgreSQLConnection& conn;
   };
 
-  ~PostgreSQLConnection() { close(); }
-  PostgreSQLConnection(bool theDebug = false) : itsDebug(theDebug), itsCollate(false) {}
+  ~PostgreSQLConnection() = default;
+  PostgreSQLConnection(bool theDebug = false);
   PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions);
 
   bool open(const PostgreSQLConnectionOptions& theConnectionOptions);
   bool reopen() const;
 
   void close() const;
-  bool isConnected() const { return itsConnection->is_open(); }
+  bool isConnected() const;
+  bool isTransaction() const;
+  void startTransaction() const;
+  void endTransaction() const;
   void setClientEncoding(const std::string& theEncoding);
-  void setDebug(bool debug) { itsDebug = debug; }
+  void setDebug(bool debug);
   pqxx::result executeNonTransaction(const std::string& theSQLStatement) const;
 
   /**
@@ -73,22 +77,16 @@ class PostgreSQLConnection
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
-  bool collateSupported() { return itsCollate; }
+  bool collateSupported() const;
   std::string quote(const std::string& theString) const;
-  const std::map<unsigned int, std::string>& dataTypes() const { return itsDataTypes; }
+  const std::map<unsigned int, std::string>& dataTypes() const;
 
-  std::shared_ptr<Transaction> transaction() { return std::make_shared<Transaction>(*this); }
-
- private:
-  void check_connection() const;
+  std::shared_ptr<Transaction> transaction() const;
 
  private:
-  mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
-  std::shared_ptr<pqxx::work> itsTransaction;               // PostgreSQL transaction
-  bool itsDebug = false;
-  bool itsCollate = false;
-  PostgreSQLConnectionOptions itsConnectionOptions;
-  mutable std::map<unsigned int, std::string> itsDataTypes;
+  class Impl;
+  std::unique_ptr<Impl> impl;
+
 };  // class PostgreSQLConnection
 
 }  // namespace Database
