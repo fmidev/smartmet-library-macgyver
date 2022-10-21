@@ -350,7 +350,9 @@ std::string Exception::getStackTrace() const
   while (e != nullptr)
   {
     // Print function information if not disabled or if there is extra information
-    bool print_func = (!last_ex_only || e->getDetailCount() > 0 || e->getParameterCount() > 0);
+    bool is_last_ex = (e->prevException.get() == nullptr);
+    bool print_func =
+        (!last_ex_only || is_last_ex || e->getDetailCount() > 0 || e->getParameterCount() > 0);
     if (print_func)
     {
       out +=
