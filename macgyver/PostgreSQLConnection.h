@@ -63,9 +63,6 @@ class PostgreSQLConnection
 
   void close() const;
   bool isConnected() const;
-  bool isTransaction() const;
-  void startTransaction() const;
-  void endTransaction() const;
   void setClientEncoding(const std::string& theEncoding);
   void setDebug(bool debug);
   pqxx::result executeNonTransaction(const std::string& theSQLStatement) const;
@@ -84,6 +81,10 @@ class PostgreSQLConnection
   std::shared_ptr<Transaction> transaction() const;
 
  private:
+  bool isTransaction() const;
+  void startTransaction() const;
+  void endTransaction() const;
+
   class Impl;
   std::unique_ptr<Impl> impl;
 
