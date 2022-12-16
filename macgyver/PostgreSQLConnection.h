@@ -38,7 +38,7 @@ class PostgreSQLConnection
   {
    public:
     ~Transaction();
-    Transaction(PostgreSQLConnection& conn);
+    Transaction(const PostgreSQLConnection& theConnection);
 
     Transaction() = delete;
     Transaction(const Transaction& other) = delete;
@@ -51,10 +51,10 @@ class PostgreSQLConnection
     void rollback();
 
    private:
-    PostgreSQLConnection& conn;
+    const PostgreSQLConnection& conn;
   };
 
-  ~PostgreSQLConnection() = default;
+  ~PostgreSQLConnection();
   PostgreSQLConnection(bool theDebug = false);
   PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions);
 
@@ -64,6 +64,7 @@ class PostgreSQLConnection
   void close() const;
   bool isConnected() const;
   void setClientEncoding(const std::string& theEncoding);
+  bool isDebug() const;
   void setDebug(bool debug);
   pqxx::result executeNonTransaction(const std::string& theSQLStatement) const;
 
@@ -84,6 +85,7 @@ class PostgreSQLConnection
   bool isTransaction() const;
   void startTransaction() const;
   void endTransaction() const;
+  void commitTransaction() const;
 
   class Impl;
   std::unique_ptr<Impl> impl;

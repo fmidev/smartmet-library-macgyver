@@ -110,6 +110,14 @@ PostgreSQLConnectionOptions::operator std::string() const
 
 class PostgreSQLConnection::Impl
 {
+ private:
+  mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
+  std::shared_ptr<pqxx::work> itsTransaction;               // PostgreSQL transaction
+  bool itsDebug = false;
+  bool itsCollate = false;
+  PostgreSQLConnectionOptions itsConnectionOptions;
+  mutable std::map<unsigned int, std::string> itsDataTypes;
+
  public:
   ~Impl() { close(); }
 
@@ -131,6 +139,8 @@ class PostgreSQLConnection::Impl
 
   void startTransaction() { itsTransaction = std::make_shared<pqxx::work>(*itsConnection); }
   void endTransaction() { itsTransaction.reset(); }
+  void commitTransaction() { itsTransaction->commit(); }
+  void exec(const std::string& sql) { itsTransaction->exec(sql); }
 
   void cancel()
   {
@@ -143,6 +153,7 @@ class PostgreSQLConnection::Impl
   bool collateSupported() const { return itsCollate; }
   const std::map<unsigned int, std::string>& dataTypes() const { return itsDataTypes; }
 
+  bool isDebug() const { return itsDebug; }
   void setDebug(bool debug) { itsDebug = debug; }
 
   void check_connection() const
@@ -238,6 +249,8 @@ class PostgreSQLConnection::Impl
 
         return itsConnection->is_open();
       }
+
+      return false;
     }
     catch (...)
     {
@@ -302,14 +315,6 @@ class PostgreSQLConnection::Impl
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
-
- private:
-  mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
-  std::shared_ptr<pqxx::work> itsTransaction;               // PostgreSQL transaction
-  bool itsDebug = false;
-  bool itsCollate = false;
-  PostgreSQLConnectionOptions itsConnectionOptions;
-  mutable std::map<unsigned int, std::string> itsDataTypes;
 };
 
 // ----------------------------------------------------------------------
@@ -323,7 +328,7 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
 {
   try
   {
-    impl->open(theConnectionOptions);
+    return impl->open(theConnectionOptions);
   }
   catch (...)
   {
@@ -335,7 +340,7 @@ bool PostgreSQLConnection::reopen() const
 {
   try
   {
-    impl->reopen();
+    return impl->reopen();
   }
   catch (...)
   {
@@ -359,7 +364,7 @@ std::string PostgreSQLConnection::quote(const std::string& theString) const
 {
   try
   {
-    impl->quote(theString);
+    return impl->quote(theString);
   }
   catch (...)
   {
@@ -426,6 +431,11 @@ void PostgreSQLConnection::setDebug(bool debug)
   impl->setDebug(debug);
 }
 
+bool PostgreSQLConnection::isDebug() const
+{
+  return impl->isDebug();
+}
+
 bool PostgreSQLConnection::collateSupported() const
 {
   return impl->collateSupported();
@@ -456,9 +466,17 @@ void PostgreSQLConnection::endTransaction() const
   impl->endTransaction();
 }
 
+void PostgreSQLConnection::commitTransaction() const
+{
+  impl->commitTransaction();
+}
+
+PostgreSQLConnection::~PostgreSQLConnection() = default;
+
 // ----------------------------------------------------------------------
 
-PostgreSQLConnection::Transaction::Transaction(PostgreSQLConnection& conn) : conn(conn)
+PostgreSQLConnection::Transaction::Transaction(const PostgreSQLConnection& theConnection)
+    : conn(theConnection)
 {
   try
   {
@@ -482,13 +500,13 @@ pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQ
 {
   try
   {
-    if (conn.itsTransaction)
+    if (conn.isTransaction())
     {
-      if (conn.itsDebug)
+      if (conn.isDebug())
       {
         std::cout << "SQL: " << theSQLStatement << std::endl;
       }
-      return conn.itsTransaction->exec(theSQLStatement);
+      return conn.execute(theSQLStatement);
     }
 
     throw Fmi::Exception(BCP, "[Logic error] Called after transaction commit or rollback");
@@ -503,17 +521,17 @@ void PostgreSQLConnection::Transaction::commit()
 {
   try
   {
-    if (conn.itsTransaction)
+    if (conn.isTransaction())
     {
       try
       {
-        conn.itsTransaction->commit();
-        conn.itsTransaction.reset();
+        conn.commitTransaction();
+        conn.endTransaction();
       }
       catch (const std::exception& e)
       {
         // If we get here, Xaction has been rolled back
-        conn.itsTransaction.reset();
+        conn.endTransaction();
         throw Fmi::Exception(BCP, std::string("Commiting transaction failed: ").append(e.what()));
       }
     }
@@ -534,9 +552,9 @@ void PostgreSQLConnection::Transaction::rollback()
 {
   try
   {
-    if (conn.itsTransaction)
+    if (conn.isTransaction())
     {
-      conn.itsTransaction.reset();
+      conn.endTransaction();
     }
     else
     {
