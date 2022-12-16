@@ -6,9 +6,7 @@
 
 #pragma once
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <list>
+#include <memory>
 #include <pqxx/pqxx>
 #include <string>
 
@@ -36,30 +34,38 @@ struct PostgreSQLConnectionOptions
 class PostgreSQLConnection
 {
  public:
-  class Transaction final : public virtual boost::noncopyable
+  class Transaction final
   {
    public:
-    Transaction(PostgreSQLConnection& conn);
     ~Transaction();
+    Transaction(const PostgreSQLConnection& theConnection);
+
+    Transaction() = delete;
+    Transaction(const Transaction& other) = delete;
+    Transaction& operator=(const Transaction& other) = delete;
+    Transaction(Transaction&& other) = delete;
+    Transaction& operator=(Transaction&& other) = delete;
+
     pqxx::result execute(const std::string& theSQLStatement) const;
     void commit();
     void rollback();
 
    private:
-    PostgreSQLConnection& conn;
+    const PostgreSQLConnection& conn;
   };
 
-  ~PostgreSQLConnection() { close(); }
-  PostgreSQLConnection(bool theDebug = false) : itsDebug(theDebug), itsCollate(false) {}
+  ~PostgreSQLConnection();
+  PostgreSQLConnection(bool theDebug = false);
   PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions);
 
   bool open(const PostgreSQLConnectionOptions& theConnectionOptions);
-  bool reopen();
+  bool reopen() const;
 
-  void close();
-  bool isConnected() const { return itsConnection->is_open(); }
+  void close() const;
+  bool isConnected() const;
   void setClientEncoding(const std::string& theEncoding);
-  void setDebug(bool debug) { itsDebug = debug; }
+  bool isDebug() const;
+  void setDebug(bool debug);
   pqxx::result executeNonTransaction(const std::string& theSQLStatement) const;
 
   /**
@@ -69,21 +75,21 @@ class PostgreSQLConnection
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
-  bool collateSupported() { return itsCollate; }
+  bool collateSupported() const;
   std::string quote(const std::string& theString) const;
-  const std::map<unsigned int, std::string>& dataTypes() const { return itsDataTypes; }
+  const std::map<unsigned int, std::string>& dataTypes() const;
 
-  std::shared_ptr<Transaction> transaction() { return std::make_shared<Transaction>(*this); }
+  std::shared_ptr<Transaction> transaction() const;
 
  private:
-  void check_connection() const;
- private:
-  boost::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
-  boost::shared_ptr<pqxx::work> itsTransaction;       // PostgreSQL transaction
-  bool itsDebug = false;
-  bool itsCollate = false;
-  PostgreSQLConnectionOptions itsConnectionOptions;
-  std::map<unsigned int, std::string> itsDataTypes;
+  bool isTransaction() const;
+  void startTransaction() const;
+  void endTransaction() const;
+  void commitTransaction() const;
+
+  class Impl;
+  std::unique_ptr<Impl> impl;
+
 };  // class PostgreSQLConnection
 
 }  // namespace Database
