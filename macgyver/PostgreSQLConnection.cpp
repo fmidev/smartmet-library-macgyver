@@ -41,6 +41,8 @@ const std::map<std::string, boost::variant<Ignore, uint_member_ptr, string_membe
 
 // ----------------------------------------------------------------------
 
+std::atomic<bool> PostgreSQLConnection::shuttingDown(false);
+
 PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn_str)
 {
   try
@@ -200,10 +202,15 @@ class PostgreSQLConnection::Impl
       const std::string conn_str = itsConnectionOptions;
 
       std::string error_message;
-      // Retriy connections automatically. Especially useful after boots if the database is in the
+      // Retry connections automatically. Especially useful after boots if the database is in the
       // same server.
       for (auto retries = 10; retries > 0; --retries)
       {
+        // Ignore connection requests if shutting down application
+        if (shuttingDown.load()) {
+          return false;
+        }
+
         try
         {
           itsConnection = std::make_shared<pqxx::connection>(conn_str);

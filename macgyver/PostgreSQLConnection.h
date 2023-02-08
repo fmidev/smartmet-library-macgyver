@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <memory>
 #include <pqxx/pqxx>
 #include <string>
@@ -81,6 +82,13 @@ class PostgreSQLConnection
 
   std::shared_ptr<Transaction> transaction() const;
 
+  /**
+   *   @brief Notifies all PostgreSQL objects that application shutdown is in progress
+   *
+   *   Note that this call cannot be undone without restarting application
+   */
+  static void shutdownAll() { shuttingDown.store(true); }
+
  private:
   bool isTransaction() const;
   void startTransaction() const;
@@ -89,6 +97,8 @@ class PostgreSQLConnection
 
   class Impl;
   std::unique_ptr<Impl> impl;
+
+  static std::atomic<bool> shuttingDown;
 
 };  // class PostgreSQLConnection
 
