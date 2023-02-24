@@ -89,6 +89,11 @@ class PostgreSQLConnection
    */
   static void shutdownAll() { shuttingDown.store(true); }
 
+  /**
+   *   @brief Disable reconnect attempts for all PostgreSQL objects (for use in tests)
+   */
+    static void disableReconnect() { reconnectDisabled.store(true); }
+
  private:
   bool isTransaction() const;
   void startTransaction() const;
@@ -99,6 +104,7 @@ class PostgreSQLConnection
   std::unique_ptr<Impl> impl;
 
   static std::atomic<bool> shuttingDown;
+  static std::atomic<bool> reconnectDisabled;
 
 };  // class PostgreSQLConnection
 

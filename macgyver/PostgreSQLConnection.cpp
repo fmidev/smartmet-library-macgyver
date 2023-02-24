@@ -3,12 +3,13 @@
 #include "TypeName.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
 #include <boost/variant.hpp>
 #include <fmt/format.h>
+#include <macgyver/TypeName.h>
 #include <cassert>
 #include <iostream>
 #include <sstream>
-#include <thread>
 #include <vector>
 
 namespace ba = boost::algorithm;
@@ -42,6 +43,7 @@ const std::map<std::string, boost::variant<Ignore, uint_member_ptr, string_membe
 // ----------------------------------------------------------------------
 
 std::atomic<bool> PostgreSQLConnection::shuttingDown(false);
+std::atomic<bool> PostgreSQLConnection::reconnectDisabled(false);
 
 PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn_str)
 {
@@ -117,6 +119,7 @@ class PostgreSQLConnection::Impl
   std::shared_ptr<pqxx::work> itsTransaction;               // PostgreSQL transaction
   bool itsDebug = false;
   bool itsCollate = false;
+  std::atomic<bool> itsCanceled;
   PostgreSQLConnectionOptions itsConnectionOptions;
   mutable std::map<unsigned int, std::string> itsDataTypes;
 
@@ -126,13 +129,16 @@ class PostgreSQLConnection::Impl
   Impl(bool debug) : itsDebug(debug) {}
 
   Impl(const PostgreSQLConnectionOptions& theConnectionOptions)
-      : itsDebug(theConnectionOptions.debug), itsConnectionOptions(theConnectionOptions)
+      : itsDebug(theConnectionOptions.debug)
+      , itsCanceled(false)
+      , itsConnectionOptions(theConnectionOptions)
   {
     open(itsConnectionOptions);
   }
 
   bool open(const PostgreSQLConnectionOptions& theConnectionOptions)
   {
+    itsCanceled.store(false);
     itsConnectionOptions = theConnectionOptions;
     return reopen();
   }
@@ -147,7 +153,10 @@ class PostgreSQLConnection::Impl
   void cancel()
   {
     if (itsConnection)
+    {
+      itsCanceled.store(true);
       itsConnection->cancel_query();
+    }
   }
 
   void close() const { itsConnection.reset(); }
@@ -161,7 +170,16 @@ class PostgreSQLConnection::Impl
   void check_connection() const
   {
     if (!itsConnection || !isConnected())
-      reopen();
+    {
+      if (reconnectDisabled.load() || itsCanceled.load())
+      {
+        throw Fmi::Exception(BCP, METHOD_NAME + ": not connected and reconnecting is disabled or connection canceled");
+      }
+      else
+      {
+        reopen();
+      }
+    }
   }
 
   void setClientEncoding(const std::string& theEncoding)
@@ -207,8 +225,9 @@ class PostgreSQLConnection::Impl
       for (auto retries = 10; retries > 0; --retries)
       {
         // Ignore connection requests if shutting down application
-        if (shuttingDown.load()) {
-          return false;
+        if (shuttingDown.load())
+        {
+          throw Fmi::Exception(BCP, METHOD_NAME + ": connecting to database disabled due to shutdown");
         }
 
         try
@@ -222,12 +241,17 @@ class PostgreSQLConnection::Impl
         }
         catch (const pqxx::broken_connection& e)
         {
-          if (retries > 0)
+          if (reconnectDisabled.load())
+          {
+            // Should not try to reconnect (rethrown current exception)
+            throw;
+          }
+          else if (retries > 0)
           {
             std::string msg = e.what();
             boost::algorithm::replace_all(msg, "\n", " ");
             std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
-            std::this_thread::sleep_for(std::chrono::seconds(10));
+            boost::this_thread::sleep_for(boost::chrono::seconds(10));
           }
           else
             error_message = e.what();
