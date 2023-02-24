@@ -6,7 +6,6 @@
 #include <boost/thread.hpp>
 #include <boost/variant.hpp>
 #include <fmt/format.h>
-#include <macgyver/TypeName.h>
 #include <cassert>
 #include <iostream>
 #include <sstream>
