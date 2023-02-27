@@ -15,7 +15,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 23.2.27
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Feb 27 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.27-2.fmi
+- Fmi::WorkerPool<T>: add method cancel()
+
 * Mon Feb 27 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.27-1.fmi
 - PostgreSQLConnection: improve shutdown,cancel and also test run support
 
