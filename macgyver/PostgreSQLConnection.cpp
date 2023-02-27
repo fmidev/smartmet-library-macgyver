@@ -121,6 +121,8 @@ class PostgreSQLConnection::Impl
   std::atomic<bool> itsCanceled;
   PostgreSQLConnectionOptions itsConnectionOptions;
   mutable std::map<unsigned int, std::string> itsDataTypes;
+  mutable boost::condition_variable cond;
+  mutable boost::mutex m;
 
  public:
   ~Impl() { close(); }
@@ -155,6 +157,8 @@ class PostgreSQLConnection::Impl
     {
       itsCanceled.store(true);
       itsConnection->cancel_query();
+      boost::unique_lock<boost::mutex> lock(m);
+      cond.notify_one();
     }
   }
 
@@ -250,7 +254,10 @@ class PostgreSQLConnection::Impl
             std::string msg = e.what();
             boost::algorithm::replace_all(msg, "\n", " ");
             std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
-            boost::this_thread::sleep_for(boost::chrono::seconds(10));
+            boost::unique_lock<boost::mutex> lock(m);
+            if (! shuttingDown.load()) {
+                cond.wait_for(lock, boost::chrono::seconds(10));
+            }
           }
           else
             error_message = e.what();
