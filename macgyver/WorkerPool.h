@@ -157,6 +157,14 @@ namespace Fmi
           return num_reserved;
       }
 
+      void cancel()
+      {
+          boost::unique_lock<boost::mutex> lock(pm_cond);
+          for (auto& item : items) {
+              item.ptr->cancel();
+          }
+      }
+
   private:
       void release(typename std::list<PoolItem>::iterator it)
       {

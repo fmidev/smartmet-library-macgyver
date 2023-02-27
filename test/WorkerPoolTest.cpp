@@ -1,6 +1,7 @@
 #include "WorkerPool.h"
 #include "Exception.h"
 #include <chrono>
+#include <condition_variable>
 #include <thread>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/optional/optional_io.hpp>
@@ -48,6 +49,33 @@ namespace {
 
         int x;
     };
+
+    struct Test3
+    {
+        static int num_failed;
+        std::condition_variable cond;
+        std::mutex m;
+        bool canceled;
+
+        Test3() : canceled(false) {}
+
+        void test()
+        {
+            std::unique_lock<std::mutex> lock(m);
+            if (cond.wait_for(lock, std::chrono::seconds(5)) == std::cv_status::timeout) {
+                num_failed++;
+            }
+        }
+
+        void cancel()
+        {
+            std::unique_lock<std::mutex> lock(m);
+            canceled = true;
+            cond.notify_one();
+        }
+    };
+
+    int Test3::num_failed = 0;
 }
 
 BOOST_AUTO_TEST_CASE(simple)
@@ -136,6 +164,18 @@ BOOST_AUTO_TEST_CASE(parallel_2)
     BOOST_CHECK_EQUAL(int(pool.get_max_reached_pool_size()), 2);
 }
 
+BOOST_AUTO_TEST_CASE(test_canceling_operation)
+{
+    BOOST_TEST_MESSAGE("+ Test canceling operation");
+    Fmi::WorkerPool<Test3> pool(10, 10);
+    std::thread t1([&pool]() { pool.reserve()->test(); });
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    pool.cancel();
+    t1.join();
+    pool.shutdown();
+    BOOST_REQUIRE_EQUAL(Test3::num_failed, 0);
+}
+
 #if 0
 // Tests that failure to release object causes SIGABRT [test disabled]
 BOOST_AUTO_TEST_CASE(failure_to_release_object)
@@ -143,5 +183,13 @@ BOOST_AUTO_TEST_CASE(failure_to_release_object)
     static std::shared_ptr<SlowAdd> dummy;
     Fmi::WorkerPool<SlowAdd> pool(2, 2);
     dummy = pool.reserve();
+}
+#endif
+
+#if 0
+BOOST_AUTO_TEST_CASE(nocompile_1)
+{
+    Fmi::WorkerPool<SlowAdd> pool(10, 10);
+    pool.cancel();
 }
 #endif
