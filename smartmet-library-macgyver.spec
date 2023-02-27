@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.2.8
+Version: 23.2.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Feb 27 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.27-1.fmi
+- PostgreSQLConnection: improve shutdown,cancel and also test run support
+
 * Wed Feb  8 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.8-1.fmi
 - PostgreSQLConnection: new static method shutdownAll
 
