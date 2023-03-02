@@ -115,7 +115,7 @@ class PostgreSQLConnection::Impl
 {
  private:
   mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
-  std::shared_ptr<pqxx::work> itsTransaction;               // PostgreSQL transaction
+  mutable std::shared_ptr<pqxx::work> itsTransaction;       // PostgreSQL transaction
   bool itsDebug = false;
   bool itsCollate = false;
   std::atomic<bool> itsCanceled;
@@ -123,6 +123,8 @@ class PostgreSQLConnection::Impl
   mutable std::map<unsigned int, std::string> itsDataTypes;
   mutable boost::condition_variable cond;
   mutable boost::mutex m;
+
+  mutable bool last_failed = false;
 
  public:
   ~Impl() { close(); }
@@ -141,14 +143,41 @@ class PostgreSQLConnection::Impl
   {
     itsCanceled.store(false);
     itsConnectionOptions = theConnectionOptions;
-    return reopen();
+    last_failed = false;
+    return bool(reopen());
   }
 
   bool isTransaction() const { return !!itsTransaction; }
 
-  void startTransaction() { itsTransaction = std::make_shared<pqxx::work>(*itsConnection); }
-  void endTransaction() { itsTransaction.reset(); }
-  void commitTransaction() { itsTransaction->commit(); }
+  void startTransaction()
+  {
+     auto conn = check_connection();
+     if (conn)
+     {
+        itsTransaction = std::make_shared<pqxx::work>(*conn);
+     }
+     else
+     {
+        Fmi::Exception(BCP, METHOD_NAME + ": cannot start transaction (not connected)");
+     }
+  }
+
+  void endTransaction()
+  {
+    if (itsTransaction)
+      itsTransaction.reset();
+    else
+      throw Fmi::Exception(BCP, "Not in transaction");
+  }
+
+  void commitTransaction()
+  {
+    if (itsTransaction)
+      itsTransaction->commit();
+    else
+      throw Fmi::Exception(BCP, "Not in transaction");
+  }
+
   void exec(const std::string& sql) { itsTransaction->exec(sql); }
 
   void cancel()
@@ -162,7 +191,12 @@ class PostgreSQLConnection::Impl
     }
   }
 
-  void close() const { itsConnection.reset(); }
+  void close() const
+  {
+    itsTransaction.reset();
+    itsConnection.reset();
+  }
+
   bool isConnected() const { return itsConnection->is_open(); }
   bool collateSupported() const { return itsCollate; }
   const std::map<unsigned int, std::string>& dataTypes() const { return itsDataTypes; }
@@ -170,9 +204,13 @@ class PostgreSQLConnection::Impl
   bool isDebug() const { return itsDebug; }
   void setDebug(bool debug) { itsDebug = debug; }
 
-  void check_connection() const
+  std::shared_ptr<pqxx::connection> check_connection() const
   {
-    if (!itsConnection || !isConnected())
+    if (itsConnection && isConnected())
+    {
+      return itsConnection;
+    }
+    else
     {
       if (reconnectDisabled.load() || itsCanceled.load())
       {
@@ -180,7 +218,7 @@ class PostgreSQLConnection::Impl
       }
       else
       {
-        reopen();
+        return reopen();
       }
     }
   }
@@ -189,8 +227,9 @@ class PostgreSQLConnection::Impl
   {
     try
     {
-      if (itsConnection)
-        itsConnection->set_client_encoding(theEncoding);
+      auto conn = check_connection();
+      if (conn)
+        conn->set_client_encoding(theEncoding);
 
       itsConnectionOptions.encoding = theEncoding;
     }
@@ -204,8 +243,9 @@ class PostgreSQLConnection::Impl
   {
     try
     {
-      if (itsConnection)
-        return itsConnection->quote(theString);
+      auto conn = check_connection();
+      if (conn)
+        return conn->quote(theString);
       throw Fmi::Exception(BCP, "Locus: Attempting to quote string without database connection");
     }
     catch (...)
@@ -214,7 +254,7 @@ class PostgreSQLConnection::Impl
     }
   }
 
-  bool reopen() const
+  std::shared_ptr<pqxx::connection> reopen() const
   {
     try
     {
@@ -222,10 +262,13 @@ class PostgreSQLConnection::Impl
 
       const std::string conn_str = itsConnectionOptions;
 
-      std::string error_message;
+      boost::optional<std::string> error_message;
+
       // Retry connections automatically. Especially useful after boots if the database is in the
       // same server.
-      for (auto retries = 10; retries > 0; --retries)
+      const int max_retries = last_failed ? 1 : 10;
+
+      for (int retries = max_retries; retries > 0; --retries)
       {
         // Ignore connection requests if shutting down application
         if (shuttingDown.load())
@@ -244,23 +287,28 @@ class PostgreSQLConnection::Impl
         }
         catch (const pqxx::broken_connection& e)
         {
+          last_failed = true;
           if (reconnectDisabled.load())
           {
             // Should not try to reconnect (rethrown current exception)
             throw;
           }
-          else if (retries > 0)
-          {
-            std::string msg = e.what();
-            boost::algorithm::replace_all(msg, "\n", " ");
-            std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
-            boost::unique_lock<boost::mutex> lock(m);
-            if (! shuttingDown.load()) {
-                cond.wait_for(lock, boost::chrono::seconds(10));
-            }
-          }
           else
-            error_message = e.what();
+          {
+            if (retries > 0)
+            {
+              std::string msg = e.what();
+              boost::algorithm::replace_all(msg, "\n", " ");
+              std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
+              boost::unique_lock<boost::mutex> lock(m);
+              if (! shuttingDown.load())
+              {
+                cond.wait_for(lock, boost::chrono::seconds(10));
+              }
+            }
+            else
+              error_message = e.what();
+          }
         }
         catch (const std::exception& e)
         {
@@ -268,26 +316,46 @@ class PostgreSQLConnection::Impl
           break;
         }
 
-        if (!error_message.empty())
+        if (error_message)
           throw Fmi::Exception(BCP,
                                "Failed to connect to " + itsConnectionOptions.username + "@" +
                                    itsConnectionOptions.database + ":" +
                                    std::to_string(itsConnectionOptions.port) + " : " +
-                                   error_message);
+                                   *error_message);
 
         // Store info of data types
-        pqxx::result result_set = executeNonTransaction("select typname,oid from pg_type");
-        for (auto row : result_set)
+        if (itsConnection)
         {
-          auto datatype = row[0].as<std::string>();
-          unsigned int oid = row[1].as<unsigned int>();
-          itsDataTypes.insert(std::make_pair(oid, datatype));
-        }
+          pqxx::result result_set;
+          const std::string sql = "select typname,oid from pg_type";
+          try
+          {
+            // Do not use executeNonTransaction here, as we do not want to call reopen() recursively
+            pqxx::nontransaction nitsTransaction(*itsConnection);
+            result_set = nitsTransaction.exec(sql);
+          }
+          catch (const std::exception& e)
+          {
+            std::cout << "Failed to execute '" << sql << "':" << e.what() << std::endl;
+            continue;
+          }
 
-        return itsConnection->is_open();
+          for (auto row : result_set)
+          {
+            auto datatype = row[0].as<std::string>();
+            unsigned int oid = row[1].as<unsigned int>();
+            itsDataTypes.insert(std::make_pair(oid, datatype));
+          }
+
+          if (itsConnection->is_open())
+          {
+            last_failed = false;
+            return itsConnection;
+          }
+        }
       }
 
-      return false;
+      return std::shared_ptr<pqxx::connection>();
     }
     catch (...)
     {
@@ -303,29 +371,47 @@ class PostgreSQLConnection::Impl
       if (itsDebug)
         std::cout << "SQL: " << theSQLStatement << std::endl;
 
-      check_connection();
+      auto conn = check_connection();
+      if (! conn)
+      {
+        throw Fmi::Exception(BCP,
+                             "Execution of SQL statement failed: not connected");
+      }
 
       try
       {
-        pqxx::nontransaction nitsTransaction(*itsConnection);
+        pqxx::nontransaction nitsTransaction(*conn);
         return nitsTransaction.exec(theSQLStatement);
       }
       catch (const std::exception& e)
       {
         // Try reopening the connection only once not to flood the network
-        if (itsConnection->is_open() || !reopen())
+        if (conn->is_open())
+        {
           throw Fmi::Exception(BCP,
                                std::string("Execution of SQL statement failed: ").append(e.what()));
-
-        try
-        {
-          pqxx::nontransaction nitsTransaction(*itsConnection);
-          return nitsTransaction.exec(theSQLStatement);
         }
-        catch (const std::exception& e)
+        else
         {
-          throw Fmi::Exception(BCP,
-                               std::string("Execution of SQL statement failed: ").append(e.what()));
+          conn = reopen();
+          if (conn)
+          {
+            try
+            {
+              pqxx::nontransaction nitsTransaction(*conn);
+              return nitsTransaction.exec(theSQLStatement);
+            }
+            catch (const std::exception& e)
+            {
+              throw Fmi::Exception(BCP,
+                                   std::string("Execution of SQL statement failed: ").append(e.what()));
+            }
+          }
+          else
+          {
+              throw Fmi::Exception(BCP,
+                                   "Execution of SQL statement failed: not connected");
+          }
         }
       }
     }
@@ -341,7 +427,7 @@ class PostgreSQLConnection::Impl
     {
       if (itsTransaction)
       {
-        check_connection();
+        // Cannot call check_connection here as possible reopen() would discard transaction
         return itsTransaction->exec(theSQLStatement);
       }
 
@@ -365,7 +451,7 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
 {
   try
   {
-    return impl->open(theConnectionOptions);
+    return bool(impl->open(theConnectionOptions));
   }
   catch (...)
   {
@@ -377,7 +463,7 @@ bool PostgreSQLConnection::reopen() const
 {
   try
   {
-    return impl->reopen();
+    return bool(impl->reopen());
   }
   catch (...)
   {
