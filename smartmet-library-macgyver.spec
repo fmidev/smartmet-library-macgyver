@@ -14,8 +14,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.2.27
-Release: 2%{?dist}.fmi
+Version: 23.3.2
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Mar  2 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.3.2-1.fmi
+- Fmi::Database::PostgreSQLConnection: try fixing reconnection after connection loss
+
 * Mon Feb 27 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.2.27-2.fmi
 - Fmi::WorkerPool<T>: add method cancel()
 
