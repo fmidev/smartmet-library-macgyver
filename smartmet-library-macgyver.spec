@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.3.2
+Version: 23.3.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Mar  3 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.3.3-1.fmi
+- Fixed PostgreSQLConnection::Transaction destructor not to throw
+
 * Thu Mar  2 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.3.2-1.fmi
 - Fmi::Database::PostgreSQLConnection: try fixing reconnection after connection loss
 

@@ -132,9 +132,9 @@ class PostgreSQLConnection::Impl
   Impl(bool debug) : itsDebug(debug) {}
 
   Impl(const PostgreSQLConnectionOptions& theConnectionOptions)
-      : itsDebug(theConnectionOptions.debug)
-      , itsCanceled(false)
-      , itsConnectionOptions(theConnectionOptions)
+      : itsDebug(theConnectionOptions.debug),
+        itsCanceled(false),
+        itsConnectionOptions(theConnectionOptions)
   {
     open(itsConnectionOptions);
   }
@@ -151,15 +151,15 @@ class PostgreSQLConnection::Impl
 
   void startTransaction()
   {
-     auto conn = check_connection();
-     if (conn)
-     {
-        itsTransaction = std::make_shared<pqxx::work>(*conn);
-     }
-     else
-     {
-        Fmi::Exception(BCP, METHOD_NAME + ": cannot start transaction (not connected)");
-     }
+    auto conn = check_connection();
+    if (conn)
+    {
+      itsTransaction = std::make_shared<pqxx::work>(*conn);
+    }
+    else
+    {
+      Fmi::Exception(BCP, METHOD_NAME + ": cannot start transaction (not connected)");
+    }
   }
 
   void endTransaction()
@@ -214,7 +214,9 @@ class PostgreSQLConnection::Impl
     {
       if (reconnectDisabled.load() || itsCanceled.load())
       {
-        throw Fmi::Exception(BCP, METHOD_NAME + ": not connected and reconnecting is disabled or connection canceled");
+        throw Fmi::Exception(
+            BCP,
+            METHOD_NAME + ": not connected and reconnecting is disabled or connection canceled");
       }
       else
       {
@@ -273,7 +275,8 @@ class PostgreSQLConnection::Impl
         // Ignore connection requests if shutting down application
         if (shuttingDown.load())
         {
-          throw Fmi::Exception(BCP, METHOD_NAME + ": connecting to database disabled due to shutdown");
+          throw Fmi::Exception(BCP,
+                               METHOD_NAME + ": connecting to database disabled due to shutdown");
         }
 
         try
@@ -301,7 +304,7 @@ class PostgreSQLConnection::Impl
               boost::algorithm::replace_all(msg, "\n", " ");
               std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
               boost::unique_lock<boost::mutex> lock(m);
-              if (! shuttingDown.load())
+              if (!shuttingDown.load())
               {
                 cond.wait_for(lock, boost::chrono::seconds(10));
               }
@@ -372,10 +375,9 @@ class PostgreSQLConnection::Impl
         std::cout << "SQL: " << theSQLStatement << std::endl;
 
       auto conn = check_connection();
-      if (! conn)
+      if (!conn)
       {
-        throw Fmi::Exception(BCP,
-                             "Execution of SQL statement failed: not connected");
+        throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
       }
 
       try
@@ -403,14 +405,13 @@ class PostgreSQLConnection::Impl
             }
             catch (const std::exception& e)
             {
-              throw Fmi::Exception(BCP,
-                                   std::string("Execution of SQL statement failed: ").append(e.what()));
+              throw Fmi::Exception(
+                  BCP, std::string("Execution of SQL statement failed: ").append(e.what()));
             }
           }
           else
           {
-              throw Fmi::Exception(BCP,
-                                   "Execution of SQL statement failed: not connected");
+            throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
           }
         }
       }
@@ -616,7 +617,13 @@ PostgreSQLConnection::Transaction::Transaction(const PostgreSQLConnection& theCo
 
 PostgreSQLConnection::Transaction::~Transaction()
 {
-  conn.endTransaction();
+  try
+  {
+    conn.endTransaction();
+  }
+  catch (...)
+  {
+  }
 }
 
 pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQLStatement) const
