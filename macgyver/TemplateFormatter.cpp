@@ -19,8 +19,6 @@
 #include <ostream>
 #include <string>
 
-Fmi::TemplateFormatter::~TemplateFormatter() = default;
-
 class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
 {
   std::string& out;
@@ -95,6 +93,18 @@ Fmi::TemplateFormatter::TemplateFormatter(UINT_32 max_handlers) : syscall_factor
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+Fmi::TemplateFormatter::~TemplateFormatter()
+{
+  try
+  {
+    CTPP::STDLibInitializer::DestroyLibrary(syscall_factory);
+  }
+  catch (...)
+  {
+    std::cout << Fmi::Exception(BCP, "ERROR: C++ EXCEPTION IN DESTRUCTOR") << std::endl;
   }
 }
 
