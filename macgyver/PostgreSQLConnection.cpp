@@ -1,4 +1,5 @@
 #include "PostgreSQLConnection.h"
+#include "AsyncTask.h"
 #include "Exception.h"
 #include "TypeName.h"
 #include <boost/algorithm/string.hpp>
@@ -262,6 +263,8 @@ class PostgreSQLConnection::Impl
     {
       close();
 
+      AsyncTask::interruption_point();
+
       const std::string conn_str = itsConnectionOptions;
 
       boost::optional<std::string> error_message;
@@ -371,6 +374,8 @@ class PostgreSQLConnection::Impl
     // FIXME: should we fail if transaction is active?
     try
     {
+      AsyncTask::interruption_point();
+
       if (itsDebug)
         std::cout << "SQL: " << theSQLStatement << std::endl;
 
@@ -428,6 +433,7 @@ class PostgreSQLConnection::Impl
     {
       if (itsTransaction)
       {
+        AsyncTask::interruption_point();
         // Cannot call check_connection here as possible reopen() would discard transaction
         return itsTransaction->exec(theSQLStatement);
       }
