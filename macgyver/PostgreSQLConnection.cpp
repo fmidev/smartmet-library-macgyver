@@ -159,7 +159,7 @@ class PostgreSQLConnection::Impl
     }
     else
     {
-      Fmi::Exception(BCP, METHOD_NAME + ": cannot start transaction (not connected)");
+      throw Fmi::Exception(BCP, METHOD_NAME + ": cannot start transaction (not connected)");
     }
   }
 
