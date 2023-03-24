@@ -301,7 +301,7 @@ class PostgreSQLConnection::Impl
           }
           else
           {
-            if (retries > 0)
+            if (retries > 1)
             {
               std::string msg = e.what();
               boost::algorithm::replace_all(msg, "\n", " ");
