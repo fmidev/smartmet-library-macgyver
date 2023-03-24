@@ -90,7 +90,9 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
         throw Fmi::Exception(BCP,
                              "An incomplete multibyte sequence has been encountered in the input");
       default:
-        throw Fmi::Exception(BCP, std::string("Unexpected error: ") + strerror(errno));
+        throw Fmi::Exception(BCP, std::string("Unexpected error: ") +
+            strerror_r(errno, s_out, sizeof(s_out))); // We can reuse the same buffer as
+                                                      // the exception is thrown anyway
     }
   }
   else
