@@ -208,22 +208,16 @@ class PostgreSQLConnection::Impl
   std::shared_ptr<pqxx::connection> check_connection() const
   {
     if (itsConnection && isConnected())
-    {
       return itsConnection;
-    }
-    else
+
+    if (reconnectDisabled.load() || itsCanceled.load())
     {
-      if (reconnectDisabled.load() || itsCanceled.load())
-      {
-        throw Fmi::Exception(
-            BCP,
-            METHOD_NAME + ": not connected and reconnecting is disabled or connection canceled");
-      }
-      else
-      {
-        return reopen();
-      }
+      throw Fmi::Exception(
+          BCP,
+          METHOD_NAME + ": not connected and reconnecting is disabled or connection canceled");
     }
+
+    return reopen();
   }
 
   void setClientEncoding(const std::string& theEncoding)
@@ -299,22 +293,20 @@ class PostgreSQLConnection::Impl
             // Should not try to reconnect (rethrown current exception)
             throw;
           }
-          else
+
+          if (retries > 1)
           {
-            if (retries > 1)
+            std::string msg = e.what();
+            boost::algorithm::replace_all(msg, "\n", " ");
+            std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
+            boost::unique_lock<boost::mutex> lock(m);
+            if (!shuttingDown.load())
             {
-              std::string msg = e.what();
-              boost::algorithm::replace_all(msg, "\n", " ");
-              std::cerr << fmt::format("Warning: {} retries left. PG message: {}\n", retries, msg);
-              boost::unique_lock<boost::mutex> lock(m);
-              if (!shuttingDown.load())
-              {
-                cond.wait_for(lock, boost::chrono::seconds(10));
-              }
+              cond.wait_for(lock, boost::chrono::seconds(10));
             }
-            else
-              error_message = e.what();
           }
+          else
+            error_message = e.what();
         }
         catch (const std::exception& e)
         {
@@ -348,8 +340,8 @@ class PostgreSQLConnection::Impl
 
           for (auto row : result_set)
           {
-            auto datatype = row[0].as<std::string>();
-            unsigned int oid = row[1].as<unsigned int>();
+            const auto datatype = row[0].as<std::string>();
+            const auto oid = row[1].as<unsigned int>();
             itsDataTypes.insert(std::make_pair(oid, datatype));
           }
 
@@ -361,7 +353,7 @@ class PostgreSQLConnection::Impl
         }
       }
 
-      return std::shared_ptr<pqxx::connection>();
+      return {};
     }
     catch (...)
     {
@@ -408,10 +400,10 @@ class PostgreSQLConnection::Impl
               pqxx::nontransaction nitsTransaction(*conn);
               return nitsTransaction.exec(theSQLStatement);
             }
-            catch (const std::exception& e)
+            catch (const std::exception& e2)
             {
               throw Fmi::Exception(
-                  BCP, std::string("Execution of SQL statement failed: ").append(e.what()));
+                  BCP, std::string("Execution of SQL statement failed: ").append(e2.what()));
             }
           }
           else
@@ -445,6 +437,11 @@ class PostgreSQLConnection::Impl
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
+
+  Impl(const Impl&) = delete;
+  Impl(Impl&&) = delete;
+  Impl& operator = (const Impl&) = delete;
+  Impl& operator = (Impl&&) = delete;
 };
 
 // ----------------------------------------------------------------------
