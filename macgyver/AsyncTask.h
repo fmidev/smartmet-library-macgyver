@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
 
 #include <atomic>
@@ -8,7 +7,7 @@
 
 namespace Fmi
 {
-class AsyncTask : private virtual boost::noncopyable
+class AsyncTask
 {
  public:
   enum Status
@@ -71,6 +70,11 @@ class AsyncTask : private virtual boost::noncopyable
   const std::function<void()> notify;
   std::exception_ptr ex;
   boost::thread task_thread;
+
+  AsyncTask(const AsyncTask&) = delete;
+  AsyncTask(AsyncTask&&) = delete;
+  AsyncTask& operator = (const AsyncTask&) = delete;
+  AsyncTask& operator = (AsyncTask&&) = delete;
 
 public:
   static bool log_time;
