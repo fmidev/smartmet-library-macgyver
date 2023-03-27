@@ -20,7 +20,7 @@ Fmi::AsyncTaskGroup::~AsyncTaskGroup()
   wait();
 }
 
-void Fmi::AsyncTaskGroup::add(const std::string& name, std::function<void()> task)
+void Fmi::AsyncTaskGroup::add(const std::string& name, const std::function<void()>& task)
 {
   while (get_num_active_tasks() >= max_paralell_tasks)
   {
@@ -30,10 +30,14 @@ void Fmi::AsyncTaskGroup::add(const std::string& name, std::function<void()> tas
   std::unique_lock<std::mutex> lock(m1);
   if (!stop_requested)
   {
-    std::size_t id = ++counter;
+    std::size_t task_id = ++counter;
     std::shared_ptr<AsyncTask> new_task(new AsyncTask(
-        name, task, std::bind(&Fmi::AsyncTaskGroup::on_task_completed_callback, this, id)));
-    active_tasks[id] = new_task;
+        name, task,
+        [this, task_id] ()
+        {
+            on_task_completed_callback(task_id);
+        }));
+    active_tasks[task_id] = new_task;
   }
 }
 
@@ -107,7 +111,7 @@ Fmi::AsyncTaskGroup::get_and_clear_exception_info()
   return tmp;
 }
 
-void Fmi::AsyncTaskGroup::dump_and_clear_exception_info(std::ostream& os)
+void Fmi::AsyncTaskGroup::dump_and_clear_exception_info(std::ostream& output_stream)
 {
   const auto exc_info = get_and_clear_exception_info();
   for (const auto& item : exc_info)
@@ -123,19 +127,19 @@ void Fmi::AsyncTaskGroup::dump_and_clear_exception_info(std::ostream& os)
           << "' terminated by exception of type '"
           << Fmi::current_exception_type() << '\'';
       const auto e  = Fmi::Exception::Trace(BCP, msg.str());
-      os << e << std::endl;
+      output_stream << e << std::endl;
     }
   }
 }
 
 boost::signals2::connection Fmi::AsyncTaskGroup::on_task_ended(
-    std::function<void(const std::string&)> callback)
+    const std::function<void(const std::string&)>& callback)
 {
   return signal_task_ended.connect(callback);
 }
 
 boost::signals2::connection Fmi::AsyncTaskGroup::on_task_error(
-    std::function<void(const std::string&)> callback)
+    const std::function<void(const std::string&)>& callback)
 {
   return signal_task_failed.connect(callback);
 }

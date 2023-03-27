@@ -16,10 +16,10 @@
 
 namespace Fmi
 {
-class AsyncTaskGroup : public boost::noncopyable
+class AsyncTaskGroup
 {
  public:
-  AsyncTaskGroup(std::size_t max_paralell_tasks = 30);
+  explicit AsyncTaskGroup(std::size_t max_paralell_tasks = 30);
   virtual ~AsyncTaskGroup();
 
   /**
@@ -28,7 +28,7 @@ class AsyncTaskGroup : public boost::noncopyable
    *   May block if the number of maximal paralell tasks is achieved
    *   (wait for some tasks ton complete)
    */
-  void add(const std::string& name, std::function<void()> task);
+  void add(const std::string& name, const std::function<void()>& task);
 
   /**
    *   @brief Wait for all added tasks to end
@@ -80,7 +80,7 @@ class AsyncTaskGroup : public boost::noncopyable
    *  @brief Dump information C++ about exceptions that has caused async tasks to fail
    *         and clear exception info
    */
-  void dump_and_clear_exception_info(std::ostream& os);
+  void dump_and_clear_exception_info(std::ostream& output_stream);
 
   /**
    *  @brief Get number of failed tasks
@@ -101,14 +101,16 @@ class AsyncTaskGroup : public boost::noncopyable
    *
    *  Called from method wait()
    */
-  boost::signals2::connection on_task_ended(std::function<void(const std::string&)> callback);
+  boost::signals2::connection on_task_ended(
+      const std::function<void(const std::string&)>& callback);
 
   /**
    *  @brief Specifies callback to be called when task has failed (threw as exception)
    *
    *  Called from method wait() while handling the exception.
    */
-  boost::signals2::connection on_task_error(std::function<void(const std::string&)> callback);
+  boost::signals2::connection on_task_error(
+      const std::function<void(const std::string&)>& callback);
 
   /**
    *  @brief Specifies whether all tasks should interrupted when one or more are noticed failing

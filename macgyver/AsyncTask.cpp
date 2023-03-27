@@ -165,7 +165,8 @@ std::exception_ptr Fmi::AsyncTask::get_exception() const
 void Fmi::AsyncTask::log_event_time(const AsyncTask* task, const std::string& desc)
 {
   std::cout << pt::microsec_clock::local_time() << " [Fmi::AsyncTask]: ("
-            << (void*)task << ") '" << task->get_name() << "': " << desc
+            << reinterpret_cast<const void*>(task) << ") '" << task->get_name()
+            << "': " << desc
             << std::endl;
 }
 
