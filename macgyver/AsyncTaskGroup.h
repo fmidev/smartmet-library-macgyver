@@ -139,5 +139,10 @@ class AsyncTaskGroup : public boost::noncopyable
   std::list<std::pair<std::string, std::exception_ptr> > exception_info;
 
   static constexpr std::size_t MAX_EXCEPTIONS = 100;
+
+  AsyncTaskGroup(const AsyncTaskGroup&) = delete;
+  AsyncTaskGroup(AsyncTaskGroup&&) = delete;
+  AsyncTaskGroup& operator = (const AsyncTaskGroup&) = delete;
+  AsyncTaskGroup& operator = (AsyncTaskGroup&&) = delete;
 };
 }  // namespace Fmi
