@@ -10,7 +10,7 @@ namespace Fmi
 {
 namespace
 {
-static const std::map<std::string, std::string> exception_name_map = {
+const std::map<std::string, std::string> exception_name_map = {
     {"std::out_of_range", "Out of range"},
     {"std::invalid_argument", "Invalid argument"},
     {"std::length_error", "Length error"},
@@ -350,7 +350,7 @@ std::string Exception::getStackTrace() const
   while (e != nullptr)
   {
     // Print function information if not disabled or if there is extra information
-    bool is_last_ex = (e->prevException.get() == nullptr);
+    bool is_last_ex = e->prevException.get();
     bool print_func =
         (!last_ex_only || is_last_ex || e->getDetailCount() > 0 || e->getParameterCount() > 0);
     if (print_func)
