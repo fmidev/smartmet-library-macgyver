@@ -31,8 +31,8 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
-BuildRequires: smartmet-timezones >= 21.2.2
-BuildRequires: smartmet-utils-devel >= 22.1.20
+BuildRequires: smartmet-timezones >= 23.4.18
+BuildRequires: smartmet-utils-devel >= 23.4.17
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -69,8 +69,8 @@ BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: postgresql13-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 21.2.2
-#TestRequires: smartmet-utils-devel >= 22.1.20
+#TestRequires: smartmet-timezones >= 23.4.18
+#TestRequires: smartmet-utils-devel >= 23.4.17
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
@@ -110,7 +110,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 22.1.20
+Requires: smartmet-utils-devel >= 23.4.17
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
