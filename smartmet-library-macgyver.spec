@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.3.3
+Version: 23.4.24
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -121,6 +121,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Apr 24 2023 Pertti Kinnia <pertti.kinnia@fmi.fi> 23.4.24-1.fmi
+- Initial support for prepared SQL (BRAINSTORM-2010)
+
 * Fri Mar  3 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.3.3-1.fmi
 - Fixed PostgreSQLConnection::Transaction destructor not to throw
 

@@ -438,6 +438,128 @@ class PostgreSQLConnection::Impl
     }
   }
 
+  void prepareStatement(
+      const std::string &theStatementName, const std::string& theSQLStatement) const
+  {
+    try
+    {
+      if (itsDebug)
+        std::cout << "Prepare: " << theStatementName << " SQL: " << theSQLStatement << std::endl;
+
+      if (theStatementName.empty() || theSQLStatement.empty())
+      {
+        throw Fmi::Exception(BCP, "Attempt to prepare SQL statement with empty name or body");
+      }
+
+      auto conn = check_connection();
+      if (!conn)
+      {
+        throw Fmi::Exception(BCP, "Preparation of SQL statement failed: not connected");
+      }
+
+      if (!itsTransaction)
+      {
+        throw Fmi::Exception(BCP, "Attempt to prepare SQL statement without transaction");
+      }
+
+      try
+      {
+        /*
+        if (!(itsTransaction->prepared(theStatementName).exists()))
+        */
+        conn->prepare(theStatementName, theSQLStatement);
+      }
+      catch (const std::exception& e)
+      {
+        throw Fmi::Exception(
+            BCP, std::string("Preparation of SQL statement failed: ").append(e.what()));
+      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+  }
+
+  pqxx::prepare::invocation prepareInvocation(const std::string &theStatementName) const
+  {
+    try
+    {
+      if (!itsTransaction)
+      {
+        throw Fmi::Exception(
+            BCP, "Attempt to prepare SQL statement invocation without transaction");
+      }
+
+      if (theStatementName.empty())
+      {
+        throw Fmi::Exception(BCP, "Attempt to prepare SQL statement invocation with empty name");
+      }
+
+      try
+      {
+        return itsTransaction->prepared(theStatementName);
+      }
+      catch (const std::exception& e)
+      {
+        throw Fmi::Exception(
+            BCP, std::string("Preparation of SQL statement invocation failed: ").append(e.what()));
+      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+  }
+
+  pqxx::prepare::invocation prepareStatementInvocation(
+      const std::string &theStatementName, const std::string& theSQLStatement) const
+  {
+    try
+    {
+      if (!itsTransaction)
+      {
+        throw Fmi::Exception(
+            BCP, "Attempt to prepare SQL statement invocation without transaction");
+      }
+
+      try
+      {
+        prepareStatement(theStatementName, theSQLStatement);
+        return prepareInvocation(theStatementName);
+      }
+      catch (const std::exception& e)
+      {
+        throw Fmi::Exception(
+            BCP, std::string("Preparation of SQL statement invocation failed: ").append(e.what()));
+      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+  }
+
+  pqxx::result executePreparedInvocation(const pqxx::prepare::invocation &theInvocation) const
+  {
+    try
+    {
+      try
+      {
+        return theInvocation.exec();
+      }
+      catch (const std::exception& e)
+      {
+        throw Fmi::Exception(
+            BCP, std::string("Execution of SQL statement invocation failed: ").append(e.what()));
+      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+  }
+
   Impl(const Impl&) = delete;
   Impl(Impl&&) = delete;
   Impl& operator = (const Impl&) = delete;
@@ -596,6 +718,30 @@ void PostgreSQLConnection::endTransaction() const
 void PostgreSQLConnection::commitTransaction() const
 {
   impl->commitTransaction();
+}
+
+void PostgreSQLConnection::prepareStatement(
+    const std::string &theStatementName, const std::string& theSQLStatement) const
+{
+  impl->prepareStatement(theStatementName, theSQLStatement);
+}
+
+pqxx::prepare::invocation PostgreSQLConnection::prepareInvocation(
+    const std::string &theStatementName) const
+{
+  return impl->prepareInvocation(theStatementName);
+}
+
+pqxx::prepare::invocation PostgreSQLConnection::prepareStatementInvocation(
+    const std::string &theStatementName, const std::string& theSQLStatement) const
+{
+  return impl->prepareStatementInvocation(theStatementName, theSQLStatement);
+}
+
+pqxx::result PostgreSQLConnection::executePreparedInvocation(
+    const pqxx::prepare::invocation &theInvocation) const
+{
+  return impl->executePreparedInvocation(theInvocation);
 }
 
 PostgreSQLConnection::~PostgreSQLConnection() = default;
