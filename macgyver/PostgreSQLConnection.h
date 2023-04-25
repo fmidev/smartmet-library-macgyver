@@ -76,28 +76,6 @@ class PostgreSQLConnection
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
-  /**
-   *   @brief Prepare SQL statement
-   */
-  void prepareStatement(
-      const std::string &theStatementName, const std::string& theSQLStatement) const;
-
-  /**
-   *   @brief Prepare SQL statement invocation
-   */
-  pqxx::prepare::invocation prepareInvocation(const std::string &theStatementName) const;
-
-  /**
-   *   @brief Prepare SQL statement and invocation
-   */
-  pqxx::prepare::invocation prepareStatementInvocation(
-      const std::string &theStatementName, const std::string& theSQLStatement) const;
-
-  /**
-   *   @brief Execute prepared SQL statement invocation in current transaction
-   */
-  pqxx::result executePreparedInvocation(const pqxx::prepare::invocation &theInvocation) const;
-
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
   const std::map<unsigned int, std::string>& dataTypes() const;
