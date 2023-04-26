@@ -356,12 +356,12 @@ class PostgreSQLConnection::Impl
           for (const auto& item : prepared_sqls) {
             try
             {
-              itsConnection.prepare(item.first, item.second);
+              itsConnection->prepare(item.first, item.second);
             }
-            catch (const std::exeception& e)
+            catch (const std::exception& e)
             {
               std::cout << "Error restoring prepared SQL statement: name=" <<  item.first
-                        << " sql='" << item.second << "': " << e:what()
+                        << " sql='" << item.second << "': " << e.what()
                         << std::endl;
             }
           }
@@ -474,19 +474,39 @@ class PostgreSQLConnection::Impl
     }
   }
 
+  void unprepare(const std::string& name)
+  {
+    try
+    {
+      auto conn = check_connection();
+      if (!conn)
+      {
+        throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
+      }
+      conn->unprepare(name);
+
+      boost::unique_lock<boost::mutex> lock(m);
+      prepared_sqls.erase(name);
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+  }
+
   std::shared_ptr<pqxx::transaction_base> get_transaction_impl()
   {
     try
     {
+      AsyncTask::interruption_point();
       if (itsTransaction)
       {
-        AsyncTask::interruption_point();
         return itsTransaction;
       }
       else
       {
-        // FIXME: create temporaray pqxx::nontransaction
-        throw Fmi::Exception(BCP, "Not in transaction");
+        auto conn = check_connection();
+        return std::shared_ptr<pqxx::transaction_base>(new pqxx::nontransaction(*conn));
       }
     }
     catch (...)
@@ -580,7 +600,7 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   }
 }
 
-void PostgreSQLConnection::prepare(const std::string& name, const std::string& theSQLStatement)
+void PostgreSQLConnection::prepare(const std::string& name, const std::string& theSQLStatement) const
 {
   try
   {
@@ -773,6 +793,42 @@ void PostgreSQLConnection::Transaction::rollback()
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+PostgreSQLConnection::PreparedSQL::PreparedSQL(
+    const PostgreSQLConnection& theConnection,
+    const std::string& name,
+    const std::string& sql)
+
+    : conn(theConnection)
+    , name(name)
+    , sql(sql)
+{
+   auto c = conn.impl->check_connection();
+   if (c)
+   {
+     throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
+   }
+
+   c->prepare(name, sql);
+}
+
+PostgreSQLConnection::PreparedSQL::~PreparedSQL()
+{
+  try
+  {
+    auto c = conn.impl->check_connection();
+    if (!c)
+    {
+      throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
+    }
+
+    c->unprepare(name);
+  }
+  catch (...)
+  {
+      std::cout << Fmi::Exception(BCP, "EXCEPTION IN DESTRUCTOR");
   }
 }
 

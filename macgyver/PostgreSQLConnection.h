@@ -86,6 +86,30 @@ class PostgreSQLConnection
     const PostgreSQLConnection& conn;
   };
 
+  class PreparedSQL final
+  {
+      const PostgreSQLConnection& conn;
+      const std::string name;
+      const std::string sql;
+   public:
+      PreparedSQL(const PostgreSQLConnection& theConnection, const std::string& name, const std::string& sql);
+      ~PreparedSQL();
+
+      template <typename... Args>
+      pqxx::result exec(Args... args)
+      {
+        try
+        {
+          auto transaction_ptr = conn.get_transaction_impl();
+          return transaction_ptr->exec_params(name, args...);
+        }
+        catch (...)
+        {
+          throw Fmi::Exception::Trace(BCP, "Operation failed!");
+        }
+      }
+  };
+
   ~PostgreSQLConnection();
   PostgreSQLConnection(bool theDebug = false);
   PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions);
@@ -107,7 +131,9 @@ class PostgreSQLConnection
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
-  void prepare(const std::string& name, const std::string& theSQLStatement);
+  void prepare(const std::string& name, const std::string& theSQLStatement) const;
+
+  void unprepare(const std::string& name) const;
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
