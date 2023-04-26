@@ -4,6 +4,8 @@ include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
 
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
+COMPILE_TESTS=$(wildcard *Compile.cpp)
+
 CFLAGS = -DUNIX -D_REENTRANT -O0 -g $(FLAGS)
 
 ifeq ($(USE_CLANG),yes)
@@ -39,20 +41,24 @@ LIBS += $(MACGYVER_LDFLAGS) \
 
 all: $(PROG)
 clean:
-	rm -f $(PROG) *~ *.d
+	rm -f $(PROG) *~ *.d *.o
 
 # FIXME: clean if switching between test and test-installed or use different directories
-test test-installed: $(PROG)
+test test-installed: $(PROG) $(patsubst %.cpp,%.o,$(COMPILE_TESTS))
 	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \
 	  ( ./$$prog || touch $$prog.err ) ; \
 	done
 	@test `find . -name \*.err | wc -l` = "0" || ( echo ; echo "The following tests have errors:" ; \
-		for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false ) 
+		for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false )
 
 $(PROG) : % : %.cpp $(MACGYVER_TARGET)
 	$(CXX) $(CFLAGS) -MD -o $@ $@.cpp $(INCLUDES) $(LIBS)
+
+%.o : %.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
 
 ifneq ($(wildcard *.d),)
 -include $(wildcard *.d)
