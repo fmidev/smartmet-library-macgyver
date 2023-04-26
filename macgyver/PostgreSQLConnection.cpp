@@ -352,6 +352,19 @@ class PostgreSQLConnection::Impl
             last_failed = false;
             return itsConnection;
           }
+
+          for (const auto& item : prepared_sqls) {
+            try
+            {
+              itsConnection.prepare(item.first, item.second);
+            }
+            catch (const std::exeception& e)
+            {
+              std::cout << "Error restoring prepared SQL statement: name=" <<  item.first
+                        << " sql='" << item.second << "': " << e:what()
+                        << std::endl;
+            }
+          }
         }
       }
 
