@@ -7,6 +7,7 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <pqxx/pqxx>
 #include <string>
@@ -48,10 +49,22 @@ class PostgreSQLConnection
     Transaction& operator=(Transaction&& other) = delete;
 
     pqxx::result execute(const std::string& theSQLStatement) const;
+
+    template <typename... Args>
+    pqxx::result executePrepared(const char* name, Args... args) const    {
+      return execute_on_transaction(
+          std::bind(
+              &pqxx::work::exec_params,
+              std::placeholders::_1,
+              &args...));
+    }
+
     void commit();
     void rollback();
 
    private:
+    pqxx::result execute_on_transaction(std::function<pqxx::result(pqxx::work&)> op) const;
+
     const PostgreSQLConnection& conn;
   };
 
@@ -76,6 +89,8 @@ class PostgreSQLConnection
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
+  void prepare(const std::string& name, const std::string& theSQLStatement);
+
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
   const std::map<unsigned int, std::string>& dataTypes() const;
@@ -99,6 +114,8 @@ class PostgreSQLConnection
   void startTransaction() const;
   void endTransaction() const;
   void commitTransaction() const;
+
+  pqxx::result execute_on_transaction(std::function<pqxx::result(pqxx::work&)> op) const;
 
   class Impl;
   std::unique_ptr<Impl> impl;
