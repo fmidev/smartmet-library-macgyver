@@ -51,11 +51,23 @@ class PostgreSQLConnection
     pqxx::result execute(const std::string& theSQLStatement) const;
 
     template <typename... Args>
-    pqxx::result executePrepared(const char* name, Args... args) const    {
+    pqxx::result executePrepared(const std::string& name, Args... args) const    {
       return execute_on_transaction(
           std::bind(
               &pqxx::work::exec_params,
               std::placeholders::_1,
+              name,
+              &args...));
+    }
+
+    template <typename... Args>
+    pqxx::result executePrepared_N(const std::string& name, unsigned n, Args... args) const    {
+      return execute_on_transaction(
+          std::bind(
+              &pqxx::work::exec_params_n,
+              std::placeholders::_1,
+              name,
+              n,
               &args...));
     }
 
