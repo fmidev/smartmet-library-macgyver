@@ -11,6 +11,7 @@
 #include <memory>
 #include <pqxx/pqxx>
 #include <string>
+#include "Exception.h"
 
 namespace Fmi
 {
@@ -38,7 +39,7 @@ class PostgreSQLConnection
  public:
   class Transaction final
   {
-   public:
+  public:
     ~Transaction();
     Transaction(const PostgreSQLConnection& theConnection);
 
@@ -51,32 +52,37 @@ class PostgreSQLConnection
     pqxx::result execute(const std::string& theSQLStatement) const;
 
     template <typename... Args>
-    pqxx::result executePrepared(const std::string& name, Args... args) const    {
-      return execute_on_transaction(
-          std::bind(
-              &pqxx::work::exec_params,
-              std::placeholders::_1,
-              name,
-              &args...));
+    pqxx::result executePrepared(const std::string& name, Args &&... args) const
+    {
+      try
+      {
+        auto transaction_ptr = conn.get_transaction_impl();
+        return transaction_ptr->exec_params(name, args...);
+      }
+      catch (...)
+      {
+        throw Fmi::Exception::Trace(BCP, "Operation failed!");
+      }
     }
 
     template <typename... Args>
-    pqxx::result executePrepared_N(const std::string& name, unsigned n, Args... args) const    {
-      return execute_on_transaction(
-          std::bind(
-              &pqxx::work::exec_params_n,
-              std::placeholders::_1,
-              name,
-              n,
-              &args...));
+    pqxx::result executePrepared_N(const std::string& name, unsigned n, Args... args) const
+    {
+      try
+      {
+        auto transaction_ptr = conn.get_transaction_impl();
+        return transaction_ptr->exec_params(name, args...);
+      }
+      catch (...)
+      {
+        throw Fmi::Exception::Trace(BCP, "Operation failed!");
+      }
     }
 
     void commit();
     void rollback();
 
    private:
-    pqxx::result execute_on_transaction(std::function<pqxx::result(pqxx::work&)> op) const;
-
     const PostgreSQLConnection& conn;
   };
 
@@ -127,7 +133,9 @@ class PostgreSQLConnection
   void endTransaction() const;
   void commitTransaction() const;
 
-  pqxx::result execute_on_transaction(std::function<pqxx::result(pqxx::work&)> op) const;
+  std::shared_ptr<pqxx::transaction_base> get_transaction_impl() const;
+
+  pqxx::work get_work() const;
 
   class Impl;
   std::unique_ptr<Impl> impl;

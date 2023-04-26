@@ -461,17 +461,18 @@ class PostgreSQLConnection::Impl
     }
   }
 
-  pqxx::result execute_on_transaction(std::function<pqxx::result(pqxx::work&)> op)
+  std::shared_ptr<pqxx::transaction_base> get_transaction_impl()
   {
     try
     {
       if (itsTransaction)
       {
         AsyncTask::interruption_point();
-        return op(*itsTransaction);
+        return itsTransaction;
       }
       else
       {
+        // FIXME: create temporaray pqxx::nontransaction
         throw Fmi::Exception(BCP, "Not in transaction");
       }
     }
@@ -623,9 +624,9 @@ bool PostgreSQLConnection::collateSupported() const
   return impl->collateSupported();
 }
 
-pqxx::result PostgreSQLConnection::execute_on_transaction(std::function<pqxx::result(pqxx::work&)> op) const
+std::shared_ptr<pqxx::transaction_base> PostgreSQLConnection::get_transaction_impl() const
 {
-  return impl->execute_on_transaction(op);
+  return impl->get_transaction_impl();
 }
 
 const std::map<unsigned int, std::string>& PostgreSQLConnection::dataTypes() const
@@ -700,29 +701,6 @@ pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQ
         std::cout << "SQL: " << theSQLStatement << std::endl;
       }
       return conn.execute(theSQLStatement);
-    }
-
-    throw Fmi::Exception(BCP, "[Logic error] Called after transaction commit or rollback");
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-pqxx::result PostgreSQLConnection::Transaction::execute_on_transaction(
-    std::function<pqxx::result(pqxx::work&)> op) const
-{
-  try
-  {
-    if (conn.isTransaction())
-    {
-      if (conn.isDebug())
-      {
-        //std::cout << "Prepared SQ : " << theSQLStatement << std::endl;
-        // FIXME: print real SQL statement and parameters
-      }
-      return conn.execute_on_transaction(op);
     }
 
     throw Fmi::Exception(BCP, "[Logic error] Called after transaction commit or rollback");
