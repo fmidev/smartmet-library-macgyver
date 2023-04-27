@@ -2,8 +2,6 @@
 .#*
 doc/
 obj/
-/test/*Test
-/test/*.err
 lib*.so
 compile_commands.json
 .gdb_history
@@ -15,3 +13,4 @@ dist/
 /smartmet-library-macgyver.tar.gz
 /abi-check
 /compat_reports
+

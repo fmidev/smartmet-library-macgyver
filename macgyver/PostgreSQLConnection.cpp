@@ -127,6 +127,8 @@ class PostgreSQLConnection::Impl
 
   mutable bool last_failed = false;
 
+  std::map<std::string, std::string> prepared_sqls;
+
  public:
   ~Impl() { close(); }
 
@@ -204,6 +206,17 @@ class PostgreSQLConnection::Impl
 
   bool isDebug() const { return itsDebug; }
   void setDebug(bool debug) { itsDebug = debug; }
+
+  /**
+   *   @brief return current connection if it is OK or empty shared_ptr otherwise
+   */
+  std::shared_ptr<pqxx::connection> get_connection() const
+  {
+    if (itsConnection && isConnected())
+        return itsConnection;
+
+    return {};
+  }
 
   std::shared_ptr<pqxx::connection> check_connection() const
   {
@@ -345,6 +358,20 @@ class PostgreSQLConnection::Impl
             itsDataTypes.insert(std::make_pair(oid, datatype));
           }
 
+          boost::unique_lock lock(m);
+          for (const auto& item : prepared_sqls) {
+            try
+            {
+              itsConnection->prepare(item.first, item.second);
+            }
+            catch (const std::exception& e)
+            {
+              std::cout << "Error restoring prepared SQL statement: name=" <<  item.first
+                        << " sql='" << item.second << "': " << e.what()
+                        << std::endl;
+            }
+          }
+
           if (itsConnection->is_open())
           {
             last_failed = false;
@@ -436,6 +463,39 @@ class PostgreSQLConnection::Impl
     {
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
+  }
+
+  std::shared_ptr<pqxx::transaction_base> get_transaction_impl()
+  {
+    try
+    {
+      AsyncTask::interruption_point();
+      if (itsTransaction)
+      {
+        return itsTransaction;
+      }
+      else
+      {
+        auto conn = check_connection();
+        return std::shared_ptr<pqxx::transaction_base>(new pqxx::nontransaction(*conn));
+      }
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+  }
+
+  void register_prepared_sql(const std::string& name, const std::string& sql)
+  {
+    boost::unique_lock<boost::mutex> lock(m);
+    prepared_sqls[name] = sql;
+  }
+
+  void unregister_prepared_sql(const std::string& name)
+  {
+    boost::unique_lock<boost::mutex> lock(m);
+    prepared_sqls.erase(name);
   }
 
   Impl(const Impl&) = delete;
@@ -566,6 +626,11 @@ bool PostgreSQLConnection::isDebug() const
 bool PostgreSQLConnection::collateSupported() const
 {
   return impl->collateSupported();
+}
+
+std::shared_ptr<pqxx::transaction_base> PostgreSQLConnection::get_transaction_impl() const
+{
+  return impl->get_transaction_impl();
 }
 
 const std::map<unsigned int, std::string>& PostgreSQLConnection::dataTypes() const
@@ -699,6 +764,51 @@ void PostgreSQLConnection::Transaction::rollback()
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+PostgreSQLConnection::PreparedSQL::PreparedSQL(
+    const PostgreSQLConnection& theConnection,
+    const std::string& name,
+    const std::string& theSQLStatement)
+
+    : conn(theConnection)
+    , name(name)
+    , sql(theSQLStatement)
+{
+   try
+   {
+     auto c = conn.impl->check_connection();
+     if (!c)
+     {
+       throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
+     }
+
+     c->prepare(name, sql);
+
+     // FIXME: report conflicts (repeated sama name). Additionally one could ignore call
+     //        if the new SQL statement is identical to the previous one
+     conn.impl->register_prepared_sql(name, theSQLStatement);
+   }
+   catch (...)
+   {
+     throw Fmi::Exception::Trace(BCP, "Operation failed!");
+   }
+}
+
+PostgreSQLConnection::PreparedSQL::~PreparedSQL()
+{
+  try
+  {
+    // We do not to unprepare if connection is lost and not restored
+    auto c = conn.impl->get_connection();
+    conn.impl->unregister_prepared_sql(name);
+    if (c)
+        c->unprepare(name);
+  }
+  catch (...)
+  {
+    // We are not interested about errors when unpreparing SQL (eg. not found)
   }
 }
 

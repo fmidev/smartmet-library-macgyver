@@ -7,9 +7,11 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <pqxx/pqxx>
 #include <string>
+#include "Exception.h"
 
 namespace Fmi
 {
@@ -37,7 +39,7 @@ class PostgreSQLConnection
  public:
   class Transaction final
   {
-   public:
+  public:
     ~Transaction();
     Transaction(const PostgreSQLConnection& theConnection);
 
@@ -48,12 +50,51 @@ class PostgreSQLConnection
     Transaction& operator=(Transaction&& other) = delete;
 
     pqxx::result execute(const std::string& theSQLStatement) const;
+
     void commit();
     void rollback();
 
    private:
     const PostgreSQLConnection& conn;
   };
+
+  class PreparedSQL final
+  {
+      const PostgreSQLConnection& conn;
+      const std::string name;
+      const std::string sql;
+   public:
+      PreparedSQL(const PostgreSQLConnection& theConnection, const std::string& name, const std::string& sql);
+      ~PreparedSQL();
+
+      template <typename... Args>
+      pqxx::result exec(Args... args)
+      {
+        try
+        {
+          auto transaction_ptr = conn.get_transaction_impl();
+          return transaction_ptr->exec_prepared(name, args...);
+        }
+        catch (...)
+        {
+          throw Fmi::Exception::Trace(BCP, "Operation failed!");
+        }
+      }
+
+      template <typename... Args>
+      pqxx::result exec_n(std::size_t num_rows, Args... args)
+      {
+        try
+        {
+          auto transaction_ptr = conn.get_transaction_impl();
+          return transaction_ptr->exec_prepared_n(num_rows, name, args...);
+        }
+        catch (...)
+        {
+          throw Fmi::Exception::Trace(BCP, "Operation failed!");
+        }
+      }
+};
 
   ~PostgreSQLConnection();
   PostgreSQLConnection(bool theDebug = false);
@@ -75,6 +116,20 @@ class PostgreSQLConnection
    */
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
+
+  template <typename... Args>
+  pqxx::result exec_params(const std::string& theSQLStatement, Args... args)
+  {
+     auto transaction_ptr = get_transaction_impl();
+     return transaction_ptr->exec_params(theSQLStatement, args...);
+  }
+
+  template <typename... Args>
+  pqxx::result exec_params_n(std::size_t num_rows, const std::string& theSQLStatement, Args... args)
+  {
+     auto transaction_ptr = get_transaction_impl();
+     return transaction_ptr->exec_params(num_rows, theSQLStatement, args...);
+  }
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
@@ -99,6 +154,10 @@ class PostgreSQLConnection
   void startTransaction() const;
   void endTransaction() const;
   void commitTransaction() const;
+
+  std::shared_ptr<pqxx::transaction_base> get_transaction_impl() const;
+
+  pqxx::work get_work() const;
 
   class Impl;
   std::unique_ptr<Impl> impl;
