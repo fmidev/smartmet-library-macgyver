@@ -73,14 +73,28 @@ class PostgreSQLConnection
         try
         {
           auto transaction_ptr = conn.get_transaction_impl();
-          return transaction_ptr->exec_params(name, args...);
+          return transaction_ptr->exec_prepared(name, args...);
         }
         catch (...)
         {
           throw Fmi::Exception::Trace(BCP, "Operation failed!");
         }
       }
-  };
+
+      template <typename... Args>
+      pqxx::result exec_n(std::size_t num_rows, Args... args)
+      {
+        try
+        {
+          auto transaction_ptr = conn.get_transaction_impl();
+          return transaction_ptr->exec_prepared_n(num_rows, name, args...);
+        }
+        catch (...)
+        {
+          throw Fmi::Exception::Trace(BCP, "Operation failed!");
+        }
+      }
+};
 
   ~PostgreSQLConnection();
   PostgreSQLConnection(bool theDebug = false);
