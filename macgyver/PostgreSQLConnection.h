@@ -51,34 +51,6 @@ class PostgreSQLConnection
 
     pqxx::result execute(const std::string& theSQLStatement) const;
 
-    template <typename... Args>
-    pqxx::result executePrepared(const std::string& name, Args &&... args) const
-    {
-      try
-      {
-        auto transaction_ptr = conn.get_transaction_impl();
-        return transaction_ptr->exec_params(name, args...);
-      }
-      catch (...)
-      {
-        throw Fmi::Exception::Trace(BCP, "Operation failed!");
-      }
-    }
-
-    template <typename... Args>
-    pqxx::result executePrepared_N(const std::string& name, unsigned n, Args... args) const
-    {
-      try
-      {
-        auto transaction_ptr = conn.get_transaction_impl();
-        return transaction_ptr->exec_params(name, args...);
-      }
-      catch (...)
-      {
-        throw Fmi::Exception::Trace(BCP, "Operation failed!");
-      }
-    }
-
     void commit();
     void rollback();
 
