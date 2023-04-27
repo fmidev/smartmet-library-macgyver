@@ -75,3 +75,27 @@ BOOST_AUTO_TEST_CASE(test_parametrized_sql_2, * utf::depends_on("test_open_conne
     int id = result[0]["id"].as<int>();
     BOOST_CHECK_EQUAL(id, 456172);
 }
+
+BOOST_AUTO_TEST_CASE(test_prepared_sql_reopen, * utf::depends_on("test_open_connection"))
+{
+    BOOST_REQUIRE(env::conn->isConnected());
+    auto sql = SHOW_EXCEPTIONS(
+        std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
+            *env::conn,
+            "test",
+            "SELECT id, lat, lon FROM geonames WHERE name=$1"));
+
+    pqxx::result result= SHOW_EXCEPTIONS(sql->exec("Valassaaret"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
+    int id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, 632561);
+
+    // Reopen connection and check whether prepared SQL is restored
+
+    env::conn->reopen();
+
+    result= SHOW_EXCEPTIONS(sql->exec("Valassaaret"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
+    id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, 632561);
+}

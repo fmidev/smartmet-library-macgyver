@@ -207,6 +207,17 @@ class PostgreSQLConnection::Impl
   bool isDebug() const { return itsDebug; }
   void setDebug(bool debug) { itsDebug = debug; }
 
+  /**
+   *   @brief return current connection if it is OK or empty shared_ptr otherwise
+   */
+  std::shared_ptr<pqxx::connection> get_connection() const
+  {
+    if (itsConnection && isConnected())
+        return itsConnection;
+
+    return {};
+  }
+
   std::shared_ptr<pqxx::connection> check_connection() const
   {
     if (itsConnection && isConnected())
@@ -454,47 +465,6 @@ class PostgreSQLConnection::Impl
     }
   }
 
-  void prepare(const std::string& name, const std::string& theSQLStatement)
-  {
-    try
-    {
-      auto conn = check_connection();
-      if (!conn)
-      {
-        throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-      }
-      conn->prepare(name, theSQLStatement);
-
-      // FIXME: report conflicts (repeated sama name)
-      boost::unique_lock<boost::mutex> lock(m);
-      prepared_sqls[name] = theSQLStatement;
-    }
-    catch (...)
-    {
-      throw Fmi::Exception::Trace(BCP, "Operation failed!");
-    }
-  }
-
-  void unprepare(const std::string& name)
-  {
-    try
-    {
-      auto conn = check_connection();
-      if (!conn)
-      {
-        throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-      }
-      conn->unprepare(name);
-
-      boost::unique_lock<boost::mutex> lock(m);
-      prepared_sqls.erase(name);
-    }
-    catch (...)
-    {
-      throw Fmi::Exception::Trace(BCP, "Operation failed!");
-    }
-  }
-
   std::shared_ptr<pqxx::transaction_base> get_transaction_impl()
   {
     try
@@ -514,6 +484,18 @@ class PostgreSQLConnection::Impl
     {
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
+  }
+
+  void register_prepared_sql(const std::string& name, const std::string& sql)
+  {
+    boost::unique_lock<boost::mutex> lock(m);
+    prepared_sqls[name] = sql;
+  }
+
+  void unregister_prepared_sql(const std::string& name)
+  {
+    boost::unique_lock<boost::mutex> lock(m);
+    prepared_sqls.erase(name);
   }
 
   Impl(const Impl&) = delete;
@@ -594,18 +576,6 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   try
   {
     return impl->execute(theSQLStatement);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-void PostgreSQLConnection::prepare(const std::string& name, const std::string& theSQLStatement) const
-{
-  try
-  {
-    return impl->prepare(name, theSQLStatement);
   }
   catch (...)
   {
@@ -800,36 +770,45 @@ void PostgreSQLConnection::Transaction::rollback()
 PostgreSQLConnection::PreparedSQL::PreparedSQL(
     const PostgreSQLConnection& theConnection,
     const std::string& name,
-    const std::string& sql)
+    const std::string& theSQLStatement)
 
     : conn(theConnection)
     , name(name)
-    , sql(sql)
+    , sql(theSQLStatement)
 {
-   auto c = conn.impl->check_connection();
-   if (!c)
+   try
    {
-     throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-   }
+     auto c = conn.impl->check_connection();
+     if (!c)
+     {
+       throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
+     }
 
-   c->prepare(name, sql);
+     c->prepare(name, sql);
+
+     // FIXME: report conflicts (repeated sama name). Additionally one could ignore call
+     //        if the new SQL statement is identical to the previous one
+     conn.impl->register_prepared_sql(name, theSQLStatement);
+   }
+   catch (...)
+   {
+     throw Fmi::Exception::Trace(BCP, "Operation failed!");
+   }
 }
 
 PostgreSQLConnection::PreparedSQL::~PreparedSQL()
 {
   try
   {
-    auto c = conn.impl->check_connection();
-    if (!c)
-    {
-      throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-    }
-
-    c->unprepare(name);
+    // We do not to unprepare if connection is lost and not restored
+    auto c = conn.impl->get_connection();
+    conn.impl->unregister_prepared_sql(name);
+    if (c)
+        c->unprepare(name);
   }
   catch (...)
   {
-      std::cout << Fmi::Exception(BCP, "EXCEPTION IN DESTRUCTOR");
+    // We are not interested about errors when unpreparing SQL (eg. not found)
   }
 }
 

@@ -131,10 +131,6 @@ class PostgreSQLConnection
      return transaction_ptr->exec_params(num_rows, theSQLStatement, args...);
   }
 
-  void prepare(const std::string& name, const std::string& theSQLStatement) const;
-
-  void unprepare(const std::string& name) const;
-
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
   const std::map<unsigned int, std::string>& dataTypes() const;
