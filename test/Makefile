@@ -44,7 +44,7 @@ clean:
 	rm -f $(PROG) *~ *.d *.o
 
 # FIXME: clean if switching between test and test-installed or use different directories
-test test-installed: $(PROG) $(patsubst %.cpp,%.o,$(COMPILE_TESTS))
+test test-installed: $(PROG) $(patsubst %.cpp,%.CompileOnly,$(COMPILE_TESTS))
 	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \
@@ -56,8 +56,8 @@ test test-installed: $(PROG) $(patsubst %.cpp,%.o,$(COMPILE_TESTS))
 $(PROG) : % : %.cpp $(MACGYVER_TARGET)
 	$(CXX) $(CFLAGS) -MD -o $@ $@.cpp $(INCLUDES) $(LIBS)
 
-%.o : %.cpp
-	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+%.CompileOnly : %.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -o /dev/null $<
 
 
 ifneq ($(wildcard *.d),)
