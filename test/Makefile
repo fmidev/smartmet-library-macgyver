@@ -111,7 +111,7 @@ PostgreSQLConnectionTest.conf:
 dummy:
 	true
 
-.PROXY: PostgreSQLConnectionTest.conf
+.PHONY: PostgreSQLConnectionTest.conf
 
 ifneq ($(wildcard *.d),)
 -include $(wildcard *.d)
