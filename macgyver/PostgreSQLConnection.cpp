@@ -807,7 +807,7 @@ PostgreSQLConnection::PreparedSQL::PreparedSQL(
     , sql(sql)
 {
    auto c = conn.impl->check_connection();
-   if (c)
+   if (!c)
    {
      throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
    }
