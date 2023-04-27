@@ -22,26 +22,28 @@ utf::test_suite* init_unit_test_suite(int argc, char* argv[])
 
 namespace env
 {
-    std::shared_ptr<db::PostgreSQLConnection> conn;
+    db::PostgreSQLConnectionOptions opts;
+//    std::shared_ptr<db::PostgreSQLConnection> conn;
 }
 
-BOOST_AUTO_TEST_CASE(test_open_connection)
+BOOST_AUTO_TEST_CASE(get_connection_options)
 {
     std::ifstream config("PostgreSQLConnectionTest.conf");
     BOOST_REQUIRE(bool(config));
 
-    db::PostgreSQLConnectionOptions opts;
-    config >> opts.host >> opts.port >> opts.database >> opts.username >> opts.password;
-
-    env::conn = std::make_shared<db::PostgreSQLConnection>(opts);
-    BOOST_REQUIRE(static_cast<bool>(env::conn));
-    BOOST_REQUIRE(env::conn->isConnected());
+    config >> env::opts.host
+           >> env::opts.port
+           >> env::opts.database
+           >> env::opts.username
+           >> env::opts.password;
 }
 
-BOOST_AUTO_TEST_CASE(test_parametrized_sql_1, * utf::depends_on("test_open_connection"))
+BOOST_AUTO_TEST_CASE(test_parametrized_sql_1, * utf::depends_on("get_connection_options"))
 {
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
     pqxx::result result =
-        SHOW_EXCEPTIONS(env::conn->exec_params(
+        SHOW_EXCEPTIONS(conn.exec_params(
                 "SELECT id, lat, lon FROM geonames WHERE name=$1",
                 "Valassaaret"));
     BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
@@ -49,12 +51,13 @@ BOOST_AUTO_TEST_CASE(test_parametrized_sql_1, * utf::depends_on("test_open_conne
     BOOST_CHECK_EQUAL(id, 632561);
 }
 
-BOOST_AUTO_TEST_CASE(test_prepared_sql_1, * utf::depends_on("test_open_connection"))
+BOOST_AUTO_TEST_CASE(test_prepared_sql_1, * utf::depends_on("get_connection_options"))
 {
-    BOOST_REQUIRE(env::conn->isConnected());
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
     auto sql = SHOW_EXCEPTIONS(
         std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
-            *env::conn,
+            conn,
             "test",
             "SELECT id, lat, lon FROM geonames WHERE name=$1"));
 
@@ -64,24 +67,29 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_1, * utf::depends_on("test_open_connectio
     BOOST_CHECK_EQUAL(id, 632561);
 }
 
-BOOST_AUTO_TEST_CASE(test_parametrized_sql_2, * utf::depends_on("test_open_connection"))
+BOOST_AUTO_TEST_CASE(test_parametrized_sql_2, * utf::depends_on("get_connection_options"))
 {
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+    auto transaction = conn.transaction();
     pqxx::result result =
         SHOW_EXCEPTIONS(
-            env::conn->exec_params(
-                "SELECT id, lat, lon FROM geonames WHERE name=$1",
-                "Riga"));
+            conn.exec_params(
+                "SELECT id, lat, lon FROM geonames WHERE name=$1 AND countries_iso2=$2",
+                "Riga",
+                "LV"));
     BOOST_REQUIRE_EQUAL(result.size(), std::size_t(2));
     int id = result[0]["id"].as<int>();
     BOOST_CHECK_EQUAL(id, 456172);
 }
 
-BOOST_AUTO_TEST_CASE(test_prepared_sql_reopen, * utf::depends_on("test_open_connection"))
+BOOST_AUTO_TEST_CASE(test_prepared_sql_reopen, * utf::depends_on("get_connection_options"))
 {
-    BOOST_REQUIRE(env::conn->isConnected());
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
     auto sql = SHOW_EXCEPTIONS(
         std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
-            *env::conn,
+            conn,
             "test",
             "SELECT id, lat, lon FROM geonames WHERE name=$1"));
 
@@ -92,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_reopen, * utf::depends_on("test_open_conn
 
     // Reopen connection and check whether prepared SQL is restored
 
-    env::conn->reopen();
+    conn.reopen();
 
     result= SHOW_EXCEPTIONS(sql->exec("Valassaaret"));
     BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
