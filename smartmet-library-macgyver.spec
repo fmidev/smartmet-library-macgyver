@@ -71,7 +71,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 21.2.2
 #TestRequires: smartmet-utils-devel >= 22.1.20
-#TestREquires: smartmet-test-db
+#TestRequires: smartmet-test-db
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
 Obsoletes: libsmartmet_macgyver-debuginfo < 16.12.20
