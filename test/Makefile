@@ -69,9 +69,11 @@ all: $(PROG)
 clean:
 	rm -f $(PROG) *~ *.d
 	rm -f PostgreSQLConnectionTest.conf
+	rm -rf tmp-geonames-db
+	rm -f tmp-geonames-db.log
 
 # FIXME: clean if switching between test and test-installed or use different directories
-test test-installed: $(PROG) $(patsubst %.cpp,%.CompileOnly,$(COMPILE_TESTS)) $(TEST_FINISH_TARGETS)
+test test-installed: $(PROG) $(patsubst %.cpp,%.CompileOnly,$(COMPILE_TESTS)) $(TEST_PREPARE_TARGETS)
 	@echo Running tests:
 	@rm -f *.err
 	@for prog in $(PROG); do \
