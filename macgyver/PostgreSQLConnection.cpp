@@ -347,12 +347,7 @@ class PostgreSQLConnection::Impl
             itsDataTypes.insert(std::make_pair(oid, datatype));
           }
 
-          if (itsConnection->is_open())
-          {
-            last_failed = false;
-            return itsConnection;
-          }
-
+          boost::unique_lock lock(m);
           for (const auto& item : prepared_sqls) {
             try
             {
@@ -364,6 +359,12 @@ class PostgreSQLConnection::Impl
                         << " sql='" << item.second << "': " << e.what()
                         << std::endl;
             }
+          }
+
+          if (itsConnection->is_open())
+          {
+            last_failed = false;
+            return itsConnection;
           }
         }
       }
