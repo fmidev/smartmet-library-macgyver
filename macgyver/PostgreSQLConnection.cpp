@@ -358,7 +358,7 @@ class PostgreSQLConnection::Impl
             itsDataTypes.insert(std::make_pair(oid, datatype));
           }
 
-          boost::unique_lock lock(m);
+          boost::unique_lock<boost::mutex> lock(m);
           for (const auto& item : prepared_sqls) {
             try
             {
