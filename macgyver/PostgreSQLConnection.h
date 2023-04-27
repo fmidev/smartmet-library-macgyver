@@ -117,6 +117,20 @@ class PostgreSQLConnection
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
+  template <typename... Args>
+  pqxx::result exec_params(const std::string& theSQLStatement, Args... args)
+  {
+     auto transaction_ptr = get_transaction_impl();
+     return transaction_ptr->exec_params(theSQLStatement, args...);
+  }
+
+  template <typename... Args>
+  pqxx::result exec_params_n(std::size_t num_rows, const std::string& theSQLStatement, Args... args)
+  {
+     auto transaction_ptr = get_transaction_impl();
+     return transaction_ptr->exec_params(num_rows, theSQLStatement, args...);
+  }
+
   void prepare(const std::string& name, const std::string& theSQLStatement) const;
 
   void unprepare(const std::string& name) const;
