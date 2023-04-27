@@ -49,8 +49,6 @@ BOOST_AUTO_TEST_CASE(test_parametrized_sql_1, * utf::depends_on("test_open_conne
     BOOST_CHECK_EQUAL(id, 632561);
 }
 
-#if 0
-// Jostain syystä ei toimi vielä
 BOOST_AUTO_TEST_CASE(test_prepared_sql_1, * utf::depends_on("test_open_connection"))
 {
     BOOST_REQUIRE(env::conn->isConnected());
@@ -60,12 +58,11 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_1, * utf::depends_on("test_open_connectio
             "test",
             "SELECT id, lat, lon FROM geonames WHERE name=$1"));
 
-    pqxx::result result= SHOW_EXCEPTIONS(sql->exec("test", "Valassaaret"));
+    pqxx::result result= SHOW_EXCEPTIONS(sql->exec("Valassaaret"));
     BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
     int id = result[0]["id"].as<int>();
     BOOST_CHECK_EQUAL(id, 632561);
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(test_parametrized_sql_2, * utf::depends_on("test_open_connection"))
 {
