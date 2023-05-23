@@ -78,30 +78,7 @@ class PostgreSQLConnection
        */
       template <typename Container>
       typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
-      exec_p(const Container& container, int requested_size = -1)
-      {
-        try
-        {
-          auto transaction_ptr = conn.get_transaction_impl();
-#if PQXX_VERSION_MAJOR < 7
-          if (requested_size < 0) {
-              return transaction_ptr->exec_prepared(name, pqxx::prepare::make_dynamic_params(container));
-          }
-          return transaction_ptr->exec_prepared_n(requested_size, name, pqxx::prepare::make_dynamic_params(container));
-#else
-          pqxx::params params;
-          params.append_multi(container);
-          if (requested_size < 0) {
-              return transaction_ptr->exec_prepared(name, params);
-          }
-          return transaction_ptr->exec_prepared_n(requested_size, name, params);
-#endif
-        }
-        catch (...)
-        {
-          throw Fmi::Exception::Trace(BCP, "Operation failed!");
-        }
-      }
+      exec_p(const Container& container, int requested_size = -1);
 
       template <typename... Args>
       pqxx::result exec(Args... args)
@@ -180,34 +157,7 @@ class PostgreSQLConnection
   exec_params_p(
       const std::string& theSQLStatement,
       const Container& container,
-      int requested_size =  -1)
-  {
-     // No easy way to use the same method name as for Args... as we need to distinguish from
-     // cases when std::string<something> is provided as the only argument
-     try
-     {
-       auto transaction_ptr = get_transaction_impl();
-#if PQXX_VERSION_MAJOR < 7
-       const auto params = pqxx::prepare::make_dynamic_params(container);
-       if (requested_size < 0) {
-           return transaction_ptr->exec_params(theSQLStatement, params);
-       }
-       return transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
-#else
-       pqxx::params params;
-       params.append_multi(container);
-       if (requested_size < 0) {
-           return transaction_ptr->exec_params(theSQLStatement, params);
-       }
-       return transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
-#endif
-     }
-     catch (...)
-     {
-       throw Fmi::Exception::Trace(BCP, "Operation failed!");
-     }
-  }
-
+      int requested_size =  -1);
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
@@ -244,6 +194,75 @@ class PostgreSQLConnection
   static std::atomic<bool> reconnectDisabled;
 
 };  // class PostgreSQLConnection
+
+
+namespace detail
+{
+
+#if PQXX_VERSION_MAJOR < 7
+
+template <typename Container>
+auto make_params(const Container& container) -> decltype(pqxx::prepare::make_dynamic_params(container))
+{
+  return pqxx::prepare::make_dynamic_params(container);
+}
+
+#else // PQXX_VERSION >= 7
+
+template <typename Container>
+  auto make_params(const Container& container) -> pqxx::params
+{
+  pqxx::params params;
+  params.append_multi(container);
+  return params;
+}
+
+#endif
+
+} // namespace detail
+
+template <typename Container>
+typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int requested_size)
+{
+  try
+  {
+    auto transaction_ptr = conn.get_transaction_impl();
+    const auto params = detail::make_params(container);
+    if (requested_size < 0) {
+      return transaction_ptr->exec_prepared(name, params);
+     }
+    return transaction_ptr->exec_prepared_n(requested_size, name, pqxx::prepare::make_dynamic_params(container));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+template <typename Container>
+typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+PostgreSQLConnection::exec_params_p(
+    const std::string& theSQLStatement,
+    const Container& container,
+    int requested_size)
+{
+  // No easy way to use the same method name as for Args... as we need to distinguish from
+  // cases when std::string<something> is provided as the only argument
+  try
+  {
+    auto transaction_ptr = get_transaction_impl();
+    const auto params = detail::make_params(container);
+    if (requested_size < 0) {
+      return transaction_ptr->exec_params(theSQLStatement, params);
+    }
+    return transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
 
 }  // namespace Database
 }  // namespace Fmi
