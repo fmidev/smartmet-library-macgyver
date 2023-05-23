@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.4.27
+Version: 23.5.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue May 23 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.5.23-1.fmi
+- PostgrSQLConnection: support for providing prepared and parametrized SQL parameters from container
+
 * Thu Apr 27 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.4.27-1.fmi
 - PostgreSQLConnection: added parametrized and prepared SQL query support
 
