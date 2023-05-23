@@ -232,7 +232,7 @@ PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int reques
     if (requested_size < 0) {
       return transaction_ptr->exec_prepared(name, params);
      }
-    return transaction_ptr->exec_prepared_n(requested_size, name, pqxx::prepare::make_dynamic_params(container));
+    return transaction_ptr->exec_prepared_n(requested_size, name, params);
   }
   catch (...)
   {
