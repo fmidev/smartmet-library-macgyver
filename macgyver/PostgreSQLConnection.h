@@ -77,7 +77,7 @@ class PostgreSQLConnection
        *                         (default -1, negative value means no limits)
        */
       template <typename Container>
-      typename std::enable_if<is_iterable_v<Container>, pqxx::result>::type
+      typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
       exec_p(const Container& container, int requested_size = -1)
       {
         try
@@ -87,7 +87,7 @@ class PostgreSQLConnection
           if (requested_size < 0) {
               return transaction_ptr->exec_prepared(name, pqxx::prepare::make_dynamic_params(container));
           }
-          transaction_ptr->exec_prepared_n(requested_size, name, pqxx::prepare::make_dynamic_params(container));
+          return transaction_ptr->exec_prepared_n(requested_size, name, pqxx::prepare::make_dynamic_params(container));
 #else
           pqxx::params params;
           params.append_multi(container);
@@ -176,7 +176,7 @@ class PostgreSQLConnection
    *                         (default -1, negative value means no limits)
    */
   template <typename Container>
-  typename std::enable_if<is_iterable_v<Container>, pqxx::result>::type
+  typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
   exec_params_p(
       const std::string& theSQLStatement,
       const Container& container,
@@ -192,7 +192,7 @@ class PostgreSQLConnection
        if (requested_size < 0) {
            return transaction_ptr->exec_params(theSQLStatement, params);
        }
-       transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
+       return transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
 #else
        pqxx::params params;
        params.append_multi(container);
