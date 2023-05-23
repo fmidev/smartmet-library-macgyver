@@ -12,6 +12,7 @@
 #include <pqxx/pqxx>
 #include <string>
 #include "Exception.h"
+#include "TypeTraits.h"
 
 namespace Fmi
 {
@@ -67,6 +68,18 @@ class PostgreSQLConnection
       PreparedSQL(const PostgreSQLConnection& theConnection, const std::string& name, const std::string& sql);
       ~PreparedSQL();
 
+      /**
+       *   @brief execute prepared SQL statement with parameters provided in a container
+       *         (eg. std::vector)
+       *
+       *   @param container container with parameters
+       *   @param requested_size requested row count in the response
+       *                         (default -1, negative value means no limits)
+       */
+      template <typename Container>
+      typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+      exec_p(const Container& container, int requested_size = -1);
+
       template <typename... Args>
       pqxx::result exec(Args... args)
       {
@@ -94,7 +107,7 @@ class PostgreSQLConnection
           throw Fmi::Exception::Trace(BCP, "Operation failed!");
         }
       }
-};
+  };
 
   ~PostgreSQLConnection();
   PostgreSQLConnection(bool theDebug = false);
@@ -128,8 +141,23 @@ class PostgreSQLConnection
   pqxx::result exec_params_n(std::size_t num_rows, const std::string& theSQLStatement, Args... args)
   {
      auto transaction_ptr = get_transaction_impl();
-     return transaction_ptr->exec_params(num_rows, theSQLStatement, args...);
+     return transaction_ptr->exec_params_n(num_rows, theSQLStatement, args...);
   }
+
+  /**
+   *   @brief execute prepared SQL statement with parameters provided in a container
+   *         (eg. std::vector)
+   *
+   *   @param container container with parameters
+   *   @param requested_size requested row count in the response
+   *                         (default -1, negative value means no limits)
+   */
+  template <typename Container>
+  typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+  exec_params_p(
+      const std::string& theSQLStatement,
+      const Container& container,
+      int requested_size =  -1);
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
@@ -166,6 +194,75 @@ class PostgreSQLConnection
   static std::atomic<bool> reconnectDisabled;
 
 };  // class PostgreSQLConnection
+
+
+namespace detail
+{
+
+#if PQXX_VERSION_MAJOR < 7
+
+template <typename Container>
+auto make_params(const Container& container) -> decltype(pqxx::prepare::make_dynamic_params(container))
+{
+  return pqxx::prepare::make_dynamic_params(container);
+}
+
+#else // PQXX_VERSION >= 7
+
+template <typename Container>
+  auto make_params(const Container& container) -> pqxx::params
+{
+  pqxx::params params;
+  params.append_multi(container);
+  return params;
+}
+
+#endif
+
+} // namespace detail
+
+template <typename Container>
+typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int requested_size)
+{
+  try
+  {
+    auto transaction_ptr = conn.get_transaction_impl();
+    const auto params = detail::make_params(container);
+    if (requested_size < 0) {
+      return transaction_ptr->exec_prepared(name, params);
+     }
+    return transaction_ptr->exec_prepared_n(requested_size, name, params);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+template <typename Container>
+typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+PostgreSQLConnection::exec_params_p(
+    const std::string& theSQLStatement,
+    const Container& container,
+    int requested_size)
+{
+  // No easy way to use the same method name as for Args... as we need to distinguish from
+  // cases when std::string<something> is provided as the only argument
+  try
+  {
+    auto transaction_ptr = get_transaction_impl();
+    const auto params = detail::make_params(container);
+    if (requested_size < 0) {
+      return transaction_ptr->exec_params(theSQLStatement, params);
+    }
+    return transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
 
 }  // namespace Database
 }  // namespace Fmi
