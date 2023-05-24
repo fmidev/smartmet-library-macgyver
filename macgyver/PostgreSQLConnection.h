@@ -107,6 +107,8 @@ class PostgreSQLConnection
           throw Fmi::Exception::Trace(BCP, "Operation failed!");
         }
       }
+
+      using Ptr = std::shared_ptr<PreparedSQL>;
   };
 
   ~PostgreSQLConnection();

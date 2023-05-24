@@ -583,6 +583,12 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   }
 }
 
+PostgreSQLConnection::PreparedSQL::Ptr
+PostgreSQLConnection::prepare(const std::string& name, const std::string& theSQLStatement) const
+{
+    return std::make_shared<PreparedSQL>(*this, name, theSQLStatement);
+}
+
 void PostgreSQLConnection::cancel()
 {
   try
