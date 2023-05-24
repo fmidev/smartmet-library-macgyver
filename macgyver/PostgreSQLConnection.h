@@ -132,15 +132,18 @@ class PostgreSQLConnection
   pqxx::result execute(const std::string& theSQLStatement) const;
   void cancel();
 
+  PreparedSQL::Ptr prepare(const std::string& name, const std::string& theSQLStatement) const;
+
   template <typename... Args>
-  pqxx::result exec_params(const std::string& theSQLStatement, Args... args)
+  pqxx::result exec_params(const std::string& theSQLStatement, Args... args) const
   {
      auto transaction_ptr = get_transaction_impl();
      return transaction_ptr->exec_params(theSQLStatement, args...);
   }
 
   template <typename... Args>
-  pqxx::result exec_params_n(std::size_t num_rows, const std::string& theSQLStatement, Args... args)
+  pqxx::result exec_params_n(std::size_t num_rows, const std::string& theSQLStatement,
+      Args... args) const
   {
      auto transaction_ptr = get_transaction_impl();
      return transaction_ptr->exec_params_n(num_rows, theSQLStatement, args...);
@@ -159,7 +162,7 @@ class PostgreSQLConnection
   exec_params_p(
       const std::string& theSQLStatement,
       const Container& container,
-      int requested_size =  -1);
+      int requested_size =  -1) const;
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
@@ -247,7 +250,7 @@ typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
 PostgreSQLConnection::exec_params_p(
     const std::string& theSQLStatement,
     const Container& container,
-    int requested_size)
+    int requested_size) const
 {
   // No easy way to use the same method name as for Args... as we need to distinguish from
   // cases when std::string<something> is provided as the only argument
