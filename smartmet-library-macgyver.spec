@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.5.24
+Version: 23.6.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jun  2 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.2-1.fmi
+- Added Fmi::xmlescape
+
 * Wed May 24 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.5.24-1.fmi
 - PostgreSQLConnection: make methods const and add method prepare
 
