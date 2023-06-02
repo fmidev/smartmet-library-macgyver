@@ -1070,4 +1070,46 @@ std::string trim_copy(const std::string& value)
   }
 }
 
+// Escape for HTML/SVG/XML
+std::string xmlescape(const std::string& input)
+{
+  try
+  {
+    std::string output;
+    output.reserve(input.size() + 20);  // 20 is just a guess to avoid one resize
+
+    // https://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string
+
+    for (size_t pos = 0; pos != input.size(); ++pos)
+    {
+      switch (input[pos])
+      {
+        case '&':
+          output += "&amp;";
+          break;
+        case '\"':
+          output += "&quot;";
+          break;
+        case '\'':
+          output += "&apos;";
+          break;
+        case '<':
+          output += "&lt;";
+          break;
+        case '>':
+          output += "&gt;";
+          break;
+        default:
+          output += input[pos];
+          break;
+      }
+    }
+    return output;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 }  // namespace Fmi

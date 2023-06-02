@@ -389,4 +389,13 @@ BOOST_AUTO_TEST_CASE(trim)
   BOOST_CHECK_EQUAL(input, "a");
 }
 
+BOOST_AUTO_TEST_CASE(xmlescape)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::xmlescape()");
+
+  std::string input = "< 100";
+  std::string output = Fmi::xmlescape(input);
+  BOOST_CHECK_EQUAL(output, "&lt; 100");
+}
+
 // ======================================================================
