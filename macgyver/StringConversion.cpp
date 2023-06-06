@@ -1159,15 +1159,7 @@ std::string safexmlescape(const std::string& input)
           break;
         }
         default:
-          if (input[pos] < 32 || input[pos] > 126)
-          {
-            // Numeric character reference for non-printable ASCII characters
-            output += "&#";
-            output += Fmi::to_string(static_cast<int>(input[pos]));
-            output += ";";
-          }
-          else
-            output += input[pos];
+          output += input[pos];
           break;
       }
     }
