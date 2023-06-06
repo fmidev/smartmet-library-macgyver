@@ -1100,7 +1100,15 @@ std::string xmlescape(const std::string& input)
           output += "&gt;";
           break;
         default:
-          output += input[pos];
+          if (input[pos] < 32 || input[pos] > 126)
+          {
+            // Numeric character reference for non-printable ASCII characters
+            output += "&#";
+            output += Fmi::to_string(static_cast<int>(input[pos]));
+            output += ";";
+          }
+          else
+            output += input[pos];
           break;
       }
     }
@@ -1115,47 +1123,60 @@ std::string xmlescape(const std::string& input)
 // Do not escape parts which are already escaped
 std::string safexmlescape(const std::string& input)
 {
-  std::string escaped;
-  for (size_t i = 0; i < input.size(); ++i)
+  try
   {
-    if (input[i] == '&')
+    std::string output;
+    output.reserve(input.size() + 20);  // 20 is just a guess to avoid one resize
+
+    for (size_t pos = 0; pos != input.size(); ++pos)
     {
-      size_t endpos = input.find(';', i);
-      if (endpos != std::string::npos)
+      switch (input[pos])
       {
-        std::string entity = input.substr(i, endpos - i + 1);
-        if (entity == "&lt;" || entity == "&gt;" || entity == "&amp;" || entity == "&quot;" ||
-            entity == "&apos;")
+        case '\"':
+          output += "&quot;";
+          break;
+        case '\'':
+          output += "&apos;";
+          break;
+        case '<':
+          output += "&lt;";
+          break;
+        case '>':
+          output += "&gt;";
+          break;
+        case '&':
         {
-          escaped += entity;
-          i = endpos;
-          continue;
+          auto endpos = input.find_first_of("&;\"'<>", pos + 1);
+          if (endpos != std::string::npos && endpos - pos > 1 && input[endpos] == ';')
+          {
+            // If we encountered an already encoded segment such as "&lt"; or "&32"; output it as is
+            auto entity = input.substr(pos, endpos - pos + 1);
+            output += entity;
+            pos += entity.size() - 1;
+          }
+          else
+            output += "&amp;";
+          break;
         }
+        default:
+          if (input[pos] < 32 || input[pos] > 126)
+          {
+            // Numeric character reference for non-printable ASCII characters
+            output += "&#";
+            output += Fmi::to_string(static_cast<int>(input[pos]));
+            output += ";";
+          }
+          else
+            output += input[pos];
+          break;
       }
     }
-    switch (input[i])
-    {
-      case '<':
-        escaped += "&lt;";
-        break;
-      case '>':
-        escaped += "&gt;";
-        break;
-      case '&':
-        escaped += "&amp;";
-        break;
-      case '\"':
-        escaped += "&quot;";
-        break;
-      case '\'':
-        escaped += "&apos;";
-        break;
-      default:
-        escaped += input[i];
-        break;
-    }
+    return output;
   }
-  return escaped;
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Fmi

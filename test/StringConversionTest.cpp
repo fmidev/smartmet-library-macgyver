@@ -405,6 +405,14 @@ BOOST_AUTO_TEST_CASE(safexmlescape)
   std::string input = "< 100 &lt; 200 & &amp;";
   std::string output = Fmi::safexmlescape(input);
   BOOST_CHECK_EQUAL(output, "&lt; 100 &lt; 200 &amp; &amp;");
+
+  input = "12&&34";
+  output = Fmi::safexmlescape(input);
+  BOOST_CHECK_EQUAL("12&amp;&amp;34", output);
+
+  input = "&#176;C";
+  output = Fmi::safexmlescape(input);
+  BOOST_CHECK_EQUAL(input, output);
 }
 
 // ======================================================================
