@@ -822,7 +822,7 @@ void parse_errors()
 
   try
   {
-    std::string input = "19700124T095740";
+    std::string input = "2023060bb60000";
     auto res = TimeParser::parse(input);
     TEST_FAILED("Should not return result " + tostring(res) + " for input " + input);
   }
