@@ -97,7 +97,7 @@ void parse_iso()
       {"2000-02-28T12:00:00.321", ptime(date(2000, 2, 28), hours(12))},
       {"2000-02-28T12:00:00.321+03:00", ptime(date(2000, 2, 28), hours(9))}  // BRAINSTORM-480
       ,
-      {"2022-05-19T21:00:00.000Z", ptime(date(2022,5,19), hours(21))},
+      {"2022-05-19T21:00:00.000Z", ptime(date(2022, 5, 19), hours(21))},
       {"2015-06-09T16:00:00+03", ptime(date(2015, 6, 9), hours(13))},
       {"2015-06-09T16:00:00+03:00", ptime(date(2015, 6, 9), hours(13))},
       {"2015-06-09T16:00:00+0300", ptime(date(2015, 6, 9), hours(13))},
@@ -717,29 +717,25 @@ void looks_utc()
 {
   using namespace Fmi;
 
-  std::vector<Test::TimeParseTest<bool> > data =
-      {
-          {"200701020500", false}
-          ,{"20000228T051500", false}
-          ,{"2007-01-02T05:00:00", false}
-          ,{"2000-02-28T05:15:00", false}
-          ,{"2000-02-28T05:15:10", false}
-          ,{"2000-02-28T05:15:10Z", true}
-          ,{"2000-02-28T05:15:10+01:00", true}
-          ,{"2000-02-28T05:15:10-02", true}
-          ,{"2007-01-02 05:00:00", false}
-          ,{"2000-02-28 05:15:00", false}
-          ,{"1167714000", true}
-      };
+  std::vector<Test::TimeParseTest<bool> > data = {{"200701020500", false},
+                                                  {"20000228T051500", false},
+                                                  {"2007-01-02T05:00:00", false},
+                                                  {"2000-02-28T05:15:00", false},
+                                                  {"2000-02-28T05:15:10", false},
+                                                  {"2000-02-28T05:15:10Z", true},
+                                                  {"2000-02-28T05:15:10+01:00", true},
+                                                  {"2000-02-28T05:15:10-02", true},
+                                                  {"2007-01-02 05:00:00", false},
+                                                  {"2000-02-28 05:15:00", false},
+                                                  {"1167714000", true}};
 
   for (const auto& item : data)
   {
-      if (item.expected ^ TimeParser::looks_utc(item.src))
-      {
-          TEST_FAILED((item.src + " should look like "
-                  + (item.expected ? "UTC" : "local")
-                  + " time").c_str());
-      }
+    if (item.expected ^ TimeParser::looks_utc(item.src))
+    {
+      TEST_FAILED(
+          (item.src + " should look like " + (item.expected ? "UTC" : "local") + " time").c_str());
+    }
   }
 
   TEST_PASSED();
@@ -808,6 +804,35 @@ void parse_summertime()
   TEST_PASSED();
 }
 
+void parse_errors()
+{
+  using namespace Fmi;
+  using namespace boost::posix_time;
+  using namespace boost::gregorian;
+
+  try
+  {
+    std::string input = "202301dropthedb";
+    auto res = TimeParser::parse(input);
+    TEST_FAILED("Should not return result " + tostring(res) + " for input " + input);
+  }
+  catch (...)
+  {
+  }
+
+  try
+  {
+    std::string input = "19700124T095740";
+    auto res = TimeParser::parse(input);
+    TEST_FAILED("Should not return result " + tostring(res) + " for input " + input);
+  }
+  catch (...)
+  {
+  }
+
+  TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * The actual test suite
@@ -836,6 +861,7 @@ class tests : public tframe::tests
     TEST(try_parse_duration);
     TEST(parse_duration);
     TEST(parse_iso_duration);
+    TEST(parse_errors);
   }
 };
 
