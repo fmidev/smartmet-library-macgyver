@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.6.2
+Version: 23.6.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Jun  6 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.6-1.fmi
+- Added Fmi::safexmlescape
+
 * Fri Jun  2 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.2-1.fmi
 - Added Fmi::xmlescape
 
