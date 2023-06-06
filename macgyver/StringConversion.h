@@ -78,6 +78,10 @@ bool looks_signed_int(const std::string& value);
 void trim(std::string& value);
 std::string trim_copy(const std::string& value);
 
+// Plain xmlescape
 std::string xmlescape(const std::string& input);
+
+// Version which does nothing for input which is already escaped
+std::string safexmlescape(const std::string& input);
 
 }  // namespace Fmi

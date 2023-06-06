@@ -1112,4 +1112,50 @@ std::string xmlescape(const std::string& input)
   }
 }
 
+// Do not escape parts which are already escaped
+std::string safexmlescape(const std::string& input)
+{
+  std::string escaped;
+  for (size_t i = 0; i < input.size(); ++i)
+  {
+    if (input[i] == '&')
+    {
+      size_t endpos = input.find(';', i);
+      if (endpos != std::string::npos)
+      {
+        std::string entity = input.substr(i, endpos - i + 1);
+        if (entity == "&lt;" || entity == "&gt;" || entity == "&amp;" || entity == "&quot;" ||
+            entity == "&apos;")
+        {
+          escaped += entity;
+          i = endpos;
+          continue;
+        }
+      }
+    }
+    switch (input[i])
+    {
+      case '<':
+        escaped += "&lt;";
+        break;
+      case '>':
+        escaped += "&gt;";
+        break;
+      case '&':
+        escaped += "&amp;";
+        break;
+      case '\"':
+        escaped += "&quot;";
+        break;
+      case '\'':
+        escaped += "&apos;";
+        break;
+      default:
+        escaped += input[i];
+        break;
+    }
+  }
+  return escaped;
+}
+
 }  // namespace Fmi
