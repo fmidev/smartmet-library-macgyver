@@ -78,11 +78,68 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_2, * utf::depends_on("get_connection_opti
             "SELECT id, lat, lon FROM geonames WHERE name=$1 AND countries_iso2=$2"));
 
     const std::vector<std::string> params = { "Riga", "LV" };
-
     pqxx::result result= SHOW_EXCEPTIONS(sql->exec_p(params));
     BOOST_REQUIRE_EQUAL(result.size(), std::size_t(2));
     int id = result[0]["id"].as<int>();
     BOOST_CHECK_EQUAL(id, 456172);
+}
+
+BOOST_AUTO_TEST_CASE(test_prepared_sql_reuse_no_transaction, * utf::depends_on("get_connection_options"))
+{
+    int id;
+    pqxx::result result;
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+    auto sql = SHOW_EXCEPTIONS(
+        std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
+            conn,
+            "test",
+            "SELECT id, lat, lon FROM geonames WHERE name=$1 ORDER BY id ASC"));
+
+    result = SHOW_EXCEPTIONS(sql->exec("Riga"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(2));
+    id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, -16003156);
+
+    result = SHOW_EXCEPTIONS(sql->exec("Turku"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(3));
+    id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, -105198);
+
+    result = SHOW_EXCEPTIONS(sql->exec("Tampere"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(2));
+    id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, 634963);
+}
+
+BOOST_AUTO_TEST_CASE(test_prepared_sql_reuse_in_transaction, * utf::depends_on("get_connection_options"))
+{
+    int id;
+    pqxx::result result;
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+    auto sql = SHOW_EXCEPTIONS(
+        std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
+            conn,
+            "test",
+            "SELECT id, lat, lon FROM geonames WHERE name=$1 ORDER BY id ASC"));
+
+    auto transaction = conn.transaction();
+
+    result = SHOW_EXCEPTIONS(sql->exec("Riga"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(2));
+    id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, -16003156);
+
+    result = SHOW_EXCEPTIONS(sql->exec("Turku"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(3));
+    id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, -105198);
+
+    result = SHOW_EXCEPTIONS(sql->exec("Tampere"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(2));
+    id = result[0]["id"].as<int>();
+    BOOST_CHECK_EQUAL(id, 634963);
 }
 
 BOOST_AUTO_TEST_CASE(test_parametrized_sql_2, * utf::depends_on("get_connection_options"))
@@ -142,4 +199,78 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_reopen, * utf::depends_on("get_connection
     BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
     id = result[0]["id"].as<int>();
     BOOST_CHECK_EQUAL(id, 632561);
+}
+
+BOOST_AUTO_TEST_CASE(test_executeNonTransaction_after_parametrized_sql,
+    * utf::depends_on("get_connection_options"))
+{
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+
+    pqxx::result result;
+    const std::vector<std::string> params = { "Riga", "LV" };
+
+    do {
+        auto transaction = conn.transaction();
+        result =
+            SHOW_EXCEPTIONS(
+                conn.exec_params_p(
+                    "SELECT id, lat, lon FROM geonames WHERE name=$1 AND countries_iso2=$2",
+                    params));
+        BOOST_REQUIRE_EQUAL(result.size(), std::size_t(2));
+        int id = result[0]["id"].as<int>();
+        BOOST_CHECK_EQUAL(id, 456172);
+    } while (false);
+
+    result = SHOW_EXCEPTIONS(conn.executeNonTransaction("SELECT COUNT(*) FROM geonames"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
+}
+
+BOOST_AUTO_TEST_CASE(test_executeNonTransaction_after_using_prepared_sql,
+    * utf::depends_on("get_connection_options"))
+{
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+
+    pqxx::result result;
+
+    do {
+        db::PostgreSQLConnection conn(env::opts);
+        BOOST_REQUIRE(conn.isConnected());
+        auto sql = SHOW_EXCEPTIONS(
+            std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
+                conn,
+                "test",
+                "SELECT id, lat, lon FROM geonames WHERE name=$1"));
+
+        result= SHOW_EXCEPTIONS(sql->exec("Valassaaret"));
+        BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
+        int id = result[0]["id"].as<int>();
+        BOOST_CHECK_EQUAL(id, 632561);
+    } while (false);
+
+    result = SHOW_EXCEPTIONS(conn.executeNonTransaction("SELECT COUNT(*) FROM geonames"));
+    BOOST_REQUIRE_EQUAL(result.size(), std::size_t(1));
+}
+
+BOOST_AUTO_TEST_CASE(test_executeNonTransaction_with_active_transaction,
+    * utf::depends_on("get_connection_options"))
+{
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+
+    pqxx::result result;
+
+    {
+        auto transaction = conn.transaction();
+        result = SHOW_EXCEPTIONS(transaction->execute("SELECT id, lat, lon FROM geonames WHERE name='Helsinki'"));
+        // Transaction is active: should fail
+        BOOST_REQUIRE_THROW(
+            result = conn.executeNonTransaction("SELECT COUNT(*) FROM geonames"),
+            Fmi::Exception);
+    }
+
+    // Now the transaction has ended
+    BOOST_REQUIRE_NO_THROW(
+        result = conn.executeNonTransaction("SELECT COUNT(*) FROM geonames"));
 }
