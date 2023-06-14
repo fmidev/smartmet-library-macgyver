@@ -470,7 +470,7 @@ boost::posix_time::ptime parse_epoch(const std::string& str)
     iterator start = str.begin();
     iterator finish = str.end();
 
-    bool success = qi::parse(start, finish, theParser, target);
+    bool success = qi::parse(start, finish, theParser >> qi::eoi, target);
 
     if (success)  // parse succesful, parsers check that entire input was consumed
       return ::buildFromEpoch(target);
@@ -973,7 +973,7 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
 
       iterator start = str.begin();
       iterator finish = str.end();
-      bool success = qi::parse(start, finish, theParser, target);
+      bool success = qi::parse(start, finish, theParser >> qi::eoi, target);
       if (success)  // parse succesful, parsers check that entire input was consumed
       {
         try

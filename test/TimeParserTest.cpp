@@ -34,7 +34,12 @@ void parse_timestamp()
       {"20070102T0500", ptime(date(2007, 1, 2), hours(5) + minutes(0))},
       {"20000228T0515", ptime(date(2000, 2, 28), hours(5) + minutes(15))}};
 
-  std::vector<std::string> should_fail = {"foobar", "12345678901", "123456789012"};
+  std::vector<std::string> should_fail =
+      {
+          "foobar",
+          "12345678901",
+          "123456789012"
+      };
 
   Fmi::Test::check_time_parse(should_pass, &TimeParser::parse_iso);
   Fmi::Test::check_time_parse_fail(should_fail, &TimeParser::parse_iso);
@@ -299,6 +304,20 @@ void parse()
   TimeParser::parse("+12m");
   TimeParser::parse("+13M");
   TimeParser::parse("-14M");
+
+  try {
+      auto result = TimeParser::parse("202301dropthedb");
+      TEST_FAILED("TimeParser::parse(\"202301dropthedb\") is expected to fail (got "
+          + to_iso_string(result));
+  } catch (const tframe::failed&) { throw;
+  } catch (...) {}
+
+  try {
+      auto result = TimeParser::parse("2023060bb60000");
+      TEST_FAILED("TimeParser::parse(\"2023060bb60000\") is expected to fail (got "
+          + to_iso_string(result));
+  } catch (const tframe::failed&) { throw;
+  } catch (...) {}
 
   TEST_PASSED();
 }
