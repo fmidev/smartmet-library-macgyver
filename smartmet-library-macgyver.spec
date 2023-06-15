@@ -14,8 +14,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.6.6
-Release: 2%{?dist}.fmi
+Version: 23.6.15
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jun 15 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.6.15-1.fmi
+- Fix Fmi::TimeParse::parse: ensure that entire input is parsed
+
 * Tue Jun  6 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.6-2.fmi
 - Fixed ChatGPT generated Fmi::safexmlescape
 
