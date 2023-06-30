@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.6.15
+Version: 23.6.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jun 30 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.6.30-1.fmi
+- Fmi::Exception: fix disabling stack trace
+
 * Thu Jun 15 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.6.15-1.fmi
 - Fix Fmi::TimeParse::parse: ensure that entire input is parsed
 
