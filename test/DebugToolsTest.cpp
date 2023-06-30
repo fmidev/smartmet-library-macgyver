@@ -2,6 +2,30 @@
 #include <regression/tframe.h>
 #include <fstream>
 #include <memory>
+#include <vector>
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+
+namespace ba = boost::algorithm;
+
+std::vector<std::string> parse_stack_trace(const std::string& input)
+{
+  static boost::regex r_ansi("\\033\[[0-9;]+m");
+
+  std::vector<std::string> lines;
+  ba::split(
+      lines,
+      boost::regex_replace(input, r_ansi, "", boost::match_default | boost::format_all),
+      ba::is_any_of("\n"));
+
+  std::vector<std::string> result;
+  for (const auto& line : lines) {
+      if (line.substr(0, 9) == "EXCEPTION") {
+          result.push_back(ba::trim_copy(line.substr(10)));
+      }
+  }
+  return result;
+}
 
 int redirecter_test()
 {
@@ -32,9 +56,12 @@ int show_exceptions_test_1()
     } catch (...) {}
     redirecter.reset();
 
-    const std::string output = out.str();
-    // FIXME: add tests for output value
-    std::cout << out.str();
+    std::string output = out.str();
+    const auto tmp = parse_stack_trace(output);
+    if (tmp.size() != 2) {
+        TEST_FAILED("Exactly 2 frames expected");
+    }
+    //std::cout << out.str();
 
     TEST_PASSED();
 }
@@ -53,8 +80,11 @@ int show_exceptions_test_2()
     redirecter.reset();
 
     const std::string output = out.str();
-    // FIXME: add tests for output value
-    std::cout << out.str();
+    const auto tmp = parse_stack_trace(output);
+    if (tmp.size() != 2) {
+        TEST_FAILED("Exactly 2 frames expected");
+    }
+    //std::cout << out.str();
 
     TEST_PASSED();
 }
@@ -67,12 +97,14 @@ int show_exceptions_test_3_funct(int depth)
         } else {
             Fmi::Exception e(BCP, "Testing");
             e.disableStackTrace();
+            e.disableLogging();
             throw e;
         }
     } catch (...) {
         auto e = Fmi::Exception::Trace(BCP, "Operation failed");
         e.addParameter("Depth", std::to_string(depth));
         e.disableStackTrace();
+        e.disableLogging();
         throw e;
     }
 }
@@ -89,8 +121,11 @@ int show_exceptions_test_3()
     redirecter.reset();
 
     const std::string output = out.str();
-    // FIXME: add tests for output value
-    std::cout << out.str();
+    const auto tmp = parse_stack_trace(output);
+    if (tmp.size() != 8) {
+        TEST_FAILED("Exactly 8 frames expected. Got " + std::to_string(tmp.size()));
+    }
+    //std::cout << out.str();
 
     TEST_PASSED();
 }
