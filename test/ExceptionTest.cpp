@@ -1,9 +1,12 @@
 #include "Exception.h"
 #include <regression/tframe.h>
+#include <macgyver/DebugTools.h>
 #include <future>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 using std::string;
 
@@ -46,6 +49,24 @@ void test_std_library_exception_reporting_1()
     TEST_FAILED("Fmi::Exception was expected");
   }
   TEST_PASSED();
+}
+
+int count_lines(const std::string& input, const std::string& regex)
+{
+  static boost::regex r_ansi("\\033\[[0-9;]+m");
+
+  std::vector<std::string> lines;
+  ba::split(lines, input, ba::is_any_of("\n"));
+
+  int count = 0;
+  boost::regex r(regex);
+  for (const auto& line : lines) {
+      std::string in = boost::regex_replace(line, r_ansi, "", boost::match_default | boost::format_all);
+      if (boost::regex_search(in, r)) {
+          count++;
+      }
+  }
+  return count;
 }
 
 struct MyRuntimeError : public std::runtime_error
@@ -242,6 +263,85 @@ void test_squashing_stack_trace()
     TEST_PASSED();
 }
 
+void rethrow_with_stack_trace_disabled_example()
+{
+   try
+   {
+     try
+     {
+       try
+       {
+         Fmi::Exception exc(BCP, "Test exception");
+         exc.addParameter("test", "42");
+         exc.disableStackTrace();
+         throw exc;
+       }
+       catch (...)
+       {
+         throw Fmi::Exception::Trace(BCP, "rethrowing 1");
+       }
+     }
+     catch (...)
+     {
+       throw Fmi::Exception::Trace(BCP, "rethrowing 2");
+     }
+   }
+   catch (const Fmi::Exception& e)
+   {
+     throw Fmi::Exception::Trace(BCP, "rethrowing 3");
+   }
+}
+
+
+void test_stack_trace_disabled_1()
+{
+  std::ostringstream output;
+  try
+  {
+    rethrow_with_stack_trace_disabled_example();
+  }
+  catch (const Fmi::Exception& e)
+  {
+    if (!e.stackTraceDisabled())
+    {
+      TEST_FAILED("Stack trace was expected to be disabled");
+    }
+    const auto redirect = std::make_shared<Fmi::Redirecter>(output, std::cout);
+    output << e;
+  }
+
+  std::cout << output.str() << std::endl;
+  int count = count_lines(output.str(), "^EXCEPTION\\ rethrowing");
+  if (count != 0) {
+      TEST_FAILED("Stack trace was expected to be hidden");
+  }
+  TEST_PASSED();
+}
+
+void test_stack_trace_disabled_2()
+{
+  std::string output;
+  try
+  {
+    rethrow_with_stack_trace_disabled_example();
+  }
+  catch (const Fmi::Exception& e)
+  {
+    if (!e.stackTraceDisabled())
+    {
+      TEST_FAILED("Stack trace was expected to be disabled");
+    }
+    output = e.getStackTrace();
+  }
+
+  std::cout << output << std::endl;
+  int count = count_lines(output, "EXCEPTION\\ rethrowing");
+  if (count != 0) {
+      TEST_FAILED("Stack trace was expected to be hidden");
+  }
+  TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * The actual test suite
@@ -259,6 +359,8 @@ class tests : public tframe::tests
     TEST(throw_fmi_exception_in_async_call);
     TEST(throw_nested_fmi_exception_in_async_call);
     TEST(test_squashing_stack_trace);
+    TEST(test_stack_trace_disabled_1);
+    TEST(test_stack_trace_disabled_2);
   }
 };
 
