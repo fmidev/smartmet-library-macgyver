@@ -1,6 +1,6 @@
 #include "Exception.h"
+#include "DebugTools.h"
 #include <regression/tframe.h>
-#include <macgyver/DebugTools.h>
 #include <future>
 #include <iostream>
 #include <sstream>
