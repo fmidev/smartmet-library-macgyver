@@ -310,7 +310,7 @@ void test_stack_trace_disabled_1()
     output << e;
   }
 
-  std::cout << output.str() << std::endl;
+  //std::cout << output.str() << std::endl;
   int count = count_lines(output.str(), "^EXCEPTION\\ rethrowing");
   if (count != 0) {
       TEST_FAILED("Stack trace was expected to be hidden");
@@ -334,7 +334,7 @@ void test_stack_trace_disabled_2()
     output = e.getStackTrace();
   }
 
-  std::cout << output << std::endl;
+  //std::cout << output << std::endl;
   int count = count_lines(output, "EXCEPTION\\ rethrowing");
   if (count != 0) {
       TEST_FAILED("Stack trace was expected to be hidden");
