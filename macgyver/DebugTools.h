@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TypeName.h"
+#include "Exception.h"
 #include <exception>
 #include <iostream>
 #include <string>
@@ -71,12 +72,14 @@ int tracerPid();
     {                                                                                             \
       return x;                                                                                   \
     }                                                                                             \
-    catch (const std::exception& e)                                                               \
+    catch (...)                                                                                   \
     {                                                                                             \
-      std::cout << "Exception " << Fmi::current_exception_type() << ": " << e.what() << std::endl \
-                << "    thrown by '" << #x << '\'' << std::endl                                   \
-                << "    in " << __FILE__ << " at line " << __LINE__ << std::endl;                 \
-      throw;                                                                                      \
+      Fmi::Exception::ForceStackTrace forceStackTrace;                                            \
+      const auto e = Fmi::Exception::Trace(BCP,                                                   \
+          "SHOW_EXCEPTIONS: Exception thrown by '"#x"'");                                         \
+      std::cout << e << std::endl;                                                                \
+      throw; /* Rethrow the original exception. Newly created exception object is for  */         \
+      /* output only   */                                                                         \
     }                                                                                             \
   }()
 
