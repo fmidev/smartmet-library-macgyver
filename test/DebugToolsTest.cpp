@@ -57,7 +57,7 @@ int show_exceptions_test_1()
     const auto funct = [] () -> int { throw std::runtime_error("Testing"); };
     auto redirecter = std::make_shared<Fmi::Redirecter>(out, std::cout);
     try {
-        (void) SHOW_EXCEPTIONS(funct());
+        SHOW_EXCEPTIONS(funct());
         TEST_FAILED("Excepted std::runtime_error thrown by previous statement");
     } catch (...) {}
     redirecter.reset();
@@ -80,7 +80,7 @@ int show_exceptions_test_2()
         throw std::move(Fmi::Exception(BCP, "Testing").addParameter("TestName", "TestValue")); };
     auto redirecter = std::make_shared<Fmi::Redirecter>(out, std::cout);
     try {
-        (void) SHOW_EXCEPTIONS(funct());
+        SHOW_EXCEPTIONS(funct());
         TEST_FAILED("Excepted std::runtime_error thrown by previous statement");
     } catch (...) {}
     redirecter.reset();
@@ -121,7 +121,7 @@ int show_exceptions_test_3()
 
     auto redirecter = std::make_shared<Fmi::Redirecter>(out, std::cout);
     try {
-        (void) SHOW_EXCEPTIONS(show_exceptions_test_3_funct(5));
+        SHOW_EXCEPTIONS(show_exceptions_test_3_funct(5));
         TEST_FAILED("Excepted std::runtime_error thrown by previous statement");
     } catch (...) {}
     redirecter.reset();
