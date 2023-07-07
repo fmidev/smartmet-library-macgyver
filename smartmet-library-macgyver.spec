@@ -67,7 +67,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
 #TestRequires: make
-#TestRequires: postgresql13-libs
+#TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 21.2.2
 #TestRequires: smartmet-utils-devel >= 22.1.20
