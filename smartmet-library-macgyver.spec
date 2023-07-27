@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.7.10
+Version: 23.7.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -31,8 +31,8 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
-BuildRequires: smartmet-timezones >= 21.2.2
-BuildRequires: smartmet-utils-devel >= 22.1.20
+BuildRequires: smartmet-timezones >= 23.4.18
+BuildRequires: smartmet-utils-devel >= 23.7.17
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -69,8 +69,8 @@ BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 21.2.2
-#TestRequires: smartmet-utils-devel >= 22.1.20
+#TestRequires: smartmet-timezones >= 23.4.18
+#TestRequires: smartmet-utils-devel >= 23.7.17
 #TestRequires: smartmet-test-db
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
@@ -111,7 +111,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 22.1.20
+Requires: smartmet-utils-devel >= 23.7.17
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jul 27 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.27-1.fmi
+- Do not use boost::noncopyable
+
 * Mon Jul 10 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.10-1.fmi
 - Use postgresql 15, gdal 3.5, geos 3.11 and proj-9.0
 
