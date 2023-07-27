@@ -18,7 +18,7 @@
 
 namespace Fmi
 {
-class DirectoryMonitor : private boost::noncopyable
+class DirectoryMonitor
 {
  public:
   // Watcher ID
@@ -49,6 +49,8 @@ class DirectoryMonitor : private boost::noncopyable
 
   DirectoryMonitor(const DirectoryMonitor& other) = delete;
   DirectoryMonitor& operator=(const DirectoryMonitor& other) = delete;
+  DirectoryMonitor(DirectoryMonitor&& other) = delete;
+  DirectoryMonitor& operator=(DirectoryMonitor&& other) = delete;
 
   // Callback interfaces. Note that const references could be used
   // since a write lock exists during the callback. However, if

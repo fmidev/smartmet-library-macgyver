@@ -1,10 +1,7 @@
 #pragma once
 
 #include "AsyncTask.h"
-
-#include <boost/noncopyable.hpp>
 #include <boost/signals2.hpp>
-
 #include <atomic>
 #include <condition_variable>
 #include <list>
@@ -144,7 +141,7 @@ class AsyncTaskGroup
 
   AsyncTaskGroup(const AsyncTaskGroup&) = delete;
   AsyncTaskGroup(AsyncTaskGroup&&) = delete;
-  AsyncTaskGroup& operator = (const AsyncTaskGroup&) = delete;
-  AsyncTaskGroup& operator = (AsyncTaskGroup&&) = delete;
+  AsyncTaskGroup& operator=(const AsyncTaskGroup&) = delete;
+  AsyncTaskGroup& operator=(AsyncTaskGroup&&) = delete;
 };
 }  // namespace Fmi

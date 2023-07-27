@@ -8,7 +8,6 @@
 
 #pragma once
 #include <boost/bind.hpp>
-#include <boost/core/noncopyable.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/functional.hpp>
 #include <boost/shared_ptr.hpp>
@@ -192,7 +191,7 @@ class FifoScheduler
 // ======================================================================
 
 template <class SchedulingPolicy = FifoScheduler>
-class ThreadPool : public boost::noncopyable
+class ThreadPool
 {
  private:
   using PoolType = ThreadPool<SchedulingPolicy>;
@@ -224,14 +223,12 @@ class ThreadPool : public boost::noncopyable
   {
   }
 
-  // ======================================================================
-  /*!
-   * \brief Destructor
-   *
-   */
-  // ======================================================================
+  ~ThreadPool() = default;
+  ThreadPool(const ThreadPool& other) = default;
+  ThreadPool(ThreadPool&& other) = default;
+  ThreadPool& operator=(const ThreadPool& other) = default;
+  ThreadPool& operator=(ThreadPool&& other) = default;
 
-  ~ThreadPool() {}
   // ======================================================================
   /*!
    * \brief Stops ThreadPool activity
@@ -325,8 +322,8 @@ class ThreadPool : public boost::noncopyable
       inserted = itsScheduler.push(newTask);
       if (inserted)
       {
-          // Tell threads that new data is available
-          itsDataEvent.notify_one();
+        // Tell threads that new data is available
+        itsDataEvent.notify_one();
       }
     }
     return inserted;

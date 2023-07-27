@@ -124,7 +124,7 @@ class NearTreeDistance
 // The actual class
 
 template <typename T, typename F = NearTreeDistance<T> >
-class NearTree : private boost::noncopyable
+class NearTree
 {
  private:
   class Impl
@@ -174,6 +174,10 @@ class NearTree : private boost::noncopyable
 
   ~NearTree();
   NearTree();
+  NearTree(const NearTree& other) = delete;
+  NearTree(NearTree&& other) = delete;
+  NearTree& operator=(const NearTree& other) = delete;
+  NearTree& operator=(NearTree&& other) = delete;
 
   size_type size() const { return impl->size() + buffer.size(); }
   bool empty() const { return impl->empty() && buffer.empty(); }

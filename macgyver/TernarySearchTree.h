@@ -19,7 +19,7 @@
 namespace Fmi
 {
 template <typename T>
-class TernarySearchTree : private boost::noncopyable
+class TernarySearchTree
 {
  public:
   using element_type = boost::shared_ptr<T>;
@@ -45,6 +45,10 @@ class TernarySearchTree : private boost::noncopyable
  public:
   ~TernarySearchTree();
   TernarySearchTree();
+  TernarySearchTree(const TernarySearchTree& other) = delete;
+  TernarySearchTree(TernarySearchTree&& other) = delete;
+  TernarySearchTree& operator=(const TernarySearchTree& other) = delete;
+  TernarySearchTree& operator=(TernarySearchTree&& other) = delete;
   bool empty() const;
   size_t size() const;
   bool insert(const std::string& key, const T& data);

@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <ctpp2/CDT.hpp>
 #include <ctpp2/CTPP2SyscallFactory.hpp>
@@ -27,7 +26,7 @@ namespace Fmi
  *   simultaneously from different threads. Distinct objects
  *   can safely be used simultaneously from different threads.
  */
-class TemplateFormatter : public boost::noncopyable
+class TemplateFormatter
 {
   class OutputCollector;
   class Logger;
@@ -36,6 +35,11 @@ class TemplateFormatter : public boost::noncopyable
   TemplateFormatter(UINT_32 max_handlers = 100);
 
   virtual ~TemplateFormatter();
+
+  TemplateFormatter(const TemplateFormatter& other) = delete;
+  TemplateFormatter(TemplateFormatter&& other) = delete;
+  TemplateFormatter& operator=(const TemplateFormatter& other) = delete;
+  TemplateFormatter& operator=(TemplateFormatter&& other) = delete;
 
   /**
    *  @brief Generate an output data from template on the base of provided values in the hash

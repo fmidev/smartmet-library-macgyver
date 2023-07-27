@@ -15,16 +15,19 @@
 
 #include <boost/date_time/local_time/local_time.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/noncopyable.hpp>
 #include <string>
 
 namespace Fmi
 {
-class DateTimeParser : private boost::noncopyable
+class DateTimeParser
 {
  public:
   ~DateTimeParser();
   DateTimeParser();
+  DateTimeParser(const DateTimeParser& other);
+  DateTimeParser(DateTimeParser&& other);
+  DateTimeParser& operator=(const DateTimeParser& other);
+  DateTimeParser& operator=(DateTimeParser&& other);
 
   boost::local_time::local_date_time parse(const std::string& str,
                                            const std::string& format,

@@ -11,12 +11,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
-
 #include <cmath>
 #include <ctime>
 #include <fstream>
@@ -854,7 +852,7 @@ template <class KeyType,
           class TagType = int,
           class ExpirationPolicy = StaticExpire,
           class SizeFunc = TrivialSizeFunction<ValueType> >
-class Cache : public boost::noncopyable
+class Cache
 {
  public:
   using TagSetType = std::set<TagType>;
@@ -873,6 +871,11 @@ class Cache : public boost::noncopyable
 
   // Default constructor eases the use as data member
   Cache() = default;
+
+  Cache(const Cache& other) = delete;
+  Cache(Cache&& other) = delete;
+  Cache& operator=(const Cache& other) = delete;
+  Cache& operator=(Cache&& other) = delete;
 
   Cache(std::size_t maxSize, long timeConstant = 0)
       : itsMaxSize(maxSize), itsTimeConstant(timeConstant)
@@ -1453,7 +1456,7 @@ struct FileCacheStruct
   std::size_t fileSize;
 };
 
-class FileCache : boost::noncopyable
+class FileCache
 {
   using MutexType = boost::shared_mutex;
   using ReadLock = boost::shared_lock<MutexType>;
@@ -1474,6 +1477,11 @@ class FileCache : boost::noncopyable
    */
   // ----------------------------------------------------------------------
   FileCache(const fs::path& directory, std::size_t maxSize);
+
+  FileCache(const FileCache& other) = delete;
+  FileCache(FileCache&& other) = delete;
+  FileCache& operator=(const FileCache& other) = delete;
+  FileCache& operator=(FileCache&& other) = delete;
 
   // ----------------------------------------------------------------------
   /*!
