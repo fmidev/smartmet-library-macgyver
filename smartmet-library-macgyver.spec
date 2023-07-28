@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.7.27
+Version: 23.7.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
+- Fix Fmi::TemplateFactory
+
 * Thu Jul 27 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.27-1.fmi
 - Do not use boost::noncopyable
 
