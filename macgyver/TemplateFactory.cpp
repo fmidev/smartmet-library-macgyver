@@ -21,6 +21,8 @@ struct TemplateInfo
 using TemplateMap = std::map<boost::filesystem::path, TemplateInfo>;
 thread_local TemplateMap itsTemplates{};
 
+TemplateFactory::TemplateFactory() = default;
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Get a thread specific template formatter for given template
