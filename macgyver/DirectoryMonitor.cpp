@@ -73,6 +73,10 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
     // find all matching filenames with modification times
     // if target is a directory
 
+    // Note: files may vanish while being scanned, or be in a corrupted state
+    // in which case stat will fail. We simply ignore such cases by checking
+    // the error code and do not let last_write_time throw
+
     if (fs::is_directory(path))
     {
       fs::directory_iterator end;
@@ -82,19 +86,22 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
         char dot = '.';
         if (it->path().filename().native().at(0) != dot)
         {
+          boost::system::error_code ec;
           if (hasregex)
           {
             if (boost::regex_match(it->path().filename().string(), pattern))
             {
-              std::time_t t = fs::last_write_time(it->path());
-              contents.insert(Contents::value_type(it->path(), t));
+              std::time_t t = fs::last_write_time(it->path(), ec);
+              if (!ec)
+                contents.insert(Contents::value_type(it->path(), t));
             }
           }
 
           else
           {
-            std::time_t t = fs::last_write_time(it->path());
-            contents.insert(Contents::value_type(it->path(), t));
+            std::time_t t = fs::last_write_time(it->path(), ec);
+            if (!ec)
+              contents.insert(Contents::value_type(it->path(), t));
           }
         }
       }
@@ -102,8 +109,10 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
     else
     {
       // No regex checking for single files
-      std::time_t t = fs::last_write_time(path);
-      contents.insert(Contents::value_type(path, t));
+      boost::system::error_code ec;
+      std::time_t t = fs::last_write_time(path, ec);
+      if (!ec)
+        contents.insert(Contents::value_type(path, t));
     }
     return contents;
   }
@@ -215,10 +224,10 @@ class DirectoryMonitor::Pimple
  public:
   MutexType mutex;
   Schedule schedule;
-  bool running{false};                 // true if run() has not exited
-  std::atomic<bool> stop{false};       // true if stop request is pending
-  std::atomic<bool> isready{false};    // true if at least one scan has completed
-  bool has_ended{false};               // true if run() has ended due to any reason
+  bool running{false};               // true if run() has not exited
+  std::atomic<bool> stop{false};     // true if stop request is pending
+  std::atomic<bool> isready{false};  // true if at least one scan has completed
+  bool has_ended{false};             // true if run() has ended due to any reason
 
   boost::mutex m2;
   boost::mutex m_ready;
@@ -392,13 +401,14 @@ void DirectoryMonitor::run()
     {
       // Do not start if already running
 
-      do {
-	boost::unique_lock<boost::mutex> lock(impl->m_ready);
-	if (impl->running)
-	  return;
+      do
+      {
+        boost::unique_lock<boost::mutex> lock(impl->m_ready);
+        if (impl->running)
+          return;
 
-	impl->running = true;
-	impl->has_ended = false;
+        impl->running = true;
+        impl->has_ended = false;
       } while (false);
 
       while (!impl->stop && !impl->schedule.empty())
@@ -502,14 +512,14 @@ void DirectoryMonitor::run()
           }
         }
 
-	{
-	  boost::unique_lock<boost::mutex> lock(impl->m_ready);
-	  if (!impl->isready)
-	  {
-	    impl->isready = true;
-	    impl->cond_ready.notify_all();
-	  }
-	}
+        {
+          boost::unique_lock<boost::mutex> lock(impl->m_ready);
+          if (!impl->isready)
+          {
+            impl->isready = true;
+            impl->cond_ready.notify_all();
+          }
+        }
 
         long sleeptime = 0;
         {
@@ -528,11 +538,11 @@ void DirectoryMonitor::run()
       }
 
       {
-	boost::unique_lock<boost::mutex> lock(impl->m_ready);
-	impl->has_ended = true;
-	impl->stop = false;
-	impl->running = false;
-	impl->cond_ready.notify_all();
+        boost::unique_lock<boost::mutex> lock(impl->m_ready);
+        impl->has_ended = true;
+        impl->stop = false;
+        impl->running = false;
+        impl->cond_ready.notify_all();
       }
     }
     catch (const boost::thread_interrupted&)
