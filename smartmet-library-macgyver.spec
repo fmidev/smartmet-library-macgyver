@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.7.28
+Version: 23.8.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Aug  9 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.8.9-1.fmi
+- More error resilient DirectoryMonitor
+
 * Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
 - Fix Fmi::TemplateFactory
 
