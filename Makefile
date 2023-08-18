@@ -20,6 +20,7 @@ LIBS += -L$(libdir) \
 	-lboost_regex \
 	-lboost_filesystem \
 	-lboost_chrono \
+	-lboost_iostreams \
 	-lboost_thread \
 	-lboost_system \
 	-ldouble-conversion \

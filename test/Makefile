@@ -34,6 +34,7 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	-lboost_locale \
 	-lboost_date_time \
 	-lboost_regex \
+	-lboost_iostreams \
 	-lboost_thread \
 	-lboost_chrono \
 	-lboost_system \
