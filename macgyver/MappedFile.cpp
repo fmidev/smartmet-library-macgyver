@@ -156,10 +156,10 @@ Fmi::MappedFile::invoke_madvise(int adv)
         // FIXME: do we want to throw exception here?
         //        Maybe we should simply ignore the error.
         const int err = errno;
+        char tmp[80];
         Fmi::Exception exception(BCP, "madvise() failed");
         exception.addParameter("errno", std::to_string(err));
-        exception.addParameter("description", std::strerror(err));
-        char tmp[80];
+        exception.addParameter("description", strerror_r(err, tmp, sizeof tmp));
         snprintf(tmp, sizeof(tmp), "%p", (void*)address);
         exception.addParameter("address", tmp);
         exception.addParameter("size", std::to_string(size()));
