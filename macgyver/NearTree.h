@@ -102,6 +102,7 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <random>
 #include <vector>
 
 namespace Fmi
@@ -664,9 +665,9 @@ void NearTree<T, F>::flush() const
 {
   if (!buffer.empty())
   {
-    // Note: std::shuffle is recommended over std::random_shuffle
-    // since the former uses rand()
-    std::random_shuffle(buffer.begin(), buffer.end());
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(buffer.begin(), buffer.end(), g);
 
     for (const T& it : buffer)
       impl->insert(it);
