@@ -415,4 +415,16 @@ BOOST_AUTO_TEST_CASE(safexmlescape)
   BOOST_CHECK_EQUAL(input, output);
 }
 
+BOOST_AUTO_TEST_CASE(stdsz)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::stosz()");
+
+  BOOST_CHECK_EQUAL(123UL, Fmi::stosz("123B"));
+  BOOST_CHECK_EQUAL(123UL << 10, Fmi::stosz("123K"));
+  BOOST_CHECK_EQUAL(123UL << 20, Fmi::stosz("123M"));
+  BOOST_CHECK_EQUAL(123UL << 30, Fmi::stosz("123G"));
+  BOOST_CHECK_EQUAL(123UL << 40, Fmi::stosz("123T"));
+  BOOST_CHECK_EQUAL(123UL << 50, Fmi::stosz("123P"));
+}
+
 // ======================================================================

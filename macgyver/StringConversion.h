@@ -39,7 +39,6 @@ std::string to_string(const char* fmt, double value);
 int stoi(const std::string& str);
 long stol(const std::string& str);
 unsigned long stoul(const std::string& str);
-
 float stof(const std::string& str);
 double stod(const std::string& str);
 
@@ -48,6 +47,8 @@ boost::optional<long> stol_opt(const std::string& str);
 boost::optional<unsigned long> stoul_opt(const std::string& str);
 boost::optional<float> stof_opt(const std::string& str);
 boost::optional<double> stod_opt(const std::string& str);
+
+std::size_t stosz(const std::string& str);  // B,K,M,G,T,P suffixes allowed
 
 std::string to_iso_string(const std::time_t time);
 std::string to_iso_string(const boost::posix_time::time_duration& duration);
@@ -64,11 +65,9 @@ std::string to_http_string(const boost::posix_time::ptime& time);
 std::string to_timestamp_string(const boost::posix_time::ptime& time);
 
 void ascii_tolower(std::string& input);
-
 void ascii_toupper(std::string& input);
 
 std::string ascii_tolower_copy(std::string input);
-
 std::string ascii_toupper_copy(std::string input);
 
 bool looks_unsigned_int(const std::string& value);

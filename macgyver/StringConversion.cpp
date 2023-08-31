@@ -1171,4 +1171,40 @@ std::string safexmlescape(const std::string& input)
   }
 }
 
+std::size_t stosz(const std::string& str)
+{
+  try
+  {
+    if (str.size() < 2)
+      throw Fmi::Exception(BCP, "Too few letters in size string");
+
+    auto unit = str.back();
+    auto snum = str.substr(0, str.size() - 1);
+    auto base = Fmi::stoul(snum);
+
+    switch (unit)
+    {
+      case 'B':
+        return base;
+      case 'K':
+        return 1024UL * base;
+      case 'M':
+        return 1024UL * 1024UL * base;
+      case 'G':
+        return 1024UL * 1024UL * 1024UL * base;
+      case 'T':
+        return 1024UL * 1024UL * 1024UL * 1024UL * base;
+      case 'P':
+        return 1024UL * 1024UL * 1024UL * 1024UL * 1024UL * base;
+      default:
+        throw Fmi::Exception(BCP, "Unknown size unit for number of bytes");
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Failed to parse a string defining a size in bytes")
+        .addParameter("string", str);
+  }
+}
+
 }  // namespace Fmi
