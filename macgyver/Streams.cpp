@@ -18,7 +18,7 @@ enum Fmi::Compression Fmi::guess_compression_type(const std::string& theFileName
 
     const char* ext = theFileName.c_str() + pos + 1;
 
-    if (strcasecmp(ext, "bzip2") == 0)
+    if (strcasecmp(ext, "bz2") == 0)
         return Compression::BZIP2;
 
     if (strcasecmp(ext, "gz") == 0)
