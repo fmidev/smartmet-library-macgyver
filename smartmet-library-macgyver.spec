@@ -15,7 +15,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 23.10.10
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -123,7 +123,7 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
-* Tue Oct 10 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.10.10-1.fmi
+* Tue Oct 10 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.10.10-2.fmi
 - Added data compression support
 
 * Thu Aug 31 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.8.31-1.fmi
