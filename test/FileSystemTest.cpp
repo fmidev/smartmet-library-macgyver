@@ -5,7 +5,7 @@
  */
 // ======================================================================
 
-#include "Streams.h"
+#include "FileSystem.h"
 #include "Exception.h"
 #include <regression/tframe.h>
 #include <sstream>
@@ -14,7 +14,6 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/process.hpp>
 #include <stdio.h>
 
 namespace io = boost::iostreams;
@@ -23,7 +22,7 @@ namespace p = boost::process;
 std::string read_orig_file()
 {
     std::string result;
-    std::ifstream test_input("StreamsTest.cpp");
+    std::ifstream test_input("FileSystemTest.cpp");
     io::copy(test_input, std::back_inserter(result));
     return result;
 }
@@ -33,9 +32,9 @@ void read_gzip_compressed_stream()
     std::string s1, s2 = read_orig_file();
 
     boost::filesystem::create_directory("tmp");
-    system("cat StreamsTest.cpp | gzip >tmp/StreamsTest.cpp.gz");
-    std::ifstream pipe("tmp/StreamsTest.cpp.gz");
-    Fmi::IStream input(pipe, "tmp/StreamsTest.cpp.gz");
+    system("cat FileSystemTest.cpp | gzip >tmp/FileSystemTest.cpp.gz");
+    std::ifstream pipe("tmp/FileSystemTest.cpp.gz");
+    Fmi::IStream input(pipe, "tmp/FileSystemTest.cpp.gz");
     io::copy(input, std::back_inserter(s1));
 
     if (s1 != s2)
@@ -49,8 +48,8 @@ void read_xz_compressed_stream()
     std::string s1, s2 = read_orig_file();
 
     boost::filesystem::create_directory("tmp");
-    system("cat StreamsTest.cpp | xz >tmp/StreamsTest.cpp.xz");
-    std::ifstream pipe("tmp/StreamsTest.cpp.xz");
+    system("cat FileSystemTest.cpp | xz >tmp/FileSystemTest.cpp.xz");
+    std::ifstream pipe("tmp/FileSystemTest.cpp.xz");
     Fmi::IStream input(pipe, Fmi::Compression::XZ);
     io::copy(input, std::back_inserter(s1));
 
@@ -166,7 +165,7 @@ class tests : public tframe::tests
 
 int main(void)
 {
-  std::cout << std::endl << "Compressed streams tester" << std::endl << "=====================" << std::endl;
+  std::cout << std::endl << "FileSystem utils tester" << std::endl << "=====================" << std::endl;
   tests t;
   return t.run();
 }
