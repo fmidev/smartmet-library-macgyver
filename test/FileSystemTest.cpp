@@ -17,7 +17,6 @@
 #include <stdio.h>
 
 namespace io = boost::iostreams;
-namespace p = boost::process;
 
 std::string read_orig_file()
 {
