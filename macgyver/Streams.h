@@ -1,5 +1,7 @@
 #pragma once
+#include <string>
 #include <boost/iostreams/filtering_stream.hpp>
+#include <boost/optional.hpp>
 
 namespace Fmi
 {
@@ -20,6 +22,11 @@ namespace Fmi
     {
         return guess_compression_type(theFileName) != Compression::NONE;
     }
+
+    /**
+     *   Lookup file (including compressed ones)
+     */
+    boost::optional<std::string> lookup_file(const std::string& theFileName);
 
     class IStream : public boost::iostreams::filtering_stream<boost::iostreams::input>
     {

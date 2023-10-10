@@ -1,6 +1,7 @@
 #include "Streams.h"
 #include <istream>
 #include <ostream>
+#include <boost/filesystem.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -9,6 +10,8 @@
 #include <boost/iostreams/filter/lzma.hpp>
 #include <boost/iostreams/filter/zstd.hpp>
 #endif
+
+namespace fs = boost::filesystem;
 
 enum Fmi::Compression Fmi::guess_compression_type(const std::string& theFileName)
 {
@@ -31,6 +34,42 @@ enum Fmi::Compression Fmi::guess_compression_type(const std::string& theFileName
         return Compression::XZ;
 #endif
     return Compression::NONE;
+}
+
+boost::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
+{
+    boost::optional<std::string> result;
+
+    const auto check_fn = [](const std::string& fn) -> bool
+        {
+            boost::system::error_code ec;
+            return fs::exists(fn, ec)
+                && (fs::is_regular_file(fn, ec) || fs::is_symlink(fn, ec));
+        };
+
+    if (check_fn(theFileName))
+        return boost::optional<std::string>(theFileName);
+
+    if (Fmi::guess_compression_type(theFileName) == Fmi::Compression::NONE)
+    {
+        static std::vector<std::string> extensions =
+            {
+                ".gz"
+                , ".bz2"
+#ifndef WIN32
+                , ".xz"
+                , ".zstd"
+#endif
+            };
+        for (const auto& ext : extensions)
+        {
+            const std::string zfn = theFileName + ext;
+            if (check_fn(zfn))
+                return boost::optional<std::string>(zfn);
+        }
+    }
+
+    return boost::none;
 }
 
 Fmi::IStream::IStream(std::istream& raw_input, const std::string& name)
