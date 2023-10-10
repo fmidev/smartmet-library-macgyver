@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.8.31
+Version: 23.10.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Oct 10 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.10.10-1.fmi
+- Added data compression support
+
 * Thu Aug 31 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.8.31-1.fmi
 - Added Fmi::stosz for parsing strings defining sizes unit units of B/K/M/G/T/P
 
