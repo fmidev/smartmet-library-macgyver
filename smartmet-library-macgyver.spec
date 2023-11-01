@@ -30,6 +30,7 @@ BuildRequires: imake
 BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
+BuildRequires: date-devel
 BuildRequires: double-conversion-devel
 BuildRequires: smartmet-timezones >= 23.4.18
 BuildRequires: smartmet-utils-devel >= 23.7.17
@@ -44,6 +45,7 @@ Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: double-conversion
+Requires: date
 Requires: ctpp2
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: libicu >= 50.2
