@@ -12,17 +12,19 @@ ifeq ($(USE_CLANG),yes)
 CharsetToolsTest: CFLAGS += -Wno-invalid-source-encoding
 endif
 
+# No need to relink if only libsmartmet-macgyver.so is changed
+# Tracking include changes should be sufficient
+MACGYVER_TARGET :=
+
 ifneq (,$(findstring test-installed,$(MAKECMDGOALS)))
 
 MACGYVER_INCLUDES := -I$(includedir)/smartmet/macgyver
 MACGYVER_LDFLAGS := -L $(libdir) -lsmartmet-macgyver
-MACGYVER_TARGET :=
 
 else
 
 MACGYVER_INCLUDES := -I../macgyver
 MACGYVER_LDFLAGS := ../libsmartmet-macgyver.so
-MACGYVER_TARGET := ../libsmartmet-macgyver.so
 
 endif
 
@@ -69,11 +71,11 @@ endif
 
 all: $(PROG)
 clean:
-	rm -f $(PROG) *~ *.d
+	rm -f $(PROG) *~
 	rm -f PostgreSQLConnectionTest.conf
 	rm -rf tmp-geonames-db
 	rm -f tmp-geonames-db.log
-	rm -rf tmp
+	rm -rf tmp obj
 
 # FIXME: clean if switching between test and test-installed or use different directories
 test test-installed: $(PROG) $(patsubst %.cpp,%.CompileOnly,$(COMPILE_TESTS)) $(TEST_PREPARE_TARGETS)
@@ -87,8 +89,12 @@ test test-installed: $(PROG) $(patsubst %.cpp,%.CompileOnly,$(COMPILE_TESTS)) $(
 		for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false )
 
 
-$(PROG) : % : %.cpp $(MACGYVER_TARGET)
-	$(CXX) $(CFLAGS) -MD -o $@ $@.cpp $(INCLUDES) $(LIBS)
+$(PROG) : % : obj/%.o $(MACGYVER_TARGET)
+	$(CXX) $(CFLAGS) $< $(LIBS) -o $@
+
+obj/%.o: %.cpp
+	@mkdir -p obj
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
 PostgreSQLConnectionTest: PostgreSQLConnectionTest.conf
 
