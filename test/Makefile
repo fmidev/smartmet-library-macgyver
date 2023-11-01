@@ -124,6 +124,6 @@ dummy:
 
 .PHONY: PostgreSQLConnectionTest.conf
 
-ifneq ($(wildcard *.d),)
--include $(wildcard *.d)
+ifneq ($(wildcard obj/*.d),)
+-include $(wildcard obj/*.d)
 endif
