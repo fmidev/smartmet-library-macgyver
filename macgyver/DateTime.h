@@ -52,6 +52,7 @@ namespace Fmi
 
     virtual ~DateTime();
 
+    DateTime& operator = (const DateTime& src);
     DateTime& operator = (const boost::posix_time::ptime& src);
     Date date() const;
     TimeDuration time_of_day() const;
@@ -61,6 +62,9 @@ namespace Fmi
     std::string to_simple_string() const;
     std::string to_iso_string() const;
     std::string to_iso_extended_string() const;
+
+    inline bool is_special() const { return !initialized; }
+    inline bool is_not_a_date_time() const { return !initialized; }
   };
 
   std::ostream& operator << (std::ostream& os, const DateTime& src);

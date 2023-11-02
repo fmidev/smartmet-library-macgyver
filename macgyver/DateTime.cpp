@@ -1,6 +1,7 @@
 #include "DateTime.h"
 #include <iomanip>
 #include <fmt/format.h>
+#include "Exception.h"
 
 namespace
 {
@@ -35,10 +36,27 @@ Fmi::DateTime::DateTime(const boost::posix_time::ptime& src)
 
 Fmi::DateTime::DateTime(const Date& date, const TimeDuration& duration)
 {
-    operator = (boost::posix_time::ptime(date, duration));
+    bool date_defined = !date.is_special();
+    bool duration_defined = !duration.is_special();
+    if (!date_defined && !duration_defined)
+    {
+        initialized = false;
+    }
+    else if (date_defined && duration_defined)
+    {
+        operator = (boost::posix_time::ptime(date, duration));
+    }
+    else
+    {
+        std::ostringstream msg;
+        msg << "Conflicting arguments '" << date << "' and '" << duration << '\'';
+        throw Fmi::Exception(BCP, msg.str());
+    }
 }
 
 Fmi::DateTime::~DateTime() = default;
+Fmi::DateTime& Fmi::DateTime::operator = (const Fmi::DateTime& src) = default;
+
 
 Fmi::DateTime&
 Fmi::DateTime::operator = (const boost::posix_time::ptime& src)
