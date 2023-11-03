@@ -23,6 +23,12 @@ Fmi::DateTime::DateTime()
 {
 }
 
+Fmi::DateTime::DateTime(const Fmi::detail::time_point_t& tp)
+    : detail::time_point_t(tp)
+    , initialized(true)
+{
+}
+
 Fmi::DateTime::DateTime(const DateTime& src)
     : Fmi::detail::time_point_t(src)
     , initialized(src.initialized)

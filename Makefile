@@ -24,6 +24,7 @@ LIBS += -L$(libdir) \
 	-lboost_thread \
 	-lboost_system \
 	-ldouble-conversion \
+	-ldate-tz \
 	$(REQUIRED_LIBS) \
 	-lpthread -lrt
 

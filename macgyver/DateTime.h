@@ -20,6 +20,7 @@ namespace Fmi
     DateTime();
     DateTime(const boost::posix_time::ptime& src);
     DateTime(const Date& date, const TimeDuration& t_diff);
+    DateTime(const detail::time_point_t& tp);
     DateTime(const DateTime& src);
 
     virtual ~DateTime();
