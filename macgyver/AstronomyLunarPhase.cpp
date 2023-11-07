@@ -26,17 +26,16 @@
 #include <vector>
 
 using namespace std;
-using boost::gregorian::date;
-using boost::local_time::local_date_time;
-using boost::local_time::time_zone_ptr;
+using Fmi::Date;
+using Fmi::LocalDateTime;
+using Fmi::TimeZonePtr;
 using boost::posix_time::not_a_date_time;
-using boost::posix_time::ptime;
 
 namespace Fmi
 {
 namespace Astronomy
 {
-double moonphase(const ptime& utc)
+double moonphase(const Fmi::DateTime& utc)
 {
   try
   {
@@ -48,7 +47,7 @@ double moonphase(const ptime& utc)
   }
 }
 
-double lunar_phase(const ptime& utc)
+double lunar_phase(const Fmi::DateTime& utc)
 {
   try
   {

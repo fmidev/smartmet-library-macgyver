@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "DateTime.h"
 
 #include <atomic>
 #include <list>
@@ -13,7 +13,7 @@
 
 namespace Fmi
 {
-using ExceptionTimeStamp = boost::posix_time::ptime;
+using ExceptionTimeStamp = DateTime;
 using ParameterVector = std::vector<std::pair<std::string, std::string>>;
 using DetailVector = std::vector<std::string>;
 using DetailList = std::list<std::string>;

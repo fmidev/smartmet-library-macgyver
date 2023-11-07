@@ -120,11 +120,11 @@ vector<string> TimeZoneFactory::region_list()
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const string& id)
+Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_region(const string& id)
 {
   try
   {
-    boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(id);
+    Fmi::TimeZonePtr ptr = m_Impl->m_Regions->time_zone_from_region(id);
     if (!ptr)
       throw Fmi::Exception(BCP, "TimeZoneFactory does not recognize region '" + id + "'");
 
@@ -142,12 +142,12 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_region(const st
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const string& desc)
+Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_string(const string& desc)
 {
   try
   {
     // Try region name at first
-    boost::local_time::time_zone_ptr ptr = m_Impl->m_Regions->time_zone_from_region(desc);
+    Fmi::TimeZonePtr ptr = m_Impl->m_Regions->time_zone_from_region(desc);
     if (!ptr)
     {
       // Region name not found: try POSIX TZ description (may throw exception)
@@ -168,12 +168,12 @@ boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_string(const st
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::time_zone_ptr TimeZoneFactory::time_zone_from_coordinate(float lon, float lat)
+Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_coordinate(float lon, float lat)
 {
   try
   {
     string tz = m_Impl->m_Coordinates->zone_name(lon, lat);
-    boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
+    Fmi::TimeZonePtr ptr = time_zone_from_string(tz);
     if (!ptr)
       throw Fmi::Exception(BCP,
                            "TimeZoneFactory could not convert given coordinate " +

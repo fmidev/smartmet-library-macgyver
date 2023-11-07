@@ -99,8 +99,8 @@ TimeFormatter::~TimeFormatter() = default;
 struct IsoFormatter : public TimeFormatter
 {
   IsoFormatter() = default;
-  std::string format(const boost::posix_time::ptime& t) const override;
-  std::string format(const boost::local_time::local_date_time& t) const override;
+  std::string format(const DateTime& t) const override;
+  std::string format(const Fmi::LocalDateTime& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -114,8 +114,8 @@ struct IsoFormatter : public TimeFormatter
 struct SqlFormatter : public TimeFormatter
 {
   SqlFormatter() = default;
-  std::string format(const boost::posix_time::ptime& t) const override;
-  std::string format(const boost::local_time::local_date_time& t) const override;
+  std::string format(const DateTime& t) const override;
+  std::string format(const Fmi::LocalDateTime& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -129,8 +129,8 @@ struct SqlFormatter : public TimeFormatter
 struct XmlFormatter : public TimeFormatter
 {
   XmlFormatter() = default;
-  std::string format(const boost::posix_time::ptime& t) const override;
-  std::string format(const boost::local_time::local_date_time& t) const override;
+  std::string format(const DateTime& t) const override;
+  std::string format(const Fmi::LocalDateTime& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -144,8 +144,8 @@ struct XmlFormatter : public TimeFormatter
 struct EpochFormatter : public TimeFormatter
 {
   EpochFormatter() = default;
-  std::string format(const boost::posix_time::ptime& t) const override;
-  std::string format(const boost::local_time::local_date_time& t) const override;
+  std::string format(const DateTime& t) const override;
+  std::string format(const Fmi::LocalDateTime& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -159,8 +159,8 @@ struct EpochFormatter : public TimeFormatter
 struct TimeStampFormatter : public TimeFormatter
 {
   TimeStampFormatter() = default;
-  std::string format(const boost::posix_time::ptime& t) const override;
-  std::string format(const boost::local_time::local_date_time& t) const override;
+  std::string format(const DateTime& t) const override;
+  std::string format(const Fmi::LocalDateTime& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -174,8 +174,8 @@ struct TimeStampFormatter : public TimeFormatter
 struct HttpFormatter : public TimeFormatter
 {
   HttpFormatter() = default;
-  std::string format(const boost::posix_time::ptime& t) const override;
-  std::string format(const boost::local_time::local_date_time& t) const override;
+  std::string format(const DateTime& t) const override;
+  std::string format(const Fmi::LocalDateTime& t) const override;
 };
 
 // ----------------------------------------------------------------------
@@ -184,7 +184,7 @@ struct HttpFormatter : public TimeFormatter
  */
 // ----------------------------------------------------------------------
 
-std::string IsoFormatter::format(const boost::posix_time::ptime& t) const
+std::string IsoFormatter::format(const DateTime& t) const
 {
   try
   {
@@ -202,7 +202,7 @@ std::string IsoFormatter::format(const boost::posix_time::ptime& t) const
  */
 // ----------------------------------------------------------------------
 
-std::string IsoFormatter::format(const boost::local_time::local_date_time& t) const
+std::string IsoFormatter::format(const Fmi::LocalDateTime& t) const
 {
   try
   {
@@ -220,7 +220,7 @@ std::string IsoFormatter::format(const boost::local_time::local_date_time& t) co
  */
 // ----------------------------------------------------------------------
 
-std::string SqlFormatter::format(const boost::posix_time::ptime& t) const
+std::string SqlFormatter::format(const DateTime& t) const
 {
   try
   {
@@ -240,7 +240,7 @@ std::string SqlFormatter::format(const boost::posix_time::ptime& t) const
  */
 // ----------------------------------------------------------------------
 
-std::string SqlFormatter::format(const boost::local_time::local_date_time& t) const
+std::string SqlFormatter::format(const Fmi::LocalDateTime& t) const
 {
   try
   {
@@ -260,7 +260,7 @@ std::string SqlFormatter::format(const boost::local_time::local_date_time& t) co
  */
 // ----------------------------------------------------------------------
 
-std::string XmlFormatter::format(const boost::posix_time::ptime& t) const
+std::string XmlFormatter::format(const DateTime& t) const
 {
   try
   {
@@ -278,7 +278,7 @@ std::string XmlFormatter::format(const boost::posix_time::ptime& t) const
  */
 // ----------------------------------------------------------------------
 
-std::string XmlFormatter::format(const boost::local_time::local_date_time& t) const
+std::string XmlFormatter::format(const Fmi::LocalDateTime& t) const
 {
   try
   {
@@ -296,7 +296,7 @@ std::string XmlFormatter::format(const boost::local_time::local_date_time& t) co
  */
 // ----------------------------------------------------------------------
 
-std::string EpochFormatter::format(const boost::posix_time::ptime& t) const
+std::string EpochFormatter::format(const DateTime& t) const
 {
   try
   {
@@ -316,7 +316,7 @@ std::string EpochFormatter::format(const boost::posix_time::ptime& t) const
  */
 // ----------------------------------------------------------------------
 
-std::string EpochFormatter::format(const boost::local_time::local_date_time& t) const
+std::string EpochFormatter::format(const Fmi::LocalDateTime& t) const
 {
   try
   {
@@ -336,7 +336,7 @@ std::string EpochFormatter::format(const boost::local_time::local_date_time& t) 
  */
 // ----------------------------------------------------------------------
 
-std::string TimeStampFormatter::format(const boost::posix_time::ptime& t) const
+std::string TimeStampFormatter::format(const DateTime& t) const
 {
   try
   {
@@ -354,7 +354,7 @@ std::string TimeStampFormatter::format(const boost::posix_time::ptime& t) const
  */
 // ----------------------------------------------------------------------
 
-std::string TimeStampFormatter::format(const boost::local_time::local_date_time& t) const
+std::string TimeStampFormatter::format(const Fmi::LocalDateTime& t) const
 {
   try
   {
@@ -372,7 +372,7 @@ std::string TimeStampFormatter::format(const boost::local_time::local_date_time&
  */
 // ----------------------------------------------------------------------
 
-std::string HttpFormatter::format(const boost::posix_time::ptime& t) const
+std::string HttpFormatter::format(const DateTime& t) const
 {
   try
   {
@@ -390,7 +390,7 @@ std::string HttpFormatter::format(const boost::posix_time::ptime& t) const
  */
 // ----------------------------------------------------------------------
 
-std::string HttpFormatter::format(const boost::local_time::local_date_time& t) const
+std::string HttpFormatter::format(const Fmi::LocalDateTime& t) const
 {
   try
   {

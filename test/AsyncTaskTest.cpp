@@ -6,9 +6,9 @@
 // ======================================================================
 
 #include "AsyncTask.h"
+#include "DateTime.h"
 #include "TypeName.h"
 #include <boost/chrono.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <regression/tframe.h>
 #include <atomic>
@@ -40,9 +40,9 @@ void not_waiting_for_result()
 			      test = 1;
 			    }));
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  ptime t1 = microsec_clock::universal_time();
+  Fmi::DateTime t1 = microsec_clock::universal_time();
   task.reset();
-  ptime t2 = microsec_clock::universal_time();
+  Fmi::DateTime t2 = microsec_clock::universal_time();
   if ((t2 - t1).total_milliseconds() > 200)
   {
     // std::cout << "\n" << (t2 - t1) << std::endl;
@@ -50,7 +50,7 @@ void not_waiting_for_result()
   }
   if (test != 0)
   {
-    TEST_FAILED("Variable not updated as expected by task");
+    TEST_FAILED("Variable not upFmi::Dated as expected by task");
   }
   TEST_PASSED();
 }
@@ -116,12 +116,12 @@ void task_throws_not_std_exception()
 
 void test_cancel_task()
 {
-  ptime tm1, tm2, tm3;
+  Fmi::DateTime tm1, tm2, tm3;
 
   std::ostringstream debug_info;
 
   try {
-    ptime t1 = microsec_clock::universal_time();
+    Fmi::DateTime t1 = microsec_clock::universal_time();
     Fmi::AsyncTask
       task("foobar",
 	   [&]()
@@ -136,13 +136,13 @@ void test_cancel_task()
 	     }
 	   });
 
-    ptime t2 = microsec_clock::universal_time();
+    Fmi::DateTime t2 = microsec_clock::universal_time();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    ptime t3 = microsec_clock::universal_time();
+    Fmi::DateTime t3 = microsec_clock::universal_time();
     task.cancel();
     task.wait();
-    ptime t4 = microsec_clock::universal_time();
+    Fmi::DateTime t4 = microsec_clock::universal_time();
 
     debug_info << "started            : " << t1 << '\n'
 	       << "task created       : " << t2 << '\n'
@@ -175,11 +175,11 @@ void test_cancel_task()
 
 void test_notify()
 {
-  ptime tm1, tm2, tm3;
+  Fmi::DateTime tm1, tm2, tm3;
   std::mutex m;
   std::condition_variable cond;
   bool ended = false;
-  const ptime t1 = microsec_clock::universal_time();
+  const Fmi::DateTime t1 = microsec_clock::universal_time();
   Fmi::AsyncTask task(
       "foobar",
       [&tm1, &tm2]()
@@ -195,7 +195,7 @@ void test_notify()
 	cond.notify_all();
 	tm3 = microsec_clock::universal_time();
       });
-  const ptime t2 = microsec_clock::universal_time();
+  const Fmi::DateTime t2 = microsec_clock::universal_time();
 
   std::unique_lock<std::mutex> lock(m);
   const auto got_notification =
@@ -206,7 +206,7 @@ void test_notify()
 		    return task.ended();
 		  });
 
-  const ptime t3 = microsec_clock::universal_time();
+  const Fmi::DateTime t3 = microsec_clock::universal_time();
 
   std::ostringstream debug_info;
   debug_info << "--------------- Test notify ----------------\n";

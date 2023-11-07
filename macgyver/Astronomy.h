@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "LocalDateTime.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace Fmi
@@ -62,22 +61,22 @@ struct solar_position_t
 
 struct solar_time_t
 {
-  const boost::local_time::local_date_time sunrise;
-  const boost::local_time::local_date_time sunset;
-  const boost::local_time::local_date_time noon;  // even if below the horizon
+  const Fmi::LocalDateTime sunrise;
+  const Fmi::LocalDateTime sunset;
+  const Fmi::LocalDateTime noon;  // even if below the horizon
 
   bool sunrise_today() const { return sunrise.local_time().date() == noon.local_time().date(); }
   bool sunset_today() const { return sunset.local_time().date() == noon.local_time().date(); }
   bool polar_day() const { return sunset.local_time().date() > sunrise.local_time().date(); }
   bool polar_night() const { return sunset < sunrise; }
-  solar_time_t(const boost::local_time::local_date_time& sr,
-               const boost::local_time::local_date_time& ss,
-               const boost::local_time::local_date_time& noon_)
+  solar_time_t(const Fmi::LocalDateTime& sr,
+               const Fmi::LocalDateTime& ss,
+               const Fmi::LocalDateTime& noon_)
       : sunrise(sr), sunset(ss), noon(noon_)
   {
   }
 
-  boost::posix_time::time_duration daylength() const;
+  TimeDuration daylength() const;
 };
 
 enum SetAndRiseOccurence
@@ -90,20 +89,20 @@ enum SetAndRiseOccurence
 
 struct lunar_time_t
 {
-  boost::local_time::local_date_time moonrise{boost::local_time::not_a_date_time};
-  boost::local_time::local_date_time moonset{boost::local_time::not_a_date_time};
-  boost::local_time::local_date_time moonrise2{boost::local_time::not_a_date_time};
-  boost::local_time::local_date_time moonset2{boost::local_time::not_a_date_time};
+  Fmi::LocalDateTime moonrise{boost::local_time::not_a_date_time};
+  Fmi::LocalDateTime moonset{boost::local_time::not_a_date_time};
+  Fmi::LocalDateTime moonrise2{boost::local_time::not_a_date_time};
+  Fmi::LocalDateTime moonset2{boost::local_time::not_a_date_time};
   bool rise_today = false;
   bool set_today = false;
   bool rise2_today = false;
   bool set2_today = false;
   bool above_hz_24h = false;
 
-  lunar_time_t(const boost::local_time::local_date_time& mr,
-               const boost::local_time::local_date_time& ms,
-               const boost::local_time::local_date_time& mr2,
-               const boost::local_time::local_date_time& ms2,
+  lunar_time_t(const Fmi::LocalDateTime& mr,
+               const Fmi::LocalDateTime& ms,
+               const Fmi::LocalDateTime& mr2,
+               const Fmi::LocalDateTime& ms2,
                bool rise,
                bool set,
                bool rise2,
@@ -123,7 +122,7 @@ struct lunar_time_t
 
   lunar_time_t() = default;
 
-  const boost::local_time::local_date_time& risesettime(SetAndRiseOccurence occ) const;
+  const Fmi::LocalDateTime& risesettime(SetAndRiseOccurence occ) const;
 
   bool moonrise_today() const { return rise_today; }
   bool moonset_today() const { return set_today; }
@@ -138,20 +137,20 @@ std::ostream& operator<<(std::ostream&, const lunar_time_t& lt);
 
 // Actual functions
 
-solar_position_t solar_position(const boost::local_time::local_date_time& ldt,
+solar_position_t solar_position(const Fmi::LocalDateTime& ldt,
                                 double lon,
                                 double lat);
 
-solar_position_t solar_position(const boost::posix_time::ptime& utc, double lon, double lat);
+solar_position_t solar_position(const DateTime& utc, double lon, double lat);
 
-solar_time_t solar_time(const boost::gregorian::date& ldate, double lon, double lat);
+solar_time_t solar_time(const Fmi::Date& ldate, double lon, double lat);
 
-solar_time_t solar_time(const boost::local_time::local_date_time& ldt, double lon, double lat);
+solar_time_t solar_time(const Fmi::LocalDateTime& ldt, double lon, double lat);
 
-double moonphase(const boost::posix_time::ptime& utc);
+double moonphase(const DateTime& utc);
 
-double lunar_phase(const boost::posix_time::ptime& utc);
-lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
+double lunar_phase(const DateTime& utc);
+lunar_time_t lunar_time(const Fmi::LocalDateTime& ldt,
                         double lon,
                         double lat,
                         bool allow_missing_dates = false);

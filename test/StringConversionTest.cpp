@@ -268,17 +268,17 @@ BOOST_AUTO_TEST_CASE(to_iso_string)
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime time1(date(2002, Jan, 1), time_duration(1, 2, 3));
+  Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("20020101T010203", Fmi::to_iso_string(time1));
 
-  ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
   BOOST_CHECK_EQUAL("20020101T010203,004000", Fmi::to_iso_string(time2));
 
-  ptime time3(date(1970, Jan, 1), time_duration(0, 0, 0));
+  Fmi::DateTime time3(Fmi::Date(1970, Jan, 1), Fmi::TimeDuration(0, 0, 0));
   BOOST_CHECK_EQUAL("19700101T000000", Fmi::to_iso_string(std::time_t(0)));
 
-  // date u --date='@2147483647' --> Tue Jan 19 03:14:07 EET 2038
-  ptime time4(date(2038, Jan, 19), time_duration(3, 14, 7));
+  // Fmi::Date u --date='@2147483647' --> Tue Jan 19 03:14:07 EET 2038
+  Fmi::DateTime time4(Fmi::Date(2038, Jan, 19), Fmi::TimeDuration(3, 14, 7));
   BOOST_CHECK_EQUAL("20380119T031407", Fmi::to_iso_string(std::time_t(2147483647)));
 }
 
@@ -288,10 +288,10 @@ BOOST_AUTO_TEST_CASE(to_iso_extended_string)
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime time1(date(2002, Jan, 1), time_duration(1, 2, 3));
+  Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("2002-01-01T01:02:03", Fmi::to_iso_extended_string(time1));
 
-  ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
   BOOST_CHECK_EQUAL("2002-01-01T01:02:03,004000", Fmi::to_iso_extended_string(time2));
 }
 
@@ -301,19 +301,19 @@ BOOST_AUTO_TEST_CASE(to_simple_string)
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime time1(date(2002, Jan, 1), time_duration(1, 2, 3));
+  Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("2002-Jan-01 01:02:03", Fmi::to_simple_string(time1));
 
-  ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
   BOOST_CHECK_EQUAL("2002-Jan-01 01:02:03,004000", Fmi::to_simple_string(time2));
 
-  time_duration dura1(123, 45, 43);
+  Fmi::TimeDuration dura1(123, 45, 43);
   BOOST_CHECK_EQUAL("123:45:43", Fmi::to_simple_string(dura1));
 
-  time_duration dura2(123456, 45, 43);
+  Fmi::TimeDuration dura2(123456, 45, 43);
   BOOST_CHECK_EQUAL("123456:45:43", Fmi::to_simple_string(dura2));
 
-  time_duration dura3(0, 45, 43);
+  Fmi::TimeDuration dura3(0, 45, 43);
   BOOST_CHECK_EQUAL("00:45:43", Fmi::to_simple_string(dura3));
 }
 
@@ -323,10 +323,10 @@ BOOST_AUTO_TEST_CASE(to_http_string)
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime time1(date(2002, Jan, 1), time_duration(1, 2, 3));
+  Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("Tue, 01 Jan 2002 01:02:03 GMT", Fmi::to_http_string(time1));
 
-  ptime time2(date(2002, Jan, 1), time_duration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
   BOOST_CHECK_EQUAL("Tue, 01 Jan 2002 01:02:03 GMT", Fmi::to_http_string(time2));
 }
 

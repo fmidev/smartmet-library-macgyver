@@ -26,11 +26,10 @@
 #include <vector>
 
 using namespace std;
-using boost::gregorian::date;
-using boost::local_time::local_date_time;
-using boost::local_time::time_zone_ptr;
+using Fmi::Date;
+using Fmi::LocalDateTime;
+using Fmi::TimeZonePtr;
 using boost::posix_time::not_a_date_time;
-using boost::posix_time::ptime;
 
 /*=== Public interface =====================*/
 
@@ -44,7 +43,7 @@ namespace Astronomy
  * 'utc':        Time in UTC
  * 'lat', 'lon_e': Position on Earth
  */
-solar_position_t solar_position(const ptime& utc, double lon_e, double lat)
+    solar_position_t solar_position(const Fmi::DateTime& utc, double lon_e, double lat)
 {
   try
   {
@@ -144,7 +143,7 @@ solar_position_t solar_position(const ptime& utc, double lon_e, double lat)
  * 'lt':     Local time on Earth (includes time zone info etc.)
  * 'lon_e', 'lat': Position on Earth
  */
-solar_position_t solar_position(const local_date_time& ldt, double lon_e, double lat)
+solar_position_t solar_position(const Fmi::LocalDateTime& ldt, double lon_e, double lat)
 {
   try
   {

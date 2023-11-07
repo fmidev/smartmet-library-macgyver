@@ -10,8 +10,7 @@
 // ======================================================================
 
 #pragma once
-#include <boost/date_time/gregorian/gregorian_types.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "DateTime.h"
 #include <boost/optional.hpp>
 #include <string>
 
@@ -51,18 +50,18 @@ boost::optional<double> stod_opt(const std::string& str);
 std::size_t stosz(const std::string& str);  // B,K,M,G,T,P suffixes allowed
 
 std::string to_iso_string(const std::time_t time);
-std::string to_iso_string(const boost::posix_time::time_duration& duration);
-std::string to_simple_string(const boost::posix_time::time_duration& duration);
+std::string to_iso_string(const TimeDuration& duration);
+std::string to_simple_string(const TimeDuration& duration);
 // this has been accidentally named incorrectly
-std::string to_iso_extended_string(const boost::posix_time::time_duration& duration);
-std::string to_iso_string(const boost::gregorian::date& date);
-std::string to_simple_string(const boost::gregorian::date& date);
-std::string to_iso_extended_string(const boost::gregorian::date& date);
-std::string to_simple_string(const boost::posix_time::ptime& time);
-std::string to_iso_string(const boost::posix_time::ptime& time);
-std::string to_iso_extended_string(const boost::posix_time::ptime& time);
-std::string to_http_string(const boost::posix_time::ptime& time);
-std::string to_timestamp_string(const boost::posix_time::ptime& time);
+std::string to_iso_extended_string(const TimeDuration& duration);
+std::string to_iso_string(const Fmi::Date& date);
+std::string to_simple_string(const Fmi::Date& date);
+std::string to_iso_extended_string(const Fmi::Date& date);
+std::string to_simple_string(const DateTime& time);
+std::string to_iso_string(const DateTime& time);
+std::string to_iso_extended_string(const DateTime& time);
+std::string to_http_string(const DateTime& time);
+std::string to_timestamp_string(const DateTime& time);
 
 void ascii_tolower(std::string& input);
 void ascii_toupper(std::string& input);

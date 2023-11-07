@@ -18,7 +18,7 @@
 #include <vector>
 
 using namespace std;
-using boost::local_time::time_zone_ptr;
+using Fmi::TimeZonePtr;
 using namespace Fmi::Astronomy;
 using namespace boost::gregorian;
 using namespace boost::local_time;
@@ -709,9 +709,9 @@ vector<string> compare_test_data_with_reference_data(unsigned int day,
         int hh_ref(boost::lexical_cast<int>(reference_string.substr(0, 2)));
         int mm_ref(boost::lexical_cast<int>(reference_string.substr(2, 2)));
 
-        time_duration test_dur(hours(hh_test) + minutes(mm_test));
-        time_duration ref_dur(hours(hh_ref) + minutes(mm_ref));
-        time_duration diff_dur(ref_dur - test_dur);
+        Fmi::TimeDuration test_dur(Fmi::Hours(hh_test) + Fmi::Minutes(mm_test));
+        Fmi::TimeDuration ref_dur(Fmi::Hours(hh_ref) + Fmi::Minutes(mm_ref));
+        Fmi::TimeDuration diff_dur(ref_dur - test_dur);
 
         if (abs(diff_dur.total_seconds()) > 180)
         {
@@ -791,11 +791,11 @@ namespace MoonRiseSetTest
 std::map<int, vector<lunar_time_t> > get_daily_test_data(short year,
                                                          double lat,
                                                          double lon,
-                                                         const time_zone_ptr tz)
+                                                         const Fmi::TimeZonePtr tz)
 {
-  boost::gregorian::date par1(year, Jan, 1);
-  boost::posix_time::time_duration par2(23, 59, 59, 0);
-  ptime timeIter(par1, par2);
+  Fmi::Date par1(year, Jan, 1);
+  Fmi::TimeDuration par2(23, 59, 59, 0);
+  Fmi::DateTime timeIter(par1, par2);
 
   std::map<int, vector<lunar_time_t> > results;
 
@@ -803,14 +803,14 @@ std::map<int, vector<lunar_time_t> > get_daily_test_data(short year,
   {
     int month(timeIter.date().month());
 
-    local_date_time ldt(
-        timeIter.date(), timeIter.time_of_day(), tz, local_date_time::NOT_DATE_TIME_ON_ERROR);
+    Fmi::LocalDateTime ldt(
+        timeIter.date(), timeIter.time_of_day(), tz, Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
     lunar_time_t lt = lunar_time(ldt, lon, lat, allow_missing_dates);
 
     results[month].push_back(lt);
 
-    timeIter += hours(24);
+    timeIter += Fmi::Hours(24);
   }
 
   return results;
@@ -841,13 +841,13 @@ std::vector<string> get_daily_test_data(const std::map<int, vector<lunar_time_t>
   return test_data;
 }
 
-std::vector<string> get_test_data(short year, double lat, double lon, const time_zone_ptr tz)
+std::vector<string> get_test_data(short year, double lat, double lon, const Fmi::TimeZonePtr tz)
 {
   return get_daily_test_data(get_daily_test_data(year, lat, lon, tz));
 }
 
 bool moon_rise_set(
-    const std::string& location, short year, double lat, double lon, const time_zone_ptr tz)
+    const std::string& location, short year, double lat, double lon, const Fmi::TimeZonePtr tz)
 {
   std::vector<string> test_data(get_test_data(year, lat, lon, tz));
 
@@ -989,16 +989,16 @@ void moon_rise_set_one_day(const std::string& location,
                            short day,
                            double lat,
                            double lon,
-                           const time_zone_ptr tz)
+                           const Fmi::TimeZonePtr tz)
 {
   std::cout << std::endl
             << location << " " << year << std::setfill('0') << std::setw(2) << month
             << std::setfill('0') << std::setw(2) << day << std::endl;
 
-  boost::gregorian::date dat(year, month, day);
-  boost::posix_time::time_duration tim(0, 0, 0, 0);
+  Fmi::Date dat(year, month, day);
+  Fmi::TimeDuration tim(0, 0, 0, 0);
 
-  local_date_time ldt(dat, tim, tz, local_date_time::NOT_DATE_TIME_ON_ERROR);
+  Fmi::LocalDateTime ldt(dat, tim, tz, Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
   std::cout << std::endl;
 
@@ -1013,7 +1013,7 @@ void moon_rise_set_one_day(const std::string& location,
 }
 
 void print_moonrise_moonset_table(
-    const std::string& location, short year, double lat, double lon, const time_zone_ptr tz)
+    const std::string& location, short year, double lat, double lon, const Fmi::TimeZonePtr tz)
 {
   std::cout << std::endl << location << " " << year << std::endl << std::endl;
 
@@ -1067,7 +1067,7 @@ void moonriseset_helsinki2008()
   // Helsinki
   double lat_hel(60.151944444);
   double lon_hel(24.950833333);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
   moon_rise_set("Helsinki", 2008, lat_hel, lon_hel, tz_helsinki);
 
@@ -1079,7 +1079,7 @@ void moonriseset_helsinki2013()
   // Helsinki
   double lat_hel(60.151944444);
   double lon_hel(24.950833333);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
   moon_rise_set("Helsinki", 2013, lat_hel, lon_hel, tz_helsinki);
 
@@ -1091,7 +1091,7 @@ void moonriseset_oulu()
   // Oulu
   double lat_oul(65.016666667);
   double lon_oul(25.50);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
   moon_rise_set("Oulu", 2008, lat_oul, lon_oul, tz_helsinki);
 
@@ -1103,7 +1103,7 @@ void moonriseset_utsjoki()
   // Utsjoki
   double lat_uts(69.866666667);
   double lon_uts(27.0);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
   moon_rise_set("Utsjoki", 2008, lat_uts, lon_uts, tz_helsinki);
 
@@ -1115,7 +1115,7 @@ void moonriseset_newyork()
   // New York
   double lat_nyc(40.733333333);
   double lon_nyc(-73.91666667);
-  time_zone_ptr tz_newyork(
+  Fmi::TimeZonePtr tz_newyork(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("America/New_York"));
   moon_rise_set("NewYork", 2008, lat_nyc, lon_nyc, tz_newyork);
 
@@ -1127,7 +1127,7 @@ void moonriseset_honolulu()
   // Honolulu
   double lat_hon(21.316666667);
   double lon_hon(-157.8333333);
-  time_zone_ptr tz_honolulu(
+  Fmi::TimeZonePtr tz_honolulu(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Pacific/Honolulu"));
   moon_rise_set("Honolulu", 2008, lat_hon, lon_hon, tz_honolulu);
 
@@ -1139,13 +1139,13 @@ void moon_rises_twice()
   // Utsjoki
   double lat_uts(69.866666667);
   double lon_uts(27.0);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
 
-  local_date_time ldt(date(2008, 6, 26),
-                      time_duration(0, 0, 0, 0),
+  Fmi::LocalDateTime ldt(Fmi::Date(2008, 6, 26),
+                      Fmi::TimeDuration(0, 0, 0, 0),
                       tz_helsinki,
-                      local_date_time::NOT_DATE_TIME_ON_ERROR);
+                      Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
   lunar_time_t lt = lunar_time(ldt, lon_uts, lat_uts, allow_missing_dates);
 
@@ -1165,13 +1165,13 @@ void moon_sets_twice()
   // Utsjoki
   double lat_uts(69.866666667);
   double lon_uts(27.0);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
 
-  local_date_time ldt(date(2008, 7, 7),
-                      time_duration(0, 0, 0, 0),
+  Fmi::LocalDateTime ldt(Fmi::Date(2008, 7, 7),
+                      Fmi::TimeDuration(0, 0, 0, 0),
                       tz_helsinki,
-                      local_date_time::NOT_DATE_TIME_ON_ERROR);
+                      Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
   lunar_time_t lt = lunar_time(ldt, lon_uts, lat_uts, allow_missing_dates);
 
@@ -1192,13 +1192,13 @@ void lunar_time_t_struct()
   // Utsjoki
   double lat_uts(69.866666667);
   double lon_uts(27.0);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
 
-  local_date_time ldt(date(2008, 7, 7),
-                      time_duration(0, 0, 0, 0),
+  Fmi::LocalDateTime ldt(Fmi::Date(2008, 7, 7),
+                      Fmi::TimeDuration(0, 0, 0, 0),
                       tz_helsinki,
-                      local_date_time::NOT_DATE_TIME_ON_ERROR);
+                      Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
   lunar_time_t lt = lunar_time(ldt, lon_uts, lat_uts, allow_missing_dates);
 
@@ -1250,7 +1250,7 @@ void above_below_horizont_24h()
   // Ouly
   double lat_oul(65.016666667);
   double lon_oul(25.50);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
 
   std::map<int, vector<lunar_time_t> > daily_test_data =
@@ -1303,7 +1303,7 @@ void moonriseset()
   double lon_uts(27.0);
   //	double lat_hel(60.151944444);
   //	double lon_hel(24.950833333);
-  time_zone_ptr tz_helsinki(
+  Fmi::TimeZonePtr tz_helsinki(
       Fmi::TimeZoneFactory::instance().time_zone_from_region("Europe/Helsinki"));
   // moon_rise_set_one_day("Helsinki", 2013, 10, 26, lat_hel, lon_hel, tz_helsinki);
   //	moon_rise_set_one_day("Helsinki", 2013, 10, 27, lat_hel, lon_hel, tz_helsinki);

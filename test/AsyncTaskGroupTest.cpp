@@ -136,12 +136,12 @@ void test_interrupting_1()
     tg->add("test", []() { boost::this_thread::sleep_for(boost::chrono::milliseconds(1000)); });
   }
 
-  const ptime t1 = microsec_clock::universal_time();
+  const Fmi::DateTime t1 = microsec_clock::universal_time();
   tg->stop();
   tg->wait();
-  const ptime t2 = microsec_clock::universal_time();
+  const Fmi::DateTime t2 = microsec_clock::universal_time();
   tg.reset();
-  const ptime t3 = microsec_clock::universal_time();
+  const Fmi::DateTime t3 = microsec_clock::universal_time();
   // std::cout << '\n' << (t2-t1) << std::endl;
   // std::cout << '\n' << (t3-t1) << std::endl;
   if ((t2 - t1).total_milliseconds() > 50)
@@ -202,7 +202,7 @@ void test_stop_on_error_1()
   tg->add("task 1b", task_1);
   tg->add("task_2", task_2);
 
-  const ptime t1 = microsec_clock::universal_time();
+  const Fmi::DateTime t1 = microsec_clock::universal_time();
 
   try
   {
@@ -217,7 +217,7 @@ void test_stop_on_error_1()
   {
   }
 
-  const ptime t2 = microsec_clock::universal_time();
+  const Fmi::DateTime t2 = microsec_clock::universal_time();
   if ((t2 - t1).total_milliseconds() > 30)
   {
     TEST_FAILED("Did not stop in time");

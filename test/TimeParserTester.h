@@ -1,7 +1,7 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "DateTime.h"
 #include "TypeName.h"
 #include <regression/tframe.h>
 
@@ -15,14 +15,14 @@ namespace Fmi {
       ResponseType expected;
     };
 
-    bool check_time_parse(const std::vector<TimeParseTest<boost::posix_time::ptime> >& data,
-                          std::function<boost::posix_time::ptime(const std::string&)> parser)
+    bool check_time_parse(const std::vector<TimeParseTest<Fmi::DateTime> >& data,
+                          std::function<Fmi::DateTime(const std::string&)> parser)
     {
-      using boost::posix_time::ptime;
+      using Fmi::DateTime;
       int num_tests = 0;
       int num_passed = 0;
       for (const auto& item : data) {
-        ptime result;
+        Fmi::DateTime result;
         num_tests++;
         try {
           result = parser(item.src);
@@ -47,13 +47,13 @@ namespace Fmi {
     }
 
     bool check_time_parse_fail(const std::vector<std::string>& invalid,
-                               std::function<boost::posix_time::ptime(const std::string&)> parser)
+                               std::function<Fmi::DateTime(const std::string&)> parser)
     {
-      using boost::posix_time::ptime;
+      using Fmi::DateTime;
       int num_tests = 0;
       int num_passed = 0;
       for (const std::string& item : invalid) {
-        ptime result;
+        Fmi::DateTime result;
         num_tests++;
         try {
           result = parser(item);

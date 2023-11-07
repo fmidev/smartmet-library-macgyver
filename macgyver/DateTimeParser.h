@@ -13,8 +13,7 @@
 
 #pragma once
 
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "LocalDateTime.h"
 #include <string>
 
 namespace Fmi
@@ -29,19 +28,19 @@ class DateTimeParser
   DateTimeParser& operator=(const DateTimeParser& other);
   DateTimeParser& operator=(DateTimeParser&& other);
 
-  boost::local_time::local_date_time parse(const std::string& str,
+  Fmi::LocalDateTime parse(const std::string& str,
                                            const std::string& format,
-                                           boost::local_time::time_zone_ptr tz) const;
-  boost::local_time::local_date_time parse(const std::string& str,
-                                           boost::local_time::time_zone_ptr tz) const;
+                                           Fmi::TimeZonePtr tz) const;
+  Fmi::LocalDateTime parse(const std::string& str,
+                                           Fmi::TimeZonePtr tz) const;
 
-  boost::posix_time::ptime parse(const std::string& str, const std::string& format) const;
-  boost::posix_time::ptime parse(const std::string& str) const;
+  DateTime parse(const std::string& str, const std::string& format) const;
+  DateTime parse(const std::string& str) const;
 
-  boost::posix_time::ptime parse_http(const std::string& str) const;
+  DateTime parse_http(const std::string& str) const;
 
-  boost::posix_time::time_duration parse_duration(const std::string& str) const;
-  boost::posix_time::time_duration parse_iso_duration(const std::string& str) const;
+  TimeDuration parse_duration(const std::string& str) const;
+  TimeDuration parse_iso_duration(const std::string& str) const;
 
  private:
   struct Impl;

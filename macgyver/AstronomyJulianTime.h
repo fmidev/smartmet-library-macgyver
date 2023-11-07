@@ -67,18 +67,18 @@ class JulianTime
    *       at noon. The beginning of a Gregorian day is -12h on the earlier
    *       Julian day.
    */
-  JulianTime(const boost::posix_time::ptime& utc);
+  JulianTime(const DateTime& utc);
 
   double JulianDay() const { return jd; }
   bool valid() const { return jd != 0.0; }
   /*
    * Convert to Gregorian UTC
    */
-  boost::posix_time::ptime ptime_utc() const;
+  DateTime ptime_utc() const;
   /*
    * Convert to local Gregorian time
    */
-  boost::local_time::local_date_time ldt(const boost::local_time::time_zone_ptr& tz) const;
+  Fmi::LocalDateTime ldt(const Fmi::TimeZonePtr& tz) const;
 
   /* Back/forward 24hrs
    */
@@ -146,7 +146,7 @@ class JulianTime
 /*
  * Solar noon for the given day at the given location on Earth
  */
-JulianTime SolNoon(const boost::local_time::local_date_time& ldt, double lon_e);
+JulianTime SolNoon(const Fmi::LocalDateTime& ldt, double lon_e);
 
 /*
  * UTC of sunrise/sunset for the given day at the given location on Earth

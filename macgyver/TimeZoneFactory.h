@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <boost/date_time/local_time/local_time.hpp>
+#include "LocalDateTime.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -19,9 +19,9 @@ class TimeZoneFactory
  public:
   std::vector<std::string> region_list();
 
-  boost::local_time::time_zone_ptr time_zone_from_string(const std::string& desc);
-  boost::local_time::time_zone_ptr time_zone_from_region(const std::string& id);
-  boost::local_time::time_zone_ptr time_zone_from_coordinate(float lon, float lat);
+  Fmi::TimeZonePtr time_zone_from_string(const std::string& desc);
+  Fmi::TimeZonePtr time_zone_from_region(const std::string& id);
+  Fmi::TimeZonePtr time_zone_from_coordinate(float lon, float lat);
   std::string zone_name_from_coordinate(float lon, float lat);
 
   static TimeZoneFactory& instance();

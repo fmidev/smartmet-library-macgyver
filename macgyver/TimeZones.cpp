@@ -55,7 +55,7 @@ class TimeZones::Pimple
   }
   boost::local_time::tz_database itsRegions;
   WorldTimeZones itsCoordinates;
-  std::unordered_map<std::string, boost::local_time::time_zone_ptr> itsKnownZones;
+  std::unordered_map<std::string, Fmi::TimeZonePtr> itsKnownZones;
 };
 
 // ----------------------------------------------------------------------
@@ -106,7 +106,7 @@ vector<string> TimeZones::region_list() const
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::time_zone_ptr TimeZones::time_zone_from_region(const string& id) const
+Fmi::TimeZonePtr TimeZones::time_zone_from_region(const string& id) const
 {
   try
   {
@@ -128,7 +128,7 @@ boost::local_time::time_zone_ptr TimeZones::time_zone_from_region(const string& 
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::time_zone_ptr TimeZones::time_zone_from_string(const string& desc) const
+Fmi::TimeZonePtr TimeZones::time_zone_from_string(const string& desc) const
 {
   try
   {
@@ -138,7 +138,7 @@ boost::local_time::time_zone_ptr TimeZones::time_zone_from_string(const string& 
       return value->second;
 
     // Try POSIX TZ description (may throw) if region name is unknown
-    return boost::local_time::time_zone_ptr(new boost::local_time::posix_time_zone(desc));
+    return Fmi::TimeZonePtr(new boost::local_time::posix_time_zone(desc));
   }
   catch (...)
   {
@@ -152,12 +152,12 @@ boost::local_time::time_zone_ptr TimeZones::time_zone_from_string(const string& 
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::time_zone_ptr TimeZones::time_zone_from_coordinate(double lon, double lat) const
+Fmi::TimeZonePtr TimeZones::time_zone_from_coordinate(double lon, double lat) const
 {
   try
   {
     string tz = itsPimple->itsCoordinates.zone_name(lon, lat);
-    boost::local_time::time_zone_ptr ptr = time_zone_from_string(tz);
+    Fmi::TimeZonePtr ptr = time_zone_from_string(tz);
     if (!ptr)
       throw Fmi::Exception(BCP,
                            "TimeZones could not convert given coordinate " + Fmi::to_string(lon) +

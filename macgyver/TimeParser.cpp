@@ -16,8 +16,8 @@
 #include <cctype>
 #include <stdexcept>
 
-static boost::posix_time::ptime bad_time(boost::posix_time::not_a_date_time);
-static boost::posix_time::time_duration bad_duration(boost::posix_time::not_a_date_time);
+static Fmi::DateTime bad_time(boost::posix_time::not_a_date_time);
+static Fmi::TimeDuration bad_duration(boost::posix_time::not_a_date_time);
 
 namespace
 {
@@ -33,7 +33,7 @@ boost::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?(T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?)?$"};
 
-boost::posix_time::ptime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
+Fmi::DateTime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
 {
   try
   {
@@ -47,15 +47,15 @@ boost::posix_time::ptime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
     if (target.second)
       second = *target.second;
 
-    boost::posix_time::ptime ret;
+    Fmi::DateTime ret;
 
     // Translate the exception to runtime_error
     try
     {
-      ret = boost::posix_time::ptime(boost::gregorian::date(target.year, target.month, target.day),
-                                     boost::posix_time::hours(hour) +
-                                         boost::posix_time::minutes(minute) +
-                                         boost::posix_time::seconds(second));
+      ret = Fmi::DateTime(Fmi::Date(target.year, target.month, target.day),
+                                     Fmi::Hours(hour) +
+                                         Fmi::Minutes(minute) +
+                                         Fmi::Seconds(second));
     }
     catch (std::exception& err)
     {
@@ -70,7 +70,7 @@ boost::posix_time::ptime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
   }
 }
 
-boost::posix_time::ptime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
+Fmi::DateTime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
 {
   try
   {
@@ -85,14 +85,14 @@ boost::posix_time::ptime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
     if (target.second)
       second = *target.second;
 
-    boost::posix_time::ptime res;
+    Fmi::DateTime res;
 
     try
     {
-      res = boost::posix_time::ptime(boost::gregorian::date(target.year, target.month, target.day),
-                                     boost::posix_time::hours(hour) +
-                                         boost::posix_time::minutes(minute) +
-                                         boost::posix_time::seconds(second));
+      res = Fmi::DateTime(Fmi::Date(target.year, target.month, target.day),
+                                     Fmi::Hours(hour) +
+                                         Fmi::Minutes(minute) +
+                                         Fmi::Seconds(second));
     }
     catch (std::exception& err)
     {
@@ -105,13 +105,13 @@ boost::posix_time::ptime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
     // must be parsed exactly once, not separately for hour and minute
     if (target.tz.sign == '+')
     {
-      res -= boost::posix_time::hours(target.tz.hours);
-      res -= boost::posix_time::minutes(target.tz.minutes);
+      res -= Fmi::Hours(target.tz.hours);
+      res -= Fmi::Minutes(target.tz.minutes);
     }
     else
     {
-      res += boost::posix_time::hours(target.tz.hours);
-      res += boost::posix_time::minutes(target.tz.minutes);
+      res += Fmi::Hours(target.tz.hours);
+      res += Fmi::Minutes(target.tz.minutes);
     }
 
     return res;
@@ -122,7 +122,7 @@ boost::posix_time::ptime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
   }
 }
 
-boost::posix_time::ptime buildFromEpoch(const Fmi::TimeParser::UnixTime& target)
+Fmi::DateTime buildFromEpoch(const Fmi::TimeParser::UnixTime& target)
 {
   try
   {
@@ -134,24 +134,24 @@ boost::posix_time::ptime buildFromEpoch(const Fmi::TimeParser::UnixTime& target)
   }
 }
 
-boost::posix_time::ptime buildFromOffset(boost::posix_time::time_duration offset)
+Fmi::DateTime buildFromOffset(Fmi::TimeDuration offset)
 {
   try
   {
     // Apply to current time rounded to closest minute
 
-    boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
-    boost::posix_time::time_duration tnow = now.time_of_day();
+    Fmi::DateTime now = Fmi::SecondClock::universal_time();
+    Fmi::TimeDuration tnow = now.time_of_day();
     int secs = tnow.seconds();
 
     if (secs >= 30)
-      offset += boost::posix_time::seconds(60 - secs);  // round up
+      offset += Fmi::Seconds(60 - secs);  // round up
     else
-      offset -= boost::posix_time::seconds(secs);  // round down
+      offset -= Fmi::Seconds(secs);  // round down
 
     // Construct the shifted time
 
-    return boost::posix_time::ptime(now.date(), tnow + offset);
+    return Fmi::DateTime(now.date(), tnow + offset);
   }
   catch (...)
   {
@@ -365,7 +365,7 @@ bool looks_iso(const std::string& str)
   try
   {
     bool utc;
-    boost::posix_time::ptime t = try_parse_iso(str, &utc);
+    Fmi::DateTime t = try_parse_iso(str, &utc);
     return !t.is_not_a_date_time();
   }
   catch (...)
@@ -440,7 +440,7 @@ bool looks_utc(const std::string& str)
       return true;
 
     bool utc;
-    boost::posix_time::ptime t = try_parse_iso(str, &utc);
+    Fmi::DateTime t = try_parse_iso(str, &utc);
     if (!t.is_not_a_date_time())
       return utc;
 
@@ -458,7 +458,7 @@ bool looks_utc(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime parse_epoch(const std::string& str)
+Fmi::DateTime parse_epoch(const std::string& str)
 {
   try
   {
@@ -492,7 +492,7 @@ boost::posix_time::ptime parse_epoch(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime try_parse_offset(const std::string& str)
+Fmi::DateTime try_parse_offset(const std::string& str)
 {
   try
   {
@@ -527,7 +527,7 @@ boost::posix_time::ptime try_parse_offset(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
+Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
 {
   using namespace boost::posix_time;
   try
@@ -535,7 +535,7 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
     using iterator = std::string::const_iterator;
     ISOParser<iterator> theParser;
     TimeStamp target;
-    ptime t = bad_time;
+    Fmi::DateTime t = bad_time;
 
     iterator start = str.begin();
     iterator finish = str.end();
@@ -572,7 +572,7 @@ boost::posix_time::ptime try_parse_iso(const std::string& str, bool* isutc)
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime parse_iso(const std::string& str)
+Fmi::DateTime parse_iso(const std::string& str)
 {
   try
   {
@@ -602,7 +602,7 @@ boost::posix_time::ptime parse_iso(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime parse_fmi(const std::string& str)
+Fmi::DateTime parse_fmi(const std::string& str)
 {
   try
   {
@@ -632,7 +632,7 @@ boost::posix_time::ptime parse_fmi(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime parse_sql(const std::string& str)
+Fmi::DateTime parse_sql(const std::string& str)
 {
   try
   {
@@ -662,14 +662,14 @@ boost::posix_time::ptime parse_sql(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime parse_offset(const std::string& str)
+Fmi::DateTime parse_offset(const std::string& str)
 {
   try
   {
     if (str.empty())
       throw Fmi::Exception(BCP, "Trying to parse an empty string as a time offset");
 
-    boost::posix_time::time_duration offset = parse_duration(str);
+    TimeDuration offset = parse_duration(str);
 
     return ::buildFromOffset(offset);
   }
@@ -697,7 +697,7 @@ boost::posix_time::ptime parse_offset(const std::string& str)
  */
 //----------------------------------------------------------------------
 
-boost::posix_time::time_duration parse_duration(const std::string& str)
+TimeDuration parse_duration(const std::string& str)
 {
   try
   {
@@ -734,7 +734,7 @@ boost::posix_time::time_duration parse_duration(const std::string& str)
  */
 //----------------------------------------------------------------------
 
-boost::posix_time::time_duration try_parse_duration(const std::string& str)
+TimeDuration try_parse_duration(const std::string& str)
 {
   try
   {
@@ -769,27 +769,27 @@ boost::posix_time::time_duration try_parse_duration(const std::string& str)
 
     // Default unit is minutes
     if (!target.unit)
-      return boost::posix_time::minutes(offset_value);
+      return Fmi::Minutes(offset_value);
 
     char theUnit = *target.unit;
 
     if (theUnit == 's' || theUnit == 'S')
-      return boost::posix_time::seconds(offset_value);
+      return Fmi::Seconds(offset_value);
 
     if (theUnit == 'm' || theUnit == 'M')
-      return boost::posix_time::minutes(offset_value);
+      return Fmi::Minutes(offset_value);
 
     if (theUnit == 'h' || theUnit == 'H')
-      return boost::posix_time::hours(offset_value);
+      return Fmi::Hours(offset_value);
 
     if (theUnit == 'd' || theUnit == 'D')
-      return boost::posix_time::hours(offset_value * 24);
+      return Fmi::Hours(offset_value * 24);
 
     if (theUnit == 'w' || theUnit == 'W')
-      return boost::posix_time::hours(offset_value * 24 * 7);
+      return Fmi::Hours(offset_value * 24 * 7);
 
     if (theUnit == 'y' || theUnit == 'Y')
-      return boost::posix_time::hours(offset_value * 24 * 365);
+      return Fmi::Hours(offset_value * 24 * 365);
 
     return bad_duration;
   }
@@ -808,7 +808,7 @@ boost::posix_time::time_duration try_parse_duration(const std::string& str)
  */
 //----------------------------------------------------------------------
 
-boost::posix_time::time_duration parse_iso_duration(const std::string& str)
+TimeDuration parse_iso_duration(const std::string& str)
 {
   try
   {
@@ -834,7 +834,7 @@ boost::posix_time::time_duration parse_iso_duration(const std::string& str)
  */
 //----------------------------------------------------------------------
 
-boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
+TimeDuration try_parse_iso_duration(const std::string& str)
 {
   try
   {
@@ -843,7 +843,7 @@ boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
     if (boost::regex_search(str, match, iso8601_weeks))
     {
       int n = std::stoi(match[1]);
-      return boost::posix_time::hours(7 * 24 * n);
+      return Fmi::Hours(7 * 24 * n);
     }
 
     if (!boost::regex_search(str, match, iso8601_long))
@@ -869,8 +869,8 @@ boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
 
     // Year length 365 and month length 30 are arbitrary choices here
 
-    return boost::posix_time::hours(365 * 24 * vec[0] + 30 * 24 * vec[1] + 24 * vec[2]) +
-           boost::posix_time::time_duration(vec[4], vec[5], vec[6], 0);
+    return Fmi::Hours(365 * 24 * vec[0] + 30 * 24 * vec[1] + 24 * vec[2]) +
+           TimeDuration(vec[4], vec[5], vec[6], 0);
   }
   catch (...)
   {
@@ -883,7 +883,7 @@ boost::posix_time::time_duration try_parse_iso_duration(const std::string& str)
  * \brief Parse a time string and return the matched parser
  */
 // ----------------------------------------------------------------------
-boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& matchedParser)
+Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
 {
   try
   {
@@ -900,7 +900,7 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
       {
         try
         {
-          boost::posix_time::ptime ret;
+          Fmi::DateTime ret;
           ret = ::buildFromISO(target);  // Similar building as with ISO parser
           matchedParser = FMI;
           return ret;
@@ -923,7 +923,7 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
       {
         try
         {
-          boost::posix_time::ptime ret;
+          Fmi::DateTime ret;
           ret = ::buildFromISO(target);
           matchedParser = ISO;
           return ret;
@@ -946,7 +946,7 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
       {
         try
         {
-          boost::posix_time::ptime ret;
+          Fmi::DateTime ret;
           ret = ::buildFromSQL(target);
           matchedParser = SQL;
           return ret;
@@ -978,7 +978,7 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
       {
         try
         {
-          boost::posix_time::ptime ret;
+          Fmi::DateTime ret;
           ret = ::buildFromEpoch(target);
           matchedParser = EPOCH;
           return ret;
@@ -1005,7 +1005,7 @@ boost::posix_time::ptime match_and_parse(const std::string& str, ParserId& match
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime parse(const std::string& str, const std::string& format)
+Fmi::DateTime parse(const std::string& str, const std::string& format)
 {
   try
   {
@@ -1034,7 +1034,7 @@ boost::posix_time::ptime parse(const std::string& str, const std::string& format
  */
 // ----------------------------------------------------------------------�
 
-boost::posix_time::ptime parse(const std::string& str)
+Fmi::DateTime parse(const std::string& str)
 {
   try
   {
@@ -1053,17 +1053,17 @@ boost::posix_time::ptime parse(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::local_date_time parse(const std::string& str,
+Fmi::LocalDateTime parse(const std::string& str,
                                          const std::string& format,
-                                         boost::local_time::time_zone_ptr tz)
+                                         Fmi::TimeZonePtr tz)
 {
   try
   {
-    boost::posix_time::ptime t = parse(str, format);
+    Fmi::DateTime t = parse(str, format);
 
     // epoch is always in UTC
     if (format == "epoch")
-      return boost::local_time::local_date_time(t, tz);
+      return Fmi::LocalDateTime(t, tz);
 
     // timestamps are local
     return make_time(t.date(), t.time_of_day(), tz);
@@ -1080,18 +1080,18 @@ boost::local_time::local_date_time parse(const std::string& str,
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::local_date_time parse(const std::string& str,
-                                         boost::local_time::time_zone_ptr tz)
+Fmi::LocalDateTime parse(const std::string& str,
+                                         Fmi::TimeZonePtr tz)
 {
   try
   {
     ParserId matched;
 
-    boost::posix_time::ptime t = match_and_parse(str, matched);
+    Fmi::DateTime t = match_and_parse(str, matched);
 
     // epoch is always in UTC
     if (matched == EPOCH)
-      return boost::local_time::local_date_time(t, tz);
+      return Fmi::LocalDateTime(t, tz);
 
     // timestamps are local
     return make_time(t.date(), t.time_of_day(), tz);
@@ -1129,7 +1129,7 @@ boost::local_time::local_date_time parse(const std::string& str,
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime parse_http(const std::string& str)
+Fmi::DateTime parse_http(const std::string& str)
 {
   try
   {
@@ -1197,9 +1197,9 @@ boost::posix_time::ptime parse_http(const std::string& str)
       mi = std::stoul(hms.substr(3, 2));
       ss = std::stoul(hms.substr(6, 2));
 
-      boost::posix_time::ptime t(boost::gregorian::date(yy, mm, dd),
-                                 boost::posix_time::hours(hh) + boost::posix_time::minutes(mi) +
-                                     boost::posix_time::seconds(ss));
+      Fmi::DateTime t(Fmi::Date(yy, mm, dd),
+                                 Fmi::Hours(hh) + Fmi::Minutes(mi) +
+                                     Fmi::Seconds(ss));
 
       if (t.is_not_a_date_time())
         throw Fmi::Exception(BCP, "");
@@ -1223,18 +1223,15 @@ boost::posix_time::ptime parse_http(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-boost::local_time::local_date_time make_time(const boost::gregorian::date& date,
-                                             const boost::posix_time::time_duration& duration,
-                                             const boost::local_time::time_zone_ptr& zone)
+Fmi::LocalDateTime make_time(const Fmi::Date& date,
+                                             const TimeDuration& duration,
+                                             const Fmi::TimeZonePtr& zone)
 {
   try
   {
-    namespace bl = boost::local_time;
-    namespace bp = boost::posix_time;
-
     // Handle the normal case
 
-    bl::local_date_time dt(date, duration, zone, bl::local_date_time::NOT_DATE_TIME_ON_ERROR);
+    Fmi::LocalDateTime dt(date, duration, zone, Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
     // If the constructed time is not valid, see if we can fix
     // it using DST rules.
@@ -1248,21 +1245,21 @@ boost::local_time::local_date_time make_time(const boost::gregorian::date& date,
       try
       {
         const bool summertime = true;
-        dt = bl::local_date_time(date, duration, zone, summertime);
+        dt = Fmi::LocalDateTime(date, duration, zone, summertime);
       }
       catch (...)
       {
-        bp::ptime t(date, duration);
-        bp::ptime dst_start = zone->dst_local_start_time(date.year());
+        Fmi::DateTime t(date, duration);
+        Fmi::DateTime dst_start = zone->dst_local_start_time(date.year());
         if (date == dst_start.date())
         {
-          bp::ptime dst_end = dst_start + zone->dst_offset();
+          Fmi::DateTime dst_end = dst_start + zone->dst_offset();
           if (t >= dst_start && t <= dst_end)
           {
-            dt = bl::local_date_time(date,
+            dt = Fmi::LocalDateTime(date,
                                      duration + zone->dst_offset(),
                                      zone,
-                                     bl::local_date_time::NOT_DATE_TIME_ON_ERROR);
+                                     Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
           }
           // We'll just return an invalid date if above fails
         }

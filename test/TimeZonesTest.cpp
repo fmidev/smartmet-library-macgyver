@@ -49,9 +49,9 @@ void region_list()
 void time_zone_from_region()
 {
   using boost::lexical_cast;
-  using boost::local_time::time_zone_ptr;
+  using Fmi::TimeZonePtr;
 
-  time_zone_ptr tz = timezones.time_zone_from_region("Europe/Helsinki");
+  Fmi::TimeZonePtr tz = timezones.time_zone_from_region("Europe/Helsinki");
   if (tz->dst_zone_abbrev() != "EEST")
     TEST_FAILED("Europe/Helsinki dst_zone_abbrev should be EEST, not " + tz->dst_zone_abbrev());
   if (tz->std_zone_abbrev() != "EET")
@@ -87,13 +87,13 @@ void time_zone_from_region()
 void time_zone_from_string()
 {
   using boost::lexical_cast;
-  using boost::local_time::time_zone_ptr;
+  using Fmi::TimeZonePtr;
 
   // UTC
 
   {
     string posix = "UTC";
-    time_zone_ptr tz = timezones.time_zone_from_string("UTC");
+    Fmi::TimeZonePtr tz = timezones.time_zone_from_string("UTC");
 
     if (tz->std_zone_name() != posix)
       TEST_FAILED("UTC string should be " + posix + ", not " + tz->std_zone_name());
@@ -104,11 +104,11 @@ void time_zone_from_string()
     string region = "Europe/Helsinki";
     string posix = "EET";
 
-    time_zone_ptr tz1 = timezones.time_zone_from_string(region);
+    Fmi::TimeZonePtr tz1 = timezones.time_zone_from_string(region);
     if (tz1->std_zone_name() != posix)
       TEST_FAILED(region + " string should be " + posix + ", not " + tz1->std_zone_name());
 
-    time_zone_ptr tz2 = timezones.time_zone_from_string(posix);
+    Fmi::TimeZonePtr tz2 = timezones.time_zone_from_string(posix);
     if (tz2->std_zone_name() != posix)
       TEST_FAILED(posix + " string should be " + posix + ", not " + tz2->std_zone_name());
   }
@@ -125,20 +125,20 @@ void time_zone_from_string()
 void time_zone_from_coordinate()
 {
   using boost::lexical_cast;
-  using boost::local_time::time_zone_ptr;
+  using Fmi::TimeZonePtr;
 
   string ok1 = "CET";
-  time_zone_ptr tz1 = timezones.time_zone_from_coordinate(17, 60);
+  Fmi::TimeZonePtr tz1 = timezones.time_zone_from_coordinate(17, 60);
   if (tz1->std_zone_name() != ok1)
     TEST_FAILED("17,60 string should be " + ok1 + ", not " + tz1->std_zone_name());
 
   string ok2 = "EET";
-  time_zone_ptr tz2 = timezones.time_zone_from_coordinate(25, 60);
+  Fmi::TimeZonePtr tz2 = timezones.time_zone_from_coordinate(25, 60);
   if (tz2->std_zone_name() != ok2)
     TEST_FAILED("25,60 string should be " + ok2 + ", not " + tz2->std_zone_name());
 
   string ok3 = "EET";
-  time_zone_ptr tz3 = timezones.time_zone_from_coordinate(21.3705, 59.7811);
+  Fmi::TimeZonePtr tz3 = timezones.time_zone_from_coordinate(21.3705, 59.7811);
   if (tz3->std_zone_name() != ok3)
     TEST_FAILED("21.3705,59.7811 string should be " + ok3 + ", not " + tz3->std_zone_name());
 
@@ -154,7 +154,7 @@ void time_zone_from_coordinate()
 void zone_name_from_coordinate()
 {
   using boost::lexical_cast;
-  using boost::local_time::time_zone_ptr;
+  using Fmi::TimeZonePtr;
 
   string ok1 = "Europe/Stockholm";
   string tz1 = timezones.zone_name_from_coordinate(17, 60);

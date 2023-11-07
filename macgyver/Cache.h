@@ -26,6 +26,7 @@
 #include <sstream>
 #include <utility>
 
+#include "DateTime.h"
 #include "CacheStats.h"
 
 namespace Fmi
@@ -1431,7 +1432,7 @@ class Cache
   std::size_t itsMissCount = 0;
   std::size_t itsHitCount = 0;
 
-  const boost::posix_time::ptime itsStartTime = boost::posix_time::second_clock::universal_time();
+  const DateTime itsStartTime = Fmi::SecondClock::universal_time();
 
   long itsTimeConstant = 0;
 };
@@ -1592,7 +1593,7 @@ class FileCache
   std::size_t itsMissCount = 0;
   std::size_t itsHitCount = 0;
 
-  const boost::posix_time::ptime itsStartTime = boost::posix_time::second_clock::universal_time();
+  const DateTime itsStartTime = Fmi::SecondClock::universal_time();
 
   fs::path itsDirectory;
 

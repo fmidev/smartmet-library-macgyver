@@ -1,7 +1,6 @@
 #include "StringConversion.h"
 #include "Exception.h"
 #include <boost/date_time/gregorian/gregorian_types.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // for is_special() cases
 #include <boost/numeric/conversion/cast.hpp>               // numeric_cast
 #include <boost/spirit/include/qi.hpp>
@@ -419,7 +418,7 @@ double stod(const std::string& str)
 // ----------------------------------------------------------------------
 
 // Convert a duration to iso string of form HHMMSS[,fffffff]
-std::string to_iso_string(const boost::posix_time::time_duration& duration)
+std::string to_iso_string(const TimeDuration& duration)
 {
   try
   {
@@ -457,7 +456,7 @@ std::string to_iso_string(const boost::posix_time::time_duration& duration)
 }
 
 // Convert a duration to string of form HH:MM:SS[,fffffff]
-std::string to_simple_string(const boost::posix_time::time_duration& duration)
+std::string to_simple_string(const TimeDuration& duration)
 {
   try
   {
@@ -513,7 +512,7 @@ std::string to_simple_string(const boost::posix_time::time_duration& duration)
   }
 }
 
-std::string to_iso_extended_string(const boost::posix_time::time_duration& duration)
+std::string to_iso_extended_string(const TimeDuration& duration)
 {
   try
   {
@@ -526,7 +525,7 @@ std::string to_iso_extended_string(const boost::posix_time::time_duration& durat
 }
 
 // Convert date to form YYYY-mmm-DD string where mmm 3 char month name
-std::string to_simple_string(const boost::gregorian::date& date)
+std::string to_simple_string(const Fmi::Date& date)
 {
   try
   {
@@ -557,7 +556,7 @@ std::string to_simple_string(const boost::gregorian::date& date)
 }
 
 // Convert date to form YYYYMMDD
-std::string to_iso_string(const boost::gregorian::date& date)
+std::string to_iso_string(const Fmi::Date& date)
 {
   try
   {
@@ -586,7 +585,7 @@ std::string to_iso_string(const boost::gregorian::date& date)
 }
 
 // Convert date to form YYYY-MM-DD
-std::string to_iso_extended_string(const boost::gregorian::date& date)
+std::string to_iso_extended_string(const Fmi::Date& date)
 {
   try
   {
@@ -617,7 +616,7 @@ std::string to_iso_extended_string(const boost::gregorian::date& date)
 }
 
 // Convert to form YYYYMMDDTHHMMSS,fffffffff where T is the date-time separator
-std::string to_iso_string(const boost::posix_time::ptime& time)
+std::string to_iso_string(const DateTime& time)
 {
   try
   {
@@ -713,7 +712,7 @@ std::string to_iso_string(const std::time_t time)
 }
 
 // Convert to form YYYYMMDDTHHMM
-std::string to_timestamp_string(const boost::posix_time::ptime& time)
+std::string to_timestamp_string(const DateTime& time)
 {
   try
   {
@@ -754,7 +753,7 @@ std::string to_timestamp_string(const boost::posix_time::ptime& time)
 }
 
 // Convert to form YYYY-MM-DDTHH:MM:SS,fffffffff where T is the date-time separator
-std::string to_iso_extended_string(const boost::posix_time::ptime& time)
+std::string to_iso_extended_string(const DateTime& time)
 {
   try
   {
@@ -811,7 +810,7 @@ std::string to_iso_extended_string(const boost::posix_time::ptime& time)
 }
 
 // Convert to form YYYY-mmm-DD HH:MM:SS.fffffffff string where mmm 3 char month name
-std::string to_simple_string(const boost::posix_time::ptime& time)
+std::string to_simple_string(const DateTime& time)
 {
   try
   {
@@ -870,13 +869,13 @@ std::string to_simple_string(const boost::posix_time::ptime& time)
 }
 
 // Convert a valid time to form "Fri, 27 Jul 2018 11:26:04 GMT" suitable for HTTP responses
-std::string to_http_string(const boost::posix_time::ptime& time)
+std::string to_http_string(const DateTime& time)
 {
   try
   {
     if (time.is_special())
       throw Fmi::Exception(
-          BCP, "Unable to format special boost::posix_time::ptime objects for HTTP responses");
+          BCP, "Unable to format special DateTime objects for HTTP responses");
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();

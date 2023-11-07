@@ -22,10 +22,10 @@
 #pragma once
 
 #include "Exception.h"
+#include "DateTime.h"
+#include "LocalDateTime.h"
 #include <cmath>
 
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/math/constants/constants.hpp>
 
 namespace Fmi
@@ -96,7 +96,7 @@ inline double Deg(double d1)
 {
   return (d1 * 180) / 3.1415926535897931;
 }
-inline double julianDay(const boost::posix_time::ptime& utc)
+inline double julianDay(const DateTime& utc)
 {
   double d3 = utc.time_of_day().total_seconds();
   double d1 = utc.date().day() + d3 / 86400;

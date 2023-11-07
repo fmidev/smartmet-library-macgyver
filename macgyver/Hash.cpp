@@ -33,7 +33,7 @@ std::size_t hash_value(const std::string& str)
   return std::hash<std::string>{}(str);
 }
 
-std::size_t hash_value(const boost::gregorian::date& date)
+std::size_t hash_value(const Fmi::Date& date)
 {
   if (!date.is_special())
   {
@@ -51,7 +51,7 @@ std::size_t hash_value(const boost::gregorian::date& date)
   return hash;
 }
 
-std::size_t hash_value(const boost::posix_time::time_duration& duration)
+std::size_t hash_value(const TimeDuration& duration)
 {
   if (!duration.is_special())
     return hash_value(duration.total_nanoseconds());
@@ -62,7 +62,7 @@ std::size_t hash_value(const boost::posix_time::time_duration& duration)
   return hash;
 }
 
-std::size_t hash_value(const boost::posix_time::ptime& time)
+std::size_t hash_value(const DateTime& time)
 {
   if (!time.is_special())
   {
@@ -78,14 +78,14 @@ std::size_t hash_value(const boost::posix_time::ptime& time)
   return hash;
 }
 
-std::size_t hash_value(const boost::local_time::local_date_time& time)
+std::size_t hash_value(const Fmi::LocalDateTime& time)
 {
   auto hash = Fmi::hash_value(time.utc_time());
   Fmi::hash_combine(hash, Fmi::hash_value(time.zone()));
   return hash;
 }
 
-std::size_t hash_value(const boost::local_time::time_zone_ptr& zone)
+std::size_t hash_value(const Fmi::TimeZonePtr& zone)
 {
   return Fmi::hash_value(zone->std_zone_name());
 }

@@ -206,7 +206,7 @@ double sinAlt(double mjd, double hour, double glon, double cglat, double sglat)
 
 }  // namespace
 
-const boost::local_time::local_date_time& lunar_time_t::risesettime(SetAndRiseOccurence occ) const
+const Fmi::LocalDateTime& lunar_time_t::risesettime(SetAndRiseOccurence occ) const
 {
   try
   {
@@ -233,7 +233,7 @@ std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
 
     bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
 
-    const boost::local_time::local_date_time& occ_ldt =
+    const Fmi::LocalDateTime& occ_ldt =
         (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
                         : (occ == FIRST_SET ? moonset : moonset2));
 
@@ -259,7 +259,7 @@ std::string lunar_time_t::as_string_long(SetAndRiseOccurence occ) const
 
     bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
 
-    const boost::local_time::local_date_time& occ_ldt =
+    const Fmi::LocalDateTime& occ_ldt =
         (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
                         : (occ == FIRST_SET ? moonset : moonset2));
 
@@ -324,7 +324,7 @@ std::ostream& operator<<(std::ostream& ostream, const lunar_time_t& lt)
   }
 }
 
-bool dst_on(const boost::posix_time::ptime& theTime, const boost::local_time::local_date_time& ldt)
+bool dst_on(const DateTime& theTime, const Fmi::LocalDateTime& ldt)
 {
   try
   {
@@ -355,7 +355,7 @@ bool dst_on(const boost::posix_time::ptime& theTime, const boost::local_time::lo
   }
 }
 
-double timezone_offset(const boost::local_time::local_date_time& ldt)
+double timezone_offset(const Fmi::LocalDateTime& ldt)
 {
   try
   {
@@ -394,8 +394,8 @@ void get_hours_and_minutes(double hours, int& hr, int& min)
   }
 }
 
-boost::local_time::local_date_time parse_local_date_time(
-    const boost::local_time::local_date_time& ldt, double hours)
+Fmi::LocalDateTime parse_local_date_time(
+    const Fmi::LocalDateTime& ldt, double hours)
 {
   try
   {
@@ -407,10 +407,10 @@ boost::local_time::local_date_time parse_local_date_time(
     // utc time of the beginning of the day
     auto utc_ptime = ldt.utc_time();
     // add hour offset
-    utc_ptime += boost::posix_time::time_duration(hour, min, 0, 0);
+    utc_ptime += TimeDuration(hour, min, 0, 0);
 
     // return local time
-    boost::local_time::local_date_time ldt_riseset(utc_ptime, ldt.zone());
+    Fmi::LocalDateTime ldt_riseset(utc_ptime, ldt.zone());
 
     return ldt_riseset;
   }
@@ -423,7 +423,7 @@ boost::local_time::local_date_time parse_local_date_time(
 /*
  * Calculate moonrise, moonset for given location
  */
-lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ldt,
+lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
                                     double offset,
                                     double lon,
                                     double lat)
@@ -436,11 +436,11 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
     double utset2(0.0);
 
     // beginning of the day
-    boost::local_time::local_date_time ldt_beg(
+    Fmi::LocalDateTime ldt_beg(
         ldt.local_time().date(),
-        boost::posix_time::time_duration(0, 0, 0, 0),
+        TimeDuration(0, 0, 0, 0),
         ldt.zone(),
-        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
+        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
     double date = ldt_beg.local_time().date().modjulian_day();
 
@@ -571,13 +571,13 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
 
     lunar_time_t retval(
         (rise ? parse_local_date_time(ldt_beg, utrise)
-              : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
+              : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
         (set ? parse_local_date_time(ldt_beg, utset)
-             : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
+             : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
         (rise2 ? parse_local_date_time(ldt_beg, utrise2)
-               : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
+               : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
         (set2 ? parse_local_date_time(ldt_beg, utset2)
-              : boost::local_time::local_date_time(boost::posix_time::not_a_date_time)),
+              : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
         rise,
         set,
         rise2,
@@ -592,25 +592,25 @@ lunar_time_t lunar_time_calculation(const boost::local_time::local_date_time& ld
   }
 }
 
-lunar_time_t lunar_time_i(const boost::local_time::local_date_time& ldt, double lon, double lat)
+lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
 {
   try
   {
-	boost::local_time::time_zone_ptr tz_ptr = (ldt.zone() ? ldt.zone() : boost::make_shared<boost::local_time::posix_time_zone>("UTC"));
+	Fmi::TimeZonePtr tz_ptr = (ldt.zone() ? ldt.zone() : boost::make_shared<boost::local_time::posix_time_zone>("UTC"));
 
     // beginning of the day
-    boost::local_time::local_date_time ldt_beg(
+    Fmi::LocalDateTime ldt_beg(
         ldt.local_time().date(),
-        boost::posix_time::time_duration(0, 0, 0, 0),
+        TimeDuration(0, 0, 0, 0),
         tz_ptr,
-        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
-    boost::local_time::local_date_time ldt_end(
+        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+    Fmi::LocalDateTime ldt_end(
         ldt.local_time().date(),
-        boost::posix_time::time_duration(23, 59, 59, 0),
+        TimeDuration(23, 59, 59, 0),
         tz_ptr,
-        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
+        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
-    boost::posix_time::ptime dst_endtime(
+    DateTime dst_endtime(
         tz_ptr->dst_local_end_time(ldt.local_time().date().year()));
     bool dst_ends_today(ldt_beg.local_time().date() == dst_endtime.date());
 
@@ -632,13 +632,13 @@ lunar_time_t lunar_time_i(const boost::local_time::local_date_time& ldt, double 
       // do calculation using wintertime offset
       lunar_time_t lt_after = lunar_time_calculation(ldt_beg, offset_after_dst_ends, lon, lat);
       if (lt_after.moonrise_today())
-        lt_after.moonrise += boost::posix_time::hours(1);
+        lt_after.moonrise += Fmi::Hours(1);
       if (lt_after.moonset_today())
-        lt_after.moonset += boost::posix_time::hours(1);
+        lt_after.moonset += Fmi::Hours(1);
       if (lt_after.moonrise2_today())
-        lt_after.moonrise2 += boost::posix_time::hours(1);
+        lt_after.moonrise2 += Fmi::Hours(1);
       if (lt_after.moonset2_today())
-        lt_after.moonset2 += boost::posix_time::hours(1);
+        lt_after.moonset2 += Fmi::Hours(1);
 
       lunar_time_t lt_combined(
           lt_before.moonrise_today() ? lt_before.moonrise : lt_after.moonrise,
@@ -665,7 +665,7 @@ lunar_time_t lunar_time_i(const boost::local_time::local_date_time& ldt, double 
   }
 }
 
-lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
+lunar_time_t lunar_time(const Fmi::LocalDateTime& ldt,
                         double lon,
                         double lat,
                         bool allow_missing_dates /*= false*/)
@@ -681,14 +681,14 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
     if (!lt_ret.moonrise_today())
     {
       unsigned int counter(0);  // just in case something goes wrong
-      boost::local_time::local_date_time ldt_iter(ldt);
+      Fmi::LocalDateTime ldt_iter(ldt);
       if (lt_ret.above_hz_24h || lt_ret.moonset_today())
       {
         // find the previous moonrise
         lunar_time_t lt_prev;
         while (!lt_prev.moonrise_today() && counter < iteration_limit)
         {
-          ldt_iter -= boost::posix_time::hours(24);
+          ldt_iter -= Fmi::Hours(24);
           lt_prev = lunar_time_i(ldt_iter, lon, lat);
           counter++;
         }
@@ -701,7 +701,7 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
         lunar_time_t lt_next;
         while (!lt_next.moonrise_today() && counter < iteration_limit)
         {
-          ldt_iter += boost::posix_time::hours(24);
+          ldt_iter += Fmi::Hours(24);
           lt_next = lunar_time_i(ldt_iter, lon, lat);
           counter++;
         }
@@ -712,14 +712,14 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
     if (!lt_ret.moonset_today())
     {
       unsigned int counter(0);  // just in case something goes wrong
-      boost::local_time::local_date_time ldt_iter(ldt);
+      Fmi::LocalDateTime ldt_iter(ldt);
       if (lt_ret.above_hz_24h || lt_ret.moonrise_today())
       {
         // find the next moonset
         lunar_time_t lt_next;
         while (!lt_next.moonset_today() && counter < iteration_limit)
         {
-          ldt_iter += boost::posix_time::hours(24);
+          ldt_iter += Fmi::Hours(24);
           lt_next = lunar_time_i(ldt_iter, lon, lat);
           counter++;
         }
@@ -732,7 +732,7 @@ lunar_time_t lunar_time(const boost::local_time::local_date_time& ldt,
         lunar_time_t lt_prev;
         while (!lt_prev.moonset_today() && counter < iteration_limit)
         {
-          ldt_iter -= boost::posix_time::hours(24);
+          ldt_iter -= Fmi::Hours(24);
           lt_prev = lunar_time_i(ldt_iter, lon, lat);
           counter++;
         }

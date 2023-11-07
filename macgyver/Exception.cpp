@@ -1,5 +1,6 @@
 #include "Exception.h"
 #include "AnsiEscapeCodes.h"
+#include "DateTime.h"
 #include "StringConversion.h"
 #include "TypeName.h"
 #include <boost/thread.hpp>
@@ -26,7 +27,7 @@ thread_local bool Exception::force_stack_trace = false;
 
 Exception::Exception()
 {
-  timestamp = boost::posix_time::second_clock::local_time();
+  timestamp = Fmi::SecondClock::local_time();
   line = 0;
 }
 
@@ -69,7 +70,7 @@ Exception::Exception(const char* _filename,
                      std::string _message,
                      Exception* _prevException)
 {
-  timestamp = boost::posix_time::second_clock::local_time();
+  timestamp = Fmi::SecondClock::local_time();
   filename = _filename;
   line = _line;
   function = _function;
@@ -114,7 +115,7 @@ Exception::Exception(const char* _filename,
 
 Exception::Exception(const char* _filename, int _line, const char* _function, std::string _message)
 {
-  timestamp = boost::posix_time::second_clock::local_time();
+  timestamp = Fmi::SecondClock::local_time();
   filename = _filename;
   line = _line;
   function = _function;

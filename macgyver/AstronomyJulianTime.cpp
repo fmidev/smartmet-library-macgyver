@@ -25,11 +25,10 @@
 #include <boost/date_time/local_time/local_time.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-using boost::gregorian::date;
-using boost::local_time::local_date_time;
-using boost::local_time::time_zone_ptr;
+using Fmi::Date;
+using Fmi::LocalDateTime;
+using Fmi::TimeZonePtr;
 using boost::posix_time::not_a_date_time;
-using boost::posix_time::ptime;
 
 namespace Fmi
 {
@@ -42,7 +41,7 @@ namespace Astronomy
  *       at noon. The beginning of a Gregorian day is -12h on the earlier
  *       Julian day.
  */
-JulianTime::JulianTime(const ptime& utc)
+JulianTime::JulianTime(const Fmi::DateTime& utc)
 {
   try
   {
@@ -57,7 +56,7 @@ JulianTime::JulianTime(const ptime& utc)
 /*
  * Convert to Gregorian UTC
  */
-ptime JulianTime::ptime_utc() const
+Fmi::DateTime JulianTime::ptime_utc() const
 {
   try
   {
@@ -87,11 +86,11 @@ ptime JulianTime::ptime_utc() const
     auto month = static_cast<std::uint16_t>((E < 14) ? E - 1 : E - 13);
     auto year = static_cast<std::uint16_t>((month > 2) ? C - 4716 : C - 4715);
 
-    date date(year, month, day);
+    Fmi::Date date(year, month, day);
 
     auto ss = (unsigned)floor(f * (24 * 60 * 60));  // f: [0,1)
 
-    return ptime(date, boost::posix_time::seconds(ss));
+    return Fmi::DateTime(date, Fmi::Seconds(ss));
   }
   catch (...)
   {
@@ -102,14 +101,14 @@ ptime JulianTime::ptime_utc() const
 /*
  * Convert to local Gregorian time
  */
-local_date_time JulianTime::ldt(const time_zone_ptr& tz) const
+Fmi::LocalDateTime JulianTime::ldt(const Fmi::TimeZonePtr& tz) const
 {
   try
   {
     /*
      * When constructed this way, Boost takes 'ptime' as UTC.
      */
-    return local_date_time(ptime_utc(), tz);
+    return Fmi::LocalDateTime(ptime_utc(), tz);
   }
   catch (...)
   {
@@ -357,7 +356,7 @@ double JulianTime::EquationOfTime() const
 /*
  * Solar noon for the given day at the given location on Earth
  */
-JulianTime SolNoon(const local_date_time& ldt, double lon_e)
+JulianTime SolNoon(const Fmi::LocalDateTime& ldt, double lon_e)
 {
   try
   {
@@ -369,12 +368,12 @@ JulianTime SolNoon(const local_date_time& ldt, double lon_e)
     //       we're at local noon.
     //
 
-    local_date_time lnoon(ldt.local_time().date(),
-                          boost::posix_time::time_duration(12, 0, 0),
+    Fmi::LocalDateTime lnoon(ldt.local_time().date(),
+                          TimeDuration(12, 0, 0),
                           ldt.zone(),
-                          local_date_time::NOT_DATE_TIME_ON_ERROR);
+                          Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
-    date date_utc = lnoon.utc_time().date();
+    Fmi::Date date_utc = lnoon.utc_time().date();
 
     double JD = date_utc.julian_day() - 0.5;
 

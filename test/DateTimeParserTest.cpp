@@ -28,15 +28,15 @@ void parse_timestamp()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   DateTimeParser parser;
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("20070102T0500")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("20000228T0515")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -78,17 +78,17 @@ void parse_epoch()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   DateTimeParser parser;
 
-  // date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  // Fmi::Date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("1167714000")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  // date +%s --date="2000-02-28 05:15:00 UTC" --> 951714900
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  // Fmi::Date +%s --date="2000-02-28 05:15:00 UTC" --> 951714900
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("951714900")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -110,9 +110,9 @@ void parse_epoch()
   {
   }
 
-  // This looks like a valid datetime:
+  // This looks like a valid Fmi::Datetime:
 
-  ok = ptime(date(2014, 05, 13), hours(20) + minutes(8));
+  ok = Fmi::DateTime(Fmi::Date(2014, 05, 13), hours(20) + minutes(8));
   if ((res = parser.parse("1400011680")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -127,77 +127,77 @@ void parse_iso()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   DateTimeParser parser;
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("20070102T050000")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("20000228T051500")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("2007-01-02T05:00:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("2000-02-28T05:15:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
   if ((res = parser.parse("2000-02-28T05:15:10")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
   if ((res = parser.parse("2000-02-28T05:15:10Z")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(4) + minutes(15) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(4) + minutes(15) + seconds(10));
   if ((res = parser.parse("2000-02-28T05:15:10+01:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(3) + minutes(45) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(3) + minutes(45) + seconds(10));
   if ((res = parser.parse("2000-02-28T05:15:10+01:30")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(3) + minutes(45) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(3) + minutes(45) + seconds(10));
   if ((res = parser.parse("2000-02-28T02:15:10-01:30")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
   if ((res = parser.parse("2000-02-28T051510")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
   if ((res = parser.parse("20000228T05:15:10")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15) + seconds(10));
   if ((res = parser.parse("2000-0228T0515:10")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28));
   if ((res = parser.parse("20000228T")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(12));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(12));
   if ((res = parser.parse("20000228T12")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
   // Fractional seconds are ignored
-  ok = ptime(date(2000, 2, 28), hours(12));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(12));
   if ((res = parser.parse("2000-02-28T12:00:00.321")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(9));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(9));
   if ((res = parser.parse("2000-02-28T12:00:00.321+03:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
   // Fractional seconds are ignored
-  ok = ptime(date(2000, 2, 28), hours(12));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(12));
   try
   {
     res = parser.parse("2000-02-28T12:00:00.3233");
@@ -214,7 +214,7 @@ void parse_iso()
   }
 
   // BRAINSTORM-480
-  ok = ptime(date(2015, 6, 9), hours(13));
+  ok = Fmi::DateTime(Fmi::Date(2015, 6, 9), hours(13));
   if ((res = parser.parse("2015-06-09T16:00:00+03")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
   if ((res = parser.parse("2015-06-09T16:00:00+03:00")) != ok)
@@ -222,7 +222,7 @@ void parse_iso()
   if ((res = parser.parse("2015-06-09T16:00:00+0300")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2015, 6, 9), hours(13) + minutes(30));
+  ok = Fmi::DateTime(Fmi::Date(2015, 6, 9), hours(13) + minutes(30));
   if ((res = parser.parse("2015-06-09T08:00:00-05:30")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -257,16 +257,16 @@ void parse_iso()
   }
 
 #ifdef WE_DO_NOT_SUPPORT_FRACTIONS
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(123456));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(123456));
   if ((res = parser.parse("2000-02-28T05:15:10.123456")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(987654));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15) + seconds(10) + microseconds(987654));
   if ((res = parser.parse("2000-02-28T05:15:10.987654Z")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 #endif
   // the Gregorian calendar is officially introduced on 1582-10-15
-  ok = ptime(date(1582, 10, 15), hours(0) + minutes(0) + seconds(0));
+  ok = Fmi::DateTime(Fmi::Date(1582, 10, 15), hours(0) + minutes(0) + seconds(0));
   if ((res = parser.parse("1582-10-15T00:00:00Z")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -338,15 +338,15 @@ void parse_fmi()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   DateTimeParser parser;
 
-  ok = ptime(date(2009, 12, 12), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2009, 12, 12), hours(5) + minutes(0));
   if ((res = parser.parse("200912120500")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(1800, 1, 1), hours(15) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(1800, 1, 1), hours(15) + minutes(0));
   if ((res = parser.parse("180001011500")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -379,27 +379,27 @@ void parse_sql()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   DateTimeParser parser;
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("2007-01-02 05:00:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("2000-02-28 05:15:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5));
   if ((res = parser.parse("2000-02-28 05")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(20) + seconds(34));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(20) + seconds(34));
   if ((res = parser.parse("2000-02-28 05:20:34")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28));
   if ((res = parser.parse("2000-02-28")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -432,57 +432,57 @@ void parse()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   DateTimeParser parser;
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("200701020500")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("200002280515")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("20070102T050000")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("20000228T051500")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("2007-01-02 05:00:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("2000-02-28 05:15:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  // date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  // Fmi::Date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("1167714000")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  // date +%s --date="2000-02-28 05:15:00 UTC" --> 951714900
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  // Fmi::Date +%s --date="2000-02-28 05:15:00 UTC" --> 951714900
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("951714900")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2007, 1, 2), hours(5) + minutes(0));
+  ok = Fmi::DateTime(Fmi::Date(2007, 1, 2), hours(5) + minutes(0));
   if ((res = parser.parse("2007-01-02T05:00:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2000, 2, 28), hours(5) + minutes(15));
+  ok = Fmi::DateTime(Fmi::Date(2000, 2, 28), hours(5) + minutes(15));
   if ((res = parser.parse("2000-02-28T05:15:00")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2013, 5, 15), hours(13) + minutes(17) + seconds(23));
+  ok = Fmi::DateTime(Fmi::Date(2013, 5, 15), hours(13) + minutes(17) + seconds(23));
   if ((res = parser.parse("20130515131723")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
-  ok = ptime(date(2013, 5, 15), hours(13) + minutes(17));
+  ok = Fmi::DateTime(Fmi::Date(2013, 5, 15), hours(13) + minutes(17));
   if ((res = parser.parse("201305151317")) != ok)
     TEST_FAILED("Expected " + to_simple_string(ok) + ", got " + to_simple_string(res));
 
@@ -505,11 +505,11 @@ void parse_http()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   DateTimeParser parser;
 
-  ok = ptime(date(1994, 11, 6), hours(8) + minutes(49) + seconds(37));
+  ok = Fmi::DateTime(Fmi::Date(1994, 11, 6), hours(8) + minutes(49) + seconds(37));
 
   if ((res = parser.parse_http("Sun, 06 Nov 1994 08:49:37 GMT")) != ok)
     TEST_FAILED("Failed to parse Sun, 06 Nov 1994 08:49:37 GMT");
@@ -538,15 +538,15 @@ void parse_offset()
   DateTimeParser parser;
 
   // Now rounded to closest minute
-  ptime now = second_clock::universal_time();
-  time_duration tnow = now.time_of_day();
+  Fmi::DateTime now = second_clock::universal_time();
+  Fmi::TimeDuration tnow = now.time_of_day();
   int secs = tnow.seconds();
   if (secs >= 30)
     now += seconds(60 - secs);
   else
     now -= seconds(secs);
 
-  ptime res, ok;
+  Fmi::DateTime res, ok;
 
   res = parser.parse("0");
   if (res - now != minutes(0))
@@ -611,7 +611,7 @@ void parse_duration()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  time_duration res, ok;
+  Fmi::TimeDuration res, ok;
 
   DateTimeParser parser;
 
@@ -658,7 +658,7 @@ void parse_iso_duration()
   using namespace boost::posix_time;
   using namespace boost::gregorian;
 
-  time_duration res;
+  Fmi::TimeDuration res;
 
   DateTimeParser parser;
 
@@ -710,20 +710,20 @@ void parse_wintertime()
 
   auto zone = TimeZoneFactory::instance().time_zone_from_string("Europe/Helsinki");
 
-  local_date_time ok = local_date_time(
-      date(2012, 10, 27), hours(3) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
-  local_date_time res = parser.parse("201210270330", zone);
+  Fmi::LocalDateTime ok = Fmi::LocalDateTime(
+      date(2012, 10, 27), hours(3) + minutes(30), zone, Fmi::LocalDateTime::EXCEPTION_ON_ERROR);
+  Fmi::LocalDateTime res = parser.parse("201210270330", zone);
   if (res != ok)
     TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
-  ok = local_date_time(
-      date(2012, 10, 27), hours(2) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
+  ok = Fmi::LocalDateTime(
+      date(2012, 10, 27), hours(2) + minutes(30), zone, Fmi::LocalDateTime::EXCEPTION_ON_ERROR);
   res = parser.parse("201210270230", zone);
   if (res != ok)
     TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
-  ok = local_date_time(
-      date(2012, 10, 27), hours(1) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
+  ok = Fmi::LocalDateTime(
+      date(2012, 10, 27), hours(1) + minutes(30), zone, Fmi::LocalDateTime::EXCEPTION_ON_ERROR);
   res = parser.parse("201210270130", zone);
   if (res != ok)
     TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
@@ -742,21 +742,21 @@ void parse_summertime()
 
   auto zone = TimeZoneFactory::instance().time_zone_from_string("Europe/Helsinki");
 
-  local_date_time ok = local_date_time(
-      date(2013, 3, 31), hours(1) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
-  local_date_time res = parser.parse("201303310130", zone);
+  Fmi::LocalDateTime ok = Fmi::LocalDateTime(
+      date(2013, 3, 31), hours(1) + minutes(30), zone, Fmi::LocalDateTime::EXCEPTION_ON_ERROR);
+  Fmi::LocalDateTime res = parser.parse("201303310130", zone);
   if (res != ok)
     TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
-  ok = local_date_time(
-      date(2013, 3, 31), hours(2) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
+  ok = Fmi::LocalDateTime(
+      date(2013, 3, 31), hours(2) + minutes(30), zone, Fmi::LocalDateTime::EXCEPTION_ON_ERROR);
   res = parser.parse("201303310230", zone);
   if (res != ok)
     TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));
 
   // We expect 04:30 for invalid 03:30!!
-  ok = local_date_time(
-      date(2013, 3, 31), hours(4) + minutes(30), zone, local_date_time::EXCEPTION_ON_ERROR);
+  ok = Fmi::LocalDateTime(
+      date(2013, 3, 31), hours(4) + minutes(30), zone, Fmi::LocalDateTime::EXCEPTION_ON_ERROR);
   res = parser.parse("201303310330", zone);
   if (res != ok)
     TEST_FAILED("Expected " + tostring(ok) + ", got " + tostring(res));

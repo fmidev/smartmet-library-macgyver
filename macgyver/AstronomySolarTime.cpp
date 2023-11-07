@@ -35,7 +35,7 @@ namespace Astronomy
 /*
  * Calculate sunrise, sunset and noon times on a certain day
  */
-solar_time_t solar_time(const boost::local_time::local_date_time& ldt, double lon_e, double lat)
+solar_time_t solar_time(const Fmi::LocalDateTime& ldt, double lon_e, double lat)
 {
   try
   {
@@ -102,7 +102,7 @@ solar_time_t solar_time(const boost::local_time::local_date_time& ldt, double lo
  * so that a day is either 0 or 24 hours long in local time.
  */
 
-boost::posix_time::time_duration solar_time_t::daylength() const
+TimeDuration solar_time_t::daylength() const
 {
   try
   {
@@ -111,14 +111,14 @@ boost::posix_time::time_duration solar_time_t::daylength() const
       if (sunset_today())
         return sunset - sunrise;
 
-      return boost::posix_time::hours(24) - sunrise.local_time().time_of_day();
+      return Fmi::Hours(24) - sunrise.local_time().time_of_day();
     }
     if (sunset_today())
       return sunset.local_time().time_of_day();
     if (polar_night())
-      return boost::posix_time::seconds(0);
+      return Fmi::Seconds(0);
 
-    return boost::posix_time::hours(24);
+    return Fmi::Hours(24);
   }
   catch (...)
   {

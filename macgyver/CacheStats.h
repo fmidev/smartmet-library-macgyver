@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <boost/date_time/posix_time/ptime.hpp>
+#include "DateTime.h"
 #include <map>
 
 namespace Fmi
@@ -16,8 +16,8 @@ namespace Cache
 struct CacheStats
 {
   CacheStats() = default;
-  CacheStats(const boost::posix_time::ptime& t) : starttime(t) {}
-  CacheStats(const boost::posix_time::ptime& t,
+  CacheStats(const DateTime& t) : starttime(t) {}
+  CacheStats(const DateTime& t,
              std::size_t maxsize_,
              std::size_t size_,
              std::size_t inserts_,
@@ -32,7 +32,7 @@ struct CacheStats
   {
   }
 
-  boost::posix_time::ptime starttime;
+  DateTime starttime;
   std::size_t maxsize = 0;
   std::size_t size = 0;
   std::size_t inserts = 0;
