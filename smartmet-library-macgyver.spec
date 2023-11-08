@@ -14,8 +14,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.10.10
-Release: 2%{?dist}.fmi
+Version: 23.11.8
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Nov  8 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.11.8-1.fmi
+- New headers DateTime.h and LocalDateTime.h for wrapping boost::date_time definitions
+
 * Tue Oct 10 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.10.10-2.fmi
 - Added data compression support
 
