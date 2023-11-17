@@ -405,7 +405,7 @@ LocalDateTime Fmi::operator - (const LocalDateTime& time, const TimeDuration& td
     return tmp;
 }
 
-TimeDuration Fmi::operator - (const LocalDateTime& from, const LocalDateTime& to)
+TimeDuration Fmi::operator - (const LocalDateTime& to, const LocalDateTime& from)
 {
     if (from.is_special() || to.is_special())
     {
