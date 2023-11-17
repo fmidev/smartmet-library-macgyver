@@ -87,7 +87,9 @@ std::size_t hash_value(const Fmi::LocalDateTime& time)
 
 std::size_t hash_value(const Fmi::TimeZonePtr& zone)
 {
-  return Fmi::hash_value(zone->std_zone_name());
+  // FIXME: Unfortunatelly abbreviation is not available from std::chrono::time_zone unesless
+  //        also time is provided. Replace currently with name
+    return Fmi::hash_value(zone.name());
 }
 
 std::size_t hash_value(bool value)

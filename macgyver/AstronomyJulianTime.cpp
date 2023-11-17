@@ -61,7 +61,7 @@ Fmi::DateTime JulianTime::ptime_utc() const
   try
   {
     if (jd == 0.0)
-      return not_a_date_time;
+        return Fmi::DateTime(not_a_date_time);
 
     int z = lround(jd);
     double f = (jd + 0.5) - z;
@@ -108,7 +108,8 @@ Fmi::LocalDateTime JulianTime::ldt(const Fmi::TimeZonePtr& tz) const
     /*
      * When constructed this way, Boost takes 'ptime' as UTC.
      */
-    return Fmi::LocalDateTime(ptime_utc(), tz);
+    TimeZonePtr utc("Etc/UTC");
+    return Fmi::LocalDateTime(ptime_utc(), utc).to_tz(tz);
   }
   catch (...)
   {
@@ -371,7 +372,7 @@ JulianTime SolNoon(const Fmi::LocalDateTime& ldt, double lon_e)
     Fmi::LocalDateTime lnoon(ldt.local_time().date(),
                           TimeDuration(12, 0, 0),
                           ldt.zone(),
-                          Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+                          boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
 
     Fmi::Date date_utc = lnoon.utc_time().date();
 

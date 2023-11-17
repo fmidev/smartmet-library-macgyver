@@ -439,8 +439,10 @@ Fmi::LocalDateTime make_time(const Fmi::Date& date,
 
     // Handle the normal case
 
-    bl::local_date_time dt(date, duration, zone, bl::local_date_time::NOT_DATE_TIME_ON_ERROR);
+    Fmi::DateTime tmp(date, duration);
+    Fmi::LocalDateTime dt(tmp, zone);
 
+#if 0
     // If the constructed time is not valid, see if we can fix
     // it using DST rules.
 
@@ -453,7 +455,8 @@ Fmi::LocalDateTime make_time(const Fmi::Date& date,
       try
       {
         const bool summertime = true;
-        dt = bl::local_date_time(date, duration, zone, summertime);
+        dt = bl::local_date_time(date, duration, zone, summertimees
+            );
       }
       catch (...)
       {
@@ -473,6 +476,7 @@ Fmi::LocalDateTime make_time(const Fmi::Date& date,
         }
       }
     }
+#endif
     return dt;
   }
   catch (...)

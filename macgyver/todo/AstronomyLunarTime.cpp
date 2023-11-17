@@ -1,3 +1,12 @@
+/**
+ * @file AstronomyLunarTime.cpp
+ *
+ * @brief This file contains the implementation of lunar time calculation functions.
+ * 
+ * The functions in this file are used to calculate moonrise and moonset times for a given location.
+ * The calculations are based on the altitude of the moon and the location's latitude and longitude.
+ * The functions use boost libraries for date and time calculations.
+ */
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
 #include "Exception.h"
@@ -330,24 +339,8 @@ bool dst_on(const DateTime& theTime, const Fmi::LocalDateTime& ldt)
   {
     auto zone = ldt.zone();
 
-    bool dst_on(false);
-    if (zone->has_dst())
-    {
-      auto dst_starttime = zone->dst_local_start_time(ldt.local_time().date().year());
-      auto dst_endtime = zone->dst_local_end_time(ldt.local_time().date().year());
-
-      if (dst_starttime < dst_endtime)
-      {
-        if (theTime >= dst_starttime && theTime <= dst_endtime)
-          dst_on = true;
-      }
-      else
-      {
-        if (theTime >= dst_starttime || theTime <= dst_endtime)
-          dst_on = true;
-      }
-    }
-    return dst_on;
+    Fmi::LocalDateTime tmp(theTime, zone);
+    return tmp.dst_on();
   }
   catch (...)
   {
@@ -360,14 +353,8 @@ double timezone_offset(const Fmi::LocalDateTime& ldt)
   try
   {
     auto zone = ldt.zone();
-
-    double base_offset(zone->base_utc_offset().hours() +
-                       (static_cast<float>(zone->base_utc_offset().minutes()) / 60.0));
-    double dst_offset(dst_on(ldt.local_time(), ldt)
-                          ? (zone->dst_offset().hours() + zone->dst_offset().minutes())
-                          : 0.0);
-
-    return (base_offset + dst_offset);
+    const double offset = ldt.base_offset() + ldt.dst_offset();
+    return offset;
   }
   catch (...)
   {
@@ -440,7 +427,7 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
         ldt.local_time().date(),
         TimeDuration(0, 0, 0, 0),
         ldt.zone(),
-        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
 
     double date = ldt_beg.local_time().date().modjulian_day();
 
@@ -596,19 +583,19 @@ lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
 {
   try
   {
-	Fmi::TimeZonePtr tz_ptr = (ldt.zone() ? ldt.zone() : boost::make_shared<boost::local_time::posix_time_zone>("UTC"));
+      Fmi::TimeZonePtr tz_ptr = (ldt.zone() ? ldt.zone() : TimeZonePtr("UTC"));
 
     // beginning of the day
     Fmi::LocalDateTime ldt_beg(
         ldt.local_time().date(),
         TimeDuration(0, 0, 0, 0),
         tz_ptr,
-        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
     Fmi::LocalDateTime ldt_end(
         ldt.local_time().date(),
         TimeDuration(23, 59, 59, 0),
         tz_ptr,
-        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
 
     DateTime dst_endtime(
         tz_ptr->dst_local_end_time(ldt.local_time().date().year()));

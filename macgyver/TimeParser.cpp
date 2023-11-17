@@ -1231,7 +1231,11 @@ Fmi::LocalDateTime make_time(const Fmi::Date& date,
   {
     // Handle the normal case
 
-    Fmi::LocalDateTime dt(date, duration, zone, Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+    Fmi::DateTime tmp(date, duration);
+    Fmi::LocalDateTime dt(tmp, zone);
+
+#if 0
+    // NOTE: already implemented
 
     // If the constructed time is not valid, see if we can fix
     // it using DST rules.
@@ -1265,6 +1269,7 @@ Fmi::LocalDateTime make_time(const Fmi::Date& date,
         }
       }
     }
+#endif
     return dt;
   }
   catch (...)

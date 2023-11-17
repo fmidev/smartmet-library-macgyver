@@ -29,31 +29,40 @@ class TimeZones::Pimple
 {
  public:
   Pimple(const std::string& regionsFile, const std::string& coordinatesFile)
-      : itsRegions(), itsCoordinates(coordinatesFile)
+      : itsCoordinates(coordinatesFile)
   {
     try
     {
-      itsRegions.load_from_file(regionsFile);
-
+      const DateTimeNS::tzdb& tzdb = DateTimeNS::get_tzdb();
       // Create all known timezones once for better access speed later on.
-      auto regions = itsRegions.region_list();
-      for (const auto& id : regions)
-      {
-        auto ptr = itsRegions.time_zone_from_region(id);
-        if (!ptr)
-          throw Fmi::Exception(BCP, "Unknown timezone definition")
-              .addParameter("Filename", regionsFile)
-              .addParameter("ID", id);
+      std::for_each(
+          tzdb.zones.begin(),
+          tzdb.zones.end(),
+          [this](const DateTimeNS::time_zone& tz) {
+              const std::string& name = tz.name();
+              TimeZonePtr tz_ptr(&tz);
+              tz_names.emplace_back(name);
+              itsKnownZones.emplace(name, tz_ptr);
+          });
 
-        itsKnownZones[id] = ptr;
-      }
+      std::for_each(
+          tzdb.links.begin(),
+          tzdb.links.end(),
+          [this](const DateTimeNS::time_zone_link& tzl) {
+              const std::string& name = tzl.name();
+              TimeZonePtr tz_ptr(itsKnownZones.at(tzl.target()));
+              tz_names.emplace_back(name);
+              itsKnownZones.emplace(name, tz_ptr);
+          });
+
+      std::sort(tz_names.begin(), tz_names.end());
     }
     catch (...)
     {
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
-  boost::local_time::tz_database itsRegions;
+  std::vector<std::string> tz_names;
   WorldTimeZones itsCoordinates;
   std::unordered_map<std::string, Fmi::TimeZonePtr> itsKnownZones;
 };
@@ -91,14 +100,7 @@ TimeZones::TimeZones(const std::string& regionsFile, const std::string& coordina
 
 vector<string> TimeZones::region_list() const
 {
-  try
-  {
-    return itsPimple->itsRegions.region_list();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
+    return itsPimple->tz_names;
 }
 // ----------------------------------------------------------------------
 /*!
@@ -138,7 +140,7 @@ Fmi::TimeZonePtr TimeZones::time_zone_from_string(const string& desc) const
       return value->second;
 
     // Try POSIX TZ description (may throw) if region name is unknown
-    return Fmi::TimeZonePtr(new boost::local_time::posix_time_zone(desc));
+    return Fmi::TimeZonePtr(desc);
   }
   catch (...)
   {
