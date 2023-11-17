@@ -25,6 +25,7 @@ LIBS += -L$(libdir) \
 	-lboost_system \
 	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
+	-ldate-tz \
 	-lpthread -lrt
 
 RPMBUILD_OPT ?=
