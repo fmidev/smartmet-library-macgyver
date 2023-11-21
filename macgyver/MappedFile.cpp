@@ -7,6 +7,7 @@
 
 Fmi::MappedFile::MappedFile(const MappedFile::Params& params)
     : boost::iostreams::mapped_file(params)
+    , m_path(params.path)
 {
     madvise_nodump();
 }
@@ -20,6 +21,7 @@ Fmi::MappedFile::MappedFile(
     try
 
     : boost::iostreams::mapped_file(path, mode, length, offset)
+    , m_path(path)
 {
     madvise_nodump();
 }
@@ -38,7 +40,8 @@ Fmi::MappedFile::MappedFile(
 
     try
 
-    : boost::iostreams::mapped_file(path, mode, length, offset)
+      : boost::iostreams::mapped_file(path, mode, length, offset)
+      , m_path(path)
 {
     madvise_nodump();
 }
@@ -66,6 +69,7 @@ void
 Fmi::MappedFile::open(Params params)  try
 {
     madvise_default();
+    m_path = params.path;
     boost::iostreams::mapped_file::open(params);
     madvise_nodump();
 }
@@ -84,6 +88,7 @@ Fmi::MappedFile::open(
     boost::intmax_t offset ) try
 {
     madvise_default();
+    m_path = path;
     boost::iostreams::mapped_file::open(path, mode, length, offset);
     madvise_nodump();
 }
@@ -102,6 +107,7 @@ Fmi::MappedFile::open(
     boost::intmax_t offset) try
 {
     madvise_default();
+    m_path = path;
     boost::iostreams::mapped_file::open(path, mode, length, offset);
     madvise_nodump();
 }
@@ -121,6 +127,7 @@ Fmi::MappedFile::close() try
 catch (...)
 {
     auto exception = Fmi::Exception::Trace(BCP, "Failed to close mapped file");
+    exception.addParameter("Path", m_path);
     throw exception;
 }
 

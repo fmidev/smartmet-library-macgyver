@@ -70,6 +70,7 @@ namespace Fmi
         static int alignment() { return boost::iostreams::mapped_file::alignment(); }
 
     private:
+        std::string m_path;
         void madvise_nodump();
         void madvise_default();
         void invoke_madvise(int adv);
