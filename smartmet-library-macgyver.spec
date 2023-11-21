@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.11.8
+Version: 23.11.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -31,8 +31,8 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
-BuildRequires: smartmet-timezones >= 23.4.18
-BuildRequires: smartmet-utils-devel >= 23.7.17
+BuildRequires: smartmet-timezones >= 23.10.30
+BuildRequires: smartmet-utils-devel >= 23.9.6
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -70,8 +70,8 @@ BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 23.4.18
-#TestRequires: smartmet-utils-devel >= 23.7.17
+#TestRequires: smartmet-timezones >= 23.10.30
+#TestRequires: smartmet-utils-devel >= 23.9.6
 #TestRequires: smartmet-test-db
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
@@ -112,7 +112,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 23.7.17
+Requires: smartmet-utils-devel >= 23.9.6
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Nov 21 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.21-1.fmi
+- MappedFile now reports the filename if close() fails
+
 * Wed Nov  8 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.11.8-1.fmi
 - New headers DateTime.h and LocalDateTime.h for wrapping boost::date_time definitions
 
