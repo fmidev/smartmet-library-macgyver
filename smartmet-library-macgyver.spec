@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 23.11.21
+Version: 24.1.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jan 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.1.12-1.fmi
+- Improve exception reporting
+
 * Tue Nov 21 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.21-1.fmi
 - MappedFile now reports the filename if close() fails
 
