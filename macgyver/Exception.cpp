@@ -339,25 +339,10 @@ std::string Exception::getStackTrace() const
                                 ANSI_FG_DEFAULT,
                                 ANSI_BG_DEFAULT);
 
-  // Skip levels when stack trace is disabled, but if there is detail/parameter information add the
-  // function info with the details and parameters. For example the WMS plugin may disable
-  // stack traces for user errors, but we still want to know the URI and the IP added by the
-  // top level exception. In general, any information added during the trace is likely to be
-  // of importance. Any less important information can be added directly to the error message
-  // using for example fmt::format.
-
-  bool last_ex_only = (!force_stack_trace && e->stackTraceDisabled());
-
-  while (e != nullptr)
-  {
-    // Print function information if not disabled or if there is extra information
-    bool is_last_ex = e->prevException.get() == nullptr;
-    bool print_func =
-        (!last_ex_only || is_last_ex || e->getDetailCount() > 0 || e->getParameterCount() > 0);
-    if (print_func)
-    {
-      out +=
-          fmt::format("{}{}EXCEPTION {}{}{}\n{} * Function   : {}{}\n{} * Location   : {}{}:{}\n",
+  const auto summary_string =
+      [](const Exception* e) -> std::string
+      {
+          return fmt::format("{}{}EXCEPTION {}{}{}\n{} * Function   : {}{}\n{} * Location   : {}{}:{}\n",
                       ANSI_FG_RED,
                       ANSI_BOLD_ON,
                       ANSI_BOLD_OFF,
@@ -370,41 +355,79 @@ std::string Exception::getStackTrace() const
                       ANSI_BOLD_OFF,
                       e->filename,
                       e->line);
-    }
 
-    size_t size = e->detailVector.size();
-    if (size > 0)
-    {
-      out += ANSI_BOLD_ON;
-      out += " * Details    :\n";
-      out += ANSI_BOLD_OFF;
-      for (size_t t = 0; t < size; t++)
-      {
-        out += "   - ";
-        out += e->detailVector.at(t);
-        out += "\n";
-      }
-    }
+      };
 
-    size = e->parameterVector.size();
-    if (size > 0)
-    {
-      out += ANSI_BOLD_ON;
-      out += " * Parameters :\n";
-      out += ANSI_BOLD_OFF;
-      for (size_t t = 0; t < size; t++)
+  const auto details_string =
+      [] (const DetailVector& details) -> std::string
       {
-        auto p = e->parameterVector.at(t);
-        out += "   - ";
-        out += p.first;
-        out += " = ";
-        out += p.second;
-        out += "\n";
-      }
+          std::string out;
+          if (!details.empty())
+          {
+              out += ANSI_BOLD_ON;
+              out += " * Details    :\n";
+              out += ANSI_BOLD_OFF;
+              for (const auto& detail : details)
+              {
+                  out += "   - ";
+                  out += detail;
+                  out += "\n";
+              }
+          }
+          return out;
+      };
+
+  const auto parameters_string =
+      [] (const ParameterVector& parameters) -> std::string
+      {
+          std::string out;
+          if (!parameters.empty())
+          {
+              out += ANSI_BOLD_ON;
+              out += " * Parameters :\n";
+              out += ANSI_BOLD_OFF;
+              for (const auto& param : parameters)
+              {
+                  out += "   - ";
+                  out += param.first;
+                  out += " = ";
+                  out += param.second;
+                  out += "\n";
+              }
+          }
+          return out;
+      };
+
+  // Skip levels when stack trace is disabled, but if there is detail/parameter information add the
+  // function info with the details and parameters. For example the WMS plugin may disable
+  // stack traces for user errors, but we still want to know the URI and the IP added by the
+  // top level exception. In general, any information added during the trace is likely to be
+  // of importance. Any less important information can be added directly to the error message
+  // using for example fmt::format.
+
+  if (!force_stack_trace && e->stackTraceDisabled())
+  {
+    const Exception* last = e;
+    DetailVector details;
+    ParameterVector parameters;
+    for ( ; e && e->stackTraceDisabled(); e = e->prevException.get())
+    {
+      last = e;
+      std::copy(e->detailVector.begin(), e->detailVector.end(), std::back_inserter(details));
+      std::copy(e->parameterVector.begin(), e->parameterVector.end(), std::back_inserter(parameters));
     }
+    out += summary_string(last);
+    out += details_string(details);
+    out += parameters_string(parameters);
     out += "\n";
+  }
 
-    e = e->prevException.get();
+  for ( ; e ; e = e->prevException.get())
+  {
+    out += summary_string(e);
+    out += details_string(e->detailVector);
+    out += parameters_string(e->parameterVector);
+    out += "\n";
   }
 
   return out;
