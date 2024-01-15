@@ -92,13 +92,14 @@ static void prepare_test_data()
   const Fmi::Date APR_4_1970(1970, 4, 4);
   const Fmi::Date MAY_16_2008(2008, 5, 16);
   const Fmi::Date JUL_28_2008(2008, 7, 28);
-  const Fmi::Date NOV_25_2012(2012, 11, 25);
-  const Fmi::Date JAN_16_2013(2013, 1, 16);
+  const Fmi::Date NOV_26_2012(2012, 11, 26);
+  const Fmi::Date JAN_17_2013(2013, 1, 17);
   const Fmi::Date JUN_14_2012(2012, 6, 14);
-  const Fmi::Date JUN_11_2012(2012, 6, 11);
-  const Fmi::Date JUL_01_2012(2012, 7, 1);
+  const Fmi::Date JUN_12_2012(2012, 6, 12);
+  const Fmi::Date JUL_02_2012(2012, 7, 2);
   const Fmi::Date OCT_7_2013(2013, 10, 7);
   const Fmi::Date JUN_18_2019(2019, 6, 18);
+  const Fmi::Date JAN_10_2024(2024, 1, 10);
 
   /* HELSINKI 2008-Jun-18 15:34:07
    */
@@ -112,10 +113,27 @@ static void prepare_test_data()
                                   227.0028,  // azimuth
                                   46.6335,   // elevation
                                   //
-                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(3, 53, 42)),
-                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(22, 49, 9)),
+                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(3, 53, 41)),
+                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(22, 49, 8)),
                                   Fmi::TimeDuration(13, 21, 13),
                                   Fmi::TimeDuration(18, 55, 27)));
+
+  // Kuusamo
+
+  test_data.push_back(test_data_t("Kuusamo",
+                                  "Europe/Helsinki",
+                                  LON_E(29, 12, 0),
+                                  LAT_N(66, 0, 0),  //
+                                  //
+                                  Fmi::DateTime(JUN_14_2012, Fmi::TimeDuration(13, 20, 0)),
+                                  23.2897,  // declination
+                                  185.565,  // azimuth
+                                  47.2234,  // elevation
+                                  //
+                                  Fmi::DateTime(JUN_12_2012, Fmi::TimeDuration(1, 10, 31)),
+                                  Fmi::DateTime(JUL_02_2012, Fmi::TimeDuration(0, 40, 55)),
+                                  Fmi::TimeDuration(13, 03, 26),
+                                  Fmi::TimeDuration(24, 0, 0)));
 
   /* Utsjoki kesäaurinko / kaamos / jotain väliltä
    */
@@ -130,8 +148,8 @@ static void prepare_test_data()
                   175.8591,           // azimuth
                   43.4874,            // elevation
                   //
-                  Fmi::DateTime(Fmi::Date(2008, 5, 16), Fmi::TimeDuration(1, 36, 13)),
-                  Fmi::DateTime(Fmi::Date(2008, 7, 28), Fmi::TimeDuration(0, 37, 33)),
+                  Fmi::DateTime(Fmi::Date(2008, 5, 16), Fmi::TimeDuration(1, 35, 59)),
+                  Fmi::DateTime(Fmi::Date(2008, 7, 29), Fmi::TimeDuration(0, 23, 43)),
                   Fmi::TimeDuration(13, 12, 59),
                   Fmi::Hours(24)));
 
@@ -146,12 +164,12 @@ static void prepare_test_data()
                   190.34,               // azimuth
                   -3.1991,              // elevation
                   //
-                  Fmi::DateTime(Fmi::Date(2013, 1, 16), Fmi::TimeDuration(12, 2, 26)),
-                  Fmi::DateTime(Fmi::Date(2012, 11, 25), Fmi::TimeDuration(12, 18, 16)),
-                  Fmi::TimeDuration(),  // (12,14,49) but NOAA does not give it so not among the test
+                  Fmi::DateTime(Fmi::Date(2013, 1, 17), Fmi::TimeDuration(11, 43, 30)),
+                  Fmi::DateTime(Fmi::Date(2012, 11, 25), Fmi::TimeDuration(12, 18, 5)),
+                  Fmi::TimeDuration(12, 14, 49),
                   Fmi::Seconds(0)));
 
-  // Aurinko nousee kes�ksi
+  // Sun rises for the summer
   test_data.push_back(
       test_data_t("Utsjoki 3",
                   "Europe/Helsinki",
@@ -163,12 +181,12 @@ static void prepare_test_data()
                   177.476,  // azimuth
                   39.3317,  // elevation
                   //
-                  Fmi::DateTime(Fmi::Date(2008, 5, 16), Fmi::TimeDuration(1, 36, 13)),
-                  Fmi::DateTime(Fmi::Date(2008, 7, 28), Fmi::TimeDuration(0, 37, 33)),
+                  Fmi::DateTime(Fmi::Date(2008, 5, 16), Fmi::TimeDuration(1, 35, 59)),
+                  Fmi::DateTime(Fmi::Date(2008, 7, 29), Fmi::TimeDuration(0, 23, 43)),
                   Fmi::TimeDuration(13, 8, 15),
-                  Fmi::TimeDuration(22, 23, 47)));
+                  Fmi::TimeDuration(22, 24, 1)));
 
-  // Ja laskee hein�kuussa
+  // ... and sets in July
   test_data.push_back(
       test_data_t("Utsjoki 4",
                   "Europe/Helsinki",
@@ -180,44 +198,44 @@ static void prepare_test_data()
                   174.407,  // azimuth
                   38.8839,  // elevation
                   //
-                  Fmi::DateTime(Fmi::Date(2008, 7, 28), Fmi::TimeDuration(2, 0, 9)),
-                  Fmi::DateTime(Fmi::Date(2008, 7, 29), Fmi::TimeDuration(0, 23, 46)),
+                  Fmi::DateTime(Fmi::Date(2008, 7, 28), Fmi::TimeDuration(2, 0, 4)),
+                  Fmi::DateTime(Fmi::Date(2008, 7, 29), Fmi::TimeDuration(0, 23, 43)),
                   Fmi::TimeDuration(13, 18, 24),
-                  Fmi::TimeDuration(21, 59, 51)));
+                  Fmi::TimeDuration(21, 59, 56)));
 
-  // Aurinko laskee talveksi
+  // Sun sets for winter
   test_data.push_back(
       test_data_t("Utsjoki 5",
                   "Europe/Helsinki",
                   LON_E(27, 1, 25),
                   LAT_N(69, 54, 22),
                   //
-                  Fmi::DateTime(NOV_25_2012, Fmi::TimeDuration(13, 0, 0)),
-                  -20.8674,  // declination
-                  194.23,    // azimuth
-                  -1.18855,  // elevation
+                  Fmi::DateTime(NOV_26_2012, Fmi::TimeDuration(13, 0, 0)),
+                  -21.0557,  // declination
+                  194.139,   // azimuth
+                  -1.39563,  // elevation
                   //
-                  Fmi::DateTime(Fmi::Date(2012, 11, 25), Fmi::TimeDuration(11, 38, 57)),
-                  Fmi::DateTime(Fmi::Date(2012, 11, 25), Fmi::TimeDuration(12, 18, 15)),
-                  Fmi::TimeDuration(11, 58, 50),
-                  Fmi::TimeDuration(0, 39, 18)));
+                  Fmi::DateTime(Fmi::Date(2013, 1, 17), Fmi::TimeDuration(11, 43, 30)),
+                  Fmi::DateTime(Fmi::Date(2012, 11, 25), Fmi::TimeDuration(12, 18, 5)),
+                  Fmi::TimeDuration(11, 59, 9),
+                  Fmi::TimeDuration(0, 0, 0)));
 
-  // Ja nousee tammikuussa
+  // ... and rises in January
   test_data.push_back(
       test_data_t("Utsjoki 6",
                   "Europe/Helsinki",
                   LON_E(27, 1, 25),
                   LAT_N(69, 54, 22),
                   //
-                  Fmi::DateTime(JAN_16_2013, Fmi::TimeDuration(13, 0, 0)),
-                  -20.8541,   // declination
-                  188.938,    // azimuth
-                  -0.690872,  // elevation
+                  Fmi::DateTime(JAN_17_2013, Fmi::TimeDuration(13, 0, 0)),
+                  -20.6575,   // declination
+                  188.872,    // azimuth
+                  -0.410117,  // elevation
                   //
-                  Fmi::DateTime(Fmi::Date(2013, 1, 16), Fmi::TimeDuration(12, 2, 26)),
-                  Fmi::DateTime(Fmi::Date(2013, 1, 16), Fmi::TimeDuration(12, 41, 45)),
-                  Fmi::TimeDuration(12, 21, 32),
-                  Fmi::TimeDuration(0, 39, 19)));
+                  Fmi::DateTime(Fmi::Date(2013, 1, 17), Fmi::TimeDuration(11, 43, 30)),
+                  Fmi::DateTime(Fmi::Date(2013, 1, 17), Fmi::TimeDuration(13, 1, 14)),
+                  Fmi::TimeDuration(12, 21, 52),
+                  Fmi::TimeDuration(1, 17, 44)));
 
   /* Boost DST does NOT work right with historic Fmi::Dates; Finland did NOT
    * have DST in 1970 (or the CSV file does not reflect this).
@@ -251,12 +269,12 @@ static void prepare_test_data()
                                   //
                                   Fmi::DateTime(DEC_31_2012, Fmi::TimeDuration(22, 5, 59)),
                                   -23.00891107988152,  // declination
-                                  NAN,                 // azimuth (dark; NOAA gives no value)
-                                  NAN,                 // elevation (dark; NOAA gives no value)
+                                  310.218,             // azimuth (dark; NOAA gives no value)
+                                  -53.5585,            // elevation (dark; NOAA gives no value)
                                   //
-                                  Fmi::DateTime(DEC_31_2012, Fmi::TimeDuration(8, 6, 22)),
-                                  Fmi::DateTime(DEC_31_2012, Fmi::TimeDuration(16, 1, 33)),
-                                  Fmi::TimeDuration(12, 3, 38),
+                                  Fmi::DateTime(DEC_31_2012, Fmi::TimeDuration(8, 6, 21)),
+                                  Fmi::DateTime(DEC_31_2012, Fmi::TimeDuration(16, 1, 32)),
+                                  Fmi::TimeDuration(12, 3, 37),
                                   Fmi::TimeDuration(7, 55, 11)));
 
   /* Chicago, IL (-6 hrs, DST)
@@ -271,7 +289,7 @@ static void prepare_test_data()
                                   82.4293,             // azimuth
                                   27.776,              // elevation
                                   //
-                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(5, 15, 11)),
+                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(5, 15, 10)),
                                   Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(20, 28, 35)),
                                   Fmi::TimeDuration(12, 51, 45),
                                   Fmi::TimeDuration(15, 13, 25)));
@@ -304,38 +322,21 @@ static void prepare_test_data()
    *           Date:               Jun 17th 2008
    *           Time:               18:00:00 (= 8am at UTC+14)
    */
-  test_data.push_back(
-      test_data_t("Kiribati (+14)",
-                  "Pacific/Kiritimati",
-                  LON_W(157, 42, 0),
-                  LAT_N(1, 52, 0),
-                  //
-                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(8, 0, 0)),
-                  23.40385438036006,  // declination
-                  65.6055,            // azimuth
-                  20.9652,            // elevation
-                  //
-                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(6, 24, 58)),   // NOAA says 16:24:58 UTC (17th)
-                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(18, 38, 49)),  // NOAA says 4:38:49 UTC (18th)
-                  Fmi::TimeDuration(12, 31, 47),                      // NOAA says 22:31:47 UTC (17th)
-                  Fmi::TimeDuration(12, 13, 51)));
-
-  // Kuusamo
-
-  test_data.push_back(test_data_t("Kuusamo",
-                                  "Europe/Helsinki",
-                                  LON_E(29, 12, 0),
-                                  LAT_N(66, 0, 0),  //
-                                  //
-                                  Fmi::DateTime(JUN_14_2012, Fmi::TimeDuration(13, 20, 0)),
-                                  NAN,  // declination
-                                  NAN,  // azimuth
-                                  NAN,  // elevation
-                                  //
-                                  Fmi::DateTime(JUN_11_2012, Fmi::TimeDuration(1, 22, 11)),
-                                  Fmi::DateTime(JUL_01_2012, Fmi::TimeDuration(0, 48, 30)),
-                                  Fmi::TimeDuration(13, 03, 26),
-                                  Fmi::TimeDuration(24, 0, 0)));
+  test_data.push_back(test_data_t(
+      "Kiribati (+14)",
+      "Pacific/Kiritimati",
+      LON_W(157, 42, 0),
+      LAT_N(1, 52, 0),
+      //
+      Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(8, 0, 0)),
+      23.40385438036006,  // declination
+      65.6055,            // azimuth
+      20.9652,            // elevation
+      //
+      Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(6, 24, 58)),   // NOAA says 16:24:58 UTC (17th)
+      Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(18, 38, 49)),  // NOAA says 4:38:49 UTC (18th)
+      Fmi::TimeDuration(12, 31, 47),                              // NOAA says 22:31:47 UTC (17th)
+      Fmi::TimeDuration(12, 13, 51)));
 
   /* Honolulu, HI (-10 hrs, no DST)
    */
@@ -350,8 +351,8 @@ static void prepare_test_data()
                                   -5.2182,             // elevation
                                   //
                                   Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(5, 49, 47)),
-                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(19, 15, 38)),
-                                  Fmi::TimeDuration(12, 32, 36),
+                                  Fmi::DateTime(JUN_18_2008, Fmi::TimeDuration(19, 15, 37)),
+                                  Fmi::TimeDuration(12, 32, 35),
                                   Fmi::TimeDuration(13, 25, 50)));
 
   /* Namaka, Fidzi (+12 hours, DST)
@@ -389,6 +390,40 @@ static void prepare_test_data()
                                   Fmi::DateTime(OCT_7_2013, Fmi::TimeDuration(18, 19, 55)),
                                   Fmi::TimeDuration(12, 10, 35),
                                   Fmi::TimeDuration(12, 18, 44)));
+
+  /* Wellington 2024-Jan-10 12:00:00
+   */
+  test_data.push_back(test_data_t("Wellington",
+                                  "Pacific/Auckland",
+                                  LON_E(174, 46, 32),
+                                  LAT_N(-41, 46, 14),
+                                  //
+                                  Fmi::DateTime(JAN_10_2024, Fmi::TimeDuration(12, 0, 0)),
+                                  -22.0677,  // declination
+                                  52.3171,   // azimuth
+                                  63.9919,   // elevation
+                                  //
+                                  Fmi::DateTime(JAN_10_2024, Fmi::TimeDuration(6, 2, 28)),
+                                  Fmi::DateTime(JAN_10_2024, Fmi::TimeDuration(20, 53, 10)),
+                                  Fmi::TimeDuration(13, 27, 48),
+                                  Fmi::TimeDuration(14, 50, 42)));
+
+  /* Nauru2024-Jan-10 12:00:00
+   */
+  test_data.push_back(test_data_t("Nauru",
+                                  "Pacific/Nauru",
+                                  LON_E(166, 55, 0),
+                                  LAT_S(0, 32, 0),
+                                  //
+                                  Fmi::DateTime(JAN_10_2024, Fmi::TimeDuration(12, 0, 0)),
+                                  -22.0617,  // declination
+                                  147.088,   // azimuth
+                                  64.0659,   // elevation
+                                  //
+                                  Fmi::DateTime(JAN_10_2024, Fmi::TimeDuration(6, 54, 53)),
+                                  Fmi::DateTime(JAN_10_2024, Fmi::TimeDuration(19, 4, 1)),
+                                  Fmi::TimeDuration(12, 59, 15),
+                                  Fmi::TimeDuration(12, 9, 8)));
 };
 
 #define validate(a, b, factor)                                         \
@@ -407,7 +442,11 @@ static void prepare_test_data()
   }
 
 #define validate_time(a, b)                                      \
-  if (abs(((a) - (b)).total_seconds()) <= 1)                     \
+  if (abs(((a) - (b)).total_seconds()) == 0)                     \
+  {                                                              \
+    cerr << "OK " << #a << ": " << a << " = " << b << endl;      \
+  }                                                              \
+  else if (abs(((a) - (b)).total_seconds()) <= 1)                \
   {                                                              \
     cerr << "OK " << #a << ": " << a << " ~ " << b << endl;      \
   }                                                              \
@@ -461,9 +500,9 @@ int main(int argc, const char **argv)
 
     solar_position_t sp = solar_position(ldt, td->lon, td->lat);
 
-    validate(sp.declination, td->right_decl, 1000);
+    validate(sp.declination, td->right_decl, 100);
     validate(sp.azimuth, td->right_azim, 100);
-    validate(sp.elevation, td->right_elev, 1000);
+    validate(sp.elevation, td->right_elev, 100);
 
     //---
     solar_time_t ss = solar_time(ldt, td->lon, td->lat);
@@ -479,7 +518,7 @@ int main(int argc, const char **argv)
     }
     else
     {
-        validate_time(ss.noon.local_time(), Fmi::DateTime(td->when.date(), td->right_noon));
+      validate_time(ss.noon.local_time(), Fmi::DateTime(td->when.date(), td->right_noon));
     }
 
     validate_time(ss.daylength(), td->daylen);
