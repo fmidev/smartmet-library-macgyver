@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.1.12
+Version: 24.1.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jan 15 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> 24.1.15-1.fmi
+- Fixed sunrise calculations (BRAINSTORM-2830)
+
 * Fri Jan 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.1.12-1.fmi
 - Improve exception reporting
 
