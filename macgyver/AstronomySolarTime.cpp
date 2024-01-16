@@ -13,7 +13,6 @@ using JulianTime = double;
 
 namespace
 {
-
 // Function to calculate date components from Julian day
 std::tuple<int, int, int> calcDateFromJD(JulianTime jd)
 {
@@ -461,7 +460,10 @@ std::tuple<double, double, double> calcSunriseSet(
   {
     double timeLocal = newTimeUTC + (timezone * 60.0);
     double riseT = calcTimeJulianCent(JD + newTimeUTC / 1440.0);
-    auto [azimuth, elevation] = calcAzEl(riseT, timeLocal, latitude, longitude, timezone);
+    auto azel = calcAzEl(riseT, timeLocal, latitude, longitude, timezone);
+    auto azimuth = std::get<0>(azel);
+    auto elevation = std::get<1>(azel);
+
     double jday = JD;
 
     if ((timeLocal < 0.0) || (timeLocal >= 1440.0))
@@ -510,7 +512,6 @@ namespace Fmi
 {
 namespace Astronomy
 {
-
 /*
  * Calculate daylength. The code assumes that DST changes do not occur
  * at the given timezone during polar nights or midnight sun events
