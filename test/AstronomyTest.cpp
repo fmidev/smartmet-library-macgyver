@@ -99,7 +99,10 @@ static void prepare_test_data()
   const Fmi::Date JUL_02_2012(2012, 7, 2);
   const Fmi::Date OCT_7_2013(2013, 10, 7);
   const Fmi::Date JUN_18_2019(2019, 6, 18);
+  const Fmi::Date NOV_20_2023(2023, 11, 20);
   const Fmi::Date JAN_10_2024(2024, 1, 10);
+  const Fmi::Date JAN_17_2024(2024, 1, 17);
+  const Fmi::Date JAN_22_2024(2024, 1, 22);
 
   /* HELSINKI 2008-Jun-18 15:34:07
    */
@@ -408,7 +411,7 @@ static void prepare_test_data()
                                   Fmi::TimeDuration(13, 27, 48),
                                   Fmi::TimeDuration(14, 50, 42)));
 
-  /* Nauru2024-Jan-10 12:00:00
+  /* Nauru 2024-Jan-10 12:00:00
    */
   test_data.push_back(test_data_t("Nauru",
                                   "Pacific/Nauru",
@@ -424,6 +427,23 @@ static void prepare_test_data()
                                   Fmi::DateTime(JAN_10_2024, Fmi::TimeDuration(19, 4, 1)),
                                   Fmi::TimeDuration(12, 59, 15),
                                   Fmi::TimeDuration(12, 9, 8)));
+
+  /* Sörvågen 2024-Jan-17 8:00:00
+   */
+  test_data.push_back(test_data_t("Sörvågen",
+                                  "Europe/Oslo",
+                                  LON_E(25, 58, 9),
+                                  LAT_N(70, 58, 53),
+                                  //
+                                  Fmi::DateTime(JAN_17_2024, Fmi::TimeDuration(8, 0, 0)),
+                                  -20.8258,  // declination
+                                  132.321,   // azimuth
+                                  -8.3843,   // elevation
+                                  //
+                                  Fmi::DateTime(JAN_22_2024, Fmi::TimeDuration(11, 1, 56)),
+                                  Fmi::DateTime(NOV_20_2023, Fmi::TimeDuration(11, 33, 52)),
+                                  Fmi::TimeDuration(11, 25, 51),
+                                  Fmi::TimeDuration(0, 0, 0)));
 };
 
 #define validate(a, b, factor)                                         \

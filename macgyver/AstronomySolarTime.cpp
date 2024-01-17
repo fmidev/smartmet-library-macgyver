@@ -462,7 +462,6 @@ std::tuple<double, double, double> calcSunriseSet(
     double riseT = calcTimeJulianCent(JD + newTimeUTC / 1440.0);
     auto azel = calcAzEl(riseT, timeLocal, latitude, longitude, timezone);
     auto azimuth = std::get<0>(azel);
-    auto elevation = std::get<1>(azel);
 
     double jday = JD;
 
@@ -496,11 +495,23 @@ std::tuple<double, double, double> calcSunriseSet(
   {
     // previous sunrise/next sunset
     double jday = calcJDofNextPrevRiseSet(!rise, rise, JD, latitude, longitude, timezone);
+
+    if (jday == JD)  // This fixes infinite recursion issues
+    {
+      double increment = (!rise ? 1.0 : -1.0);
+      jday += increment;
+    }
     return calcSunriseSet(rise, jday, latitude, longitude, timezone);
   }
 
   // previous sunset/next sunrise
   double jday = calcJDofNextPrevRiseSet(rise, rise, JD, latitude, longitude, timezone);
+
+  if (jday == JD)  // This fixes infinite recursion issues
+  {
+    double increment = (rise ? 1.0 : -1.0);
+    jday += increment;
+  }
   return calcSunriseSet(rise, jday, latitude, longitude, timezone);
 }
 
@@ -571,6 +582,7 @@ solar_time_t solar_time(const boost::local_time::local_date_time& ldt, double lo
     auto solnoon = calcSolNoon(jday, lon_e, offset_hours);
 
     // Sunrise and sunset surrounding the noon
+
     auto sunrise_jday_time_az = calcSunriseSet(true, jday, lat, lon_e, offset_hours);
     auto sunset_jday_time_az = calcSunriseSet(false, jday, lat, lon_e, offset_hours);
 
