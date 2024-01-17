@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.1.15
+Version: 24.1.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jan 17 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.1.17-1.fmi
+- Fixed infinite recursion bug in sunrise calculations
+
 * Mon Jan 15 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> 24.1.15-1.fmi
 - Fixed sunrise calculations (BRAINSTORM-2830)
 
