@@ -1,4 +1,5 @@
 #include "TimeDuration.h"
+#include "../Exception.h"
 #include <boost/regex.hpp>
 
 Fmi::date_time::TimeDuration::TimeDuration(const detail::duration_t& duration)

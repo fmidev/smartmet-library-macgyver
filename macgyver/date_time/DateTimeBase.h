@@ -23,9 +23,6 @@ namespace Fmi
 }
 #endif
 
-#include <macgyver/Exception.h>
-#include <macgyver/TypeMap.h>
-
 namespace Fmi
 {
     namespace detail
