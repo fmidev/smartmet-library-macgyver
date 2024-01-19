@@ -35,14 +35,14 @@ LIBFILE = libsmartmet-$(SUBNAME).so
 
 # Compilation directories
 
-vpath %.cpp $(SUBNAME)
-vpath %.h $(SUBNAME)
+vpath %.cpp $(SUBNAME) $(SUBNAME)/date_time
+vpath %.h $(SUBNAME) $(SUBNAME)/date_time
 
 # The files to be compiled
 
-SRCS = $(wildcard $(SUBNAME)/*.cpp)
-HDRS = $(wildcard $(SUBNAME)/*.h)
-OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
+SRCS = $(wildcard $(SUBNAME)/*.cpp) $(wildcard $(SUBNAME)/date_time/*.cpp)
+HDRS = $(wildcard $(SUBNAME)/*.h) $(wildcard $(SUBNAME)/date_time/*.h)
+OBJS = $(patsubst macgyver/%.cpp, obj/%.o, $(SRCS))
 
 INCLUDES := -Iinclude $(INCLUDES)
 
@@ -102,7 +102,7 @@ objdir:
 	mkdir -p $(objdir)
 
 obj/%.o : %.cpp
-	@mkdir -p $(objdir)
+	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
 ifneq ($(wildcard obj/*.d),)
