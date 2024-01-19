@@ -28,6 +28,7 @@ BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: gcc-c++
 BuildRequires: imake
 BuildRequires: libicu-devel
+BuildRequires: date-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
@@ -45,6 +46,7 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: double-conversion
 Requires: ctpp2
+Requires: date
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: libicu >= 50.2
 
@@ -112,6 +114,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
+Requires: date-devel
 Requires: smartmet-utils-devel >= 23.9.6
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
