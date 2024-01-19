@@ -35,14 +35,14 @@ LIBFILE = libsmartmet-$(SUBNAME).so
 
 # Compilation directories
 
-vpath %.cpp $(SUBNAME)
-vpath %.h $(SUBNAME)
+vpath %.cpp $(SUBNAME) $(SUBNAME)/date_time
+vpath %.h $(SUBNAME) $(SUBNAME)/date_time
 
 # The files to be compiled
 
-SRCS = $(wildcard $(SUBNAME)/*.cpp)
-HDRS = $(wildcard $(SUBNAME)/*.h)
-OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
+SRCS = $(wildcard $(SUBNAME)/*.cpp) $(wildcard $(SUBNAME)/date_time/*.cpp)
+HDRS = $(wildcard $(SUBNAME)/*.h) $(wildcard $(SUBNAME)/date_time/*.h)
+OBJS = $(patsubst $(SUBNAME)/%.cpp, obj/%.o, $(SRCS))
 
 INCLUDES := -Iinclude $(INCLUDES)
 
@@ -78,12 +78,13 @@ examples:
 
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
-	@list='$(HDRS)'; \
+	@list='$(HDRS)'; set -x; \
 	for hdr in $$list; do \
-	  HDR=$$(basename $$hdr); \
-	  echo $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
-	  $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
-	done
+	  HDR=$$(echo $$hdr | sed -e 's:^$(SUBNAME)/::'); \
+	  subdir=$$(dirname $$HDR); \
+	  echo $(INSTALL_DATA) -D $$hdr $(includedir)/$(INCDIR)/$(subdir)/$$HDR; \
+	  $(INSTALL_DATA) -D $$hdr $(includedir)/$(INCDIR)/$(subdir)/$$HDR; \
+	set +x; done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
@@ -102,7 +103,7 @@ objdir:
 	mkdir -p $(objdir)
 
 obj/%.o : %.cpp
-	@mkdir -p $(objdir)
+	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
 ifneq ($(wildcard obj/*.d),)
