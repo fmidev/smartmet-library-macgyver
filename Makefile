@@ -42,7 +42,7 @@ vpath %.h $(SUBNAME) $(SUBNAME)/date_time
 
 SRCS = $(wildcard $(SUBNAME)/*.cpp) $(wildcard $(SUBNAME)/date_time/*.cpp)
 HDRS = $(wildcard $(SUBNAME)/*.h) $(wildcard $(SUBNAME)/date_time/*.h)
-OBJS = $(patsubst macgyver/%.cpp, obj/%.o, $(SRCS))
+OBJS = $(patsubst $(SUBNAME)/%.cpp, obj/%.o, $(SRCS))
 
 INCLUDES := -Iinclude $(INCLUDES)
 
@@ -78,12 +78,13 @@ examples:
 
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
-	@list='$(HDRS)'; \
+	@list='$(HDRS)'; set -x; \
 	for hdr in $$list; do \
-	  HDR=$$(basename $$hdr); \
-	  echo $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
-	  $(INSTALL_DATA) $$hdr $(includedir)/$(INCDIR)/$$HDR; \
-	done
+	  HDR=$$(echo $$hdr | sed -e 's:^$(SUBNAME)/::'); \
+	  subdir=$$(dirname $$HDR); \
+	  echo $(INSTALL_DATA) -D $$hdr $(includedir)/$(INCDIR)/$(subdir)/$$HDR; \
+	  $(INSTALL_DATA) -D $$hdr $(includedir)/$(INCDIR)/$(subdir)/$$HDR; \
+	set +x; done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
