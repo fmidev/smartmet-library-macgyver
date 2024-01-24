@@ -44,17 +44,19 @@ namespace Fmi
         using year_t = DateTimeNS::year;
         using ymd_t = DateTimeNS::year_month_day;
 
-    constexpr int periods_per_mks = std::micro::den * period_t::num / period_t::den;
+        constexpr int periods_per_mks = std::micro::den * period_t::num / period_t::den;
 
-    extern const time_point_t epoch_time_point;
+        extern const time_point_t epoch_time_point;
 
-    static_assert (periods_per_mks * period_t::den / period_t::num == std::micro::den,
+        static_assert (periods_per_mks * period_t::den / period_t::num == std::micro::den,
           "INTERNAL ERROR");
 
     }  // namespace detail
 
     namespace date_time
     {
+        using Weekday = DateTimeNS::weekday;
+
         class Base
         {
         public:
