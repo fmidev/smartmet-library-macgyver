@@ -69,7 +69,7 @@ namespace Fmi
         };
 
         // Not implemented: another namespace for boost (boost::gregorian)
-        // Would be conflict in our case
+        // Would be conflict in our case, Should use other names
         //Date from_string(const std::string& str);
         //Date from_undelimited_string(const std::string& str);
 

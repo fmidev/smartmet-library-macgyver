@@ -33,6 +33,7 @@ namespace Fmi
 
             virtual std::string as_string() const;
             std::string as_iso_string() const;
+            std::string as_iso_extended_string() const;
 
             bool operator==(const TimeDuration& other) const;
             bool operator!=(const TimeDuration& other) const;
@@ -51,6 +52,8 @@ namespace Fmi
             TimeDuration& operator*=(int64_t factor);
             TimeDuration& operator/=(int64_t factor);
 
+            detail::duration_t get_impl() const { return m_duration; }
+
         private:
             void assert_special() const;
 
@@ -58,6 +61,7 @@ namespace Fmi
             detail::duration_t m_duration;
         };
 
+        TimeDuration days(int days);
         TimeDuration hours(int hours);
         TimeDuration minutes(int minutes);
         TimeDuration seconds(int seconds);

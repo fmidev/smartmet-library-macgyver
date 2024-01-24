@@ -1,8 +1,8 @@
 // ======================================================================
 /*!
  * \file
- * \brief Regression tests for CharsetConverter.h
- */
+ * \brief Regression tests for date_time::Date
+ * */
 // ======================================================================
 
 #include "date_time/Date.h"
@@ -16,7 +16,7 @@ namespace g = boost::gregorian;
 
 test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  const char* name = "Date tester";
+  const char* name = "Fmi::date_time::Date tester";
   // unit_test_log.set_threshold_level(log_test_units);
   unit_test_log.set_threshold_level(log_messages);
   framework::master_test_suite().p_name.value = name;
@@ -194,19 +194,4 @@ BOOST_AUTO_TEST_CASE(week_number)
         d1 += g::days(1);
     }
     BOOST_REQUIRE_EQUAL(num_err, 0);
-}
-
-std::string Fmi::date_time::to_simple_string(const Fmi::date_time::Date& date)
-{
-    return date.as_string();
-}
-
-std::string Fmi::date_time::to_iso_string(const Fmi::date_time::Date& date)
-{
-    return date.as_iso_string();
-}
-
-std::string Fmi::date_time::to_iso_extended_string(const Fmi::date_time::Date& date)
-{
-    return date.as_iso_extended_string();
 }

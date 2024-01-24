@@ -273,3 +273,9 @@ std::string Fmi::date_time::to_iso_extended_string(const Fmi::date_time::Date& d
 {
     return date.as_iso_extended_string();
 }
+
+std::ostream& Fmi::date_time::operator<<(std::ostream& os, const Fmi::date_time::Date& date)
+{
+    os << date.as_string();
+    return os;
+}
