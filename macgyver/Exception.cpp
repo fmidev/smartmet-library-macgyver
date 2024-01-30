@@ -54,6 +54,25 @@ Exception Exception::Trace(const char* _filename,
   return Exception(_filename, _line, _function, std::move(_message), nullptr);
 }
 
+Exception Exception::Trace(const char* _filename,
+                          int _line,
+                          const char* _function,
+                          std::exception_ptr eptr,
+                          std::string _message)
+{
+  if (!eptr)
+    throw Exception(BCP, "Empty std::exception_ptr is not allowed");
+
+  try
+  {
+    std::rethrow_exception(eptr);
+  }
+  catch (...)
+  {
+    return Exception(_filename, _line, _function, std::move(_message), nullptr);
+  }
+}
+
 Exception Exception::SquashTrace(const char* _filename,
                                  int _line,
                                  const char* _function,
