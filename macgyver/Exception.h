@@ -37,6 +37,13 @@ class Exception : public std::exception
                          const char* _function,
                          std::string _message);
 
+  // Convert std::exception_ptr to Fmi::Exception
+  static Exception Trace(const char* _filename,
+                        int _line,
+                        const char* _function,
+                        std::exception_ptr eptr,
+                        std::string _message);
+
   /**
    *  @brief Returns a copy of deepest level Fmi::Exception object or new one when none is found
    *
