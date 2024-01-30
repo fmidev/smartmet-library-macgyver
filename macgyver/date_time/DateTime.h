@@ -55,6 +55,8 @@ namespace Fmi
         DateTime time_from_iso_string(const std::string& str);
         DateTime time_from_iso_extended_string(const std::string& str);
 
+        DateTime parse_date_time(const std::string& fmt, const std::string& str);
+
         DateTime from_time_t(std::time_t t);
 
         std::ostream& operator<<(std::ostream& os, const DateTime& dt);

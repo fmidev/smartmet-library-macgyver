@@ -1,6 +1,9 @@
 #pragma once
 
 #include <chrono>
+#include <sstream>
+#include <string>
+
 #if __cplusplus >= 202002L && defined(__cpp_lib_chrono) && __cpp_lib_chrono >= 201907L
 // Time zone, zoned_time etc is supported in libstdc++ => use it
 namespace Fmi
@@ -51,6 +54,7 @@ namespace Fmi
         static_assert (periods_per_mks * period_t::den / period_t::num == std::micro::den,
           "INTERNAL ERROR");
 
+        std::string handle_parse_remainder(std::istringstream& is);
     }  // namespace detail
 
     namespace date_time
@@ -103,8 +107,6 @@ namespace Fmi
             bool operator <= (const Base& other) const;
             bool operator > (const Base& other) const;
             bool operator >= (const Base& other) const;
-
-            static std::string remove_trailing_zeros(const std::string& str);
 
         private:
             void assert_supported() const;

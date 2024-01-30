@@ -54,6 +54,15 @@ namespace Fmi
 
             detail::duration_t get_impl() const { return m_duration; }
 
+            /**
+             * @brief  Parse time duration from string.
+             * 
+             * @param str  String to parse.
+             * @param assume_eoi  If true, allows only whitespace after the duration.
+             * @return TimeDuration  Parsed time duration.
+            */
+            static TimeDuration from_stream(std::istream& src, bool assume_eoi = true);
+
         private:
             void assert_special() const;
 

@@ -1,5 +1,11 @@
 #include "Date.h"
 #include "../Exception.h"
+#include "../StringConversion.h"
+
+namespace
+{
+    const Fmi::date_time::Date epoch(1970, 1, 1);
+}
 
 Fmi::date_time::Date::Date() = default;
 
@@ -100,14 +106,12 @@ Fmi::date_time::Date Fmi::date_time::Date::end_of_month() const
 long Fmi::date_time::Date::modjulian_day() const
 {
     assert_special();
-    static const Date epoch(1970, 1, 1);
     return *this - epoch + 40587;
 }
 
 long Fmi::date_time::Date::julian_day() const
 {
     assert_special();
-    static const Date epoch(1970, 1, 1);
     return *this - epoch + 2440588;
 }
 
@@ -278,4 +282,61 @@ std::ostream& Fmi::date_time::operator<<(std::ostream& os, const Fmi::date_time:
 {
     os << date.as_string();
     return os;
+}
+
+Fmi::date_time::Date 
+Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
+{
+    const auto save = is.exceptions();
+    is.exceptions(std::ios::failbit | std::ios::badbit);
+    std::exception_ptr eptr;
+
+    DateTimeNS::local_days day1;
+    DateTimeNS::year year;
+    DateTimeNS::month month;
+    DateTimeNS::day day;
+    try {
+        is >> DateTimeNS::parse("%Y-", year);
+        if (!is.eof() && std::isdigit(is.peek())) {
+            is >> DateTimeNS::parse("%m-", day);
+        } else {
+            is.exceptions(std::ios::goodbit);
+            is.clear();
+            is.exceptions(std::ios::failbit | std::ios::badbit);
+            is >> DateTimeNS::parse("%b-", month);
+        }
+        is >> DateTimeNS::parse("d", day);
+    } catch (...) {
+        auto err = Fmi::Exception::Trace(BCP, eptr, "Failed to parse date from string");
+        throw err;
+    }
+
+    int ws_count = 0;
+    for (; (!is.eof() && std::isspace(is.peek())); ws_count++)
+        is.get();
+
+    if (!is.eof())
+    {
+        if (assume_eoi || ws_count == 0)
+            throw Fmi::Exception(BCP, "Unexpected trailing characters after date string");
+    }
+
+    is.exceptions(save);
+    return Fmi::date_time::Date(day1);
+}
+
+Fmi::date_time::Date Fmi::date_time::date_from_string(const std::string& str)
+{
+    std::istringstream is(Fmi::trim_copy(str));
+    try
+    {
+        DateTimeNS::local_days day1;
+        return Fmi::date_time::Date::from_stream(is, true);
+    }
+    catch(...)
+    {
+        auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
+        err.addParameter("Error position", "'" + Fmi::detail::handle_parse_remainder(is) + "'");
+        throw err;
+    }
 }

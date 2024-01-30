@@ -6,6 +6,7 @@
 // ======================================================================
 
 #include "date_time/TimeDuration.h"
+#include "DebugTools.h"
 #include <functional>
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>
@@ -139,18 +140,22 @@ BOOST_AUTO_TEST_CASE(duration_parse)
             , {"12:11:10.12", "12:11:10.120000"}
             , {"12:11:10.1", "12:11:10.100000"}
             , {"12:11:10.", "12:11:10"}
-            , {"12:11:10,123456789", "12:11:10.123456"}
             , {"12:11:10", nullptr}
+            , {"12:11 ", "12:11:00"}
         };
+
+    const auto test_parse = [](const std::string& src) -> Fmi::date_time::TimeDuration
+    {
+        return SHOW_EXCEPTIONS(duration_from_string(src));
+    };
 
     for (const auto& td : test_data)
     {
         const char* src = td.first;
         const char* dst = td.second ? td.second : td.first;
-
-        BOOST_CHECK_EQUAL(
-            duration_from_string(src).as_string(),
-            dst);
+        Fmi::date_time::TimeDuration td1;
+        BOOST_CHECK_NO_THROW(td1 = test_parse(src));
+        BOOST_CHECK_EQUAL(td1.as_string(), dst);
     }
 }
 

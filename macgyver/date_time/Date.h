@@ -61,6 +61,15 @@ namespace Fmi
 
             const DateTimeNS::local_days& get_impl() const { return date; };
 
+            /**
+             * @brief  Parse time duration from string.
+             * 
+             * @param str  String to parse.
+             * @param assume_eoi  If true, allows only whitespace after the duration.
+             * @return Parsed date.
+            */
+            static Date from_stream(std::istream& src, bool assume_eoi = true);
+
         private:
             void assert_special() const;
 
@@ -68,9 +77,7 @@ namespace Fmi
             DateTimeNS::local_days date;
         };
 
-        // Not implemented: another namespace for boost (boost::gregorian)
-        // Would be conflict in our case, Should use other names
-        //Date from_string(const std::string& str);
+        Date date_from_string(const std::string& str);
         //Date from_undelimited_string(const std::string& str);
 
         std::string to_simple_string(const Date& date);

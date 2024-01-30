@@ -70,14 +70,17 @@ void Fmi::date_time::Base::assert_supported(const Base& other) const
         throw Fmi::Exception(BCP, "INTERNAL ERROR: operation not supported for normal values");
 }
 
-std::string Fmi::date_time::Base::remove_trailing_zeros(const std::string& str)
+std::string Fmi::detail::handle_parse_remainder(std::istringstream& is)
 {
-    auto pos = str.find_last_not_of('0');
-    if (pos != std::string::npos)
-    {
-        if (str[pos] == '.')
-            pos--;
-        return str.substr(0, pos + 1);
-    }
-    return str;
+    std::string remaining;
+    const std::string src = is.str();
+    std::copy(std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>(),
+        std::back_inserter(remaining));
+
+    const std::size_t rLen = remaining.length();
+    const std::size_t srcLen = src.length();
+    if ((rLen > srcLen) || (src.substr(srcLen - rLen) != remaining))
+        throw Fmi::Exception(BCP, "INTERNAL ERROR: incorrect use");
+    return src.substr(0, srcLen - rLen) + "-->" + remaining;
 }
+

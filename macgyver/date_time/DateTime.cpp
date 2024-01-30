@@ -1,5 +1,6 @@
 #include "DateTime.h"
 #include "../Exception.h"
+#include "../StringConversion.h"
 
 Fmi::date_time::DateTime::DateTime() = default;
 
@@ -164,16 +165,87 @@ std::string Fmi::date_time::to_iso_extended_string(const DateTime& dt)
     return dt.as_iso_extended_string();
 }
 
-Fmi::date_time::DateTime Fmi::date_time::time_from_string(const std::string& str)
+Fmi::date_time::DateTime Fmi::date_time::time_from_string(const std::string& src)
 {
-    detail::time_point_t result;
-    if (str.empty())
-        return result;
-    std::istringstream is(str);
-    is >> DateTimeNS::parse("%Y-%m-%d%n%t%H:%M:%S", result);
-    if (not is or is.peek() != EOF)
-        throw Fmi::Exception(BCP, "Failed to parse time from string '" + str + "'");
-    return DateTime(result);
+    try
+    {
+        return Fmi::date_time::parse_date_time(" %Y-%b-%d %H:%M:%S", src);
+    }
+    catch(...)
+    {
+        throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+}    
+
+Fmi::date_time::DateTime Fmi::date_time::parse_date_time(
+    const std::string& format,
+    const std::string& str)
+{
+    try
+    {
+        const auto handle_remainder =
+            [](const std::string src, const std::string& remainder) -> std::string
+            {
+                const auto rLen = remainder.length();
+                const auto srcLen = src.length();
+                const std::string before = src.substr(0, srcLen - rLen);
+                return before + "^^^" + remainder;
+            };
+
+
+        detail::time_point_t result;
+        if (str.empty())
+            return result;
+        std::istringstream is(str);
+        is.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+        std::exception_ptr eptr;
+        try
+        {
+            is >> DateTimeNS::parse(format, result);
+        }
+        catch (...)
+        {
+            eptr = std::current_exception();
+        }
+        std::string remaining;
+        std::copy(std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>(),
+            std::back_inserter(remaining));
+
+        if (eptr)
+        {
+            try
+            {
+                std::rethrow_exception(eptr);
+            }
+            catch (...)
+            {
+                auto err = Fmi::Exception::Trace(BCP,
+                    "Failed to parse date from string '" + str + "'");
+                err.addParameter("Error position", "'" + handle_remainder(str, remaining) + "'");
+                throw err;
+            }
+        }
+        else
+        {
+            // There may be more digit afer supported 6 - skip them
+            std::size_t pos = remaining.find_first_not_of("0123456789");
+            if (pos != std::string::npos)
+                remaining = remaining.substr(pos);
+
+            if (!Fmi::trim_copy(remaining).empty())
+            {
+                auto err = Fmi::Exception::Trace(BCP,
+                    "DateTime parse of string '" + str + "' failed (unexpected data after DateTime)");
+                err.addParameter("Error position", "'" + handle_remainder(str, remaining) + "'");
+                throw err;
+            }
+        }
+        return DateTime(result);
+    }
+    catch (...)
+    {
+        throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
 }
 
 std::ostream& Fmi::date_time::operator<<(std::ostream& os, const DateTime& dt)

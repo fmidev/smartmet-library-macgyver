@@ -1,5 +1,6 @@
 #include "TimeDuration.h"
 #include "../Exception.h"
+#include "../StringConversion.h"
 #include <boost/regex.hpp>
 
 Fmi::date_time::TimeDuration::TimeDuration(const detail::duration_t& duration)
@@ -217,50 +218,104 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator/(int64_t fac
 }
 
 Fmi::date_time::TimeDuration
+Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
+{
+  const auto save = is.exceptions();
+  is.exceptions(std::ios::failbit | std::ios::badbit);
+  std::exception_ptr eptr;
+
+  detail::duration_t td1;
+  try {
+    is >> DateTimeNS::parse("%H:%M", td1);
+  } catch (...) {
+    eptr = std::current_exception();
+  }
+
+  // Parse optional seconds field if present no error already detected
+  if (!eptr && !is.eof() && is.peek() == ':')
+  {
+    try
+    {
+      detail::duration_t td2;
+      is >> DateTimeNS::parse(":%S", td2);
+      td1 += td2;
+      while (!is.eof() && std::isdigit(is.peek()))
+        is.get();
+    }
+    catch (...)
+    {
+      eptr = std::current_exception();
+    }
+  }
+
+  if (eptr)
+  {
+    auto err = Fmi::Exception::Trace(BCP, eptr, "Failed to parse time duration from string");
+    throw err;
+  }
+
+  int ws_count = 0;
+  for (; (!is.eof() && std::isspace(is.peek())); ws_count++)
+    is.get();
+
+  if (!is.eof())
+  {
+    if (assume_eoi || ws_count == 0)
+      throw Fmi::Exception(BCP, "Unexpected trailing characters in time duration string");
+  }
+
+  is.exceptions(save);
+  return td1;
+}
+
+Fmi::date_time::TimeDuration
 Fmi::date_time::duration_from_string(const std::string& str)
 {
-    static const boost::regex expr(
-        "^\\s*"
-        "(\\d{1,2})" // hours
-        ":"
-        "(\\d{1,2})" // minutes
-        ":"
-        "(\\d{1,2})" // seconds
-        "(?:"
-        "[.,]"
-        "(\\d*)" // microseconds
-        ")?"
-        "\\s*$");
+  const std::string tmp = Fmi::trim_copy(str);
+  if (tmp.empty())
+    return Fmi::date_time::TimeDuration();
 
-    boost::smatch match;
-    if (!boost::regex_match(str, match, expr))
-        throw Fmi::Exception(BCP, "Invalid time duration: '" + str + "'");
+  std::istringstream is(tmp);
+  try
+  {
+    return Fmi::date_time::TimeDuration::from_stream(is, true);
+  }
+  catch(...)
+  {
+    auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
+    err.addParameter("Error position", "'" + Fmi::detail::handle_parse_remainder(is) + "'");
+    throw err;
+  }
+  
 
-    const int hours = std::stoi(match[1]);
+  is.exceptions(std::ios::failbit | std::ios::badbit);
+  std::exception_ptr eptr;
 
-    const int minutes = std::stoi(match[2]);
-    if (minutes < 0 || minutes > 59)
-        throw Fmi::Exception(BCP, "Invalid time duration: '" + str + "'");
+  detail::duration_t td1;
+  try {
+    is >> DateTimeNS::parse("%H:%M", td1);
+  } catch (...) {
+    eptr = std::current_exception();
+  }
 
-    const int seconds = std::stoi(match[3]);
-    if (seconds < 0 || seconds > 59)
-        throw Fmi::Exception(BCP, "Invalid time duration: '" + str + "'");
-
-    std::string frac_str = match[4];
-    int microseconds = 0;
-    if (!frac_str.empty())
-    {
-        const std::size_t len = frac_str.size();
-        if (len > 6)
-            frac_str = frac_str.substr(0, 6);
-
-        microseconds = std::stoi(frac_str);
-        for (std::size_t i = len; i < 6; i++)
-            microseconds *= 10;
+  if (!eptr && !is.eof() && is.peek() == ':') {
+    is.get();   // Consume ':' and parse seconds
+    try {
+      detail::duration_t td2;
+      is >> DateTimeNS::parse(":%S", td2);
+      td1 += td2;
+    } catch (...) {
+      eptr = std::current_exception();
     }
+  }
 
-    return Fmi::date_time::TimeDuration(
-        hours, minutes, seconds, microseconds);
+  if (eptr)
+  {
+    auto err = Fmi::Exception::Trace(BCP, eptr,
+      ("Failed to parse time duration from string '" + str + "'").c_str());
+    err.addParameter("Error position", "'" + str + "'");
+    throw err;
+  }
 }
 
 struct std::tm Fmi::date_time::to_tm(const date_time::TimeDuration& t)

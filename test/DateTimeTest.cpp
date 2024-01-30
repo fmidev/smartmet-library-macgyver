@@ -6,6 +6,7 @@
 // ======================================================================
 
 #include "date_time/DateTime.h"
+#include "DebugTools.h"
 #include "Exception.h"
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/included/unit_test.hpp>
@@ -88,4 +89,48 @@ BOOST_AUTO_TEST_CASE(to_iso_extended_string_test_1)
     dt1 += Fmi::date_time::microseconds(123456);
     str = Fmi::date_time::to_iso_extended_string(dt1);
     BOOST_CHECK_EQUAL(str, "2024-01-24T12:34:45.123456");
+}
+
+namespace
+{
+    Fmi::date_time::DateTime make_datetime(int year, int month, int day,
+        int hours, int minutes, int seconds, int mks = 0)
+    {
+        Fmi::date_time::Date d(year, month, day);
+        Fmi::date_time::TimeDuration td(hours, minutes, seconds, mks);
+        return Fmi::date_time::DateTime(d, td);         
+    }
+}
+
+BOOST_AUTO_TEST_CASE(time_from_string_test_1)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: time_from_string");
+    
+    const std::string fmt = "%Y-%m-%d %H:%M:%S";
+
+    const std::string str1 = "2024-Jan-24 12:34:45";
+    const std::string str2 = "  2024-Jan-24     12:34:45.123456 \t ";
+    const std::string str3 = "2024-Jan-24 12:34:45.123456789";
+    const std::string str4 = "2024-Jan-24 12:34:45.12345678901234567890";
+
+    Fmi::date_time::DateTime dt1 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str1));
+    Fmi::date_time::DateTime dt1e = make_datetime(2024, 1, 24, 12, 34, 45);
+    std::cout << str1 << " -> " << Fmi::DateTimeNS::format(fmt, dt1.get_impl()) << std::endl;
+
+    Fmi::date_time::DateTime dt2 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str2));
+    Fmi::date_time::DateTime dt2e = make_datetime(2024, 1, 24, 12, 34, 45, 123456);
+    std::cout << str2 << " -> " << Fmi::DateTimeNS::format(fmt, dt2.get_impl()) << std::endl;
+
+    Fmi::date_time::DateTime dt3 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str3));
+    Fmi::date_time::DateTime dt3e = make_datetime(2024, 1, 24, 12, 34, 45, 123456);
+    std::cout << str3 << " -> " << Fmi::DateTimeNS::format(fmt, dt3.get_impl()) << std::endl;
+
+    Fmi::date_time::DateTime dt4 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str4));
+    Fmi::date_time::DateTime dt4e = make_datetime(2024, 1, 24, 12, 34, 45, 123456);
+    std::cout << str4 << " -> " << Fmi::DateTimeNS::format(fmt, dt4.get_impl()) << std::endl;
+
+    BOOST_CHECK_EQUAL(dt1, dt1e);
+    BOOST_CHECK_EQUAL(dt2, dt2e);
+    BOOST_CHECK_EQUAL(dt3, dt3e);
+    BOOST_CHECK_EQUAL(dt4, dt4e);
 }
