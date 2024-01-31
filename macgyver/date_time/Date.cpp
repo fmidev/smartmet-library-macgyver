@@ -1,32 +1,14 @@
 #include "Date.h"
+#include "Internal.hpp"
 #include "../Exception.h"
 #include "../StringConversion.h"
 
 namespace
 {
     const Fmi::date_time::Date epoch(1970, 1, 1);
-
-    struct StreamExceptionState
-    {
-        StreamExceptionState(std::istream& is)
-            : is(is)
-            , state(is.exceptions())
-        {
-        }
-
-        ~StreamExceptionState()
-        {
-            try {
-                is.exceptions(state);
-            } catch (...) {
-                // Ignore
-            }
-        }
-
-        std::istream& is;
-        std::ios::iostate state;
-    };
 }
+
+namespace internal = Fmi::date_time::internal;
 
 Fmi::date_time::Date::Date() = default;
 
@@ -308,37 +290,26 @@ std::ostream& Fmi::date_time::operator<<(std::ostream& os, const Fmi::date_time:
 Fmi::date_time::Date 
 Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
 {
-    const StreamExceptionState save(is);
-    is.exceptions(std::ios::failbit | std::ios::badbit);
-
     DateTimeNS::year year;
     DateTimeNS::month month;
     DateTimeNS::day day;
     try {
+        const internal::StreamExceptionState save(is, std::ios::failbit | std::ios::badbit);
         is >> DateTimeNS::parse("%Y-", year);
         if (!is.eof() && std::isdigit(is.peek())) {
             is >> DateTimeNS::parse("%m-", month);
         } else {
-            is.exceptions(std::ios::goodbit);
-            is.clear();
             is.exceptions(std::ios::failbit | std::ios::badbit);
             is >> DateTimeNS::parse("%b-", month);
         }
         is >> DateTimeNS::parse("%d", day);
     } catch (...) {
+        is.clear();
         auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string");
         throw err;
     }
 
-    int ws_count = 0;
-    for (; (!is.eof() && std::isspace(is.peek())); ws_count++)
-        is.get();
-
-    if (!is.eof())
-    {
-        if (assume_eoi || ws_count == 0)
-            throw Fmi::Exception(BCP, "Unexpected trailing characters after date string");
-    }
+    internal::check_parse_status(is, assume_eoi, "date");
 
     DateTimeNS::year_month_day ymd(year, month, day);
     DateTimeNS::local_days l_days(ymd);
@@ -355,7 +326,7 @@ Fmi::date_time::Date Fmi::date_time::date_from_string(const std::string& str)
     catch(...)
     {
         auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
-        err.addParameter("Error position", "'" + Fmi::detail::handle_parse_remainder(is) + "'");
+        err.addParameter("Error position", internal::handle_parse_remainder(is));
         throw err;
     }
 }

@@ -1,26 +1,9 @@
 #include "DateTime.h"
+#include "Internal.hpp"
 #include "../Exception.h"
 #include "../StringConversion.h"
 
-namespace
-{
-    struct StreamExceptionState
-    {
-        StreamExceptionState(std::istream& is)
-            : is(is)
-            , state(is.exceptions())
-        {
-        }
-
-        ~StreamExceptionState()
-        {
-            is.exceptions(state);
-        }
-
-        std::istream& is;
-        std::ios::iostate state;
-    };
-}
+namespace internal = Fmi::date_time::internal;
 
 Fmi::date_time::DateTime::DateTime() = default;
 
@@ -172,8 +155,7 @@ std::string Fmi::date_time::DateTime::as_iso_extended_string() const
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::from_stream(std::istream& is, bool assume_eoi)
 {
-    const StreamExceptionState save(is);
-    is.exceptions(std::ios::failbit | std::ios::badbit);
+    const internal::StreamExceptionState save(is, std::ios::failbit | std::ios::badbit);
 
     Fmi::date_time::Date date;
     Fmi::date_time::TimeDuration time;
@@ -197,15 +179,7 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::from_stream(std::istream& is,
         throw err;
     }
 
-    int ws_count = 0;
-    for (; (!is.eof() && std::isspace(is.peek())); ws_count++)
-        is.get();
-
-    if (!is.eof())
-    {
-        if (assume_eoi || ws_count == 0)
-            throw Fmi::Exception(BCP, "Unexpected trailing characters after date string");
-    }
+    internal::check_parse_status(is, assume_eoi, "date time");
 
     return DateTime(date, time);
 }
@@ -235,7 +209,7 @@ Fmi::date_time::DateTime Fmi::date_time::time_from_string(const std::string& src
     catch(...)
     {
         auto err = Fmi::Exception::Trace(BCP, "Operation failed!");
-        err.addParameter("Error position", "'" + Fmi::detail::handle_parse_remainder(is) + "'");
+        err.addParameter("Error position", "'" + internal::handle_parse_remainder(is) + "'");
         throw err;
     }
 }    

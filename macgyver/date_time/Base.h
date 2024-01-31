@@ -54,7 +54,6 @@ namespace Fmi
         static_assert (periods_per_mks * period_t::den / period_t::num == std::micro::den,
           "INTERNAL ERROR");
 
-        std::string handle_parse_remainder(std::istringstream& is);
     }  // namespace detail
 
     namespace date_time

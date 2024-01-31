@@ -1,7 +1,10 @@
 #include "TimeDuration.h"
+#include "Internal.hpp"
 #include "../Exception.h"
 #include "../StringConversion.h"
 #include <boost/regex.hpp>
+
+namespace internal = Fmi::date_time::internal;
 
 Fmi::date_time::TimeDuration::TimeDuration(const detail::duration_t& duration)
     : Fmi::date_time::Base(Fmi::date_time::Base::NORMAL)
@@ -220,51 +223,29 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator/(int64_t fac
 Fmi::date_time::TimeDuration
 Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
 {
-  const auto save = is.exceptions();
-  is.exceptions(std::ios::failbit | std::ios::badbit);
-  std::exception_ptr eptr;
-
   detail::duration_t td1;
-  try {
-    is >> DateTimeNS::parse("%H:%M", td1);
-  } catch (...) {
-    eptr = std::current_exception();
-  }
-
-  // Parse optional seconds field if present no error already detected
-  if (!eptr && !is.eof() && is.peek() == ':')
+  try
   {
-    try
+    const bool have_trailing_space = std::isspace(is.peek());
+    is >> DateTimeNS::parse("%H:%M", td1);
+    if (!is.eof() && is.peek() == ':')
     {
       detail::duration_t td2;
       is >> DateTimeNS::parse(":%S", td2);
       td1 += td2;
+      // Skip any remaining digits of second part if present
       while (!is.eof() && std::isdigit(is.peek()))
         is.get();
     }
-    catch (...)
-    {
-      eptr = std::current_exception();
-    }
-  }
-
-  if (eptr)
+  } 
+  catch (...)
   {
-    auto err = Fmi::Exception::Trace(BCP, eptr, "Failed to parse time duration from string");
+    auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string");
     throw err;
   }
 
-  int ws_count = 0;
-  for (; (!is.eof() && std::isspace(is.peek())); ws_count++)
-    is.get();
+  Fmi::date_time::internal::check_parse_status(is, assume_eoi, "time duration");
 
-  if (!is.eof())
-  {
-    if (assume_eoi || ws_count == 0)
-      throw Fmi::Exception(BCP, "Unexpected trailing characters in time duration string");
-  }
-
-  is.exceptions(save);
   return td1;
 }
 
@@ -283,7 +264,7 @@ Fmi::date_time::duration_from_string(const std::string& str)
   catch(...)
   {
     auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
-    err.addParameter("Error position", "'" + Fmi::detail::handle_parse_remainder(is) + "'");
+    err.addParameter("Error position", "'" + internal::handle_parse_remainder(is) + "'");
     throw err;
   }
 }

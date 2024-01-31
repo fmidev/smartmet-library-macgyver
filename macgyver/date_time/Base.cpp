@@ -1,5 +1,7 @@
 #include "Base.h"
+#include "Internal.hpp"
 #include "../Exception.h"
+#include <cctype>
 
 std::string Fmi::date_time::Base::as_string() const
 {
@@ -70,7 +72,8 @@ void Fmi::date_time::Base::assert_supported(const Base& other) const
         throw Fmi::Exception(BCP, "INTERNAL ERROR: operation not supported for normal values");
 }
 
-std::string Fmi::detail::handle_parse_remainder(std::istringstream& is)
+std::string
+Fmi::date_time::internal::handle_parse_remainder(std::istringstream& is)
 {
     std::string remaining;
     const std::string src = is.str();
@@ -79,8 +82,28 @@ std::string Fmi::detail::handle_parse_remainder(std::istringstream& is)
 
     const std::size_t rLen = remaining.length();
     const std::size_t srcLen = src.length();
-    if ((rLen > srcLen) || (src.substr(srcLen - rLen) != remaining))
-        throw Fmi::Exception(BCP, "INTERNAL ERROR: incorrect use");
-    return src.substr(0, srcLen - rLen) + "'-->'" + remaining;
+    return "'" + src.substr(0, srcLen - rLen) + "' <--> '" + remaining + "'";
 }
 
+// Check parse status:
+// - If assume_eoi is true, then the remaining part of stream may only contain space
+// - If assume_eoi is false, then there must be at least one addional spec or EOF in the stream
+void Fmi::date_time::internal::check_parse_status(std::istream& is, bool assume_eoi, const char* name)
+{
+    int num_space = 0;
+    while (!is.eof() && std::isspace(is.peek()))
+    {
+        is.get();
+        ++num_space;
+    }
+
+    const bool had_trailing_space = num_space > 0;
+    if (!is.eof())
+    {
+        if ((assume_eoi && !is.eof()) || !had_trailing_space)
+        {
+            std::string message = "Failed to parse " + std::string(name) + " from string";
+            throw Fmi::Exception(BCP, message);
+        }
+    }
+}
