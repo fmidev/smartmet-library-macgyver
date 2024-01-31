@@ -2,7 +2,7 @@
 
 #include <ctime>
 #include <string>
-#include "DateTimeBase.h"
+#include "Base.h"
 
 namespace Fmi
 {

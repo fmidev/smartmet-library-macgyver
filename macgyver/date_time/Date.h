@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ctime>
-#include "DateTimeBase.h"
+#include "Base.h"
 
 namespace Fmi
 {
