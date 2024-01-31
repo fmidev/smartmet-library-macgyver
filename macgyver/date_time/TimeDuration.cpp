@@ -226,7 +226,7 @@ Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
   detail::duration_t td1;
   try
   {
-    const bool have_trailing_space = std::isspace(is.peek());
+    const internal::StreamExceptionState save(is, std::ios::failbit | std::ios::badbit);
     is >> DateTimeNS::parse("%H:%M", td1);
     if (!is.eof() && is.peek() == ':')
     {
