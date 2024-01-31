@@ -311,7 +311,6 @@ Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
     const StreamExceptionState save(is);
     is.exceptions(std::ios::failbit | std::ios::badbit);
 
-    DateTimeNS::local_days day1;
     DateTimeNS::year year;
     DateTimeNS::month month;
     DateTimeNS::day day;
@@ -351,7 +350,6 @@ Fmi::date_time::Date Fmi::date_time::date_from_string(const std::string& str)
     std::istringstream is(Fmi::trim_copy(str));
     try
     {
-        DateTimeNS::local_days day1;
         return Fmi::date_time::Date::from_stream(is, true);
     }
     catch(...)

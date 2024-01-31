@@ -286,36 +286,6 @@ Fmi::date_time::duration_from_string(const std::string& str)
     err.addParameter("Error position", "'" + Fmi::detail::handle_parse_remainder(is) + "'");
     throw err;
   }
-  
-
-  is.exceptions(std::ios::failbit | std::ios::badbit);
-  std::exception_ptr eptr;
-
-  detail::duration_t td1;
-  try {
-    is >> DateTimeNS::parse("%H:%M", td1);
-  } catch (...) {
-    eptr = std::current_exception();
-  }
-
-  if (!eptr && !is.eof() && is.peek() == ':') {
-    is.get();   // Consume ':' and parse seconds
-    try {
-      detail::duration_t td2;
-      is >> DateTimeNS::parse(":%S", td2);
-      td1 += td2;
-    } catch (...) {
-      eptr = std::current_exception();
-    }
-  }
-
-  if (eptr)
-  {
-    auto err = Fmi::Exception::Trace(BCP, eptr,
-      ("Failed to parse time duration from string '" + str + "'").c_str());
-    err.addParameter("Error position", "'" + str + "'");
-    throw err;
-  }
 }
 
 struct std::tm Fmi::date_time::to_tm(const date_time::TimeDuration& t)
