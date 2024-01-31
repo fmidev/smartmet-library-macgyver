@@ -7,6 +7,7 @@
 
 #include "date_time/Date.h"
 #include "Exception.h"
+#include "DebugTools.h"
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
@@ -195,3 +196,30 @@ BOOST_AUTO_TEST_CASE(week_number)
     }
     BOOST_REQUIRE_EQUAL(num_err, 0);
 }
+
+BOOST_AUTO_TEST_CASE(date_from_string_1)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::Date: date_from_string");
+
+    std::vector<std::pair<std::string, std::string> > test_data = {
+        { "2000-2-29", "2000-Feb-29" }
+        , { "2000-02-29", "2000-Feb-29" }
+        , { "2000-Feb-29", "2000-Feb-29" }
+        , { "2000-february-29", "2000-Feb-29" }
+    }; // end of test_data
+
+    const auto test_parse =  [](const std::string& s1) -> std::string {
+        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).as_string());
+    };
+
+    for (const auto& item : test_data)
+    {
+        std::string s1;
+        BOOST_CHECK_NO_THROW(s1 = test_parse(item.first));
+        if (s1 != "") {
+            BOOST_CHECK_EQUAL(s1, item.second);
+        }
+    }
+}
+
+

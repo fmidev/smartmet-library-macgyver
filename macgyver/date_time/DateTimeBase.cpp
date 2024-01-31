@@ -81,6 +81,6 @@ std::string Fmi::detail::handle_parse_remainder(std::istringstream& is)
     const std::size_t srcLen = src.length();
     if ((rLen > srcLen) || (src.substr(srcLen - rLen) != remaining))
         throw Fmi::Exception(BCP, "INTERNAL ERROR: incorrect use");
-    return src.substr(0, srcLen - rLen) + "-->" + remaining;
+    return src.substr(0, srcLen - rLen) + "'-->'" + remaining;
 }
 

@@ -5,6 +5,27 @@
 namespace
 {
     const Fmi::date_time::Date epoch(1970, 1, 1);
+
+    struct StreamExceptionState
+    {
+        StreamExceptionState(std::istream& is)
+            : is(is)
+            , state(is.exceptions())
+        {
+        }
+
+        ~StreamExceptionState()
+        {
+            try {
+                is.exceptions(state);
+            } catch (...) {
+                // Ignore
+            }
+        }
+
+        std::istream& is;
+        std::ios::iostate state;
+    };
 }
 
 Fmi::date_time::Date::Date() = default;
@@ -287,9 +308,8 @@ std::ostream& Fmi::date_time::operator<<(std::ostream& os, const Fmi::date_time:
 Fmi::date_time::Date 
 Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
 {
-    const auto save = is.exceptions();
+    const StreamExceptionState save(is);
     is.exceptions(std::ios::failbit | std::ios::badbit);
-    std::exception_ptr eptr;
 
     DateTimeNS::local_days day1;
     DateTimeNS::year year;
@@ -298,16 +318,16 @@ Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
     try {
         is >> DateTimeNS::parse("%Y-", year);
         if (!is.eof() && std::isdigit(is.peek())) {
-            is >> DateTimeNS::parse("%m-", day);
+            is >> DateTimeNS::parse("%m-", month);
         } else {
             is.exceptions(std::ios::goodbit);
             is.clear();
             is.exceptions(std::ios::failbit | std::ios::badbit);
             is >> DateTimeNS::parse("%b-", month);
         }
-        is >> DateTimeNS::parse("d", day);
+        is >> DateTimeNS::parse("%d", day);
     } catch (...) {
-        auto err = Fmi::Exception::Trace(BCP, eptr, "Failed to parse date from string");
+        auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string");
         throw err;
     }
 
@@ -321,8 +341,9 @@ Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
             throw Fmi::Exception(BCP, "Unexpected trailing characters after date string");
     }
 
-    is.exceptions(save);
-    return Fmi::date_time::Date(day1);
+    DateTimeNS::year_month_day ymd(year, month, day);
+    DateTimeNS::local_days l_days(ymd);
+    return Fmi::date_time::Date(l_days);
 }
 
 Fmi::date_time::Date Fmi::date_time::date_from_string(const std::string& str)

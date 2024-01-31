@@ -78,7 +78,6 @@ namespace Fmi
         };
 
         Date date_from_string(const std::string& str);
-        //Date from_undelimited_string(const std::string& str);
 
         std::string to_simple_string(const Date& date);
         std::string to_iso_string(const Date& date);
