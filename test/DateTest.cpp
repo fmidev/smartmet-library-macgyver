@@ -11,6 +11,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
+#include <locale>
 
 using namespace boost::unit_test;
 namespace g = boost::gregorian;
@@ -24,6 +25,7 @@ test_suite* init_unit_test_suite(int argc, char* argv[])
   BOOST_TEST_MESSAGE("");
   BOOST_TEST_MESSAGE(name);
   BOOST_TEST_MESSAGE(std::string(std::strlen(name), '='));
+  std::setlocale(LC_ALL, "C");
   return NULL;
 }
 
