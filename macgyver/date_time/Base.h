@@ -11,9 +11,9 @@ namespace Fmi
   namespace DateTimeNS = std::chrono;
 }
 #else
-#ifndef __WIN32__
+// Use date library
+
 #define USE_OS_TZDB 1
-#endif
 
 // Time zone, zoned_time etc is NOT supported in libstdc++ or support is incomplete
 //      => use date library
@@ -97,8 +97,15 @@ namespace Fmi
                 return m_type == NOT_A_DATE_TIME;
             }
 
+            inline Type type() const { return m_type; }
+
         protected:
             std::string as_string() const;
+
+            inline void set_type(Type type)
+            {
+                m_type = type;
+            }
 
             bool operator == (const Base& other) const;
             bool operator != (const Base& other) const;

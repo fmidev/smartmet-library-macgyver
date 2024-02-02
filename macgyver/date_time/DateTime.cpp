@@ -5,6 +5,21 @@
 
 namespace internal = Fmi::date_time::internal;
 
+namespace
+{
+    std::string maybe_discard_seconds_part(std::string&& src)
+    {
+        const std::size_t pos = src.find_last_not_of("0");
+        if (pos == std::string::npos) {
+            return src;
+        } else if (src[pos] == '.') {
+            return std::string(src.begin(), src.begin() + pos);
+        } else {
+            return src;
+        }
+    }
+}
+
 Fmi::date_time::DateTime::DateTime() = default;
 
 Fmi::date_time::DateTime::DateTime(const Type& type)
@@ -136,21 +151,21 @@ std::string Fmi::date_time::DateTime::as_string() const
 {
     if (is_special())
         return Base::as_string();
-    return date().as_string() + " " + time_of_day().as_string();
+    return date().as_string() + " " + maybe_discard_seconds_part(time_of_day().as_string());
 }
 
 std::string Fmi::date_time::DateTime::as_iso_string() const
 {
     if (is_special())
         return Base::as_string();
-    return date().as_iso_string() + "T" + time_of_day().as_iso_string();
+    return date().as_iso_string() + "T" + maybe_discard_seconds_part(time_of_day().as_iso_string());
 }
 
 std::string Fmi::date_time::DateTime::as_iso_extended_string() const
 {
     if (is_special())
         return Base::as_string();
-    return date().as_iso_extended_string() + "T" + time_of_day().as_iso_extended_string();
+    return date().as_iso_extended_string() + "T" + maybe_discard_seconds_part(time_of_day().as_iso_extended_string());
 }
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::from_stream(std::istream& is, bool assume_eoi)
@@ -212,7 +227,17 @@ Fmi::date_time::DateTime Fmi::date_time::time_from_string(const std::string& src
         err.addParameter("Error position", "'" + internal::handle_parse_remainder(is) + "'");
         throw err;
     }
-}    
+}
+
+Fmi::date_time::DateTime Fmi::date_time::time_from_iso_string(const std::string& str)
+{
+    throw Fmi::Exception(BCP, "IMPLEMENT ME");
+}
+
+Fmi::date_time::DateTime Fmi::date_time::time_from_iso_extended_string(const std::string& str)
+{
+    throw Fmi::Exception(BCP, "IMPLEMENT ME");
+}
 
 std::ostream& Fmi::date_time::operator<<(std::ostream& os, const DateTime& dt)
 {
