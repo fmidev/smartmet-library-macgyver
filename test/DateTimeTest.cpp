@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(time_from_string_test_1)
     const std::string str3 = "2024-Jan-24 12:34:45.123456789";
     const std::string str4 = "2024-Jan-24 12:34:45.12345678901234567890";
     const std::string str5 = "2024-01-31 10:17";
-    const std::string str6 = "2024-january-31 10:17";
+    const std::string str6 = "2024-Jan-31 10:17";
     const std::string str7 = "2024-01-31";
 
     Fmi::date_time::DateTime dt1 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str1));
