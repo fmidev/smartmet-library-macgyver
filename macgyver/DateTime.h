@@ -1,6 +1,6 @@
 #pragma once
 
-#define USE_BOOST_DATE_TIME
+//#define USE_BOOST_DATE_TIME
 
 #ifdef USE_BOOST_DATE_TIME
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -34,12 +34,12 @@ namespace Fmi
     using TimeDuration = date_time::TimeDuration;
     using DateTime = date_time::DateTime;
 
-    using Seconds = date_time::seconds;
-    using Minutes = date_time::minutes;
-    using Hours = date_time::hours;
+    using date_time::Seconds;
+    using date_time::Minutes;
+    using date_time::Hours;
 
-    using MicrosecClock = date_time::MicrosecClock;
-    using SecondClock = date_time::SecondClock;
+    namespace MicrosecClock = date_time::MicrosecClock;
+    namespace SecondClock = date_time::SecondClock;
 }
 
 #endif
