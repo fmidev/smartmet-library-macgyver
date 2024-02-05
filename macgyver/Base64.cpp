@@ -39,6 +39,7 @@
 
 #include "Base64.h"
 #include "Exception.h"
+#include <array>
 #include <cctype>
 
 namespace
