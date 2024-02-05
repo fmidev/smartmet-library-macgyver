@@ -73,12 +73,12 @@ namespace Fmi
             detail::duration_t m_duration;
         };
 
-        TimeDuration days(int days);
-        TimeDuration hours(int hours);
-        TimeDuration minutes(int minutes);
-        TimeDuration seconds(int seconds);
-        TimeDuration milliseconds(int milliseconds);
-        TimeDuration microseconds(int microseconds);
+        TimeDuration Days(int days);
+        TimeDuration Hours(int hours);
+        TimeDuration Minutes(int minutes);
+        TimeDuration Seconds(int seconds);
+        TimeDuration Milliseconds(int milliseconds);
+        TimeDuration Microseconds(int microseconds);
 
         TimeDuration duration_from_string(const std::string& str);
 
