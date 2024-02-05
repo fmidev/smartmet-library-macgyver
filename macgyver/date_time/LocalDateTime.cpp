@@ -151,7 +151,8 @@ TimeDuration LocalDateTime::time_of_day() const
 
 DateTime LocalDateTime::utc_time() const
 {
-    return to_tz(TimeZonePtr::utc).local_time();
+    TimeDuration diff(get_sys_info().offset);
+    return local_time() - diff;
 }
 
 LocalDateTime LocalDateTime::to_tz(const TimeZonePtr& zone) const

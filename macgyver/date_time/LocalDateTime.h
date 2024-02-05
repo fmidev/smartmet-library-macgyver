@@ -58,14 +58,20 @@ namespace Fmi
 
             TimeDuration time_of_day() const;
 
-            DateTime local_time() const;
-
-            Date date() const;
+            /**
+             * Get the UTC time of the local date time
+            */
+            DateTime utc_time() const;
 
             /**
-             * Convert the local date time to UTC
-             */
-            DateTime utc_time() const;
+             * Get the local time of the local date time
+            */
+            DateTime local_time() const;
+
+            /**
+             * Get the date of the local date time
+            */
+            Date date() const;
 
             /**
              * Convert the local date time to the specified time zone

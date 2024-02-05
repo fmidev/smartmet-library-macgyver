@@ -55,22 +55,6 @@ namespace
         return lt::local_date_time(d, td, tz, lt::local_date_time::NOT_DATE_TIME_ON_ERROR);
     }
 
-    bool operator == (const lt::local_date_time& ldt, const Fmi::date_time::LocalDateTime& fmi_ldt)
-    {
-        const int year = fmi_ldt.date().year();
-        const int month = fmi_ldt.date().month();
-        const int day = fmi_ldt.date().day();
-        const int hours = fmi_ldt.time_of_day().hours();
-        const int minutes = fmi_ldt.time_of_day().minutes();
-        const int seconds = fmi_ldt.time_of_day().seconds();
-        const int fraction = fmi_ldt.time_of_day().fractional_seconds();
-
-        const g::date d(year, month, day);
-        const pt::time_duration td(hours, minutes, seconds, fraction);
-        const lt::time_zone_ptr tz = get_boost_tz(fmi_ldt.zone()->name());
-        return ldt == lt::local_date_time(d, td, tz, lt::local_date_time::NOT_DATE_TIME_ON_ERROR);
-    }
-    
     std::string as_string(const lt::local_date_time& ldt)
     {
         std::ostringstream os;
@@ -115,6 +99,8 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
     BOOST_CHECK(!ldt1.dst_on());
     BOOST_CHECK_EQUAL(ldt1.offset(), 2.0);
 
+    BOOST_CHECK_EQUAL(ldt1.utc_time(), dtm1 - Fmi::date_time::hours(2));
+
     //std::cout << ldt1.get_sys_info() << std::endl;
 
     LocalDateTime ldt2(dtm2, tz1);
@@ -129,6 +115,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
 
     BOOST_CHECK(ldt2.dst_on());
     BOOST_CHECK_EQUAL(ldt2.offset(), 3.0);
+    BOOST_CHECK_EQUAL(ldt2.utc_time(), dtm2 - Fmi::date_time::hours(3));
 
     //std::cout << ldt2.get_sys_info() << std::endl;
 
@@ -144,6 +131,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
 
     BOOST_CHECK(!ldt3.dst_on());
     BOOST_CHECK_EQUAL(ldt3.offset(), 0.0);
+    BOOST_CHECK_EQUAL(ldt3.utc_time(), ldt3.local_time());
 
     //std::cout << ldt3.get_sys_info() << std::endl;
 }
@@ -280,4 +268,49 @@ BOOST_AUTO_TEST_CASE(conversion_to_boost_1)
     const long mks2 = ldt2.local_time().time_of_day().total_microseconds();
     const long bmks2 = b_ldt2.local_time().time_of_day().total_microseconds();
     BOOST_CHECK_EQUAL(mks2, bmks2);
+}
+
+
+BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
+{
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: advance and comparision with boost (1)");
+
+    const auto s_dt1 = "2024-Jan-01 00:00:01"s;
+    const auto s_dt2 = "2025-Jan-01 00:00:01"s;
+    const auto s_inc = "00:17:34.654789"s;
+
+    TimeZonePtr tz1("Europe/Helsinki");
+
+    const auto inc1 = duration_from_string(s_inc);
+    const auto b_inc = boost::posix_time::duration_from_string(s_inc);
+ 
+    DateTime dt1 = time_from_string(s_dt1);
+ 
+    LocalDateTime ldt1(time_from_string(s_dt1), tz1);
+    LocalDateTime ldt2(time_from_string(s_dt2), tz1);
+    LocalDateTime ldt_start = ldt1;
+
+    auto b_ldt1 = get_boost_ldt(ldt1);
+
+    while (ldt1 < ldt2)
+    {
+        ldt1.advance(inc1);
+        b_ldt1 += b_inc;
+        const std::string s1 = ldt1.local_time().as_string();
+        const std::string s2 = pt::to_simple_string(b_ldt1.local_time());
+        //std::cout << s1 << " == " << s2 << std::endl;
+        BOOST_REQUIRE_EQUAL(s1, s2);
+    }  
+
+    while (ldt1 > ldt_start)
+    {
+        ldt1.advance(-inc1);
+        b_ldt1 -= b_inc;
+        const std::string s1 = ldt1.local_time().as_string();
+        const std::string s2 = pt::to_simple_string(b_ldt1.local_time());
+        //std::cout << s1 << " == " << s2 << std::endl;
+        BOOST_REQUIRE_EQUAL(s1, s2);
+    }
 }
