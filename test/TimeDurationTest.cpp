@@ -1,0 +1,183 @@
+// ======================================================================
+/*!
+ * \file
+ * \brief Regression tests for date_time/TimeDuration.h
+ */
+// ======================================================================
+
+#include "date_time/TimeDuration.h"
+#include "DebugTools.h"
+#include <functional>
+#include <iostream>
+#include <boost/test/included/unit_test.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+using namespace boost::unit_test;
+
+test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  const char* name = "Fmi::date_time/TimeDuration tester";
+  // unit_test_log.set_threshold_level(log_test_units);
+  unit_test_log.set_threshold_level(log_messages);
+  framework::master_test_suite().p_name.value = name;
+  BOOST_TEST_MESSAGE("");
+  BOOST_TEST_MESSAGE(name);
+  BOOST_TEST_MESSAGE(std::string(std::strlen(name), '='));
+  return NULL;
+}
+
+BOOST_AUTO_TEST_CASE(test_TimeDuration_1)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: extraction and conversion to string");
+
+    using namespace Fmi::date_time;
+
+    int num_err = 0;
+    int num_tests = 0;
+    int mks = 0;
+    for (int hours = 0; hours < 48; hours++)
+    {
+      for (int minutes = 0; minutes < 60; minutes++)
+      {
+        for (int seconds = 0; seconds < 60; seconds++)
+        {
+            using namespace boost::posix_time;
+            num_tests++;
+            if (num_tests > 7200) mks += 1;
+            TimeDuration td(hours, minutes, seconds, mks);
+            int frac = mks * time_duration::ticks_per_second() / td.ticks_per_second();
+            time_duration pt(hours, minutes, seconds, frac);
+            const std::string str1 = td.as_string();
+            const std::string str2 = boost::posix_time::to_simple_string(pt);
+
+            const std::string str3 = td.as_iso_string();
+            const std::string str4 = boost::posix_time::to_iso_string(pt);
+            if (str1 != str2)
+            {
+                if (num_err < 10) {
+                    std::cout << "Error: " << str1 << " != " << str2
+                              << std::endl;
+                }
+                num_err++;
+            }
+            if (str3 != str4)
+            {
+                if (num_err < 10) {
+                    std::cout << "Error: " << str3 << " != " << str4
+                              << std::endl;
+                }
+                num_err++;
+            }
+
+            BOOST_REQUIRE_EQUAL(int(td.hours()), hours);
+            BOOST_REQUIRE_EQUAL(int(td.minutes()), minutes);
+            BOOST_REQUIRE_EQUAL(int(td.seconds()), seconds);
+        }
+      }
+    }
+
+    BOOST_REQUIRE_EQUAL(num_err, 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_TimeDuration_2)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: test negative value");
+
+    using namespace Fmi::date_time;
+    using namespace boost::posix_time;
+
+    TimeDuration td1(-1, -2, -3, -4);
+    time_duration pt1(-1, -2, -3, -4);
+
+    BOOST_REQUIRE_EQUAL(td1.hours(), pt1.hours());
+    BOOST_REQUIRE_EQUAL(td1.minutes(), pt1.minutes());
+    BOOST_REQUIRE_EQUAL(td1.seconds(), pt1.seconds());
+
+    const std::string str1 = td1.as_string();
+    const std::string str2 = boost::posix_time::to_simple_string(pt1);
+    BOOST_REQUIRE_EQUAL(str1, str2);
+}
+
+BOOST_AUTO_TEST_CASE(test_operations)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: test operations");
+
+    using namespace Fmi::date_time;
+
+    TimeDuration td1(1, 2, 3, 4);
+    TimeDuration td2(0, 3, 0, 0);
+    TimeDuration td3(1, 5, 3, 4);
+    TimeDuration td4(0, 59, 3, 4);
+    TimeDuration td5(2, 4, 6, 8);
+
+    BOOST_CHECK(td1 == td1);
+    BOOST_CHECK(td1 != td2);
+    BOOST_CHECK(td1 > td2);
+    BOOST_CHECK(td1 >= td1);
+    BOOST_CHECK(td1 >= td2);
+    BOOST_CHECK(td4 < td1);
+    BOOST_CHECK(td4 <= td1);
+    BOOST_CHECK(td4 <= td4);
+    BOOST_CHECK_EQUAL(td1 + td2, td3);
+    BOOST_CHECK_EQUAL(td1 - td2, td4);
+    BOOST_CHECK_EQUAL(td1 * 2, td5);
+    BOOST_CHECK_EQUAL(td5 / 2, td1);
+}
+
+BOOST_AUTO_TEST_CASE(duration_parse)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: test parsing");
+
+    using Fmi::date_time::duration_from_string;
+
+    const std::pair<const char*, const char*> test_data[] =
+        {
+            {"12:11:10.123456789", "12:11:10.123456"}
+            , {"12:11:10.123456", nullptr}
+            , {"12:11:10.12345", "12:11:10.123450"}
+            , {"12:11:10.1234", "12:11:10.123400"}
+            , {"12:11:10.123", "12:11:10.123000"}
+            , {"12:11:10.12", "12:11:10.120000"}
+            , {"12:11:10.1", "12:11:10.100000"}
+            , {"12:11:10.", "12:11:10"}
+            , {"12:11:10", nullptr}
+            , {"12:11 ", "12:11:00"}
+        };
+
+    const auto test_parse = [](const std::string& src) -> Fmi::date_time::TimeDuration
+    {
+        return SHOW_EXCEPTIONS(duration_from_string(src));
+    };
+
+    for (const auto& td : test_data)
+    {
+        const char* src = td.first;
+        const char* dst = td.second ? td.second : td.first;
+        Fmi::date_time::TimeDuration td1;
+        BOOST_CHECK_NO_THROW(td1 = test_parse(src));
+        BOOST_CHECK_EQUAL(td1.as_string(), dst);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(factory_methods)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: test factory methods");
+
+    using Fmi::date_time::hours;
+    using Fmi::date_time::minutes;
+    using Fmi::date_time::seconds;
+    using Fmi::date_time::milliseconds;
+    using Fmi::date_time::microseconds;
+
+    BOOST_CHECK_EQUAL(hours(1).as_string(), "01:00:00");
+    BOOST_CHECK_EQUAL(minutes(1).as_string(), "00:01:00");
+    BOOST_CHECK_EQUAL(seconds(1).as_string(), "00:00:01");
+    BOOST_CHECK_EQUAL(milliseconds(1).as_string(), "00:00:00.001000");
+    BOOST_CHECK_EQUAL(microseconds(1).as_string(), "00:00:00.000001");
+
+    BOOST_CHECK_EQUAL(minutes(1445).as_string(), "24:05:00");
+    BOOST_CHECK_EQUAL(seconds(86401).as_string(), "24:00:01");
+
+    BOOST_CHECK_EQUAL(minutes(-1445).as_string(), "-24:05:00");
+    BOOST_CHECK_EQUAL(seconds(-86401).as_string(), "-24:00:01");
+}

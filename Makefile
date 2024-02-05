@@ -25,6 +25,7 @@ LIBS += -L$(libdir) \
 	-lboost_system \
 	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
+	-ldate-tz \
 	-lpthread -lrt
 
 RPMBUILD_OPT ?=
@@ -35,14 +36,22 @@ LIBFILE = libsmartmet-$(SUBNAME).so
 
 # Compilation directories
 
-vpath %.cpp $(SUBNAME) $(SUBNAME)/date_time
-vpath %.h $(SUBNAME) $(SUBNAME)/date_time
+INTERNAL_HDRS = date_time/Internal.h
+SRC_DIRS = $(SUBNAME) $(SUBNAME)/date_time
+
+vpath %.cpp $(SRC_DIRS)
+vpath %.h $(SRC_DIRS)
 
 # The files to be compiled
 
-SRCS = $(wildcard $(SUBNAME)/*.cpp) $(wildcard $(SUBNAME)/date_time/*.cpp)
-HDRS = $(wildcard $(SUBNAME)/*.h) $(wildcard $(SUBNAME)/date_time/*.h)
-OBJS = $(patsubst $(SUBNAME)/%.cpp, obj/%.o, $(SRCS))
+SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
+HDRS = $(filter-out $(INTRENAL_HEADERS), $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h)))
+OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
+
+ifneq ($(words $(sort $(OBJS))),$(words $(OBJS)))
+$(info $(shell for f in $(OBJS); do echo $$f; done | sort | uniq -c | grep -v '^ *1 ' | sed -e 's/^ *//' -e 's/ /: /'))
+$(error Source file name conflict detected)
+endif
 
 INCLUDES := -Iinclude $(INCLUDES)
 
