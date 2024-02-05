@@ -60,5 +60,18 @@ namespace Fmi
         DateTime from_time_t(std::time_t t);
 
         std::ostream& operator<<(std::ostream& os, const DateTime& dt);
+
+        namespace MicrosecClock
+        {
+            DateTime universal_time();
+            DateTime local_time();
+        };
+
+        namespace SecondClock
+        {
+            DateTime universal_time();
+            DateTime local_time();
+        };
+
     }
 }

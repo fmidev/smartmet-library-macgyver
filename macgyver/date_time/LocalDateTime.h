@@ -3,6 +3,7 @@
 #include "Base.h"
 #include "TimeDuration.h"
 #include "DateTime.h"
+#include "TimeZonePtr.h"
 
 #include <string>
 
@@ -147,17 +148,10 @@ namespace Fmi
         std::string to_iso_string(const LocalDateTime& time);
         std::string to_iso_extended_string(const LocalDateTime& time);
 
-        std::ostream& operator << (std::ostream& os, const LocalDateTime& time);
-        namespace MicrosecClock
-        {
-            DateTime universal_time();
-            DateTime local_time();
-        };
+        inline TimeDuration seconds(int s) { return TimeDuration(detail::duration_t(std::chrono::seconds(s))); }
+        inline TimeDuration minutes(int m) { return TimeDuration(detail::duration_t(std::chrono::minutes(m))); }
+        inline TimeDuration hours(int h) { return TimeDuration(detail::duration_t(std::chrono::hours(h))); }
 
-        namespace SecondClock
-        {
-            DateTime universal_time();
-            DateTime local_time();
-        };
+        std::ostream& operator << (std::ostream& os, const LocalDateTime& time);
     }
 }
