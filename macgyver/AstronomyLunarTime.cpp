@@ -1,12 +1,10 @@
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
 #include "Exception.h"
-#include <boost/date_time/c_local_time_adjustor.hpp>
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/local_time_adjustor.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "LocalDateTime.h"
 #include <boost/make_shared.hpp>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <vector>
 
@@ -239,8 +237,7 @@ std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
 
     if (!occ_ldt.is_not_a_date_time())
     {
-      ss << std::setfill('0') << std::setw(2) << occ_ldt.local_time().time_of_day().hours()
-         << std::setfill('0') << std::setw(2) << occ_ldt.local_time().time_of_day().minutes();
+      ss << DateTimeNS::format("%H%M", occ_ldt.local_time().get_impl());
     }
 
     return ss.str();
@@ -328,26 +325,7 @@ bool dst_on(const DateTime& theTime, const Fmi::LocalDateTime& ldt)
 {
   try
   {
-    auto zone = ldt.zone();
-
-    bool dst_on(false);
-    if (zone->has_dst())
-    {
-      auto dst_starttime = zone->dst_local_start_time(ldt.local_time().date().year());
-      auto dst_endtime = zone->dst_local_end_time(ldt.local_time().date().year());
-
-      if (dst_starttime < dst_endtime)
-      {
-        if (theTime >= dst_starttime && theTime <= dst_endtime)
-          dst_on = true;
-      }
-      else
-      {
-        if (theTime >= dst_starttime || theTime <= dst_endtime)
-          dst_on = true;
-      }
-    }
-    return dst_on;
+    return ldt.dst_on();
   }
   catch (...)
   {
@@ -359,15 +337,7 @@ double timezone_offset(const Fmi::LocalDateTime& ldt)
 {
   try
   {
-    auto zone = ldt.zone();
-
-    double base_offset(zone->base_utc_offset().hours() +
-                       (static_cast<float>(zone->base_utc_offset().minutes()) / 60.0));
-    double dst_offset(dst_on(ldt.local_time(), ldt)
-                          ? (zone->dst_offset().hours() + zone->dst_offset().minutes())
-                          : 0.0);
-
-    return (base_offset + dst_offset);
+    return ldt.offset();
   }
   catch (...)
   {
@@ -571,13 +541,13 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
 
     lunar_time_t retval(
         (rise ? parse_local_date_time(ldt_beg, utrise)
-              : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
+              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
         (set ? parse_local_date_time(ldt_beg, utset)
-             : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
+             : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
         (rise2 ? parse_local_date_time(ldt_beg, utrise2)
-               : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
+              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),  
         (set2 ? parse_local_date_time(ldt_beg, utset2)
-              : Fmi::LocalDateTime(boost::posix_time::not_a_date_time)),
+              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
         rise,
         set,
         rise2,
@@ -596,7 +566,7 @@ lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
 {
   try
   {
-	Fmi::TimeZonePtr tz_ptr = (ldt.zone() ? ldt.zone() : boost::make_shared<boost::local_time::posix_time_zone>("UTC"));
+	  Fmi::TimeZonePtr tz_ptr = ldt.zone();
 
     // beginning of the day
     Fmi::LocalDateTime ldt_beg(
@@ -610,9 +580,7 @@ lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
         tz_ptr,
         Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
-    DateTime dst_endtime(
-        tz_ptr->dst_local_end_time(ldt.local_time().date().year()));
-    bool dst_ends_today(ldt_beg.local_time().date() == dst_endtime.date());
+    bool dst_ends_today = ldt_beg.dst_on() && !ldt_end.dst_on();
 
     double offset_before_dst_ends = timezone_offset(ldt_beg);
 

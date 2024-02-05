@@ -558,7 +558,7 @@ Fmi::TimeDuration solar_time_t::daylength() const
  * The algorithm was copied from NOAA calculate function and then several guesses were made
  * to get the correct input and output parameters.
  */
-solar_time_t solar_time(const boost::local_time::local_date_time& ldt, double lon_e, double lat)
+solar_time_t solar_time(const Fmi::LocalDateTime& ldt, double lon_e, double lat)
 {
   try
   {

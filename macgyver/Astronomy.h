@@ -22,7 +22,6 @@
 #pragma once
 
 #include "LocalDateTime.h"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace Fmi
 {
@@ -89,10 +88,10 @@ enum SetAndRiseOccurence
 
 struct lunar_time_t
 {
-  Fmi::LocalDateTime moonrise{boost::local_time::not_a_date_time};
-  Fmi::LocalDateTime moonset{boost::local_time::not_a_date_time};
-  Fmi::LocalDateTime moonrise2{boost::local_time::not_a_date_time};
-  Fmi::LocalDateTime moonset2{boost::local_time::not_a_date_time};
+  Fmi::LocalDateTime moonrise;
+  Fmi::LocalDateTime moonset;
+  Fmi::LocalDateTime moonrise2;
+  Fmi::LocalDateTime moonset2;
   bool rise_today = false;
   bool set_today = false;
   bool rise2_today = false;

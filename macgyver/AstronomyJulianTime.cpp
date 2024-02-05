@@ -21,9 +21,7 @@
 
 #include "AstronomyJulianTime.h"
 #include "Exception.h"
-
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "LocalDateTime.h"
 
 using Fmi::Date;
 using Fmi::LocalDateTime;
@@ -61,7 +59,7 @@ Fmi::DateTime JulianTime::ptime_utc() const
   try
   {
     if (jd == 0.0)
-      return not_a_date_time;
+      return Fmi::DateTime();
 
     int z = lround(jd);
     double f = (jd + 0.5) - z;
