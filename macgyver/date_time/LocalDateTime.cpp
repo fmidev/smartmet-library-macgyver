@@ -393,3 +393,37 @@ std::ostream& Fmi::date_time::operator << (std::ostream& os, const LocalDateTime
     os << time.as_simple_string();
     return os;
 }
+
+Fmi::date_time::DateTime Fmi::date_time::MicrosecClock::universal_time()
+{
+    const auto tmp =
+        Fmi::DateTimeNS::clock_time_conversion<Fmi::DateTimeNS::local_t, DateTimeNS::utc_clock>()
+            (DateTimeNS::utc_clock::now());
+    return std::chrono::time_point_cast<Fmi::detail::microsec_t>(tmp);
+}
+
+Fmi::date_time::DateTime Fmi::date_time::MicrosecClock::local_time()
+{
+    namespace date = Fmi::DateTimeNS;
+    TimeZonePtr tz(DateTimeNS::current_zone());
+    const LocalDateTime utc_time(Fmi::date_time::MicrosecClock::universal_time(), TimeZonePtr::utc);
+    return utc_time.to_tz(tz).local_time();
+}
+
+Fmi::date_time::DateTime Fmi::date_time::SecondClock::universal_time()
+{
+    const auto tmp =
+        Fmi::DateTimeNS::clock_time_conversion<Fmi::DateTimeNS::local_t, DateTimeNS::utc_clock>()
+            (DateTimeNS::utc_clock::now());
+    return std::chrono::time_point_cast<Fmi::detail::microsec_t>(
+        std::chrono::time_point_cast<Fmi::detail::seconds_t>(tmp));
+}
+
+Fmi::date_time::DateTime Fmi::date_time::SecondClock::local_time()
+{
+    namespace date = Fmi::DateTimeNS;
+    TimeZonePtr tz(DateTimeNS::current_zone());
+    const LocalDateTime utc_time(Fmi::date_time::SecondClock::universal_time(), TimeZonePtr::utc);
+    return utc_time.to_tz(tz).local_time();
+    namespace date = Fmi::DateTimeNS;
+}

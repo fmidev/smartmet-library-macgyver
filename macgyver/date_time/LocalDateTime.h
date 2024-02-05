@@ -148,5 +148,16 @@ namespace Fmi
         std::string to_iso_extended_string(const LocalDateTime& time);
 
         std::ostream& operator << (std::ostream& os, const LocalDateTime& time);
+        namespace MicrosecClock
+        {
+            DateTime universal_time();
+            DateTime local_time();
+        };
+
+        namespace SecondClock
+        {
+            DateTime universal_time();
+            DateTime local_time();
+        };
     }
 }
