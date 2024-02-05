@@ -114,27 +114,27 @@ void Fmi::date_time::TimeDuration::assert_special() const
     throw Fmi::Exception(BCP, "Cannot perform operation on special time duration");
 }
 
-Fmi::date_time::TimeDuration Fmi::date_time::hours(int hours)
+Fmi::date_time::TimeDuration Fmi::date_time::Hours(int hours)
 {
   return Fmi::date_time::TimeDuration(detail::hours_t(hours));
 }
 
-Fmi::date_time::TimeDuration Fmi::date_time::minutes(int minutes)
+Fmi::date_time::TimeDuration Fmi::date_time::Minutes(int minutes)
 {
   return Fmi::date_time::TimeDuration(detail::minutes_t(minutes));
 }
 
-Fmi::date_time::TimeDuration Fmi::date_time::seconds(int seconds)
+Fmi::date_time::TimeDuration Fmi::date_time::Seconds(int seconds)
 {
   return Fmi::date_time::TimeDuration(detail::seconds_t(seconds));
 }
 
-Fmi::date_time::TimeDuration Fmi::date_time::milliseconds(int milliseconds)
+Fmi::date_time::TimeDuration Fmi::date_time::Milliseconds(int milliseconds)
 {
   return Fmi::date_time::TimeDuration(detail::millisec_t(milliseconds));
 }
 
-Fmi::date_time::TimeDuration Fmi::date_time::microseconds(int microseconds)
+Fmi::date_time::TimeDuration Fmi::date_time::Microseconds(int microseconds)
 {
   return Fmi::date_time::TimeDuration(detail::microsec_t(microseconds));
 }
