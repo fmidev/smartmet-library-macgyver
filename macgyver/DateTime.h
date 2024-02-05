@@ -1,7 +1,9 @@
 #pragma once
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#define USE_BOOST_DATE_TIME
 
+#ifdef USE_BOOST_DATE_TIME
+#include <boost/date_time/posix_time/posix_time.hpp>
 namespace Fmi
 {
     using Date = boost::gregorian::date;
@@ -21,3 +23,23 @@ namespace Fmi
     //     boost::date_time::neg_infin
     //     boost::date_time::pos_infin
 }
+
+#else
+
+#include "date_time/DateTime.h"
+
+namespace Fmi
+{
+    using Date = date_time::Date;
+    using TimeDuration = date_time::TimeDuration;
+    using DateTime = date_time::DateTime;
+
+    using Seconds = date_time::seconds;
+    using Minutes = date_time::minutes;
+    using Hours = date_time::hours;
+
+    using MicrosecClock = date_time::MicrosecClock;
+    using SecondClock = date_time::SecondClock;
+}
+
+#endif
