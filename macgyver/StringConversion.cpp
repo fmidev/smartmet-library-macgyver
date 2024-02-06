@@ -423,7 +423,14 @@ std::string to_iso_string(const TimeDuration& duration)
   try
   {
     if (duration.is_special())
-      return boost::posix_time::to_iso_string(duration);
+      return Fmi::date_time::to_iso_string(duration);
+
+    DateTimeNS::hh_mm_ss hms(duration);
+    bool is_negative = duration.get_impl().count() < 0;
+    int hours = hms.hours().count();
+    int minutes = hms.minutes().count();
+    int seconds = hms.seconds().count();
+    int sub_sec = hms.subseconds().count();
 
     std::array<char, 8> buffer;
     char* ptr = buffer.data() + buffer.size();
@@ -437,14 +444,14 @@ std::string to_iso_string(const TimeDuration& duration)
     index = duration.hours() * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    if (duration.is_negative())
+    if (is_negative)
       *--ptr = '-';
     std::string ret(ptr);
 
     auto frac_sec = duration.fractional_seconds();
     if (frac_sec != 0)
     {
-      std::string fmt = ",%0" + Fmi::to_string(duration.num_fractional_digits()) + "ld";
+      std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
       ret += fmt::sprintf(fmt, frac_sec);
     }
     return ret;
@@ -461,7 +468,14 @@ std::string to_simple_string(const TimeDuration& duration)
   try
   {
     if (duration.is_special())
-      return boost::posix_time::to_simple_string(duration);
+      return Fmi::date_time::to_string(duration);
+
+    DateTimeNS::hh_mm_ss hms(duration);
+    bool is_negative = duration.get_impl().count() < 0;
+    int hours = hms.hours().count();
+    int minutes = hms.minutes().count();
+    int seconds = hms.seconds().count();
+    int sub_sec = hms.subseconds().count();
 
     std::array<char, 40> buffer;
     char* ptr = buffer.data() + buffer.size();
@@ -494,14 +508,14 @@ std::string to_simple_string(const TimeDuration& duration)
     if (duration.hours() >= 100 && *ptr == '0')
       ++ptr;
 
-    if (duration.is_negative())
+    if (is_negative)
       *--ptr = '-';
     std::string ret(ptr);
 
     auto frac_sec = duration.fractional_seconds();
     if (frac_sec != 0)
     {
-      std::string fmt = ",%0" + Fmi::to_string(duration.num_fractional_digits()) + "ld";
+      std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
       ret += fmt::sprintf(fmt, frac_sec);
     }
     return ret;
@@ -529,22 +543,26 @@ std::string to_simple_string(const Fmi::Date& date)
 {
   try
   {
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+    const DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
     std::array<char, 12> buffer;
     char* ptr = buffer.data() + buffer.size();
-    unsigned index = ymd.day * 2;
+    unsigned index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = '-';
-    index = ymd.month * 3;
+    index = month * 3;
     *--ptr = months[index + 2];
     *--ptr = months[index + 1];
     *--ptr = months[index];
     *--ptr = '-';
-    index = (ymd.year % 100) * 2;
+    index = (year % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     return std::string(ptr);
@@ -560,20 +578,24 @@ std::string to_iso_string(const Fmi::Date& date)
 {
   try
   {
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+    const DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
     std::array<char, 9> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    unsigned index = ymd.day * 2;
+    unsigned index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = ymd.month * 2;
+    index = month * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year % 100) * 2;
+    index = (year % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     return std::string(ptr);
@@ -589,22 +611,26 @@ std::string to_iso_extended_string(const Fmi::Date& date)
 {
   try
   {
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+    const DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
     std::array<char, 11> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    unsigned index = ymd.day * 2;
+    unsigned index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = '-';
-    index = ymd.month * 2;
+    index = month * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = '-';
-    index = (ymd.year % 100) * 2;
+    index = (year % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     return std::string(ptr);
@@ -621,44 +647,54 @@ std::string to_iso_string(const DateTime& time)
   try
   {
     if (time.is_special())
-      return boost::posix_time::to_iso_string(time);
+      return Fmi::date_time::to_iso_string(time);
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+
+    const DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
+    DateTimeNS::hh_mm_ss hms(duration);
+    bool is_negative = hms.is_negative();
+    int hours = hms.hours().count();
+    int minutes = hms.minutes().count();
+    int seconds = hms.seconds().count();
+    int sub_sec = hms.subseconds().count();
 
     std::array<char, 16> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    unsigned index = duration.seconds() * 2;
+    unsigned index = seconds * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = duration.minutes() * 2;
+    index = minutes * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = duration.hours() * 2;
+    index = hours * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = 'T';
-    index = ymd.day * 2;
+    index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = ymd.month * 2;
+    index = month * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year % 100) * 2;
+    index = year % 100 * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = year / 100 * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     std::string ret(ptr);
 
-    auto frac_sec = duration.fractional_seconds();
-    if (frac_sec != 0)
+    if (sub_sec != 0)
     {
-      std::string fmt = ",%0" + Fmi::to_string(duration.num_fractional_digits()) + "ld";
-      ret += fmt::sprintf(fmt, frac_sec);
+      std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
+      ret += fmt::sprintf(fmt, sub_sec);
     }
     return ret;
   }
@@ -717,31 +753,39 @@ std::string to_timestamp_string(const DateTime& time)
   try
   {
     if (time.is_special())
-      return boost::posix_time::to_iso_string(time);
+      return Fmi::date_time::to_iso_string(time);
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+
+    const DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
+    const DateTimeNS::hh_mm_ss hms(duration);
+    int hours = hms.hours().count();
+    int minutes = hms.minutes().count();
 
     std::array<char, 13> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    auto index = duration.minutes() * 2;
+    auto index = minutes * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = duration.hours() * 2;
+    index = hours * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = ymd.day * 2;
+    index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = ymd.month * 2;
+    index = month * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year % 100) * 2;
+    index = (year % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     return std::string(ptr);
@@ -758,48 +802,57 @@ std::string to_iso_extended_string(const DateTime& time)
   try
   {
     if (time.is_special())
-      return boost::posix_time::to_iso_extended_string(time);
+      return Fmi::date_time::to_iso_extended_string(time);
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+
+    const DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
+    const DateTimeNS::hh_mm_ss hms(duration);
+    int hours = hms.hours().count();
+    int minutes = hms.minutes().count();
+    int seconds = hms.seconds().count();
+    int sub_sec = hms.subseconds().count();
 
     std::array<char, 20> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    unsigned index = duration.seconds() * 2;
+    unsigned index = seconds * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.minutes() * 2;
+    index = minutes * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.hours() * 2;
+    index = hours * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = 'T';
-    index = ymd.day * 2;
+    index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = '-';
-    index = ymd.month * 2;
+    index = month * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = '-';
-    index = (ymd.year % 100) * 2;
+    index = (year % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    std::string ret(ptr);
+    std::string ret(ptr);    int sub_sec = hms.subseconds().count();
 
-    auto frac_sec = duration.fractional_seconds();
-    if (frac_sec != 0)
+    if (sub_sec != 0)
     {
-      std::string fmt = ",%0" + Fmi::to_string(duration.num_fractional_digits()) + "ld";
-      ret += fmt::sprintf(fmt, frac_sec);
+      std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
+      ret += fmt::sprintf(fmt, sub_sec);
     }
     return ret;
   }
@@ -810,45 +863,55 @@ std::string to_iso_extended_string(const DateTime& time)
 }
 
 // Convert to form YYYY-mmm-DD HH:MM:SS.fffffffff string where mmm 3 char month name
-std::string to_simple_string(const DateTime& time)
+std::string to_simple_string(const Fmi::date_time::DateTime& time)
 {
   try
   {
     if (time.is_special())
-      return boost::posix_time::to_simple_string(time);
+      return Fmi::date_time::to_simple_string(time);
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+
+    const Fmi::DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
+    const Fmi::DateTimeNS::hh_mm_ss hms(duration);
+    int hours = hms.hours().count();
+    int minutes = hms.minutes().count();
+    int seconds = hms.seconds().count();
+    int sub_sec = hms.subseconds().count();
 
     std::array<char, 30> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    unsigned index = duration.seconds() * 2;
+    unsigned index = seconds * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.minutes() * 2;
+    index = minutes * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.hours() * 2;
+    index = hours * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ' ';
-    index = ymd.day * 2;
+    index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = '-';
-    index = ymd.month * 3;
+    index = month * 3;
     *--ptr = months[index + 2];
     *--ptr = months[index + 1];
     *--ptr = months[index];
     *--ptr = '-';
-    index = (ymd.year % 100) * 2;
+    index = (year % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
 
@@ -857,7 +920,7 @@ std::string to_simple_string(const DateTime& time)
     auto frac_sec = duration.fractional_seconds();
     if (frac_sec != 0)
     {
-      std::string fmt = ",%0" + Fmi::to_string(duration.num_fractional_digits()) + "ld";
+      std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
       ret += fmt::sprintf(fmt, frac_sec);
     }
     return ret;
@@ -869,7 +932,7 @@ std::string to_simple_string(const DateTime& time)
 }
 
 // Convert a valid time to form "Fri, 27 Jul 2018 11:26:04 GMT" suitable for HTTP responses
-std::string to_http_string(const DateTime& time)
+std::string to_http_string(const Fmi::date_time::DateTime& time)
 {
   try
   {
@@ -879,7 +942,16 @@ std::string to_http_string(const DateTime& time)
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();
-    boost::gregorian::greg_year_month_day ymd = date.year_month_day();
+
+    const Fmi::DateTimeNS::year_month_day ymd(date.get_impl());
+    const int year = int(ymd.year());
+    const unsigned month = unsigned(ymd.month());
+    const unsigned day = unsigned(ymd.day());
+
+    const Fmi::DateTimeNS::hh_mm_ss hms(duration);
+    int hours = hms.hours().count();
+    int minutes = hms.minutes().count();
+    int seconds = hms.seconds().count();
 
     std::array<char, 30> buffer;
     char* ptr = buffer.data() + buffer.size();
@@ -888,36 +960,36 @@ std::string to_http_string(const DateTime& time)
     *--ptr = 'M';
     *--ptr = 'G';
     *--ptr = ' ';
-    unsigned index = duration.seconds() * 2;
+    unsigned index = seconds * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.minutes() * 2;
+    index = minutes * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.hours() * 2;
+    index = hours * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ' ';
-    index = (ymd.year % 100) * 2;
+    index = (year % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = (ymd.year / 100) * 2;
+    index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ' ';
-    index = ymd.month * 3;
+    index = month * 3;
     *--ptr = months[index + 2];
     *--ptr = months[index + 1];
     *--ptr = months[index];
     *--ptr = ' ';
-    index = ymd.day * 2;
+    index = day * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ' ';
     *--ptr = ',';
-    index = date.day_of_week() * 3;
+    index = date.day_of_week().iso_encoding() * 3;
     *--ptr = weekdays[index + 2];
     *--ptr = weekdays[index + 1];
     *--ptr = weekdays[index];
