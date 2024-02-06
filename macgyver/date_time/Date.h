@@ -17,6 +17,8 @@ namespace Fmi
         class Date : public Base
         {
         public:
+            static constexpr enum Type NOT_A_DATE = NOT_A_DATE_TIME;
+
             Date();
             Date(const Type& type);
             Date(const DateTimeNS::local_days& date);
@@ -27,6 +29,8 @@ namespace Fmi
             Date& operator=(const Date& other);
 
             static const Date epoch;
+
+            inline bool is_not_a_date() const { return is_not_a_date_time(); }
 
             int year() const;
             unsigned month() const;
