@@ -9,8 +9,6 @@
 using namespace std;
 
 using namespace Fmi::Astronomy;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 // ptime, time_duration, not_a_time_date
 
@@ -70,19 +68,9 @@ struct test_data_t
 
 static vector<test_data_t> test_data;
 
-#define ZONESPEC_CVS "/usr/share/smartmet/timezones/date_time_zonespec.csv"
-
-boost::shared_ptr<boost::local_time::tz_database> tz_db;
-
 static Fmi::TimeZonePtr tz_from_region(const string &id)
 {
-  if (tz_db == 0)
-  {
-    tz_db.reset(new boost::local_time::tz_database());
-    tz_db->load_from_file(ZONESPEC_CVS);
-  }
-
-  return tz_db->time_zone_from_region(id);
+  return Fmi::DateTimeNS::locate_zone(id);
 }
 
 static void prepare_test_data()

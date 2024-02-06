@@ -8,7 +8,7 @@
 #include "AsyncTaskGroup.h"
 #include "Exception.h"
 #include "TypeName.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "DateTime.h"
 #include <regression/tframe.h>
 #include <atomic>
 #include <iostream>
@@ -16,7 +16,8 @@
 #include <string>
 #include <thread>
 
-using namespace boost::posix_time;
+
+namespace microsec_clock = Fmi::date_time::MicrosecClock;
 
 namespace AsyncTaskGroupTest
 {

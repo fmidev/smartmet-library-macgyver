@@ -19,7 +19,7 @@
 #include <string>
 #include <thread>
 
-using namespace boost::posix_time;
+namespace microsec_clock = Fmi::date_time::MicrosecClock;
 
 namespace AsyncTaskTest
 {
