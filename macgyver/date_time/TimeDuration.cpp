@@ -311,7 +311,7 @@ struct std::tm Fmi::date_time::to_tm(const date_time::TimeDuration& t)
   return result;
 }
 
-std::string Fmi::date_time::to_string(const TimeDuration& td)
+std::string Fmi::date_time::to_simple_string(const TimeDuration& td)
 {
   return td.as_string();
 }

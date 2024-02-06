@@ -89,7 +89,7 @@ namespace Fmi
 
         struct std::tm to_tm(const TimeDuration& td);
 
-        std::string to_string(const TimeDuration& td);
+        std::string to_simple_string(const TimeDuration& td);
         std::string to_iso_string(const TimeDuration& td);
 
         std::ostream& operator<<(std::ostream& os, const TimeDuration& td);
