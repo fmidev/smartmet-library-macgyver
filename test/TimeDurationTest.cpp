@@ -163,21 +163,21 @@ BOOST_AUTO_TEST_CASE(factory_methods)
 {
     BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: test factory methods");
 
-    using Fmi::date_time::hours;
-    using Fmi::date_time::minutes;
-    using Fmi::date_time::seconds;
-    using Fmi::date_time::milliseconds;
-    using Fmi::date_time::microseconds;
+    using Fmi::date_time::Hours;
+    using Fmi::date_time::Minutes;
+    using Fmi::date_time::Seconds;
+    using Fmi::date_time::Milliseconds;
+    using Fmi::date_time::Microseconds;
 
-    BOOST_CHECK_EQUAL(hours(1).as_string(), "01:00:00");
-    BOOST_CHECK_EQUAL(minutes(1).as_string(), "00:01:00");
-    BOOST_CHECK_EQUAL(seconds(1).as_string(), "00:00:01");
-    BOOST_CHECK_EQUAL(milliseconds(1).as_string(), "00:00:00.001000");
-    BOOST_CHECK_EQUAL(microseconds(1).as_string(), "00:00:00.000001");
+    BOOST_CHECK_EQUAL(Hours(1).as_string(), "01:00:00");
+    BOOST_CHECK_EQUAL(Minutes(1).as_string(), "00:01:00");
+    BOOST_CHECK_EQUAL(Seconds(1).as_string(), "00:00:01");
+    BOOST_CHECK_EQUAL(Milliseconds(1).as_string(), "00:00:00.001000");
+    BOOST_CHECK_EQUAL(Microseconds(1).as_string(), "00:00:00.000001");
 
-    BOOST_CHECK_EQUAL(minutes(1445).as_string(), "24:05:00");
-    BOOST_CHECK_EQUAL(seconds(86401).as_string(), "24:00:01");
+    BOOST_CHECK_EQUAL(Minutes(1445).as_string(), "24:05:00");
+    BOOST_CHECK_EQUAL(Seconds(86401).as_string(), "24:00:01");
 
-    BOOST_CHECK_EQUAL(minutes(-1445).as_string(), "-24:05:00");
-    BOOST_CHECK_EQUAL(seconds(-86401).as_string(), "-24:00:01");
+    BOOST_CHECK_EQUAL(Minutes(-1445).as_string(), "-24:05:00");
+    BOOST_CHECK_EQUAL(Seconds(-86401).as_string(), "-24:00:01");
 }

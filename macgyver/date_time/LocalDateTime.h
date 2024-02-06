@@ -153,5 +153,19 @@ namespace Fmi
         inline TimeDuration hours(int h) { return TimeDuration(detail::duration_t(std::chrono::hours(h))); }
 
         std::ostream& operator << (std::ostream& os, const LocalDateTime& time);
+
+        /**
+         *  Make a local date time from a date and time of day (preffers summer time in case of ambiguity)
+         *
+         *  Returns NOT_A_DATE_TIME if fails to create a valid local date time
+         *
+         *  @param date Date
+         *  @param time Time of day
+         *  @param tz Time zone
+         *  @return Local date time
+         */
+        LocalDateTime make_time(const Fmi::date_time::Date& date, const Fmi::date_time::TimeDuration& time,
+                                const Fmi::date_time::TimeZonePtr& tz);
+
     }
 }

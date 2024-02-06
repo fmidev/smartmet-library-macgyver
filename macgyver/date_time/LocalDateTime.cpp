@@ -370,7 +370,7 @@ TimeDuration Fmi::date_time::operator - (const LocalDateTime& to, const LocalDat
         tz_from->to_sys(from.get_impl().get_local_time());
 
     const auto mks = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
-    return Fmi::date_time::microseconds(mks);
+    return Fmi::date_time::Microseconds(mks);
 }
 
 std::string Fmi::date_time::to_simple_string(const LocalDateTime& time)
@@ -426,4 +426,39 @@ Fmi::date_time::DateTime Fmi::date_time::SecondClock::local_time()
     const LocalDateTime utc_time(Fmi::date_time::SecondClock::universal_time(), TimeZonePtr::utc);
     return utc_time.to_tz(tz).local_time();
     namespace date = Fmi::DateTimeNS;
+}
+
+#include <iostream>
+
+Fmi::date_time::LocalDateTime
+Fmi::date_time::make_time(
+    const Fmi::date_time::Date& date,
+    const Fmi::date_time::TimeDuration& time,
+    const Fmi::date_time::TimeZonePtr& tz)
+{
+    try
+    {
+        detail::time_point_t tp = date.get_impl() + time.get_impl();
+        try
+        {
+            detail::zoned_time_t ldt(tz.zone_ptr(), tp);
+            return LocalDateTime(ldt);
+        }
+        catch (const DateTimeNS::ambiguous_local_time&)
+        {
+            // We have ambigous local time - preffer sommertime
+            detail::zoned_time_t ldt(tz.zone_ptr(), tp, DateTimeNS::choose::earliest);
+            return LocalDateTime(ldt);
+        }
+        //catch (const DateTimeNS::nonexistent_local_time&)
+        //{
+        //    // We have non-existent local time - preffer standard time
+        //    detail::zoned_time_t ldt(tz.zone_ptr(), tp, DateTimeNS::choose::earliest);
+        //    return LocalDateTime(ldt);
+        //}
+    }
+    catch (...)
+    {
+        return LocalDateTime(LocalDateTime::NOT_A_DATE_TIME);
+    }
 }

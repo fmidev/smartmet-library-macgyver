@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(to_simple_string_test_1)
     std::string str = Fmi::date_time::to_simple_string(dt1);
     BOOST_CHECK_EQUAL(str, "2024-Jan-24 12:34:45");
 
-    dt1 += Fmi::date_time::microseconds(123456);
+    dt1 += Fmi::date_time::Microseconds(123456);
     str = Fmi::date_time::to_simple_string(dt1);
     BOOST_CHECK_EQUAL(str, "2024-Jan-24 12:34:45.123456");
 }
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(to_iso_string_test_1)
     std::string str = Fmi::date_time::to_iso_string(dt1);
     BOOST_CHECK_EQUAL(str, "20240124T123445");
 
-    dt1 += Fmi::date_time::microseconds(123456);
+    dt1 += Fmi::date_time::Microseconds(123456);
     str = Fmi::date_time::to_iso_string(dt1);
     BOOST_CHECK_EQUAL(str, "20240124T123445.123456");
 }
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(to_iso_extended_string_test_1)
     std::string str = Fmi::date_time::to_iso_extended_string(dt1);
     BOOST_CHECK_EQUAL(str, "2024-01-24T12:34:45");
 
-    dt1 += Fmi::date_time::microseconds(123456);
+    dt1 += Fmi::date_time::Microseconds(123456);
     str = Fmi::date_time::to_iso_extended_string(dt1);
     BOOST_CHECK_EQUAL(str, "2024-01-24T12:34:45.123456");
 }

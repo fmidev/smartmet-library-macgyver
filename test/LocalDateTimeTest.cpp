@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
 
     const auto s_dt1 = "2024-Jan-01 00:00:01"s;
     const auto s_dt2 = "2025-Jan-01 00:00:01"s;
-    const auto s_inc = "00:17:34.654789"s;
+    const auto s_inc = "00:37:34.654789"s;
 
     TimeZonePtr tz1("Europe/Helsinki");
 
@@ -313,4 +313,34 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
         //std::cout << s1 << " == " << s2 << std::endl;
         BOOST_REQUIRE_EQUAL(s1, s2);
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_make_date)
+{
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: make_date");
+
+    Fmi::date_time::Date date(2024, 10, 27);
+    TimeZonePtr tz1("Europe/Helsinki");
+
+    int num_err = 0;
+    for (int i = 0; i < 33; i++)
+    {
+        Fmi::date_time::LocalDateTime ldt1;
+        const auto time = Fmi::date_time::Minutes(10*i);
+        ldt1 = make_time(date, time, tz1);
+        const std::string exp_abbrev = time.hours() < 4 ? "EEST" : "EET";
+        if (ldt1.abbrev() != exp_abbrev)
+        {
+            if (num_err < 10)
+            {
+                std::cout << "Error: " << ldt1.abbrev() << " != " << exp_abbrev
+                          << " at " << Fmi::date_time::to_iso_extended_string(ldt1)
+                          << std::endl;
+            }
+            num_err++;
+        }
+    }
+    BOOST_REQUIRE_EQUAL(num_err, 0);
 }
