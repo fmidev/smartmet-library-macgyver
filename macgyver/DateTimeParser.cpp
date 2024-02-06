@@ -421,63 +421,6 @@ Fmi::TimeDuration try_parse_iso_duration(const std::string& str)
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Local date time creator which handles DST changes nicely
- */
-// ----------------------------------------------------------------------
-
-Fmi::LocalDateTime make_time(const Fmi::Date& date,
-                                             const Fmi::TimeDuration& duration,
-                                             const Fmi::TimeZonePtr& zone)
-{
-  try
-  {
-    // Handle the normal case
-
-    Fmi::LocalDateTime dt(date, duration, zone, Fmi::LocalDateTime
-    ::NOT_DATE_TIME_ON_ERROR);
-
-    // If the constructed time is not valid, see if we can fix
-    // it using DST rules.
-
-    if (dt.is_not_a_date_time())
-    {
-      // When summer time ends some times will occur twice, and
-      // Boost refuses to choose one for you. We have to make the
-      // pick, and we choose summer time.
-
-      try
-      {
-        const bool summertime = true;
-        dt = bl::local_date_time(date, duration, zone, summertime);
-      }
-      catch (...)
-      {
-        bp::ptime t(date, duration);
-        bp::ptime dst_start = zone->dst_local_start_time(date.year());
-        if (date == dst_start.date())
-        {
-          bp::ptime dst_end = dst_start + zone->dst_offset();
-          if (t >= dst_start && t <= dst_end)
-          {
-            dt = bl::local_date_time(date,
-                                     duration + zone->dst_offset(),
-                                     zone,
-                                     bl::local_date_time::NOT_DATE_TIME_ON_ERROR);
-          }
-          // We'll just return an invalid date if above fails
-        }
-      }
-    }
-    return dt;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Try to parse iso format
  *
  * \param str The string to parse
