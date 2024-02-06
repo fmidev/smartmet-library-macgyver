@@ -59,9 +59,7 @@ DateTime parse_http(const std::string& str);
 // Local date time creator which handles DST changes nicely. Used internally
 // and provided as a convenice function for external parsers
 
-Fmi::LocalDateTime make_time(const Fmi::Date& day,
-                                             const TimeDuration& duration,
-                                             const Fmi::TimeZonePtr& zone);
+using date_time::make_time;
 
 TimeDuration try_parse_duration(const std::string& str);
 TimeDuration try_parse_iso_duration(const std::string& str);
