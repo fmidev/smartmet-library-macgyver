@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
 
     const auto s_dt1 = "2024-Jan-01 00:00:01"s;
     const auto s_dt2 = "2025-Jan-01 00:00:01"s;
-    const auto s_inc = "00:17:34.654789"s;
+    const auto s_inc = "00:37:34.654789"s;
 
     TimeZonePtr tz1("Europe/Helsinki");
 
