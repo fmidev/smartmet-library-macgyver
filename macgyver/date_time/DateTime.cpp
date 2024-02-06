@@ -133,6 +133,13 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::operator-(const TimeDuration&
     return DateTime(m_time_point - duration.get_impl());
 }
 
+Fmi::date_time::TimeDuration Fmi::date_time::DateTime::operator-(const DateTime& other) const
+{
+    if (is_special() || other.is_special())
+        throw Fmi::Exception(BCP, "Cannot subtract special DateTime from DateTime");
+    return TimeDuration(m_time_point - other.get_impl());
+}
+
 Fmi::date_time::Date Fmi::date_time::DateTime::date() const
 {
     if (is_special())
@@ -243,4 +250,9 @@ std::ostream& Fmi::date_time::operator<<(std::ostream& os, const DateTime& dt)
 {
     os << dt.as_string();
     return os;
+}
+
+Fmi::date_time::DateTime Fmi::date_time::from_time_t(long time)
+{
+    return Fmi::date_time::DateTime(Fmi::date_time::Date::epoch.get_impl() + Fmi::detail::seconds_t(time));
 }
