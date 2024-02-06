@@ -47,6 +47,7 @@ namespace Fmi
         using year_t = DateTimeNS::year;
         using ymd_t = DateTimeNS::year_month_day;
 
+        constexpr int periods_per_sec = period_t::num / period_t::den;
         constexpr int periods_per_mks = std::micro::den * period_t::num / period_t::den;
 
         extern const time_point_t epoch_time_point;
@@ -54,11 +55,15 @@ namespace Fmi
         static_assert (periods_per_mks * period_t::den / period_t::num == std::micro::den,
           "INTERNAL ERROR");
 
+        constexpr int count_digits(uint64_t den) { return (den == 0 ? 0 : 1 + count_digits(den / 10)); }
+
     }  // namespace detail
 
     namespace date_time
     {
         using Weekday = DateTimeNS::weekday;
+
+        constexpr unsigned num_fractional_digits = detail::count_digits(detail::periods_per_sec - 1);
 
         class Base
         {
