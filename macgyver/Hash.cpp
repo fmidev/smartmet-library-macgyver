@@ -87,7 +87,7 @@ std::size_t hash_value(const Fmi::LocalDateTime& time)
 
 std::size_t hash_value(const Fmi::TimeZonePtr& zone)
 {
-  return Fmi::hash_value(zone->std_zone_name());
+  return Fmi::hash_value(zone->name());
 }
 
 std::size_t hash_value(bool value)
