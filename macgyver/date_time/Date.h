@@ -26,6 +26,8 @@ namespace Fmi
 
             Date& operator=(const Date& other);
 
+            static const Date epoch;
+
             int year() const;
             unsigned month() const;
             unsigned day() const;

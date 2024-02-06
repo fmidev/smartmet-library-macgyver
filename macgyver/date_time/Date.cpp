@@ -3,10 +3,7 @@
 #include "../Exception.h"
 #include "../StringConversion.h"
 
-namespace
-{
-    const Fmi::date_time::Date epoch(1970, 1, 1);
-}
+const Fmi::date_time::Date Fmi::date_time::Date::epoch(1970, 1, 1);
 
 namespace internal = Fmi::date_time::internal;
 
