@@ -467,7 +467,7 @@ std::string to_simple_string(const TimeDuration& duration)
   try
   {
     if (duration.is_special())
-      return Fmi::date_time::to_string(duration);
+      return Fmi::date_time::to_simple_string(duration);
 
     const detail::hh_mm_ss hms(duration.get_impl());
     bool is_negative = duration.get_impl().count() < 0;
