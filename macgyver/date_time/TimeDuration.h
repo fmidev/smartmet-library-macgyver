@@ -11,6 +11,8 @@ namespace Fmi
         class TimeDuration : public Base
         {
         public:
+            static constexpr enum Type NOT_A_DURATION = NOT_A_DATE_TIME;
+
             TimeDuration() = default;
             TimeDuration(Type type) : Base(type) {}
             TimeDuration(const detail::duration_t& duration);
@@ -20,6 +22,8 @@ namespace Fmi
 
             TimeDuration& operator=(const TimeDuration& other) = default;
 
+            inline bool is_not_a_duration() const { return is_not_a_date_time(); }
+
             int64_t hours() const;
             int64_t minutes() const;
             int64_t seconds() const;
@@ -28,6 +32,7 @@ namespace Fmi
             int64_t total_seconds() const;
             int64_t total_milliseconds() const;
             int64_t total_microseconds() const;
+            inline int64_t total_nanoseconds() const { return 1000L * total_microseconds(); }
 
             constexpr int64_t ticks_per_second() const { return detail::period_t::den; }
 

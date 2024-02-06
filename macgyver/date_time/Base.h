@@ -97,6 +97,11 @@ namespace Fmi
                 return m_type == NEG_INFINITY;
             }
 
+            bool is_infinity() const
+            {
+                return m_type == POS_INFINITY || m_type == NEG_INFINITY;
+            }
+
             bool is_not_a_date_time() const
             {
                 return m_type == NOT_A_DATE_TIME;
