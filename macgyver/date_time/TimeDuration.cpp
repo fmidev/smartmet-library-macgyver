@@ -188,6 +188,32 @@ bool Fmi::date_time::TimeDuration::operator>=(const TimeDuration& other) const
   return m_duration >= other.m_duration;
 }
 
+Fmi::date_time::TimeDuration& Fmi::date_time::TimeDuration::operator+=(const TimeDuration& other)
+{
+  if (is_special() && other.is_special())
+  {
+    *this = TimeDuration(NOT_A_DATE_TIME);
+  }
+  else
+  {
+    m_duration += other.m_duration;
+  }
+  return *this;
+}
+
+Fmi::date_time::TimeDuration& Fmi::date_time::TimeDuration::operator-=(const TimeDuration& other)
+{
+  if (is_special() && other.is_special())
+  {
+    *this = TimeDuration(NOT_A_DATE_TIME);
+  }
+  else
+  {
+    m_duration -= other.m_duration;
+  }
+  return *this;
+}
+
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator+(const TimeDuration& other) const
 {
   if (is_special() && other.is_special())
