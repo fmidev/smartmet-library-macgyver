@@ -47,6 +47,8 @@ namespace Fmi
         using year_t = DateTimeNS::year;
         using ymd_t = DateTimeNS::year_month_day;
 
+        using hh_mm_ss = DateTimeNS::hh_mm_ss<duration_t>;
+
         constexpr int periods_per_sec = period_t::num / period_t::den;
         constexpr int periods_per_mks = std::micro::den * period_t::num / period_t::den;
 
