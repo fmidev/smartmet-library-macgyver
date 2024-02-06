@@ -23,8 +23,8 @@ using namespace Fmi::TimeParser;
 
 namespace
 {
-Fmi::DateTime bad_time(Fmi::DateTime bad_time);
-Fmi::TimeDuration Fmi::TimeDuration()(Fmi::DateTime bad_time);
+Fmi::DateTime bad_date;
+Fmi::TimeDuration bad_duration;
 
 boost::regex iso8601_weeks{"^P(\\d+)W$"};
 boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
