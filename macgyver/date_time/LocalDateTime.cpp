@@ -370,7 +370,7 @@ TimeDuration Fmi::date_time::operator - (const LocalDateTime& to, const LocalDat
         tz_from->to_sys(from.get_impl().get_local_time());
 
     const auto mks = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
-    return Fmi::date_time::microseconds(mks);
+    return Fmi::date_time::Microseconds(mks);
 }
 
 std::string Fmi::date_time::to_simple_string(const LocalDateTime& time)
