@@ -425,7 +425,7 @@ std::string to_iso_string(const TimeDuration& duration)
     if (duration.is_special())
       return Fmi::date_time::to_iso_string(duration);
 
-    DateTimeNS::hh_mm_ss hms(duration);
+    const detail::hh_mm_ss hms(duration.get_impl());
     bool is_negative = duration.get_impl().count() < 0;
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
@@ -435,24 +435,23 @@ std::string to_iso_string(const TimeDuration& duration)
     std::array<char, 8> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    unsigned index = duration.seconds() * 2;
+    unsigned index = seconds * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = duration.minutes() * 2;
+    index = minutes * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    index = duration.hours() * 2;
+    index = hours * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     if (is_negative)
       *--ptr = '-';
     std::string ret(ptr);
 
-    auto frac_sec = duration.fractional_seconds();
-    if (frac_sec != 0)
+    if (sub_sec != 0)
     {
       std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
-      ret += fmt::sprintf(fmt, frac_sec);
+      ret += fmt::sprintf(fmt, sub_sec);
     }
     return ret;
   }
@@ -470,7 +469,7 @@ std::string to_simple_string(const TimeDuration& duration)
     if (duration.is_special())
       return Fmi::date_time::to_string(duration);
 
-    DateTimeNS::hh_mm_ss hms(duration);
+    const detail::hh_mm_ss hms(duration.get_impl());
     bool is_negative = duration.get_impl().count() < 0;
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
@@ -480,16 +479,14 @@ std::string to_simple_string(const TimeDuration& duration)
     std::array<char, 40> buffer;
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
-    unsigned index = duration.seconds() * 2;
+    unsigned index = seconds * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-    index = duration.minutes() * 2;
+    index = minutes * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     *--ptr = ':';
-
-    auto hours = duration.hours();
 
     while (true)
     {
@@ -512,11 +509,10 @@ std::string to_simple_string(const TimeDuration& duration)
       *--ptr = '-';
     std::string ret(ptr);
 
-    auto frac_sec = duration.fractional_seconds();
-    if (frac_sec != 0)
+    if (sub_sec != 0)
     {
       std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
-      ret += fmt::sprintf(fmt, frac_sec);
+      ret += fmt::sprintf(fmt, sub_sec);
     }
     return ret;
   }
@@ -642,23 +638,20 @@ std::string to_iso_extended_string(const Fmi::Date& date)
 }
 
 // Convert to form YYYYMMDDTHHMMSS,fffffffff where T is the date-time separator
-std::string to_iso_string(const DateTime& time)
+std::string to_iso_string(const Fmi::DateTime& time)
 {
   try
   {
     if (time.is_special())
       return Fmi::date_time::to_iso_string(time);
 
-    const auto& date = time.date();
-    const auto& duration = time.time_of_day();
-
-    const DateTimeNS::year_month_day ymd(date.get_impl());
+    const DateTimeNS::year_month_day ymd(time.date().get_impl());
     const int year = int(ymd.year());
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    DateTimeNS::hh_mm_ss hms(duration);
-    bool is_negative = hms.is_negative();
+    const detail::duration_t duration = time.time_of_day().get_impl();
+    const detail::hh_mm_ss hms(duration);
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
     int seconds = hms.seconds().count();
@@ -763,7 +756,7 @@ std::string to_timestamp_string(const DateTime& time)
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    const DateTimeNS::hh_mm_ss hms(duration);
+    const detail::hh_mm_ss hms(duration.get_impl());
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
 
@@ -812,7 +805,7 @@ std::string to_iso_extended_string(const DateTime& time)
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    const DateTimeNS::hh_mm_ss hms(duration);
+    const detail::hh_mm_ss hms(duration.get_impl());
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
     int seconds = hms.seconds().count();
@@ -847,7 +840,7 @@ std::string to_iso_extended_string(const DateTime& time)
     index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    std::string ret(ptr);    int sub_sec = hms.subseconds().count();
+    std::string ret(ptr);
 
     if (sub_sec != 0)
     {
@@ -878,7 +871,7 @@ std::string to_simple_string(const Fmi::date_time::DateTime& time)
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    const Fmi::DateTimeNS::hh_mm_ss hms(duration);
+    const detail::hh_mm_ss hms(duration.get_impl());
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
     int seconds = hms.seconds().count();
@@ -917,11 +910,10 @@ std::string to_simple_string(const Fmi::date_time::DateTime& time)
 
     std::string ret(ptr);
 
-    auto frac_sec = duration.fractional_seconds();
-    if (frac_sec != 0)
+    if (sub_sec != 0)
     {
       std::string fmt = ",%0" + Fmi::to_string(Fmi::date_time::num_fractional_digits) + "ld";
-      ret += fmt::sprintf(fmt, frac_sec);
+      ret += fmt::sprintf(fmt, sub_sec);
     }
     return ret;
   }
@@ -948,7 +940,7 @@ std::string to_http_string(const Fmi::date_time::DateTime& time)
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    const Fmi::DateTimeNS::hh_mm_ss hms(duration);
+    const detail::hh_mm_ss hms(duration.get_impl());
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
     int seconds = hms.seconds().count();
