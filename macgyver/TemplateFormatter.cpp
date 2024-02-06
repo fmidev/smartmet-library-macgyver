@@ -16,7 +16,7 @@
 
 #include <cstdarg>
 #include <cstdio>
-#include <ostream>
+#include <iostream>
 #include <string>
 
 class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
