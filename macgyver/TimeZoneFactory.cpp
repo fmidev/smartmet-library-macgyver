@@ -16,7 +16,6 @@ using namespace std;
 
 namespace Fmi
 {
-static const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
 static const char* default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
 
 // ----------------------------------------------------------------------
@@ -31,7 +30,7 @@ class TimeZoneFactory::Impl
   Impl();
 
   std::unique_ptr<WorldTimeZones> m_Coordinates;
-  std::unique_ptr<boost::local_time::tz_database> m_Regions;
+  const DateTimeNS::tzdb& m_Regions;
 };
 
 // ----------------------------------------------------------------------
@@ -44,12 +43,10 @@ class TimeZoneFactory::Impl
 // ----------------------------------------------------------------------
 
 TimeZoneFactory::Impl::Impl()
+    : m_Regions(DateTimeNS::get_tzdb())
 {
   try
   {
-    m_Regions.reset(new boost::local_time::tz_database());
-    m_Regions->load_from_file(default_regions);
-
     m_Coordinates.reset(new WorldTimeZones(default_coordinates));
   }
   catch (...)
@@ -106,7 +103,7 @@ vector<string> TimeZoneFactory::region_list()
 {
   try
   {
-    return m_Impl->m_Regions->region_list();
+    return date_time::TimeZonePtr::get_region_list();
   }
   catch (...)
   {
@@ -124,9 +121,10 @@ Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_region(const string& id)
 {
   try
   {
-    Fmi::TimeZonePtr ptr = m_Impl->m_Regions->time_zone_from_region(id);
+    Fmi::TimeZonePtr ptr(DateTimeNS::locate_zone(id));
+
     if (!ptr)
-      throw Fmi::Exception(BCP, "TimeZoneFactory does not recognize region '" + id + "'");
+       throw Fmi::Exception(BCP, "TimeZoneFactory does not recognize region '" + id + "'");
 
     return ptr;
   }
@@ -147,12 +145,14 @@ Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_string(const string& desc)
   try
   {
     // Try region name at first
-    Fmi::TimeZonePtr ptr = m_Impl->m_Regions->time_zone_from_region(desc);
-    if (!ptr)
-    {
-      // Region name not found: try POSIX TZ description (may throw exception)
-      ptr.reset(new boost::local_time::posix_time_zone(desc));
-    }
+    Fmi::TimeZonePtr ptr(DateTimeNS::locate_zone(desc));
+
+    // FIXME: POSIX TZ are currently not supported
+    //if (!ptr)
+    //{
+    ////Region name not found: try POSIX TZ description (may throw exception)
+    //ptr.reset(new boost::local_time::posix_time_zone(desc));
+    //}
 
     return ptr;
   }

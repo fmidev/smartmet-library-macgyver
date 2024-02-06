@@ -29,17 +29,15 @@ class TimeZones::Pimple
 {
  public:
   Pimple(const std::string& regionsFile, const std::string& coordinatesFile)
-      : itsRegions(), itsCoordinates(coordinatesFile)
+      : itsRegions(DateTimeNS::get_tzdb()), itsCoordinates(coordinatesFile)
   {
     try
     {
-      itsRegions.load_from_file(regionsFile);
-
       // Create all known timezones once for better access speed later on.
-      auto regions = itsRegions.region_list();
+      auto regions = date_time::TimeZonePtr::get_region_list();
       for (const auto& id : regions)
       {
-        auto ptr = itsRegions.time_zone_from_region(id);
+        date_time::TimeZonePtr ptr(id);
         if (!ptr)
           throw Fmi::Exception(BCP, "Unknown timezone definition")
               .addParameter("Filename", regionsFile)
@@ -53,7 +51,7 @@ class TimeZones::Pimple
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
-  boost::local_time::tz_database itsRegions;
+  const DateTimeNS::tzdb& itsRegions;
   WorldTimeZones itsCoordinates;
   std::unordered_map<std::string, Fmi::TimeZonePtr> itsKnownZones;
 };
@@ -93,7 +91,7 @@ vector<string> TimeZones::region_list() const
 {
   try
   {
-    return itsPimple->itsRegions.region_list();
+    return date_time::TimeZonePtr::get_region_list();
   }
   catch (...)
   {
@@ -137,8 +135,11 @@ Fmi::TimeZonePtr TimeZones::time_zone_from_string(const string& desc) const
     if (value != itsPimple->itsKnownZones.end())
       return value->second;
 
+    // FIXME: POSIX TZ descriptions are not supported currently
     // Try POSIX TZ description (may throw) if region name is unknown
-    return Fmi::TimeZonePtr(new boost::local_time::posix_time_zone(desc));
+    //return Fmi::TimeZonePtr(new boost::local_time::posix_time_zone(desc));
+
+    return Fmi::TimeZonePtr();
   }
   catch (...)
   {
