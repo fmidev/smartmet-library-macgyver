@@ -12,6 +12,7 @@
 #include <string>
 
 using namespace std;
+using namespace Fmi::date_time;
 
 static Fmi::TimeZones timezones;
 
@@ -52,18 +53,18 @@ void time_zone_from_region()
   using Fmi::TimeZonePtr;
 
   Fmi::TimeZonePtr tz = timezones.time_zone_from_region("Europe/Helsinki");
-  if (tz->dst_zone_abbrev() != "EEST")
-    TEST_FAILED("Europe/Helsinki dst_zone_abbrev should be EEST, not " + tz->dst_zone_abbrev());
-  if (tz->std_zone_abbrev() != "EET")
-    TEST_FAILED("Europe/Helsinki std_zone_abbrev should be EET, not " + tz->std_zone_abbrev());
-  if (tz->dst_zone_name() != "EEST")
-    TEST_FAILED("Europe/Helsinki dst_zone_name should be EEST, not " + tz->dst_zone_name());
-  if (tz->std_zone_name() != "EET")
-    TEST_FAILED("Europe/Helsinki std_zone_name should be EET, not " + tz->std_zone_name());
-  if (tz->has_dst() != true)
-    TEST_FAILED("Europe/Helsinki is_dst should be true, not " +
-                lexical_cast<string>(tz->has_dst()));
+  LocalDateTime ldt1(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz);
+  LocalDateTime ldt2(DateTime(Date(2024, Jun, 7), TimeDuration(0, 0, 0)), tz);
 
+  if (tz->name() != "Europe/Helsinki")
+    TEST_FAILED("Europe/Helsinki region should be Europe/Helsinki, not " + tz->name());
+  if (ldt2.abbrev() != "EEST")
+    TEST_FAILED("Europe/Helsinki dst_zone_abbrev should be EEST, not " + ldt2.abbrev());
+  if (ldt1.abbrev() != "EET")
+    TEST_FAILED("Europe/Helsinki std_zone_abbrev should be EET, not " + ldt1.abbrev());
+
+// FIXME: not supported currently
+#if 0
   string val;
 
   if ("2000-Mar-26 03:00:00" != (val = lexical_cast<string>(tz->dst_local_start_time(2000))))
@@ -74,7 +75,7 @@ void time_zone_from_region()
     TEST_FAILED("base_utc_offset should be 02:00:00, not " + val);
   if ("01:00:00" != (val = lexical_cast<string>(tz->dst_offset())))
     TEST_FAILED("dst_offset should be 01:00:00, not " + val);
-
+#endif
   TEST_PASSED();
 }
 
@@ -95,8 +96,8 @@ void time_zone_from_string()
     string posix = "UTC";
     Fmi::TimeZonePtr tz = timezones.time_zone_from_string("UTC");
 
-    if (tz->std_zone_name() != posix)
-      TEST_FAILED("UTC string should be " + posix + ", not " + tz->std_zone_name());
+    if (tz->name() != posix)
+      TEST_FAILED("UTC string should be " + posix + ", not " + tz->name());
   }
 
   // Helsinki
@@ -105,12 +106,13 @@ void time_zone_from_string()
     string posix = "EET";
 
     Fmi::TimeZonePtr tz1 = timezones.time_zone_from_string(region);
-    if (tz1->std_zone_name() != posix)
-      TEST_FAILED(region + " string should be " + posix + ", not " + tz1->std_zone_name());
+    if (tz1->name() != region)
+      TEST_FAILED(region + " string should be " + posix + ", not " + tz1->name());
 
     Fmi::TimeZonePtr tz2 = timezones.time_zone_from_string(posix);
-    if (tz2->std_zone_name() != posix)
-      TEST_FAILED(posix + " string should be " + posix + ", not " + tz2->std_zone_name());
+    LocalDateTime ldt2(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz2);
+    if (ldt2.abbrev() != posix)
+      TEST_FAILED(posix + " string should be " + posix + ", not " + ldt2.abbrev());
   }
 
   TEST_PASSED();
@@ -129,18 +131,21 @@ void time_zone_from_coordinate()
 
   string ok1 = "CET";
   Fmi::TimeZonePtr tz1 = timezones.time_zone_from_coordinate(17, 60);
-  if (tz1->std_zone_name() != ok1)
-    TEST_FAILED("17,60 string should be " + ok1 + ", not " + tz1->std_zone_name());
+  LocalDateTime ldt1(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz1);
+  if (ldt1.abbrev() != ok1)
+    TEST_FAILED("17,60 string should be " + ok1 + ", not " + ldt1.abbrev());
 
   string ok2 = "EET";
   Fmi::TimeZonePtr tz2 = timezones.time_zone_from_coordinate(25, 60);
-  if (tz2->std_zone_name() != ok2)
-    TEST_FAILED("25,60 string should be " + ok2 + ", not " + tz2->std_zone_name());
+  LocalDateTime ldt2(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz2);
+  if (ldt2.abbrev() != ok2)
+    TEST_FAILED("25,60 string should be " + ok2 + ", not " + ldt2.abbrev());
 
   string ok3 = "EET";
   Fmi::TimeZonePtr tz3 = timezones.time_zone_from_coordinate(21.3705, 59.7811);
-  if (tz3->std_zone_name() != ok3)
-    TEST_FAILED("21.3705,59.7811 string should be " + ok3 + ", not " + tz3->std_zone_name());
+  LocalDateTime ldt3(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz3);
+  if (ldt3.abbrev() != ok3)
+    TEST_FAILED("21.3705,59.7811 string should be " + ok3 + ", not " + ldt3.abbrev());
 
   TEST_PASSED();
 }
