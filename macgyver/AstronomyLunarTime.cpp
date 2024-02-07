@@ -503,19 +503,19 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
         }
       }
 #ifdef MYDEBUG
-      std::cout << "nz: " << nz << endl;
-      std::cout << "z1: " << z1 << endl;
-      std::cout << "z2: " << z2 << endl;
-      // std::cout << "xe: " << xe << endl;
-      std::cout << "ye: " << ye << endl;
-      std::cout << "utrise: " << utrise << endl;
-      std::cout << "utset: " << utset << endl;
-      std::cout << "utrise2: " << utrise2 << endl;
-      std::cout << "utset2: " << utset2 << endl;
-      std::cout << "rise: " << rise << endl;
-      std::cout << "rise2: " << rise2 << endl;
-      std::cout << "set: " << set << endl;
-      std::cout << "set2: " << set2 << endl << endl;
+      std::cout << "nz: " << nz << std::endl;
+      std::cout << "z1: " << z1 << std::endl;
+      std::cout << "z2: " << z2 << std::endl;
+      // std::cout << "xe: " << xe << std::endl;
+      std::cout << "ye: " << ye << std::endl;
+      std::cout << "utrise: " << utrise << std::endl;
+      std::cout << "utset: " << utset << std::endl;
+      std::cout << "utrise2: " << utrise2 << std::endl;
+      std::cout << "utset2: " << utset2 << std::endl;
+      std::cout << "rise: " << rise << std::endl;
+      std::cout << "rise2: " << rise2 << std::endl;
+      std::cout << "set: " << set << std::endl;
+      std::cout << "set2: " << set2 << std::endl << std::endl;
 #endif
 
       ym = yp;
@@ -523,20 +523,20 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
     }
 
 #ifdef MYDEBUG
-    cout << "\noffset: " << offset << endl;
-    cout << "rise: " << rise << endl;
-    cout << "rise2: " << rise2 << endl;
-    cout << "utrise: " << utrise << endl;
-    cout << "utrise2: " << utrise2 << endl;
-    cout << "set: " << set << endl;
-    cout << "set2: " << set2 << endl;
-    cout << "utset: " << utset << endl;
-    cout << "utset2: " << utset2 << endl;
-    cout << "julian: " << date << endl;
-    cout << "ldt: " << ldt << endl;
-    cout << "ldt.local_time(): " << ldt.local_time() << endl;
-    cout << "ldt.utc_time(): " << ldt.utc_time() << endl;
-    cout << "ldt_beg: " << ldt_beg << endl;
+    std::cout << "\noffset: " << offset << std::endl;
+    std::cout << "rise: " << rise << std::endl;
+    std::cout << "rise2: " << rise2 << std::endl;
+    std::cout << "utrise: " << utrise << std::endl;
+    std::cout << "utrise2: " << utrise2 << std::endl;
+    std::cout << "set: " << set << std::endl;
+    std::cout << "set2: " << set2 << std::endl;
+    std::cout << "utset: " << utset << std::endl;
+    std::cout << "utset2: " << utset2 << std::endl;
+    std::cout << "julian: " << date << std::endl;
+    std::cout << "ldt: " << ldt << std::endl;
+    std::cout << "ldt.local_time(): " << ldt.local_time() << std::endl;
+    std::cout << "ldt.utc_time(): " << ldt.utc_time() << std::endl;
+    std::cout << "ldt_beg: " << ldt_beg << std::endl;
 #endif
 
     lunar_time_t retval(
