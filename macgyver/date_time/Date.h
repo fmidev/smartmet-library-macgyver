@@ -5,16 +5,24 @@
 
 namespace Fmi
 {
+    namespace literals
+    {
+        using namespace DateTimeNS::literals;
+    }
+
     namespace date_time
     {
+        enum Month
+        {
+            Jan = 1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
+        };
+
         struct YMD
         {
             int year;
             unsigned month;
             unsigned day;
         };
-
-        using namespace DateTimeNS::literals;
 
         class Date : public Base
         {
@@ -25,8 +33,7 @@ namespace Fmi
             Date(const Type& type);
             Date(const DateTimeNS::local_days& date);
             Date(const Date& other);
-            Date(const detail::year_t& year, const detail::month_t& month, const detail::day_t& day);
-            Date(int year, int month, int day);
+            Date(int year, unsigned month, unsigned day);
             virtual ~Date();
 
             Date& operator=(const Date& other);
