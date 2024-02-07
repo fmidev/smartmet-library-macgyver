@@ -20,9 +20,6 @@
 using namespace std;
 using Fmi::TimeZonePtr;
 using namespace Fmi::Astronomy;
-using namespace boost::gregorian;
-using namespace boost::local_time;
-using namespace boost::posix_time;
 using namespace boost;
 
 bool allow_missing_dates(true);

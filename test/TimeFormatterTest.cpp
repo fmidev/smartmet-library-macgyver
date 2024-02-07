@@ -6,6 +6,7 @@
 // ======================================================================
 
 #include "TimeFormatter.h"
+#include <memory>
 #include <regression/tframe.h>
 
 // Protection against conflicts with global functions
@@ -16,12 +17,10 @@ namespace TimeFormatterTest
 void format_timestamp()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::string ok, res;
 
-  boost::shared_ptr<TimeFormatter> tf(TimeFormatter::create("timestamp"));
+  std::shared_ptr<TimeFormatter> tf(TimeFormatter::create("timestamp"));
 
   ok = "200701020500";
   if ((res = tf->format(Fmi::DateTime(Fmi::Date(2007, 1, 2), Fmi::Hours(5) + Fmi::Minutes(0)))) != ok)
@@ -39,12 +38,10 @@ void format_timestamp()
 void format_epoch()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::string ok, res;
 
-  boost::shared_ptr<TimeFormatter> tf(TimeFormatter::create("epoch"));
+  std::shared_ptr<TimeFormatter> tf(TimeFormatter::create("epoch"));
 
   // Fmi::Date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
   ok = "1167714000";
@@ -64,12 +61,10 @@ void format_epoch()
 void format_iso()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::string ok, res;
 
-  boost::shared_ptr<TimeFormatter> tf(TimeFormatter::create("iso"));
+  std::shared_ptr<TimeFormatter> tf(TimeFormatter::create("iso"));
 
   ok = "20070102T050000";
   if ((res = tf->format(Fmi::DateTime(Fmi::Date(2007, 1, 2), Fmi::Hours(5) + Fmi::Minutes(0)))) != ok)
@@ -87,12 +82,10 @@ void format_iso()
 void format_sql()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::string ok, res;
 
-  boost::shared_ptr<TimeFormatter> tf(TimeFormatter::create("sql"));
+  std::shared_ptr<TimeFormatter> tf(TimeFormatter::create("sql"));
 
   ok = "2007-01-02 05:00:00";
   if ((res = tf->format(Fmi::DateTime(Fmi::Date(2007, 1, 2), Fmi::Hours(5) + Fmi::Minutes(0)))) != ok)
@@ -110,12 +103,10 @@ void format_sql()
 void format_xml()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::string ok, res;
 
-  boost::shared_ptr<TimeFormatter> tf(TimeFormatter::create("xml"));
+  std::shared_ptr<TimeFormatter> tf(TimeFormatter::create("xml"));
 
   ok = "2007-01-02T05:00:00";
   if ((res = tf->format(Fmi::DateTime(Fmi::Date(2007, 1, 2), Fmi::Hours(5) + Fmi::Minutes(0)))) != ok)
@@ -133,12 +124,10 @@ void format_xml()
 void format_http()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::string ok, res;
 
-  boost::shared_ptr<TimeFormatter> tf(TimeFormatter::create("http"));
+  std::shared_ptr<TimeFormatter> tf(TimeFormatter::create("http"));
 
   ok = "Sun, 06 Nov 1994 08:49:37 GMT";
   if ((res = tf->format(Fmi::DateTime(Fmi::Date(1994, 11, 6), Fmi::Hours(8) + Fmi::Minutes(49) + Fmi::Seconds(37)))) != ok)

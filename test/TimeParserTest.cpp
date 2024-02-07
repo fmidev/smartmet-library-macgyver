@@ -27,8 +27,6 @@ namespace TimeParserTest
 void parse_timestamp()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::vector<Fmi::Test::TimeParseTest<Fmi::DateTime> > should_pass = {
       {"20070102T0500", Fmi::DateTime(Fmi::Date(2007, 1, 2), Fmi::Hours(5) + Fmi::Minutes(0))},
@@ -52,8 +50,6 @@ void parse_timestamp()
 void parse_epoch()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::vector<Fmi::Test::TimeParseTest<Fmi::DateTime> > should_pass = {
       // Fmi::Date +%s --date="2007-01-02 05:00:00 UTC"  --> 1167714000
@@ -80,8 +76,6 @@ void parse_epoch()
 void parse_iso()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::vector<Fmi::Test::TimeParseTest<Fmi::DateTime> > should_pass = {
       {"20070102T050000", Fmi::DateTime(Fmi::Date(2007, 1, 2), Fmi::Hours(5) + Fmi::Minutes(0))},
@@ -147,8 +141,6 @@ void parse_iso()
 void parse_fmi()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::vector<Fmi::Test::TimeParseTest<Fmi::DateTime> > should_pass = {
       {"200912120500", Fmi::DateTime(Fmi::Date(2009, 12, 12), Fmi::Hours(5) + Fmi::Minutes(0))},
@@ -170,8 +162,6 @@ void parse_fmi()
 void try_parse_iso()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   bool utc;
 
@@ -194,8 +184,6 @@ void try_parse_iso()
 void parse_sql()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   std::vector<Fmi::Test::TimeParseTest<Fmi::DateTime> > should_pass = {
       {"2007-01-02 05:00:00", Fmi::DateTime(Fmi::Date(2007, 1, 2), Fmi::Hours(5) + Fmi::Minutes(0))},
@@ -230,8 +218,6 @@ void parse_sql()
 void parse()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::DateTime res, ok;
 
@@ -325,8 +311,6 @@ void parse()
 void parse_http()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::DateTime res, ok;
 
@@ -353,8 +337,6 @@ void parse_http()
 void try_parse_offset()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   // Now rounded to closest minute
   Fmi::DateTime now = Fmi::SecondClock::universal_time();
@@ -439,8 +421,6 @@ void try_parse_offset()
 void parse_offset()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   // Now rounded to closest minute
   Fmi::DateTime now = Fmi::SecondClock::universal_time();
@@ -513,8 +493,6 @@ void parse_offset()
 void try_parse_duration()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::TimeDuration res;
 
@@ -566,8 +544,6 @@ void try_parse_duration()
 void parse_duration()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::TimeDuration res;
 
@@ -611,8 +587,6 @@ void parse_duration()
 void parse_iso_duration()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::TimeDuration res;
 
@@ -765,9 +739,6 @@ void looks_utc()
 void parse_wintertime()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::local_time;
-  using namespace boost::gregorian;
 
   auto zone = TimeZoneFactory::instance().time_zone_from_string("Europe/Helsinki");
 
@@ -795,9 +766,6 @@ void parse_wintertime()
 void parse_summertime()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::local_time;
-  using namespace boost::gregorian;
 
   auto zone = TimeZoneFactory::instance().time_zone_from_string("Europe/Helsinki");
 
@@ -826,8 +794,6 @@ void parse_summertime()
 void parse_errors()
 {
   using namespace Fmi;
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   try
   {

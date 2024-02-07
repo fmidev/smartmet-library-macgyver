@@ -10,7 +10,8 @@
 #include <thread>
 
 namespace fs = boost::filesystem;
-namespace pt = boost::posix_time;
+
+namespace microsec_clock = Fmi::date_time::MicrosecClock;
 
 namespace DirectoryMonitorTests
 {
@@ -29,7 +30,7 @@ void stopping_test()
       [](Fmi::DirectoryMonitor::Watcher, const fs::path&, const boost::regex&, const std::string&) {
       },
       10);
-  const Fmi::DateTime start = boost::posix_time::microsec_clock::universal_time();
+  const Fmi::DateTime start = microsec_clock::universal_time();
   std::thread t(
       [&monitor, &started, &m, &c]()
       {
@@ -53,7 +54,7 @@ void stopping_test()
   monitor.stop();
   t.join();
 
-  const Fmi::DateTime done = boost::posix_time::microsec_clock::universal_time();
+  const Fmi::DateTime done = microsec_clock::universal_time();
   if ((done - start).total_milliseconds() > 500)
   {
     std::ostringstream tmp;
@@ -104,13 +105,13 @@ void interruption_test()
     }
   }
 
-  const Fmi::DateTime t1 = boost::posix_time::microsec_clock::universal_time();
+  const Fmi::DateTime t1 = microsec_clock::universal_time();
   // std::cout << t1 - start << std::endl;
   task.interrupt();
   bool joined = task.try_join_for(boost::chrono::milliseconds(1000));
   if (joined)
   {
-    const Fmi::DateTime t2 = boost::posix_time::microsec_clock::universal_time();
+    const Fmi::DateTime t2 = microsec_clock::universal_time();
     const auto dt = 1.0e-6 * (t2-t1).total_microseconds();
     if (dt > 0.1)
     {
@@ -119,7 +120,7 @@ void interruption_test()
   }
   else
   {
-    const Fmi::DateTime t2 = boost::posix_time::microsec_clock::universal_time();
+    const Fmi::DateTime t2 = microsec_clock::universal_time();
     const auto dt = 1.0e-6 * (t2-t1).total_microseconds();
     std::cout << "\nWait time " << dt << " seconds is too long" << std::endl;
     TEST_FAILED("Interrupting request did not stop directory monitor");
@@ -145,7 +146,7 @@ void wait_until_ready_test_1()
 		  10);
 
     boost::thread task([&monitor]() { monitor.run(); });
-    t2 = boost::posix_time::microsec_clock::universal_time();
+    t2 = microsec_clock::universal_time();
 
     BOOST_SCOPE_EXIT(&monitor, &task)
       {
@@ -163,7 +164,7 @@ void wait_until_ready_test_1()
 
   // Timing could be extremly unreliable especially in virtual machines
   // (at least under Virtual Box)
-  t3 = boost::posix_time::microsec_clock::universal_time();
+  t3 = microsec_clock::universal_time();
   const auto dt = (t3 - t2).total_milliseconds();
   if (dt > 750) {
     TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 750");
@@ -200,7 +201,7 @@ void wait_until_ready_test_2()
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-    t1 = boost::posix_time::microsec_clock::universal_time();
+    t1 = microsec_clock::universal_time();
 
     bool ok = monitor.wait_until_ready();
     if (!ok)
@@ -209,7 +210,7 @@ void wait_until_ready_test_2()
       }
   } while (false);
 
-  const auto t2 = boost::posix_time::microsec_clock::universal_time();
+  const auto t2 = microsec_clock::universal_time();
   const auto dt = (t2 - t1).total_milliseconds();
   if (dt > 250) {
     TEST_FAILED("Waiting for test end took " + std::to_string(dt) + " millisec > 250");

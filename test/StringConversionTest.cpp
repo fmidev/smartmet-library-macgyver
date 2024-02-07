@@ -5,9 +5,9 @@
  */
 // ======================================================================
 
+#include "DateTime.h"
 #include "Exception.h"
 #include "StringConversion.h"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/optional/optional_io.hpp>
 #include <boost/test/included/unit_test.hpp>
 
@@ -265,13 +265,11 @@ BOOST_AUTO_TEST_CASE(to_string)
 BOOST_AUTO_TEST_CASE(to_iso_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_iso_string()");
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("20020101T010203", Fmi::to_iso_string(time1));
 
-  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + Fmi::Milliseconds(4));
   BOOST_CHECK_EQUAL("20020101T010203,004000", Fmi::to_iso_string(time2));
 
   Fmi::DateTime time3(Fmi::Date(1970, Jan, 1), Fmi::TimeDuration(0, 0, 0));
@@ -285,26 +283,22 @@ BOOST_AUTO_TEST_CASE(to_iso_string)
 BOOST_AUTO_TEST_CASE(to_iso_extended_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_iso_extended_string()");
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("2002-01-01T01:02:03", Fmi::to_iso_extended_string(time1));
 
-  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + Milliseconds(4));
   BOOST_CHECK_EQUAL("2002-01-01T01:02:03,004000", Fmi::to_iso_extended_string(time2));
 }
 
 BOOST_AUTO_TEST_CASE(to_simple_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_simple_string()");
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
-
+  
   Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("2002-Jan-01 01:02:03", Fmi::to_simple_string(time1));
 
-  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + Milliseconds(4));
   BOOST_CHECK_EQUAL("2002-Jan-01 01:02:03,004000", Fmi::to_simple_string(time2));
 
   Fmi::TimeDuration dura1(123, 45, 43);
@@ -320,13 +314,11 @@ BOOST_AUTO_TEST_CASE(to_simple_string)
 BOOST_AUTO_TEST_CASE(to_http_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_http_string()");
-  using namespace boost::posix_time;
-  using namespace boost::gregorian;
 
   Fmi::DateTime time1(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3));
   BOOST_CHECK_EQUAL("Tue, 01 Jan 2002 01:02:03 GMT", Fmi::to_http_string(time1));
 
-  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + milliseconds(4));
+  Fmi::DateTime time2(Fmi::Date(2002, Jan, 1), Fmi::TimeDuration(1, 2, 3) + Milliseconds(4));
   BOOST_CHECK_EQUAL("Tue, 01 Jan 2002 01:02:03 GMT", Fmi::to_http_string(time2));
 }
 
