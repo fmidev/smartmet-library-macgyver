@@ -37,6 +37,8 @@ std::string handle_parse_remainder(std::istringstream& is);
 
 void check_parse_status(std::istream& is, bool assume_eoi, const char* name);
 
+std::string remove_trailing_zeros(const std::string& str);
+
 }  // namespace internal
 }  // namespace date_time
 }  // namespace Fmi

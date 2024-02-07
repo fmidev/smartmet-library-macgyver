@@ -12,7 +12,7 @@ std::string Fmi::date_time::Base::as_string() const
     case NEG_INFINITY:
         return "NINF";
     case NOT_A_DATE_TIME:
-        return "NOT-A-DATE-TIME";
+        return "not-a-date-time";
     default:
         throw Fmi::Exception(BCP, "INTERNAL ERROR: invalid type");
     }
@@ -106,4 +106,20 @@ void Fmi::date_time::internal::check_parse_status(std::istream& is, bool assume_
             throw Fmi::Exception(BCP, message);
         }
     }
+}
+
+std::string Fmi::date_time::internal::remove_trailing_zeros(const std::string& str)
+{
+    if (*str.rbegin() == '0' || *str.rbegin() == '.')
+    {
+        std::string::size_type pos = str.find_last_not_of('.');
+        if (pos != std::string::npos)
+        {
+            if (str[pos] == '.')
+                pos--;
+            return str.substr(0, pos + 1);
+        }
+    }
+
+    return str;
 }
