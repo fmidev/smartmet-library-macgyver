@@ -77,7 +77,8 @@ Fmi::LocalDateTime calcLocalTimeFromJD(JulianTime jd, const Fmi::TimeZonePtr& tz
 {
   try
   {
-    return {calcPtimeFromJD(jd), tz};
+    const Fmi::LocalDateTime utc = { calcPtimeFromJD(jd), Fmi::TimeZonePtr::utc };
+    return tz == Fmi::TimeZonePtr::utc ? utc : utc.to_tz(tz);
   }
   catch (...)
   {

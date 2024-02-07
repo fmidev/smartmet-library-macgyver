@@ -380,7 +380,7 @@ Fmi::LocalDateTime parse_local_date_time(
     utc_ptime += TimeDuration(hour, min, 0, 0);
 
     // return local time
-    Fmi::LocalDateTime ldt_riseset(utc_ptime, ldt.zone());
+    auto ldt_riseset = Fmi::LocalDateTime(utc_ptime, Fmi::TimeZonePtr::utc).to_tz(ldt.zone());
 
     return ldt_riseset;
   }
