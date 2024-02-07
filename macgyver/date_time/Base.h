@@ -49,7 +49,7 @@ namespace Fmi
 
         using hh_mm_ss = DateTimeNS::hh_mm_ss<duration_t>;
 
-        constexpr int periods_per_sec = period_t::num / period_t::den;
+        constexpr int periods_per_sec = period_t::den;
         constexpr int periods_per_mks = std::micro::den * period_t::num / period_t::den;
 
         extern const time_point_t epoch_time_point;
