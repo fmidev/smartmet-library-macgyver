@@ -23,6 +23,7 @@ namespace Fmi
             Date(const Type& type);
             Date(const DateTimeNS::local_days& date);
             Date(const Date& other);
+            Date(const detail::year_t& year, const detail::month_t& month, const detail::day_t& day);
             Date(int year, int month, int day);
             virtual ~Date();
 

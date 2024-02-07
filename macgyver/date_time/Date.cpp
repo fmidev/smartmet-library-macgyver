@@ -16,6 +16,15 @@ Fmi::date_time::Date::Date(const Type& type)
 
 Fmi::date_time::Date::Date(const Date& other) = default;
 
+Fmi::date_time::Date::Date(
+    const detail::year_t& year,
+    const detail::month_t& month,
+    const detail::day_t& day)
+{
+    DateTimeNS::year_month_day ymd(year, month, day);
+    date = DateTimeNS::local_days(ymd);
+}
+
 Fmi::date_time::Date::Date(int year, int month, int day)
     : Base(Date::NORMAL)
 {
