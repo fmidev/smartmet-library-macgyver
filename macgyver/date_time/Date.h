@@ -14,6 +14,8 @@ namespace Fmi
             unsigned day;
         };
 
+        using namespace DateTimeNS::literals;
+
         class Date : public Base
         {
         public:
