@@ -1,5 +1,6 @@
 #include "LocalDateTime.h"
 #include "TimeZonePtr.h"
+#include "Internal.hpp"
 #include "../Exception.h"
 
 using Fmi::date_time::Date;
@@ -223,17 +224,17 @@ std::string LocalDateTime::as_simple_string() const
     switch (type())
     {
         case Type::NORMAL:
-            return Fmi::DateTimeNS::format("%Y-%b-%d %H:%M:%S %Z", ldt);
+            return internal::remove_trailing_zeros(local_time().as_string())
+                    + " " + abbrev();
 
         case Type::NOT_A_DATE_TIME:
-            return "NOT_A_DATE_TIME";
+            return "not-a-date-time";
 
         case Type::NEG_INFINITY:
             return "NEG_INFINITY";
 
         case Type::POS_INFINITY:
             return "POS_INFINITY";
-            break;
 
         default:
             throw Fmi::Exception(BCP, "INTERNAL ERROR: Invalid LocalDateTime type");
@@ -363,14 +364,9 @@ TimeDuration Fmi::date_time::operator - (const LocalDateTime& to, const LocalDat
         return TimeDuration();
     }
 
-    const auto* tz_from = from.get_impl().get_time_zone();
-    const auto* tz_to = to.get_impl().get_time_zone();
-
-    const auto diff = tz_to->to_sys(to.get_impl().get_local_time()) -
-        tz_from->to_sys(from.get_impl().get_local_time());
-
-    const auto mks = std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
-    return Fmi::date_time::Microseconds(mks);
+    const auto sys_from = from.get_impl().get_sys_time();
+    const auto tz_to = to.get_impl().get_sys_time();
+    return Fmi::date_time::TimeDuration(tz_to - sys_from);
 }
 
 std::string Fmi::date_time::to_simple_string(const LocalDateTime& time)
