@@ -3,6 +3,7 @@
 #include "Exception.h"
 #include <atomic>
 #include <functional>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <type_traits>
