@@ -365,8 +365,8 @@ TimeDuration Fmi::date_time::operator - (const LocalDateTime& to, const LocalDat
     }
 
     const auto sys_from = from.get_impl().get_sys_time();
-    const auto tz_to = to.get_impl().get_sys_time();
-    return Fmi::date_time::TimeDuration(tz_to - sys_from);
+    const auto sys_to = to.get_impl().get_sys_time();
+    return Fmi::date_time::TimeDuration(sys_to - sys_from);
 }
 
 std::string Fmi::date_time::to_simple_string(const LocalDateTime& time)
