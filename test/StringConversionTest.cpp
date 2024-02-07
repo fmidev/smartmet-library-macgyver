@@ -12,6 +12,8 @@
 #include <boost/test/included/unit_test.hpp>
 
 using namespace boost::unit_test;
+using namespace Fmi::date_time;
+using namespace Fmi::literals;
 
 test_suite* init_unit_test_suite(int argc, char* argv[])
 {
@@ -262,7 +264,7 @@ BOOST_AUTO_TEST_CASE(to_string)
   BOOST_CHECK_EQUAL("1.235", Fmi::to_string("%.3f", 1.234567890123456789));
 }
 
-BOOST_AUTO_TEST_CASE(to_iso_string)
+BOOST_AUTO_TEST_CASE(conv_to_iso_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_iso_string()");
 
@@ -280,7 +282,7 @@ BOOST_AUTO_TEST_CASE(to_iso_string)
   BOOST_CHECK_EQUAL("20380119T031407", Fmi::to_iso_string(std::time_t(2147483647)));
 }
 
-BOOST_AUTO_TEST_CASE(to_iso_extended_string)
+BOOST_AUTO_TEST_CASE(conv_to_iso_extended_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_iso_extended_string()");
 
@@ -291,7 +293,7 @@ BOOST_AUTO_TEST_CASE(to_iso_extended_string)
   BOOST_CHECK_EQUAL("2002-01-01T01:02:03,004000", Fmi::to_iso_extended_string(time2));
 }
 
-BOOST_AUTO_TEST_CASE(to_simple_string)
+BOOST_AUTO_TEST_CASE(conv_to_simple_string)
 {
   BOOST_TEST_MESSAGE(" + Fmi::to_simple_string()");
   

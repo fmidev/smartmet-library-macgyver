@@ -6,20 +6,21 @@
 // ======================================================================
 
 #include "Astronomy.h"
+#include "LocalDateTime.h"
 #include "TimeZoneFactory.h"
-#include "boost/date_time/posix_time/posix_time.hpp"  //include all types plus i/o
 #include <boost/algorithm/string.hpp>
-#include <boost/date_time/local_time/local_time.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regression/tframe.h>
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
 using namespace std;
 using Fmi::TimeZonePtr;
 using namespace Fmi::Astronomy;
+using namespace Fmi::date_time;
 using namespace boost;
 
 bool allow_missing_dates(true);
