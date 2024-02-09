@@ -93,9 +93,10 @@ void time_zone_from_string()
 
   {
     string posix = "UTC";
+    string expected = "Etc/UTC";
     Fmi::TimeZonePtr tz = Fmi::TimeZoneFactory::instance().time_zone_from_string("UTC");
 
-    if (tz->name() != posix)
+    if (tz->name() != expected)
       TEST_FAILED("UTC string should be " + posix + ", not " + tz->name());
   }
 

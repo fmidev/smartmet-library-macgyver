@@ -21,7 +21,7 @@ namespace g = boost::gregorian;
 #define DEBUG(x) SHOW_EXCEPTIONS(x)
 //#define DEBUG(x) x
 
-const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
+static const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
 
 namespace g = boost::gregorian;
 namespace pt = boost::posix_time;

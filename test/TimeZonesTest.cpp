@@ -94,10 +94,12 @@ void time_zone_from_string()
 
   {
     string posix = "UTC";
+    string expected = "Etc/UTC";
+
     Fmi::TimeZonePtr tz = timezones.time_zone_from_string("UTC");
 
-    if (tz->name() != posix)
-      TEST_FAILED("UTC string should be " + posix + ", not " + tz->name());
+    if (tz->name() != expected)
+      TEST_FAILED("UTC string should be " + expected + ", not " + tz->name());
   }
 
   // Helsinki
