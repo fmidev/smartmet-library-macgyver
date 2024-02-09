@@ -27,7 +27,7 @@ thread_local bool Exception::force_stack_trace = false;
 
 Exception::Exception()
 {
-  timestamp = Fmi::SecondClock::local_time();
+  timestamp = std::time(nullptr);
   line = 0;
 }
 
@@ -89,7 +89,7 @@ Exception::Exception(const char* _filename,
                      std::string _message,
                      Exception* _prevException)
 {
-  timestamp = Fmi::SecondClock::local_time();
+  timestamp = time(nullptr);
   filename = _filename;
   line = _line;
   function = _function;
@@ -134,7 +134,7 @@ Exception::Exception(const char* _filename,
 
 Exception::Exception(const char* _filename, int _line, const char* _function, std::string _message)
 {
-  timestamp = Fmi::SecondClock::local_time();
+  timestamp = std::time(nullptr);
   filename = _filename;
   line = _line;
   function = _function;
@@ -342,6 +342,17 @@ Exception& Exception::disableStackTraceRecursive()
   return *this;
 }
 
+std::string Exception::getTimeStampString() const
+{
+  // Fmi::Exception must not depend on other macgyver parts or external libraries
+  // except for libstdc++ and libc
+  struct std::tm tExpanded;
+  char result[80];
+  localtime_r(&timestamp, &tExpanded);
+  std::strftime(result, sizeof(result), "%Y-%m-%dT%H:%M:%S", &tExpanded);
+  return result;
+}
+
 std::string Exception::getStackTrace() const
 {
   if (!force_stack_trace && mLoggingDisabled)
@@ -353,7 +364,7 @@ std::string Exception::getStackTrace() const
                                 ANSI_BG_RED,
                                 ANSI_FG_WHITE,
                                 ANSI_BOLD_ON,
-                                Fmi::to_iso_string(e->timestamp),
+                                e->getTimeStampString(),
                                 ANSI_BOLD_OFF,
                                 ANSI_FG_DEFAULT,
                                 ANSI_BG_DEFAULT);
@@ -456,7 +467,7 @@ std::string Exception::getHtmlStackTrace() const
 {
   // This is used only when debugging, hence mStackTraceDisabled is ignored
 
-  std::string out = "<html><body><h2>" + Fmi::to_iso_string(timestamp) + "</h2>";
+  std::string out = "<html><body><h2>" + getTimeStampString() + "</h2>";
 
   const Exception* e = this;
   while (e != nullptr)

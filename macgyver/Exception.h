@@ -1,8 +1,7 @@
 #pragma once
 
-#include "DateTime.h"
-
 #include <atomic>
+#include <ctime>
 #include <list>
 #include <memory>
 #include <ostream>
@@ -13,7 +12,7 @@
 
 namespace Fmi
 {
-using ExceptionTimeStamp = DateTime;
+using ExceptionTimeStamp = std::time_t;
 using ParameterVector = std::vector<std::pair<std::string, std::string>>;
 using DetailVector = std::vector<std::string>;
 using DetailList = std::list<std::string>;
@@ -102,6 +101,7 @@ class Exception : public std::exception
 
   ExceptionTimeStamp getTimeStamp() const;
   void setTimeStamp(ExceptionTimeStamp _timestamp);
+  std::string getTimeStampString() const;
 
   std::string getStackTrace() const;
   std::string getHtmlStackTrace() const;
