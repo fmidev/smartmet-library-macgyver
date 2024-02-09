@@ -47,8 +47,8 @@ std::vector<std::string> TimeZonePtr::get_region_list()
         regions.zones.end(),
         std::back_inserter(result),
         [](const DateTimeNS::time_zone& tz) { return tz.name(); });
-#if 0 && !USE_OS_TZDB
-    const auto& links = tzdb.links;
+#if ! USE_OS_TZDB
+    const auto& links = regions.links;
     std::transform(
       links.begin(),
       links.end(),
