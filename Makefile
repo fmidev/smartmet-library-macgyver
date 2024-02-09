@@ -7,6 +7,21 @@ INCDIR = smartmet/$(SUBNAME)
 
 processor := $(shell uname -p)
 
+# Build configuration parameters
+
+# NOTE: USE_OS_TZDB is determined by the presence of the USE_OS_TZDB macro in date_time/Base.h
+#       and its value
+
+# [USE_OS_TZDB==0 only]: If TZDB_REMOTE_API!=0 is defined, the tz.cpp file will try to download latest
+# time zone database version from IANA's ftp server. If TZDB_REMOTE_API==0, the tz.cpp file will assume
+# that the time zone database (source files) is already available
+TZDB_REMOTE_API := 1
+
+# [USE_OS_TZDB==1 and TBZD_REMOTE_API=0 only]: The folder where to downoad the time zone database files
+# Files are downloaded from IANA's server and extracted to the subdirectory "tznames" in the specified
+# directory. Value $(HOME)/Download is used when not specified (empty) or when TZBD_REMOTE_API==0
+TZDB_FOLDER := $(datadir)/smartmet/timezones
+
 # Compiler options
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
@@ -36,8 +51,8 @@ LIBFILE = libsmartmet-$(SUBNAME).so
 
 # Compilation directories
 
-INTERNAL_HDRS = date_time/Internal.h
-SRC_DIRS = $(SUBNAME) $(SUBNAME)/date_time
+INTERNAL_HDRS = date_time/Internal.h date_time/date/tz_private.h
+SRC_DIRS = $(SUBNAME) $(SUBNAME)/date_time $(SUBNAME)/date_time/date
 
 vpath %.cpp $(SRC_DIRS)
 vpath %.h $(SRC_DIRS)
@@ -45,7 +60,7 @@ vpath %.h $(SRC_DIRS)
 # The files to be compiled
 
 SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
-HDRS = $(filter-out $(INTRENAL_HEADERS), $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h)))
+HDRS = $(filter-out $(INTERNAL_HEADERS), $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h)))
 OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
 ifneq ($(words $(sort $(OBJS))),$(words $(OBJS)))
@@ -54,6 +69,29 @@ $(error Source file name conflict detected)
 endif
 
 INCLUDES := -Iinclude $(INCLUDES)
+
+# Detects presence of USE_OS_TZDB in date_time/Base.h to use the correct value
+# when compiling date_time/date/tz.cpp
+USE_OS_TZDB := $(shell awk '/^#define USE_OS_TZDB/ {print $$3}' $(SUBNAME)/date_time/Base.h)
+ifeq ($(USE_OS_TZDB),)
+$(error USE_OS_TZDB not defined in $(SUBNAME)/date_time/Base.h)
+endif
+
+ifeq ($(USE_OS_TZDB),0)
+TZ_CFLAGS = -DUSE_OS_TZDB=0
+ifeq ($(TZDB_REMOTE_API),0)
+TZ_CFLAGS += -DHAS_REMOTE_API=1 -DAUTO_DOWNLOAD=0
+$(info bar)
+else
+$(info foo)
+LIBS += -lcurl
+endif
+ifneq ($(TZDB_FOLDER),)
+TZ_CFLAGS += -DTZ_SOURCE_FOLDER="\"$(datadir)/smartmet/timezones\""
+endif
+else
+TZ_CFLAGS = -DUSE_OS_TZDB=1
+endif
 
 .PHONY: test rpm
 
@@ -114,6 +152,8 @@ objdir:
 obj/%.o : %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
+
+obj/tz.o: CFLAGS += $(TZ_CFLAGS)
 
 ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)
