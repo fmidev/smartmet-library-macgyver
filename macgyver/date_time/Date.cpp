@@ -24,6 +24,19 @@ Fmi::date_time::Date::Date(int year, unsigned month, unsigned day)
     DateTimeNS::day day_(day);
 
     DateTimeNS::year_month_day ymd(year_, month_, day_);
+    if (! ymd.ok())
+    {
+        std::ostringstream err;
+        err << "Invalid date " << DateTimeNS::format("%Y-%m-%d", ymd);
+        if (! ymd.year().ok())
+            err << " (year)";
+        if (! ymd.month().ok())
+            err << " (month)";
+        if (! ymd.day().ok())
+            err << " (day)";
+
+        throw Fmi::Exception(BCP, err.str());
+    }
     date = DateTimeNS::local_days(ymd);
 }
 
