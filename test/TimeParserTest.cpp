@@ -36,7 +36,8 @@ void parse_timestamp()
       {
           "foobar",
           "12345678901",
-          "123456789012"
+          "123456789012",
+          "202402122401"
       };
 
   Fmi::Test::check_time_parse(should_pass, &TimeParser::parse_iso);
@@ -125,8 +126,8 @@ void parse_iso()
       "2015-06-09T16:00:00--0300",  // Should fail to parse double minus in timezone
       "2015-06-09T16:00:00%0300",   // Should fail to parse invalid sign in timezone
       "foobar",
-      "12345678901",
-      "123456789012",
+      "12345678901",                // Too short
+      "123456789012",               // month, day and hour are out of range
       "20160101T00000"  // Should fail to parse 20160101T00000 due to an extra zero (BRAINSTORM-696)
   };
 
