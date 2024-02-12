@@ -34,6 +34,16 @@ boost::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?(T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?)?$"};
 
+void check_hms(unsigned hour, unsigned minute, unsigned second)
+{
+  if (hour > 23)
+    throw Fmi::Exception(BCP, "Invalid hour in time");
+  if (minute > 59)
+    throw Fmi::Exception(BCP, "Invalid minute in time");
+  if (second > 59)
+    throw Fmi::Exception(BCP, "Invalid second in time");
+}
+
 Fmi::DateTime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
 {
   try
@@ -49,6 +59,10 @@ Fmi::DateTime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
       second = *target.second;
 
     Fmi::DateTime ret;
+
+    // Fmi::Date constructor checks the validity of the date - we do not need
+    // to do it here
+    check_hms(hour, minute, second);
 
     // Translate the exception to runtime_error
     try
@@ -87,6 +101,10 @@ Fmi::DateTime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
       second = *target.second;
 
     Fmi::DateTime res;
+
+    // Fmi::Date constructor checks the validity of the date - we do not need
+    // to do it here
+    check_hms(hour, minute, second);
 
     try
     {
