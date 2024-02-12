@@ -15,10 +15,25 @@ namespace Fmi {
       ResponseType expected;
     };
 
+    // Intended to repeat failed parse operations for debugging purposes (user can set a breakpoint here)
+    void repeat_parse(const std::string& s, std::function<Fmi::DateTime(const std::string&)> parser)
+    {
+      try
+      {
+        Fmi::DateTime result;
+        result = parser(s);
+        (void) result;
+      }
+      catch (...)
+      {
+      }
+    }
+
     bool check_time_parse(const std::vector<TimeParseTest<Fmi::DateTime> >& data,
                           std::function<Fmi::DateTime(const std::string&)> parser)
     {
       using Fmi::DateTime;
+
       int num_tests = 0;
       int num_passed = 0;
       for (const auto& item : data) {
@@ -30,6 +45,7 @@ namespace Fmi {
             std::ostringstream msg;
             msg << "ERROR parsing '" << item.src << "': got " << to_simple_string(result)
                 << ", expected " << to_simple_string(item.expected);
+            repeat_parse(item.src, parser);
             TEST_FAILED(msg.str());
           }
           num_passed++;
@@ -38,9 +54,11 @@ namespace Fmi {
         } catch (const std::exception& e) {
           TEST_FAILED("Failed to parse '" + item.src + "': got exception of type "
                       + Fmi::get_type_name(&e) + " - " + e.what());
+          repeat_parse(item.src, parser);
         } catch (...) {
           TEST_FAILED("Failed to parse '" + item.src + "': got exception of type "
                       + Fmi::current_exception_type());
+          repeat_parse(item.src, parser);
         }
       }
       return num_tests == num_passed;
@@ -58,6 +76,7 @@ namespace Fmi {
         try {
           result = parser(item);
           TEST_FAILED("Should fail to parse '" + item + "': got " + to_simple_string(result));
+          repeat_parse(item, parser);
         } catch (tframe::failed&) {
           throw;
         } catch (...) {
