@@ -81,9 +81,7 @@ ifeq ($(USE_OS_TZDB),0)
 TZ_CFLAGS = -DUSE_OS_TZDB=0
 ifeq ($(TZDB_REMOTE_API),0)
 TZ_CFLAGS += -DHAS_REMOTE_API=1 -DAUTO_DOWNLOAD=0
-$(info bar)
 else
-$(info foo)
 LIBS += -lcurl
 endif
 ifneq ($(TZDB_FOLDER),)
