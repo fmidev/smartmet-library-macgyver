@@ -446,12 +446,12 @@ Fmi::date_time::make_time(
             detail::zoned_time_t ldt(tz.zone_ptr(), tp, DateTimeNS::choose::earliest);
             return LocalDateTime(ldt);
         }
-        //catch (const DateTimeNS::nonexistent_local_time&)
-        //{
-        //    // We have non-existent local time - preffer standard time
-        //    detail::zoned_time_t ldt(tz.zone_ptr(), tp, DateTimeNS::choose::earliest);
-        //    return LocalDateTime(ldt);
-        //}
+        catch (const DateTimeNS::nonexistent_local_time&)
+        {
+            // We have non-existent local time - preffer standard time
+            detail::zoned_time_t ldt(tz.zone_ptr(), tp, DateTimeNS::choose::earliest);
+            return LocalDateTime(ldt);
+        }
     }
     catch (...)
     {
