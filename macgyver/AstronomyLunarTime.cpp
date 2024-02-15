@@ -337,7 +337,7 @@ double timezone_offset(const Fmi::LocalDateTime& ldt)
 {
   try
   {
-    return ldt.offset();
+    return ldt.offset().total_seconds() / 3600.0;
   }
   catch (...)
   {
