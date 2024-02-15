@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
     BOOST_CHECK_EQUAL(ldt1.time_of_day().fractional_seconds(), 789000);
 
     BOOST_CHECK(!ldt1.dst_on());
-    BOOST_CHECK_EQUAL(ldt1.offset(), 2.0);
+    BOOST_CHECK_EQUAL(ldt1.offset(), Hours(2));
 
     BOOST_CHECK_EQUAL(ldt1.utc_time(), dtm1 - Fmi::date_time::hours(2));
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
     BOOST_CHECK_EQUAL(ldt2.time_of_day().fractional_seconds(), 789000);
 
     BOOST_CHECK(ldt2.dst_on());
-    BOOST_CHECK_EQUAL(ldt2.offset(), 3.0);
+    BOOST_CHECK_EQUAL(ldt2.offset(), Hours(3));
     BOOST_CHECK_EQUAL(ldt2.utc_time(), dtm2 - Fmi::date_time::hours(3));
 
     //std::cout << ldt2.get_sys_info() << std::endl;
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
     BOOST_CHECK_EQUAL(ldt3.time_of_day().fractional_seconds(), 789000);
 
     BOOST_CHECK(!ldt3.dst_on());
-    BOOST_CHECK_EQUAL(ldt3.offset(), 0.0);
+    BOOST_CHECK_EQUAL(ldt3.offset(), Hours(0));
     BOOST_CHECK_EQUAL(ldt3.utc_time(), ldt3.local_time());
 
     //std::cout << ldt3.get_sys_info() << std::endl;

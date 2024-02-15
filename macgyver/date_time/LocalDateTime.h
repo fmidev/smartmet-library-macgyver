@@ -91,7 +91,7 @@ namespace Fmi
             /**
              *  Get the time zone offset with possible DST offset included
              */
-            double offset() const;
+            TimeDuration offset() const;
 
 #if !USE_OS_TZDB
             /**
@@ -99,7 +99,8 @@ namespace Fmi
              * 
              *   Not supported for OS TZDB database
             */
-            double dst_offset() const;
+
+            TimeDuration dst_offset() const;
 #endif
 
             std::string abbrev() const;
