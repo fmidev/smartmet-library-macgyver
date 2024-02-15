@@ -72,7 +72,7 @@ INCLUDES := -Iinclude $(INCLUDES)
 
 # Detects presence of USE_OS_TZDB in date_time/Base.h to use the correct value
 # when compiling date_time/date/tz.cpp
-USE_OS_TZDB := $(shell awk '/^#define USE_OS_TZDB/ {print $$3}' $(SUBNAME)/date_time/Base.h)
+USE_OS_TZDB := $(shell awk '/^\#define USE_OS_TZDB/ {print $$3}' $(SUBNAME)/date_time/Base.h)
 ifeq ($(USE_OS_TZDB),)
 $(error USE_OS_TZDB not defined in $(SUBNAME)/date_time/Base.h)
 endif
