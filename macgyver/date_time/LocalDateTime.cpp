@@ -171,21 +171,21 @@ bool LocalDateTime::dst_on() const
     return get_sys_info().save != std::chrono::seconds(0);
 }
 
-double LocalDateTime::offset() const
+TimeDuration LocalDateTime::offset() const
 {
     check_no_special(BCP);
     const auto sys_info = get_sys_info();
     const detail::seconds_t off = sys_info.offset;
-    return off.count() / 3600.0;
+    return std::chrono::duration_cast<Fmi::detail::duration_t>(off);
 }
 
 #if !USE_OS_TZDB
-double LocalDateTime::dst_offset() const
+TimeDuration LocalDateTime::dst_offset() const
 {
     check_no_special(BCP);
     const auto sys_info = get_sys_info();
     const detail::seconds_t save = sys_info.save;
-    return save.count() / 3600;
+    return std::chrono::duration_cast<Fmi::detail::duration_t>(save);
 }
 #endif
 
