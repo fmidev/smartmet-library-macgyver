@@ -22,6 +22,14 @@ TZDB_REMOTE_API := 1
 # directory. Value $(HOME)/Download is used when not specified (empty) or when TZBD_REMOTE_API==0
 TZDB_FOLDER := $(datadir)/smartmet/timezones
 
+EXTRA_TZDB_LIBS :=
+ifeq ($(USE_OS_TZDB),0)
+ifeq ($(TZDB_REMOTE_API),1)
+	EXTRA_TZDB_LIBS -lcurl
+endif
+endif
+export EXTRA_TZDB_LIBS
+
 # Compiler options
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
@@ -40,7 +48,7 @@ LIBS += -L$(libdir) \
 	-lboost_system \
 	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
-	-ldate-tz \
+	-ldate-tz $(EXTRA_TZDB_LIBS) \
 	-lpthread -lrt
 
 RPMBUILD_OPT ?=
@@ -72,7 +80,7 @@ INCLUDES := -Iinclude $(INCLUDES)
 
 # Detects presence of USE_OS_TZDB in date_time/Base.h to use the correct value
 # when compiling date_time/date/tz.cpp
-USE_OS_TZDB := $(shell awk '/^\#define USE_OS_TZDB/ {print $$3}' $(SUBNAME)/date_time/Base.h)
+USE_OS_TZDB := $(shell echo '#include "date_time/Base.h"' | $(CXX) -x c++ -E -dD -Imacgyver - | awk '/^#define USE_OS_TZDB/ {print $$3}')
 ifeq ($(USE_OS_TZDB),)
 $(error USE_OS_TZDB not defined in $(SUBNAME)/date_time/Base.h)
 endif
