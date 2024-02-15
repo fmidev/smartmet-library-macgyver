@@ -89,15 +89,18 @@ void time_zone_from_string()
   using boost::lexical_cast;
   using namespace Fmi::date_time;
 
+  Fmi::DateTime time(Date(2024, Jan, 1), TimeDuration(0, 0, 0));
+
   // UTC
 
   {
     string posix = "UTC";
-    string expected = "Etc/UTC";
+    string expected = "UTC";
     Fmi::TimeZonePtr tz = Fmi::TimeZoneFactory::instance().time_zone_from_string("UTC");
 
-    if (tz->name() != expected)
-      TEST_FAILED("UTC string should be " + posix + ", not " + tz->name());
+    Fmi::LocalDateTime ldt(time, tz);
+    if (ldt.abbrev() != expected)
+      TEST_FAILED("UTC string should be " + expected + ", not " + tz->name());
   }
 
   // Helsinki
@@ -110,7 +113,7 @@ void time_zone_from_string()
       TEST_FAILED(region + " string should be " + region + ", not " + tz1->name());
 
     Fmi::TimeZonePtr tz2 = Fmi::TimeZoneFactory::instance().time_zone_from_string(posix);
-    LocalDateTime t01(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz2);
+    LocalDateTime t01(time, tz2);
     if (t01.abbrev() != posix)
       TEST_FAILED(posix + " string should be " + posix + ", not " + t01.abbrev());
   }

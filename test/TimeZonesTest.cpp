@@ -92,13 +92,16 @@ void time_zone_from_string()
 
   // UTC
 
+  Fmi::DateTime time(Date(2024, Jan, 1), TimeDuration(0, 0, 0));
+
   {
     string posix = "UTC";
-    string expected = "Etc/UTC";
+    string expected = "UTC";
 
     Fmi::TimeZonePtr tz = timezones.time_zone_from_string("UTC");
+    Fmi::LocalDateTime ldt(time, tz);
 
-    if (tz->name() != expected)
+    if (ldt.abbrev() != expected)
       TEST_FAILED("UTC string should be " + expected + ", not " + tz->name());
   }
 
@@ -112,7 +115,7 @@ void time_zone_from_string()
       TEST_FAILED(region + " string should be " + posix + ", not " + tz1->name());
 
     Fmi::TimeZonePtr tz2 = timezones.time_zone_from_string(posix);
-    LocalDateTime ldt2(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz2);
+    LocalDateTime ldt2(time, tz2);
     if (ldt2.abbrev() != posix)
       TEST_FAILED(posix + " string should be " + posix + ", not " + ldt2.abbrev());
   }
