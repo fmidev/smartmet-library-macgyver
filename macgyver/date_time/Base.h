@@ -13,7 +13,11 @@ namespace Fmi
 #else
 // Use date library
 
+#ifdef _WIN32
 #define USE_OS_TZDB 0
+#else
+#define USE_OS_TZDB 1
+#endif
 
 // Time zone, zoned_time etc is NOT supported in libstdc++ or support is incomplete
 //      => use date library
