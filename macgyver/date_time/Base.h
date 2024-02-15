@@ -4,14 +4,20 @@
 #include <sstream>
 #include <string>
 
+#define FMI_NEW_DATE_TIME 1
+
 #if __cplusplus >= 202002L && defined(__cpp_lib_chrono) && __cpp_lib_chrono >= 201907L
 // Time zone, zoned_time etc is supported in libstdc++ => use it
+
+#define FMI_CALENDAR_USES_STD_CHRONO 1
 namespace Fmi
 {
   namespace DateTimeNS = std::chrono;
 }
 #else
 // Use date library
+
+#define FMI_CALENDAR_USES_STD_CHRONO 0
 
 #ifdef _WIN32
 #define USE_OS_TZDB 0

@@ -38,22 +38,29 @@ const Fmi::DateTimeNS::time_zone* Fmi::date_time::TimeZonePtr::zone_ptr() const
     return tz;
 }
 
+#include <iostream>
+
 std::vector<std::string> TimeZonePtr::get_region_list()
 {
+    // It seems that Date library (date/tz.cpp) returns additional
+    // wrong names beginning with lowercase letter when using the system TZDB.
+    // Require that all names must begin with an uppercase letter.
     std::vector<std::string> result;
     const DateTimeNS::tzdb& regions = DateTimeNS::get_tzdb();
-    std::transform(
-        regions.zones.begin(),
-        regions.zones.end(),
-        std::back_inserter(result),
-        [](const DateTimeNS::time_zone& tz) { return tz.name(); });
-#if ! USE_OS_TZDB
-    const auto& links = regions.links;
-    std::transform(
-      links.begin(),
-      links.end(),
-      std::back_inserter(result),
-      [](const DateTimeNS::time_zone_link& tzl) { return tzl.name(); });
+    for (const auto& r : regions.zones)
+    {
+        const std::string& name = r.name();
+        if (!name.empty() && std::isupper(*name.begin()))
+            result.push_back(name);
+    }
+
+#if (defined(USE_OS_TZDB) && USE_OS_TZDB==0) || FMI_CALENDAR_USES_STD_CHRONO
+    for (const auto& link : regions.links)
+    {
+        const std::string& name = link.name();
+        if (!name.empty() && std::isupper(*name.begin()))
+            result.push_back(name);
+    }
 #endif
     std::sort(result.begin(), result.end());
     return result;
