@@ -84,6 +84,14 @@ namespace Fmi
             LocalDateTime to_tz(const TimeZonePtr& zone) const;
 
             /**
+             * Compatibility wrapper
+            */
+           inline LocalDateTime local_time_in(const TimeZonePtr& zone) const
+           {
+                return to_tz(zone);
+           }
+
+            /**
              *  Query whether DST is in effect
             */
             bool dst_on() const;
