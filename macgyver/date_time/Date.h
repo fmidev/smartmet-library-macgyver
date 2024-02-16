@@ -7,7 +7,7 @@ namespace Fmi
 {
     namespace literals
     {
-        using namespace DateTimeNS::literals;
+        using namespace date::literals;
     }
 
     namespace date_time
@@ -31,7 +31,7 @@ namespace Fmi
 
             Date();
             Date(const Type& type);
-            Date(const DateTimeNS::local_days& date);
+            Date(const date::local_days& date);
             Date(const Date& other);
             Date(int year, unsigned month, unsigned day);
             virtual ~Date();
@@ -75,7 +75,7 @@ namespace Fmi
             Date& operator+=(int num_days);
             Date& operator-=(int num_days);
 
-            const DateTimeNS::local_days& get_impl() const { return date; };
+            const date::local_days& get_impl() const { return date; };
 
             /**
              * @brief  Parse time duration from string.
@@ -90,7 +90,7 @@ namespace Fmi
             void assert_special() const;
 
         private:
-            DateTimeNS::local_days date;
+            date::local_days date;
         };
 
         Date date_from_string(const std::string& str);

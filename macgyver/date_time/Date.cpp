@@ -19,15 +19,15 @@ Fmi::date_time::Date::Date(const Date& other) = default;
 Fmi::date_time::Date::Date(int year, unsigned month, unsigned day)
     : Base(Date::NORMAL)
 {
-    DateTimeNS::year year_(year);
-    DateTimeNS::month month_(month);
-    DateTimeNS::day day_(day);
+    date::year year_(year);
+    date::month month_(month);
+    date::day day_(day);
 
-    DateTimeNS::year_month_day ymd(year_, month_, day_);
+    date::year_month_day ymd(year_, month_, day_);
     if (! ymd.ok())
     {
         std::ostringstream err;
-        err << "Invalid date " << DateTimeNS::format("%Y-%m-%d", ymd);
+        err << "Invalid date " << date::format("%Y-%m-%d", ymd);
         if (! ymd.year().ok())
             err << " (year)";
         if (! ymd.month().ok())
@@ -37,10 +37,10 @@ Fmi::date_time::Date::Date(int year, unsigned month, unsigned day)
 
         throw Fmi::Exception(BCP, err.str());
     }
-    date = DateTimeNS::local_days(ymd);
+    date = date::local_days(ymd);
 }
 
-Fmi::date_time::Date::Date(const Fmi::DateTimeNS::local_days& date)
+Fmi::date_time::Date::Date(const date::local_days& date)
     : Base(Date::NORMAL)
     , date(date)
 {
@@ -53,28 +53,28 @@ Fmi::date_time::Date& Fmi::date_time::Date::operator=(const Date& other) = defau
 int Fmi::date_time::Date::year() const
 {
     assert_special();
-    DateTimeNS::year_month_day ymd(date);
+    date::year_month_day ymd(date);
     return int(ymd.year());
 }
 
 unsigned Fmi::date_time::Date::month() const
 {
     assert_special();
-    DateTimeNS::year_month_day ymd(date);
+    date::year_month_day ymd(date);
     return unsigned(ymd.month());
 }
 
 unsigned Fmi::date_time::Date::day() const
 {
     assert_special();
-    DateTimeNS::year_month_day ymd(date);
+    date::year_month_day ymd(date);
     return unsigned(ymd.day());
 }
 
 Fmi::date_time::YMD Fmi::date_time::Date::year_month_day() const
 {
     assert_special();
-    DateTimeNS::year_month_day ymd(date);
+    date::year_month_day ymd(date);
 
     YMD result;
     result.year = int(ymd.year());
@@ -86,33 +86,33 @@ Fmi::date_time::YMD Fmi::date_time::Date::year_month_day() const
 Fmi::date_time::Weekday Fmi::date_time::Date::day_of_week() const
 {
     assert_special();
-    DateTimeNS::weekday wd(date);
+    date::weekday wd(date);
     return wd;
 }
 
 int Fmi::date_time::Date::day_of_year() const
 {
     assert_special();
-    DateTimeNS::year year_(year());
-    DateTimeNS::month month_(1);
-    DateTimeNS::day day_(1);
-    DateTimeNS::year_month_day ymd(year_, month_, day_);
-    return (date - DateTimeNS::local_days(ymd)).count() + 1;
+    date::year year_(year());
+    date::month month_(1);
+    date::day day_(1);
+    date::year_month_day ymd(year_, month_, day_);
+    return (date - date::local_days(ymd)).count() + 1;
 }
 
 Fmi::date_time::Date Fmi::date_time::Date::end_of_month() const
 {
     assert_special();
     const auto ymd1 = year_month_day();
-    DateTimeNS::year year_(ymd1.year);
-    DateTimeNS::month month_(ymd1.month);
-    DateTimeNS::day day_(1);
+    date::year year_(ymd1.year);
+    date::month month_(ymd1.month);
+    date::day day_(1);
 
-    DateTimeNS::year_month ym(year_, month_);
-    ym += DateTimeNS::months(1);
-    DateTimeNS::year_month_day ymd(ym.year(), ym.month(), day_);
-    DateTimeNS::local_days tmp(ymd);
-    tmp -= DateTimeNS::days(1);
+    date::year_month ym(year_, month_);
+    ym += date::months(1);
+    date::year_month_day ymd(ym.year(), ym.month(), day_);
+    date::local_days tmp(ymd);
+    tmp -= date::days(1);
     return Date(tmp);
 }
 
@@ -131,8 +131,6 @@ long Fmi::date_time::Date::julian_day() const
 int Fmi::date_time::Date::week_number() const
 {
     // Code ported from boost (boost/date_time/gregorian/gregorian_calendar.ipp)
-    namespace ndt = DateTimeNS;
-
     const auto ymd = year_month_day();
     const auto jBegin = Date(ymd.year, 1, 1).julian_day();
     const auto jCurr = julian_day();
@@ -146,7 +144,7 @@ int Fmi::date_time::Date::week_number() const
 
     if (week == 53)
     {
-        if ((day == 6) || ((day == 5) && (ndt::year(ymd.year).is_leap())))
+        if ((day == 6) || ((day == 5) && (date::year(ymd.year).is_leap())))
         {
             return static_cast<int>(week);
         }
@@ -166,7 +164,7 @@ int Fmi::date_time::Date::week_number() const
     else
     {
         throw Fmi::Exception(BCP, "INTERNAL ERROR: failed to get"
-            " week number for " + ndt::format("%Y-%m-%d", date));
+            " week number for " + date::format("%Y-%m-%d", date));
     }
 }
 
@@ -175,7 +173,7 @@ std::string Fmi::date_time::Date::as_string() const
     if (is_special())
         return Fmi::date_time::Base::as_string();
 
-    const std::string str = DateTimeNS::format("%Y-%b-%d", date);
+    const std::string str = date::format("%Y-%b-%d", date);
     return str;
 }
 
@@ -184,7 +182,7 @@ std::string Fmi::date_time::Date::as_iso_string() const
     if (is_special())
         return Fmi::date_time::Base::as_string();
 
-    const std::string str = DateTimeNS::format("%Y%m%d", date);
+    const std::string str = date::format("%Y%m%d", date);
     return str;
 }
 
@@ -193,7 +191,7 @@ std::string Fmi::date_time::Date::as_iso_extended_string() const
     if (is_special())
         return Fmi::date_time::Base::as_string();
 
-    const std::string str = DateTimeNS::format("%Y-%m-%d", date);
+    const std::string str = date::format("%Y-%m-%d", date);
     return str;
 }
 
@@ -236,16 +234,16 @@ bool Fmi::date_time::Date::operator>=(const Date& other) const
 Fmi::date_time::Date Fmi::date_time::Date::operator+(int num_days) const
 {
     assert_special();
-    DateTimeNS::local_days tmp(date);
-    tmp += DateTimeNS::days(num_days);
+    date::local_days tmp(date);
+    tmp += date::days(num_days);
     return Date(tmp);
 }
 
 Fmi::date_time::Date Fmi::date_time::Date::operator-(int num_days) const
 {
     assert_special();
-    DateTimeNS::local_days tmp(date);
-    tmp -= DateTimeNS::days(num_days);
+    date::local_days tmp(date);
+    tmp -= date::days(num_days);
     return Date(tmp);
 }
 
@@ -258,14 +256,14 @@ int Fmi::date_time::Date::operator-(const Date& other) const
 Fmi::date_time::Date& Fmi::date_time::Date::operator+=(int num_days)
 {
     assert_special();
-    date += DateTimeNS::days(num_days);
+    date += date::days(num_days);
     return *this;
 }
 
 Fmi::date_time::Date& Fmi::date_time::Date::operator-=(int num_days)
 {
     assert_special();
-    date -= DateTimeNS::days(num_days);
+    date -= date::days(num_days);
     return *this;
 }
 
@@ -300,19 +298,19 @@ std::ostream& Fmi::date_time::operator<<(std::ostream& os, const Fmi::date_time:
 Fmi::date_time::Date 
 Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
 {
-    DateTimeNS::year year;
-    DateTimeNS::month month;
-    DateTimeNS::day day;
+    date::year year;
+    date::month month;
+    date::day day;
     try {
         const internal::StreamExceptionState save(is, std::ios::failbit | std::ios::badbit);
-        is >> DateTimeNS::parse("%Y-", year);
+        is >> date::parse("%Y-", year);
         if (!is.eof() && std::isdigit(is.peek())) {
-            is >> DateTimeNS::parse("%m-", month);
+            is >> date::parse("%m-", month);
         } else {
             is.exceptions(std::ios::failbit | std::ios::badbit);
-            is >> DateTimeNS::parse("%b-", month);
+            is >> date::parse("%b-", month);
         }
-        is >> DateTimeNS::parse("%d", day);
+        is >> date::parse("%d", day);
     } catch (...) {
         is.clear();
         auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string");
@@ -321,8 +319,8 @@ Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
 
     internal::check_parse_status(is, assume_eoi, "date");
 
-    DateTimeNS::year_month_day ymd(year, month, day);
-    DateTimeNS::local_days l_days(ymd);
+    date::year_month_day ymd(year, month, day);
+    date::local_days l_days(ymd);
     return Fmi::date_time::Date(l_days);
 }
 

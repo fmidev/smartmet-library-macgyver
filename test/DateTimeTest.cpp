@@ -120,31 +120,31 @@ BOOST_AUTO_TEST_CASE(time_from_string_test_1)
 
     Fmi::date_time::DateTime dt1 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str1));
     Fmi::date_time::DateTime dt1e = make_datetime(2024, 1, 24, 12, 34, 45);
-    //std::cout << str1 << " -> " << Fmi::DateTimeNS::format(fmt, dt1.get_impl()) << std::endl;
+    //std::cout << str1 << " -> " << date::format(fmt, dt1.get_impl()) << std::endl;
 
     Fmi::date_time::DateTime dt2 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str2));
     Fmi::date_time::DateTime dt2e = make_datetime(2024, 1, 24, 12, 34, 45, 123456);
-    //std::cout << str2 << " -> " << Fmi::DateTimeNS::format(fmt, dt2.get_impl()) << std::endl;
+    //std::cout << str2 << " -> " << date::format(fmt, dt2.get_impl()) << std::endl;
 
     Fmi::date_time::DateTime dt3 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str3));
     Fmi::date_time::DateTime dt3e = make_datetime(2024, 1, 24, 12, 34, 45, 123456);
-    //std::cout << str3 << " -> " << Fmi::DateTimeNS::format(fmt, dt3.get_impl()) << std::endl;
+    //std::cout << str3 << " -> " << date::format(fmt, dt3.get_impl()) << std::endl;
 
     Fmi::date_time::DateTime dt4 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str4));
     Fmi::date_time::DateTime dt4e = make_datetime(2024, 1, 24, 12, 34, 45, 123456);
-    //std::cout << str4 << " -> " << Fmi::DateTimeNS::format(fmt, dt4.get_impl()) << std::endl;
+    //std::cout << str4 << " -> " << date::format(fmt, dt4.get_impl()) << std::endl;
 
     Fmi::date_time::DateTime dt5 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str5));
     Fmi::date_time::DateTime dt5e = make_datetime(2024, 1, 31, 10, 17, 0);
-    //std::cout << str5 << " -> " << Fmi::DateTimeNS::format(fmt, dt5.get_impl()) << std::endl;
+    //std::cout << str5 << " -> " << date::format(fmt, dt5.get_impl()) << std::endl;
 
     Fmi::date_time::DateTime dt6 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str6));
     Fmi::date_time::DateTime dt6e = make_datetime(2024, 1, 31, 10, 17, 0);
-    //std::cout << str6 << " -> " << Fmi::DateTimeNS::format(fmt, dt6.get_impl()) << std::endl;
+    //std::cout << str6 << " -> " << date::format(fmt, dt6.get_impl()) << std::endl;
 
     Fmi::date_time::DateTime dt7 = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(str7));
     Fmi::date_time::DateTime dt7e = make_datetime(2024, 1, 31, 0, 0, 0);
-    //std::cout << str7 << " -> " << Fmi::DateTimeNS::format(fmt, dt7.get_impl()) << std::endl;
+    //std::cout << str7 << " -> " << date::format(fmt, dt7.get_impl()) << std::endl;
 
     BOOST_CHECK_EQUAL(dt1, dt1e);
     BOOST_CHECK_EQUAL(dt2, dt2e);

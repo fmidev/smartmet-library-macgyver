@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(week_number)
         if (j1 != j2) {
             num_err++;
             std::cout << "    "
-                      << Fmi::DateTimeNS::format("%Y-%m-%d", d2.get_impl()) << " " << j1 << " != " << j2
+                      << date::format("%Y-%m-%d", d2.get_impl()) << " " << j1 << " != " << j2
                       << std::endl;;
         }
         d1 += g::days(1);

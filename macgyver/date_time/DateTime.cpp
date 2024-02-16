@@ -144,14 +144,14 @@ Fmi::date_time::Date Fmi::date_time::DateTime::date() const
 {
     if (is_special())
         throw Fmi::Exception(BCP, "Cannot get date from special DateTime");
-    return Date(DateTimeNS::floor<detail::days_t>(m_time_point));
+    return Date(date::floor<detail::days_t>(m_time_point));
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::DateTime::time_of_day() const
 {
     if (is_special())
         throw Fmi::Exception(BCP, "Cannot get time of day from special DateTime");
-    return TimeDuration(m_time_point - DateTimeNS::floor<detail::days_t>(m_time_point));
+    return TimeDuration(m_time_point - date::floor<detail::days_t>(m_time_point));
 }
 
 std::string Fmi::date_time::DateTime::as_string() const
