@@ -29,7 +29,7 @@ class TimeZones::Pimple
 {
  public:
   Pimple(const std::string& regionsFile, const std::string& coordinatesFile)
-      : itsRegions(DateTimeNS::get_tzdb()), itsCoordinates(coordinatesFile)
+      : itsRegions(date::get_tzdb()), itsCoordinates(coordinatesFile)
   {
     try
     {
@@ -51,7 +51,7 @@ class TimeZones::Pimple
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
     }
   }
-  const DateTimeNS::tzdb& itsRegions;
+  const date::tzdb& itsRegions;
   WorldTimeZones itsCoordinates;
   std::unordered_map<std::string, Fmi::TimeZonePtr> itsKnownZones;
 };

@@ -30,7 +30,7 @@ class TimeZoneFactory::Impl
   Impl();
 
   std::unique_ptr<WorldTimeZones> m_Coordinates;
-  const DateTimeNS::tzdb& m_Regions;
+  const date::tzdb& m_Regions;
 };
 
 // ----------------------------------------------------------------------
@@ -43,7 +43,7 @@ class TimeZoneFactory::Impl
 // ----------------------------------------------------------------------
 
 TimeZoneFactory::Impl::Impl()
-    : m_Regions(DateTimeNS::get_tzdb())
+    : m_Regions(date::get_tzdb())
 {
   try
   {
@@ -121,7 +121,7 @@ Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_region(const string& id)
 {
   try
   {
-    Fmi::TimeZonePtr ptr(DateTimeNS::locate_zone(id));
+    Fmi::TimeZonePtr ptr(date::locate_zone(id));
 
     if (!ptr)
        throw Fmi::Exception(BCP, "TimeZoneFactory does not recognize region '" + id + "'");
@@ -145,7 +145,7 @@ Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_string(const string& desc)
   try
   {
     // Try region name at first
-    Fmi::TimeZonePtr ptr(DateTimeNS::locate_zone(desc));
+    Fmi::TimeZonePtr ptr(date::locate_zone(desc));
 
     // FIXME: POSIX TZ are currently not supported
     //if (!ptr)

@@ -237,7 +237,7 @@ std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
 
     if (!occ_ldt.is_not_a_date_time())
     {
-      ss << DateTimeNS::format("%H%M", occ_ldt.local_time().get_impl());
+      ss << date::format("%H%M", occ_ldt.local_time().get_impl());
     }
 
     return ss.str();

@@ -70,7 +70,7 @@ static vector<test_data_t> test_data;
 
 static Fmi::TimeZonePtr tz_from_region(const string &id)
 {
-  return Fmi::DateTimeNS::locate_zone(id);
+  return date::locate_zone(id);
 }
 
 static void prepare_test_data()
