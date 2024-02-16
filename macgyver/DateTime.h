@@ -27,12 +27,16 @@ namespace Fmi
 #else
 
 #include "date_time/DateTime.h"
+#include "date_time/TimeDuration.h"
+#include "date_time/Date.h"
+#include "date_time/TimePeriod.h"
 
 namespace Fmi
 {
     using Date = date_time::Date;
     using TimeDuration = date_time::TimeDuration;
     using DateTime = date_time::DateTime;
+    using TimePeriod = date_time::TimePeriod<date_time::DateTime>;
 
     using date_time::Seconds;
     using date_time::Minutes;

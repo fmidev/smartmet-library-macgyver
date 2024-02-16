@@ -1,0 +1,132 @@
+// ======================================================================
+/*!
+ * \file
+ * \brief Regression tests for date_time::TimePeriod<>
+ * */
+// ======================================================================
+
+#include "DateTime.h"
+#include "LocalDateTime.h"
+#include <boost/test/included/unit_test.hpp>
+#include <iostream>
+
+using namespace Fmi::date_time;
+using namespace boost::unit_test;
+
+test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  const char* name = "Fmi::date_time::TimePeriod<> tester";
+  // unit_test_log.set_threshold_level(log_test_units);
+  unit_test_log.set_threshold_level(log_messages);
+  framework::master_test_suite().p_name.value = name;
+  BOOST_TEST_MESSAGE("");
+  BOOST_TEST_MESSAGE(name);
+  BOOST_TEST_MESSAGE(std::string(std::strlen(name), '='));
+  std::setlocale(LC_ALL, "C");
+  return NULL;
+}
+
+namespace
+{
+    struct TestValues1
+    {
+        DateTime dt1;
+        DateTime dt2;
+        DateTime dt3;
+        DateTime dt4;
+
+        TestValues1()
+            : dt1(Date(2024, 2, 16), TimeDuration(0, 0, 0)),
+              dt2(Date(2024, 2, 16), TimeDuration(1, 0, 0)),
+              dt3(Date(2024, 2, 16), TimeDuration(2, 0, 0)),
+              dt4(Date(2024, 2, 16), TimeDuration(3, 0, 0))
+        {
+        }
+    };
+}
+
+BOOST_AUTO_TEST_CASE(test_1)
+{
+    TestValues1 test;
+
+    TimePeriod<DateTime> period12(test.dt1, test.dt2);
+    BOOST_CHECK_EQUAL(period12.start(), test.dt1);
+    BOOST_CHECK_EQUAL(period12.end(), test.dt2);
+    BOOST_CHECK_EQUAL(period12.length(), Hours(1));
+    BOOST_CHECK(!period12.is_null());
+
+    TimePeriod<DateTime> bad_period(test.dt2, test.dt1);
+    BOOST_CHECK(bad_period.is_null());
+
+    BOOST_CHECK(period12.contains(test.dt1));
+    BOOST_CHECK(period12.contains(test.dt1 + Minutes(30)));
+    BOOST_CHECK(period12.contains(test.dt2));
+    BOOST_CHECK(!period12.contains(test.dt3));
+    BOOST_CHECK(!period12.contains(test.dt1 - TimeDuration(1, 0, 0)));
+    BOOST_CHECK(!period12.contains(test.dt2 + Minutes(30)));
+}
+
+BOOST_AUTO_TEST_CASE(local_time_interval_test_1)
+{
+    TestValues1 test;
+    TimeZonePtr tz1("Europe/Helsinki");
+    TimeZonePtr tz2("UTC");
+    TimeZonePtr tz3("Asia/Katmandu");
+
+    LocalDateTime ldt1(test.dt1, tz1);
+    LocalDateTime ldt2 = LocalDateTime(test.dt2, tz1).to_tz(tz2);
+
+    TimePeriod<LocalDateTime> period12(ldt1, ldt2);
+    BOOST_CHECK(!period12.is_null());
+    BOOST_CHECK_EQUAL(period12.start(), ldt1);
+    BOOST_CHECK_EQUAL(period12.end(), ldt2);
+    BOOST_CHECK_EQUAL(period12.length(), Hours(1));
+
+    BOOST_CHECK(period12.contains((ldt1 + Minutes(30)).to_tz(tz3)));
+}
+
+BOOST_AUTO_TEST_CASE(shift_interval)
+{
+    TestValues1 test;
+    
+    TimePeriod<DateTime> period(test.dt1, test.dt2);
+    period.shift(Minutes(30));
+    BOOST_CHECK_EQUAL(period.start(), test.dt1 + Minutes(30));
+    BOOST_CHECK_EQUAL(period.end(), test.dt2 + Minutes(30));
+}      
+
+BOOST_AUTO_TEST_CASE(expand_interval)
+{
+    TestValues1 test;
+    
+    TimePeriod<DateTime> period(test.dt1, test.dt2);
+    period.expand(Minutes(30));
+    BOOST_CHECK_EQUAL(period.start(), test.dt1 - Minutes(30));
+    BOOST_CHECK_EQUAL(period.end(), test.dt2 + Minutes(30));
+}
+
+BOOST_AUTO_TEST_CASE(contains_period)
+{
+    TestValues1 test;
+    
+    TimePeriod<DateTime> period1(test.dt1, test.dt2);
+    TimePeriod<DateTime> period2(test.dt1 + Minutes(10), test.dt2 - Minutes(10));
+    TimePeriod<DateTime> period3(test.dt1 + Minutes(90), test.dt2 + Minutes(120));
+
+    BOOST_CHECK(period1.contains(period2));
+    BOOST_CHECK(!period2.contains(period1));
+    BOOST_CHECK(!period1.contains(period3)); 
+}
+
+BOOST_AUTO_TEST_CASE(intersects)
+{
+    TestValues1 test;
+    
+    TimePeriod<DateTime> period1(test.dt1, test.dt2);
+    TimePeriod<DateTime> period2(test.dt1 + Minutes(10), test.dt2 - Minutes(10));
+    TimePeriod<DateTime> period3(test.dt1 + Minutes(90), test.dt2 + Minutes(120));
+
+    BOOST_CHECK(period1.intersects(period2));
+    BOOST_CHECK(period2.intersects(period1));
+    BOOST_CHECK(!period1.intersects(period3));
+}
