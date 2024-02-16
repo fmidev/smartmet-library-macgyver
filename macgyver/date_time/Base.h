@@ -10,10 +10,8 @@
 // Time zone, zoned_time etc is supported in libstdc++ => use it
 
 #define FMI_CALENDAR_USES_STD_CHRONO 1
-namespace Fmi
-{
-  namespace DateTimeNS = std::chrono;
-}
+namespace date = std::chrono;
+
 #else
 // Use date library
 
@@ -28,10 +26,6 @@ namespace Fmi
 #include "date/date.h"
 #include "date/tz.h"
 
-namespace Fmi
-{
-  namespace DateTimeNS = date;
-}
 #endif
 
 namespace Fmi
@@ -41,21 +35,21 @@ namespace Fmi
 
         using period_t = std::micro;
         using duration_t = std::chrono::duration<int64_t, std::micro>;
-        using time_point_t = std::chrono::time_point<DateTimeNS::local_t, duration_t>;
+        using time_point_t = std::chrono::time_point<date::local_t, duration_t>;
         using sys_time_t = std::chrono::time_point<std::chrono::system_clock>;
-        using zoned_time_t = DateTimeNS::zoned_time<duration_t>;
+        using zoned_time_t = date::zoned_time<duration_t>;
         using microsec_t = std::chrono::duration<int64_t, std::micro>;
         using millisec_t = std::chrono::duration<int64_t, std::milli>;
         using seconds_t = std::chrono::duration<int64_t, std::ratio<1, 1> >;
         using minutes_t = std::chrono::duration<int64_t, std::ratio<60, 1> >;
         using hours_t = std::chrono::duration<int64_t, std::ratio<3600, 1> >;
         using days_t = std::chrono::duration<int64_t, std::ratio<86400, 1> >;
-        using day_t = DateTimeNS::day;
-        using month_t = DateTimeNS::month;
-        using year_t = DateTimeNS::year;
-        using ymd_t = DateTimeNS::year_month_day;
+        using day_t = date::day;
+        using month_t = date::month;
+        using year_t = date::year;
+        using ymd_t = date::year_month_day;
 
-        using hh_mm_ss = DateTimeNS::hh_mm_ss<duration_t>;
+        using hh_mm_ss = date::hh_mm_ss<duration_t>;
 
         constexpr int periods_per_sec = period_t::den;
         constexpr int periods_per_mks = std::micro::den * period_t::num / period_t::den;
@@ -71,7 +65,7 @@ namespace Fmi
 
     namespace date_time
     {
-        using Weekday = DateTimeNS::weekday;
+        using Weekday = date::weekday;
 
         constexpr unsigned num_fractional_digits = detail::count_digits(detail::periods_per_sec - 1);
 

@@ -86,7 +86,7 @@ LocalDateTime::LocalDateTime(
 
 LocalDateTime::LocalDateTime(
     const detail::time_point_t& time,
-    const DateTimeNS::time_zone* tz,
+    const date::time_zone* tz,
     enum ErrorHandling err_handling)
 
     : Base(NORMAL)
@@ -195,7 +195,7 @@ std::string LocalDateTime::abbrev() const
     return get_sys_info().abbrev;
 }
 
-Fmi::DateTimeNS::sys_info LocalDateTime::get_sys_info() const
+date::sys_info LocalDateTime::get_sys_info() const
 {
     check_no_special(BCP);
     return ldt.get_info();
@@ -247,7 +247,7 @@ std::string LocalDateTime::as_iso_string() const
     const std::string s_dt = local_time().as_iso_string();
     const std::string s_zone = zone().zone_ptr() == TimeZonePtr::utc.zone_ptr()
         ? "Z"
-        : Fmi::DateTimeNS::format("%z", ldt);
+        : date::format("%z", ldt);
     return s_dt + s_zone;        
 }
 
@@ -257,7 +257,7 @@ std::string LocalDateTime::as_iso_extended_string() const
     const std::string s_dt = local_time().as_iso_extended_string();
     const std::string s_zone = zone().zone_ptr() == TimeZonePtr::utc.zone_ptr()
         ? "Z"
-        : Fmi::DateTimeNS::format("%Ez", ldt);
+        : date::format("%Ez", ldt);
     return s_dt + s_zone;        
 }
 
@@ -277,7 +277,7 @@ void LocalDateTime::advance(const TimeDuration& td)
     const detail::duration_t adv =
         std::chrono::duration_cast<detail::duration_t>(
             std::chrono::microseconds(mks));
-    const DateTimeNS::time_zone* tz = get_impl().get_time_zone();
+    const date::time_zone* tz = get_impl().get_time_zone();
     const auto& impl = get_impl();
     const auto sys_pt = impl.get_sys_time();
     const auto new_sys_pt = sys_pt + adv;
@@ -393,15 +393,14 @@ std::ostream& Fmi::date_time::operator << (std::ostream& os, const LocalDateTime
 Fmi::date_time::DateTime Fmi::date_time::MicrosecClock::universal_time()
 {
     const auto tmp =
-        Fmi::DateTimeNS::clock_time_conversion<Fmi::DateTimeNS::local_t, DateTimeNS::utc_clock>()
-            (DateTimeNS::utc_clock::now());
+        date::clock_time_conversion<date::local_t, date::utc_clock>()
+            (date::utc_clock::now());
     return std::chrono::time_point_cast<Fmi::detail::microsec_t>(tmp);
 }
 
 Fmi::date_time::DateTime Fmi::date_time::MicrosecClock::local_time()
 {
-    namespace date = Fmi::DateTimeNS;
-    TimeZonePtr tz(DateTimeNS::current_zone());
+    TimeZonePtr tz(date::current_zone());
     const LocalDateTime utc_time(Fmi::date_time::MicrosecClock::universal_time(), TimeZonePtr::utc);
     return utc_time.to_tz(tz).local_time();
 }
@@ -409,19 +408,17 @@ Fmi::date_time::DateTime Fmi::date_time::MicrosecClock::local_time()
 Fmi::date_time::DateTime Fmi::date_time::SecondClock::universal_time()
 {
     const auto tmp =
-        Fmi::DateTimeNS::clock_time_conversion<Fmi::DateTimeNS::local_t, DateTimeNS::utc_clock>()
-            (DateTimeNS::utc_clock::now());
+        date::clock_time_conversion<date::local_t, date::utc_clock>()
+            (date::utc_clock::now());
     return std::chrono::time_point_cast<Fmi::detail::microsec_t>(
         std::chrono::time_point_cast<Fmi::detail::seconds_t>(tmp));
 }
 
 Fmi::date_time::DateTime Fmi::date_time::SecondClock::local_time()
 {
-    namespace date = Fmi::DateTimeNS;
-    TimeZonePtr tz(DateTimeNS::current_zone());
+    TimeZonePtr tz(date::current_zone());
     const LocalDateTime utc_time(Fmi::date_time::SecondClock::universal_time(), TimeZonePtr::utc);
     return utc_time.to_tz(tz).local_time();
-    namespace date = Fmi::DateTimeNS;
 }
 
 #include <iostream>
@@ -440,16 +437,16 @@ Fmi::date_time::make_time(
             detail::zoned_time_t ldt(tz.zone_ptr(), tp);
             return LocalDateTime(ldt);
         }
-        catch (const DateTimeNS::ambiguous_local_time&)
+        catch (const date::ambiguous_local_time&)
         {
             // We have ambigous local time - preffer sommertime
-            detail::zoned_time_t ldt(tz.zone_ptr(), tp, DateTimeNS::choose::earliest);
+            detail::zoned_time_t ldt(tz.zone_ptr(), tp, date::choose::earliest);
             return LocalDateTime(ldt);
         }
-        catch (const DateTimeNS::nonexistent_local_time&)
+        catch (const date::nonexistent_local_time&)
         {
             // We have non-existent local time - preffer standard time
-            detail::zoned_time_t ldt(tz.zone_ptr(), tp, DateTimeNS::choose::earliest);
+            detail::zoned_time_t ldt(tz.zone_ptr(), tp, date::choose::earliest);
             return LocalDateTime(ldt);
         }
     }

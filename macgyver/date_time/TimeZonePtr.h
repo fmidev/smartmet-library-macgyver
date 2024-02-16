@@ -13,7 +13,7 @@ namespace Fmi
 
         class TimeZonePtr
         {
-            const DateTimeNS::time_zone* tz;
+            const date::time_zone* tz;
 
         public:
             /**
@@ -30,9 +30,9 @@ namespace Fmi
             TimeZonePtr(const std::string& name);
 
             /**
-             * Construct a time zone pointer from a embeded DateTimeNS::time_zone pointer
+             * Construct a time zone pointer from a embeded date::time_zone pointer
             */
-            TimeZonePtr(const DateTimeNS::time_zone* tz) noexcept;
+            TimeZonePtr(const date::time_zone* tz) noexcept;
 
             /**
              * Copy constructor.
@@ -59,19 +59,19 @@ namespace Fmi
             inline bool operator != (const TimeZonePtr& other) const noexcept { return tz != other.tz; }
 
             /**
-             * Get the emdeded DateTimeNS::time_zone pointer.
+             * Get the emdeded date::time_zone pointer.
             */
-            inline operator const DateTimeNS::time_zone * () const { return zone_ptr(); }
+            inline operator const date::time_zone * () const { return zone_ptr(); }
 
             /**
-             * Get the emdeded DateTimeNS::time_zone pointer.
+             * Get the emdeded date::time_zone pointer.
             */
-            inline const DateTimeNS::time_zone * operator -> () const { return zone_ptr(); }
+            inline const date::time_zone * operator -> () const { return zone_ptr(); }
 
             /**
-             * Get the emdeded DateTimeNS::time_zone pointer.
+             * Get the emdeded date::time_zone pointer.
             */
-            const DateTimeNS::time_zone* zone_ptr() const;
+            const date::time_zone* zone_ptr() const;
 
             /**
              * Get the time zone name.

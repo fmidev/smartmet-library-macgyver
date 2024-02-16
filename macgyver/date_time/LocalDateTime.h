@@ -43,7 +43,7 @@ namespace Fmi
 
             LocalDateTime(
                 const detail::time_point_t& time,
-                const DateTimeNS::time_zone* tz,
+                const date::time_zone* tz,
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
           
             virtual ~LocalDateTime();
@@ -51,7 +51,7 @@ namespace Fmi
             LocalDateTime& operator = (const LocalDateTime& src);
 
             /**
-             * Get the internal representation of the time point (DateTimeNS::zoned_time)
+             * Get the internal representation of the time point (date::zoned_time)
              */
             const detail::zoned_time_t& get_impl() const;
 
@@ -105,7 +105,7 @@ namespace Fmi
 
             std::string abbrev() const;
 
-            DateTimeNS::sys_info get_sys_info() const;
+            date::sys_info get_sys_info() const;
 
             std::pair<detail::sys_time_t, detail::sys_time_t> get_dst_times() const;
 

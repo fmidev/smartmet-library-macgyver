@@ -13,13 +13,13 @@ TimeZonePtr::TimeZonePtr() noexcept
 }
 
 TimeZonePtr::TimeZonePtr(const std::string& name)
-    : tz(DateTimeNS::locate_zone(name))
+    : tz(date::locate_zone(name))
 {
     if (!tz)
         throw Fmi::Exception(BCP, "Time zone '" + name + "' not found");
 }
 
-TimeZonePtr::TimeZonePtr(const DateTimeNS::time_zone* tz) noexcept
+TimeZonePtr::TimeZonePtr(const date::time_zone* tz) noexcept
     : tz(tz)
 {
 }
@@ -30,7 +30,7 @@ TimeZonePtr::~TimeZonePtr() = default;
 
 TimeZonePtr& Fmi::date_time::TimeZonePtr::operator = (const TimeZonePtr& src) noexcept = default;
 
-const Fmi::DateTimeNS::time_zone* Fmi::date_time::TimeZonePtr::zone_ptr() const
+const date::time_zone* Fmi::date_time::TimeZonePtr::zone_ptr() const
 {
     if (!tz)
         throw Fmi::Exception(BCP, "Time zone not set");
@@ -46,7 +46,7 @@ std::vector<std::string> TimeZonePtr::get_region_list()
     // wrong names beginning with lowercase letter when using the system TZDB.
     // Require that all names must begin with an uppercase letter.
     std::vector<std::string> result;
-    const Fmi::DateTimeNS::tzdb& regions = Fmi::DateTimeNS::get_tzdb();
+    const date::tzdb& regions = date::get_tzdb();
     for (const auto& r : regions.zones)
     {
         const std::string& name = r.name();
@@ -69,7 +69,7 @@ std::vector<std::string> TimeZonePtr::get_region_list()
 std::map<std::string, TimeZonePtr> TimeZonePtr::get_region_map(bool debug)
 {
     std::map<std::string, TimeZonePtr> result;
-    const Fmi::DateTimeNS::tzdb& regions = Fmi::DateTimeNS::get_tzdb();
+    const date::tzdb& regions = date::get_tzdb();
     for (const auto& r : regions.zones)
     {
         const std::string& name = r.name();
