@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base.h"
+#include <map>
 #include <string>
 #include <vector>
 
@@ -93,8 +94,7 @@ namespace Fmi
             */
             static std::vector<std::string> get_region_list();
 
-        private:
-            //DateTimeNS::local_info get_info(const LocalDateTime& time);
-         };
+            static std::map<std::string, TimeZonePtr> get_region_map(bool debug = false);
+        };
     }
 }

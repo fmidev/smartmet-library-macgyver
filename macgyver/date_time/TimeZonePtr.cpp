@@ -46,7 +46,7 @@ std::vector<std::string> TimeZonePtr::get_region_list()
     // wrong names beginning with lowercase letter when using the system TZDB.
     // Require that all names must begin with an uppercase letter.
     std::vector<std::string> result;
-    const DateTimeNS::tzdb& regions = DateTimeNS::get_tzdb();
+    const Fmi::DateTimeNS::tzdb& regions = Fmi::DateTimeNS::get_tzdb();
     for (const auto& r : regions.zones)
     {
         const std::string& name = r.name();
@@ -54,7 +54,7 @@ std::vector<std::string> TimeZonePtr::get_region_list()
             result.push_back(name);
     }
 
-#if (defined(USE_OS_TZDB) && USE_OS_TZDB==0) || FMI_CALENDAR_USES_STD_CHRONO
+#if (defined(USE_OS_TZDB) && USE_OS_TZDB==0) || defined(FMI_CALENDAR_USES_STD_CHRONO)
     for (const auto& link : regions.links)
     {
         const std::string& name = link.name();
@@ -66,7 +66,44 @@ std::vector<std::string> TimeZonePtr::get_region_list()
     return result;
 }
 
+std::map<std::string, TimeZonePtr> TimeZonePtr::get_region_map(bool debug)
+{
+    std::map<std::string, TimeZonePtr> result;
+    const Fmi::DateTimeNS::tzdb& regions = Fmi::DateTimeNS::get_tzdb();
+    for (const auto& r : regions.zones)
+    {
+        const std::string& name = r.name();
+        if (!name.empty() && std::isupper(*name.begin()))
+        {
+            result[name] = &r;
+            if (debug)
+                std::cout << "TIME ZONE: " << name << std::endl;
+        }
+    }
 
-
-
-
+#if (defined(USE_OS_TZDB) && USE_OS_TZDB==0) || defined(FMI_CALENDAR_USES_STD_CHRONO)
+    for (const auto& link : regions.links)
+    {
+        const std::string& name = link.name();
+        if (!name.empty() && std::isupper(*name.begin()))
+        {
+            try
+            {
+                const std::string& target = link.target();
+                const TimeZonePtr tz(result.at(target));
+                result[name] = tz;
+                if (debug)
+                    std::cout << "TIME ZONE LINK: " << name << " -> " << target << std::endl;
+            }
+            catch(const std::exception& e)
+            {
+                Fmi::Exception err(BCP, "Failed to resolve time zone link");
+                err.addParameter("name", name);
+                err.addParameter("target", link.target());
+                throw err;
+            }
+        }
+    }
+#endif
+    return result;
+}
