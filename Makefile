@@ -53,6 +53,43 @@ LIBS += -L$(libdir) \
 
 RPMBUILD_OPT ?=
 
+# Configuration
+
+# Detects used impementation of calendar classes implementation and
+# its parameters from macgyver/date_time/Base.h.
+TZ_CFLAGS :=
+EXTRA_SRC_DIRS :=
+CALENDAR_USES_STD_CHRONO := $(shell echo -e '\043include "date_time/Base.h"' | $(CXX) -x c++ -E -dD -Imacgyver - | awk '/^\043define FMI_CALENDAR_USES_STD_CHRONO/ {print $$3}')
+ifeq ($(CALENDAR_USES_STD_CHRONO),1)
+	# std::chrono::implemantation is sufficient and is beinf used
+	$(info CALENDAR_USES_STD_CHRONO: $(CALENDAR_USES_STD_CHRONO))
+else
+	# std::chrono::implemantation is too old -> use Date libraray
+	EXTRA_SRC_DIRS := $(SUBNAME)/date_time/date
+	USE_OS_TZDB := $(shell echo -e '\043include "date_time/Base.h"' | $(CXX) -x c++ -E -dD -Imacgyver - | awk '/^\043define USE_OS_TZDB/ {print $$3}')
+    $(info USE_OS_TZDB: $(USE_OS_TZDB))
+    $(info EXTRA_SRC_DIRS: $(EXTRA_SRC_DIRS))
+
+	ifeq ($(USE_OS_TZDB),)
+		$(error USE_OS_TZDB not defined in $(SUBNAME)/date_time/Base.h)
+	endif
+
+	ifeq ($(USE_OS_TZDB),0)
+		# USE_OS_TZDB is defined and its value is 0
+		TZ_CFLAGS := -DUSE_OS_TZDB=0
+		ifeq ($(TZDB_REMOTE_API),0)
+			TZ_CFLAGS += -DHAS_REMOTE_API=0 -DAUTO_DOWNLOAD=0
+			ifneq ($(TZDB_FOLDER),)
+				TZ_CFLAGS += -DTZ_SOURCE_FOLDER="\"$(TZDB_FOLDER)\""
+			endif
+		else
+			LIBS += -lcurl
+		endif
+	else # USE_OS_TZDB is defined and its value is not 0
+		TZ_CFLAGS := -DUSE_OS_TZDB=1
+	endif
+endif
+
 # What to install
 
 LIBFILE = libsmartmet-$(SUBNAME).so
@@ -60,7 +97,7 @@ LIBFILE = libsmartmet-$(SUBNAME).so
 # Compilation directories
 
 INTERNAL_HDRS = date_time/Internal.h date_time/date/tz_private.h
-SRC_DIRS = $(SUBNAME) $(SUBNAME)/date_time $(SUBNAME)/date_time/date
+SRC_DIRS = $(SUBNAME) $(SUBNAME)/date_time $(EXTRA_SRC_DIRS)
 
 vpath %.cpp $(SRC_DIRS)
 vpath %.h $(SRC_DIRS)
@@ -78,12 +115,6 @@ endif
 
 INCLUDES := -Iinclude $(INCLUDES)
 
-# Detects presence of USE_OS_TZDB in date_time/Base.h to use the correct value
-# when compiling date_time/date/tz.cpp
-USE_OS_TZDB := $(shell echo '#include "date_time/Base.h"' | $(CXX) -x c++ -E -dD -Imacgyver - | awk '/^#define USE_OS_TZDB/ {print $$3}')
-ifeq ($(USE_OS_TZDB),)
-$(error USE_OS_TZDB not defined in $(SUBNAME)/date_time/Base.h)
-endif
 
 ifeq ($(USE_OS_TZDB),0)
 TZ_CFLAGS = -DUSE_OS_TZDB=0

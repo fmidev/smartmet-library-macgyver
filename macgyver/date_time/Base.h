@@ -17,8 +17,6 @@ namespace Fmi
 #else
 // Use date library
 
-#define FMI_CALENDAR_USES_STD_CHRONO 0
-
 #ifdef _WIN32
 #define USE_OS_TZDB 0
 #else
