@@ -75,6 +75,11 @@ namespace Fmi
             Date& operator+=(int num_days);
             Date& operator-=(int num_days);
 
+            Date operator ++(int);
+            Date& operator++();
+            Date operator --(int);
+            Date& operator--();
+
             const date::local_days& get_impl() const { return date; };
 
             /**
@@ -85,6 +90,8 @@ namespace Fmi
              * @return Parsed date.
             */
             static Date from_stream(std::istream& src, bool assume_eoi = true);
+
+            static Date from_time_t(std::time_t time);
 
         private:
             void assert_special() const;

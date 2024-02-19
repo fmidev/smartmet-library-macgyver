@@ -255,12 +255,48 @@ Fmi::date_time::Date& Fmi::date_time::Date::operator-=(int num_days)
     return *this;
 }
 
+Fmi::date_time::Date Fmi::date_time::Date::operator ++ (int)
+{
+    assert_special();
+    date::local_days tmp(date);
+    date += date::days(1);
+    return Date(tmp);
+}
+
+Fmi::date_time::Date Fmi::date_time::Date::operator -- (int)
+{
+    assert_special();
+    date::local_days tmp(date);
+    date -= date::days(1);
+    return Date(tmp);
+}
+
+Fmi::date_time::Date& Fmi::date_time::Date::operator ++ ()
+{
+    assert_special();
+    date += date::days(1);
+    return *this;
+}
+
+Fmi::date_time::Date& Fmi::date_time::Date::operator -- ()
+{
+    assert_special();
+    date -= date::days(1);
+    return *this;
+}
+
+Fmi::date_time::Date Fmi::date_time::Date::from_time_t(std::time_t time)
+{
+    const Fmi::detail::seconds_t seconds(time);
+    const Fmi::detail::days_t days = std::chrono::duration_cast<Fmi::detail::days_t>(seconds);
+    return epoch + days.count();
+}
+
 void Fmi::date_time::Date::assert_special() const
 {
     if (is_special())
         throw Fmi::Exception(BCP, "Operation not supported for special values");
 }
-
 
 std::string Fmi::date_time::to_simple_string(const Fmi::date_time::Date& date)
 {
