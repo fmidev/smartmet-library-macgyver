@@ -113,9 +113,9 @@ namespace Fmi
 
             inline Type type() const { return m_type; }
 
-        protected:
             std::string as_string() const;
 
+        protected:
             inline void set_type(Type type)
             {
                 m_type = type;
