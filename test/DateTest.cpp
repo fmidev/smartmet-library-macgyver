@@ -229,6 +229,8 @@ BOOST_AUTO_TEST_CASE(format_for_locale)
     Fmi::date_time::Date d1(2024, 2, 19);
     const char* fmt = "%Y %B %d";
 
+    // It is possible, that some of the locales are not available in the system
+    // Do not treat missing locales as errors, but only report what is done
     std::shared_ptr<std::locale> loc;
     const std::pair<std::string, std::string> test_data[] = {
         { "C", "2024 February 19"}
