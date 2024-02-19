@@ -45,6 +45,8 @@ namespace Fmi
     using date_time::Microseconds;
     using date_time::Milliseconds;
 
+    using date_time::format_time;
+
     namespace MicrosecClock = date_time::MicrosecClock;
     namespace SecondClock = date_time::SecondClock;
 }

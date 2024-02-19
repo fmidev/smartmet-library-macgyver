@@ -170,29 +170,17 @@ int Fmi::date_time::Date::week_number() const
 
 std::string Fmi::date_time::Date::as_string() const
 {
-    if (is_special())
-        return Fmi::date_time::Base::as_string();
-
-    const std::string str = date::format("%Y-%b-%d", date);
-    return str;
+    return format_time("%Y-%b-%d", *this);
 }
 
 std::string Fmi::date_time::Date::as_iso_string() const
 {
-    if (is_special())
-        return Fmi::date_time::Base::as_string();
-
-    const std::string str = date::format("%Y%m%d", date);
-    return str;
+    return format_time("%Y%m%d", *this);
 }
 
 std::string Fmi::date_time::Date::as_iso_extended_string() const
 {
-    if (is_special())
-        return Fmi::date_time::Base::as_string();
-
-    const std::string str = date::format("%Y-%m-%d", date);
-    return str;
+    return format_time("%Y-%m-%d", *this);
 }
 
 bool Fmi::date_time::Date::operator==(const Date& other) const
