@@ -158,7 +158,7 @@ namespace Fmi
                                     std::is_base_of<Base, TimeType>::value, int>::type = 0
         >
         std::string format_time(
-            std::locale& locale,
+            const std::locale& locale,
             const std::string& format,
             const TimeType& time)
         {
