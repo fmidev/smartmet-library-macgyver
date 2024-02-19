@@ -61,7 +61,7 @@ namespace Fmi
                 return *this;
             }
 
-            DateTimeType start() const
+            DateTimeType begin() const
             {
                 return m_start;
             }

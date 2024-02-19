@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     TestValues1 test;
 
     TimePeriod<DateTime> period12(test.dt1, test.dt2);
-    BOOST_CHECK_EQUAL(period12.start(), test.dt1);
+    BOOST_CHECK_EQUAL(period12.begin(), test.dt1);
     BOOST_CHECK_EQUAL(period12.end(), test.dt2);
     BOOST_CHECK_EQUAL(period12.length(), Hours(1));
     BOOST_CHECK(!period12.is_null());
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(local_time_interval_test_1)
 
     TimePeriod<LocalDateTime> period12(ldt1, ldt2);
     BOOST_CHECK(!period12.is_null());
-    BOOST_CHECK_EQUAL(period12.start(), ldt1);
+    BOOST_CHECK_EQUAL(period12.begin(), ldt1);
     BOOST_CHECK_EQUAL(period12.end(), ldt2);
     BOOST_CHECK_EQUAL(period12.length(), Hours(1));
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(shift_interval)
     
     TimePeriod<DateTime> period(test.dt1, test.dt2);
     period.shift(Minutes(30));
-    BOOST_CHECK_EQUAL(period.start(), test.dt1 + Minutes(30));
+    BOOST_CHECK_EQUAL(period.begin(), test.dt1 + Minutes(30));
     BOOST_CHECK_EQUAL(period.end(), test.dt2 + Minutes(30));
 }      
 
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(expand_interval)
     
     TimePeriod<DateTime> period(test.dt1, test.dt2);
     period.expand(Minutes(30));
-    BOOST_CHECK_EQUAL(period.start(), test.dt1 - Minutes(30));
+    BOOST_CHECK_EQUAL(period.begin(), test.dt1 - Minutes(30));
     BOOST_CHECK_EQUAL(period.end(), test.dt2 + Minutes(30));
 }
 
