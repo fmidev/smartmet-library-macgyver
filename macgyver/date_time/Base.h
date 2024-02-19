@@ -151,5 +151,24 @@ namespace Fmi
             const auto& impl = time.get_impl();
             return date::format(format, impl);
         }
+
+        template <
+            typename TimeType,
+            typename std::enable_if<!std::is_same<TimeType, Base>::value &&
+                                    std::is_base_of<Base, TimeType>::value, int>::type = 0
+        >
+        std::string format_time(
+            std::locale& locale,
+            const std::string& format,
+            const TimeType& time)
+        {
+            if (time.is_special())
+            {
+                return time.as_string();
+            }
+
+            const auto& impl = time.get_impl();
+            return date::format(locale, format, impl);
+        }
     }
 }

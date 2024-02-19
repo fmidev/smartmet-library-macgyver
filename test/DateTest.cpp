@@ -223,4 +223,40 @@ BOOST_AUTO_TEST_CASE(date_from_string_1)
     }
 }
 
+BOOST_AUTO_TEST_CASE(format_for_locale)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::Date: format_for_locale");
+    Fmi::date_time::Date d1(2024, 2, 19);
+    const char* fmt = "%Y %B %d";
 
+    std::shared_ptr<std::locale> loc;
+    const std::pair<std::string, std::string> test_data[] = {
+        { "C", "2024 February 19"}
+        , { "en_US.UTF8", "2024 February 19" }
+        , { "fi_FI.UTF8", "2024 helmikuu 19" }
+        , { "sv_FI.UTF8", "2024 februari 19" }
+        , { "lv_LV.UTF8", "2024 februāris 19" }
+    }; // end of test_data
+    constexpr int num_tests = sizeof(test_data) / sizeof(test_data[0]);
+    int num_tested = 0;
+
+    for (const auto& item : test_data)
+    {
+        try
+        {
+            loc.reset(new std::locale(item.first));
+        }
+        catch (...)
+        {
+            BOOST_TEST_MESSAGE("No locale " + item.first + " : ignoring");
+            continue;
+        }
+
+        num_tested++;
+        const std::string s1 = Fmi::date_time::format_time(*loc, fmt, d1);
+        BOOST_CHECK_EQUAL(s1, item.second);
+    }
+
+    BOOST_TEST_MESSAGE(std::to_string(num_tested) + " locales of "
+        + std::to_string(num_tests) + " tested");
+}
