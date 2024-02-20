@@ -20,13 +20,15 @@ std::string Fmi::date_time::Base::as_string() const
 
 bool Fmi::date_time::Base::operator == (const Base& other) const
 {
-    assert_supported(other);
+    if (!is_special() && !other.is_special())
+        throw Fmi::Exception(BCP, "INTERNAL ERROR: operation not supported for normal values");
     return m_type == other.m_type;
 }
 
 bool Fmi::date_time::Base::operator != (const Base& other) const
 {
-    assert_supported(other);
+    if (!is_special() && !other.is_special())
+        throw Fmi::Exception(BCP, "INTERNAL ERROR: operation not supported for normal values");
     return m_type != other.m_type;
 }
 
