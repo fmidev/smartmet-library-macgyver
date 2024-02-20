@@ -1,5 +1,5 @@
 #include "TimeDuration.h"
-#include "Internal.hpp"
+#include "Internal.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
 #include <boost/regex.hpp>

@@ -95,7 +95,6 @@ LIBFILE = libsmartmet-$(SUBNAME).so
 
 # Compilation directories
 
-INTERNAL_HDRS = date_time/Internal.h date_time/date/tz_private.h
 SRC_DIRS = $(SUBNAME) $(SUBNAME)/date_time $(EXTRA_SRC_DIRS)
 
 vpath %.cpp $(SRC_DIRS)
@@ -103,10 +102,19 @@ vpath %.h $(SRC_DIRS)
 
 # The files to be compiled
 
+# Headers that are only needed when building the library. These are not installed
+INTERNAL_HDRS = \
+	date_time/Internal.h \
+	date_time/date/tz_private.h \
+	TimeParserDefinitions.h
+
 SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
 HDRS = $(filter-out $(INTERNAL_HEADERS), $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h)))
 OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
+# All object files are put into a subdirectory obj. As result the source files
+# can not have the same name in different subdirectories. Detect it early to avoid
+# confusing error messages later
 ifneq ($(words $(sort $(OBJS))),$(words $(OBJS)))
 $(info $(shell for f in $(OBJS); do echo $$f; done | sort | uniq -c | grep -v '^ *1 ' | sed -e 's/^ *//' -e 's/ /: /'))
 $(error Source file name conflict detected)

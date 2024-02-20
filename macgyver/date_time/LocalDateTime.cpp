@@ -1,6 +1,6 @@
 #include "LocalDateTime.h"
 #include "TimeZonePtr.h"
-#include "Internal.hpp"
+#include "Internal.h"
 #include "../Exception.h"
 
 using Fmi::date_time::Date;

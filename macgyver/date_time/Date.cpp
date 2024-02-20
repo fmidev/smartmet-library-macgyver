@@ -1,5 +1,5 @@
 #include "Date.h"
-#include "Internal.hpp"
+#include "Internal.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
 
