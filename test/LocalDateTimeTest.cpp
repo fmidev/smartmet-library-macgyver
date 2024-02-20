@@ -315,6 +315,32 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
     }
 }
 
+BOOST_AUTO_TEST_CASE(comparison_with_boost_2)
+{
+    const auto s_tz = "Europe/Helsinki"s;
+    const auto s_dt1 = "2024-Feb-20 08:48:57"s;
+
+    Fmi::date_time::TimeZonePtr tz1(s_tz);
+    Fmi::date_time::DateTime dt1 = Fmi::date_time::time_from_string(s_dt1);
+    Fmi::date_time::LocalDateTime ldt1(dt1, tz1);
+
+    boost::local_time::tz_database itsRegions;
+    itsRegions.load_from_file(default_regions);
+    auto b_tz = itsRegions.time_zone_from_region(s_tz);
+    boost::posix_time::ptime b_pt1 = boost::posix_time::time_from_string(s_dt1);
+    boost::local_time::local_date_time b_ldt1(b_pt1, b_tz);
+
+    std::ostringstream str1, str2;
+    str1 << ldt1;
+    str2 << b_ldt1;
+    BOOST_CHECK_EQUAL(str1.str(), str2.str());
+    BOOST_CHECK_EQUAL(ldt1.local_time().as_string(), pt::to_simple_string(b_ldt1.local_time()));
+
+    // boost::date_time behavior test for comparison
+    boost::local_time::local_date_time b_ldt2(b_ldt1.utc_time(), b_tz);
+    BOOST_CHECK_EQUAL(b_ldt1, b_ldt2);
+}
+
 BOOST_AUTO_TEST_CASE(test_make_date)
 {
     using namespace Fmi::date_time;
