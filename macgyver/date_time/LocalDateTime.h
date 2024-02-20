@@ -20,6 +20,19 @@ namespace Fmi
             {
                 EXCEPTION_ON_ERROR,
                 NOT_DATE_TIME_ON_ERROR
+            };
+
+            /**
+             *  Choose between ambiguous local times
+             *
+             *  NONE - no choice (report error if ambiguous - throw or NOT_A_DATE_TIME)
+             *  EARLIEST - choose the earliest time
+             *  LATEST - choose the latest time
+             */
+            enum Choose
+            {
+                EARLIEST,
+                LATEST
             };            
 
             LocalDateTime();
@@ -30,6 +43,13 @@ namespace Fmi
 
             LocalDateTime(const detail::zoned_time_t& zoned_time);
 
+            /**
+             * Construct a local date time from UTC time and time zone
+             *
+             * @param time UTC Time
+             * @param tz Time zone
+             * @param err_handling Error handling policy
+            */
             LocalDateTime(
                 const DateTime& time,
                 const TimeZonePtr& tz,
@@ -40,6 +60,12 @@ namespace Fmi
                 const TimeDuration& time,
                 const TimeZonePtr& tz,
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
+
+            LocalDateTime(
+                const Date& date,
+                const TimeDuration& time,
+                const TimeZonePtr& tz,
+                enum Choose choose);
 
             LocalDateTime(
                 const detail::time_point_t& time,

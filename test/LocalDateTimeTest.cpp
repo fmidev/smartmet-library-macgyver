@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
     TimeZonePtr tz2("Etc/UTC");
     DateTime dtm1 = time_from_string("2014-02-01 12:34:56.789");
     DateTime dtm2 = time_from_string("2014-05-01 12:34:56.789");
-    LocalDateTime ldt1(dtm1, tz1);
+    LocalDateTime ldt1(dtm1.date(), dtm1.time_of_day(), tz1);
 
     BOOST_CHECK_EQUAL(ldt1.date().year(), 2014);
     BOOST_CHECK_EQUAL(ldt1.date().month(), 2);
@@ -101,9 +101,12 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
 
     BOOST_CHECK_EQUAL(ldt1.utc_time(), dtm1 - Fmi::date_time::hours(2));
 
+    LocalDateTime ldt1b(ldt1.utc_time(), tz1);
+    BOOST_CHECK_EQUAL(ldt1b, ldt1);
+
     //std::cout << ldt1.get_sys_info() << std::endl;
 
-    LocalDateTime ldt2(dtm2, tz1);
+    LocalDateTime ldt2(dtm2.date(), dtm2.time_of_day(), tz1);
 
     BOOST_CHECK_EQUAL(ldt2.date().year(), 2014);
     BOOST_CHECK_EQUAL(ldt2.date().month(), 5);
@@ -148,16 +151,16 @@ BOOST_AUTO_TEST_CASE(dst_test_1)
     Fmi::date_time::DateTime dt3 = DEBUG(dt2 + Fmi::date_time::hours(1));           // 04:00:01
 
     // 1 second before begin of summertime
-    Fmi::date_time::LocalDateTime ldt1(dt1, tz);
+    Fmi::date_time::LocalDateTime ldt1(date, time, tz);
     BOOST_CHECK_EQUAL(ldt1.is_special(), false);
     BOOST_CHECK_EQUAL(ldt1.local_time(), dt1);
     BOOST_CHECK_EQUAL(ldt1.dst_on(), false);
 
     // 1 second in gap (begin of summertime) -> invalid local time
-    Fmi::date_time::LocalDateTime ldt2(dt2, tz);
+    Fmi::date_time::LocalDateTime ldt2(dt2.date(), dt2.time_of_day(), tz);
     BOOST_CHECK_EQUAL(ldt2.is_special(), true);
 
-    Fmi::date_time::LocalDateTime ldt3(dt3, tz);
+    Fmi::date_time::LocalDateTime ldt3(dt3.date(), dt3.time_of_day(), tz);
     BOOST_CHECK_EQUAL(ldt3.is_special(), false);
     BOOST_CHECK_EQUAL(ldt3.local_time(), dt3);
     BOOST_CHECK_EQUAL(ldt3.dst_on(), true);
@@ -175,13 +178,13 @@ BOOST_AUTO_TEST_CASE(dst_test_2)
     Fmi::date_time::DateTime dt3 = dt2 + Fmi::date_time::hours(1);           // 04:00:01
 
     // 1 second before end of summertime
-    Fmi::date_time::LocalDateTime ldt1(dt1, tz);
+    Fmi::date_time::LocalDateTime ldt1(dt1.date(), dt1.time_of_day(), tz);
     Fmi::date_time::DateTime dt1_utc = ldt1.utc_time();
     BOOST_CHECK_EQUAL(dt1_utc, dt1 - Fmi::date_time::hours(3));
     Fmi::date_time::LocalDateTime ldt1_b = ldt1.to_tz(tz);
     BOOST_CHECK_EQUAL(ldt1_b, ldt1);
 
-    Fmi::date_time::LocalDateTime ldt3(dt3, tz);
+    Fmi::date_time::LocalDateTime ldt3(dt3.date(), dt3.time_of_day(), tz);
     Fmi::date_time::DateTime dt3_utc = ldt3.utc_time();
     BOOST_CHECK_EQUAL(dt3_utc, dt3 - Fmi::date_time::hours(2));
     Fmi::date_time::LocalDateTime ldt3_b = ldt3.to_tz(tz);
@@ -201,7 +204,8 @@ BOOST_AUTO_TEST_CASE(tz_convert_1)
   Fmi::date_time::DateTime dt3(Fmi::date_time::Date(1961, 12, 31), Fmi::date_time::TimeDuration(20, 30, 00));
   Fmi::date_time::DateTime dt4(Fmi::date_time::Date(1962,  1,  1), Fmi::date_time::TimeDuration( 2, 00, 00));
 
-  Fmi::date_time::LocalDateTime ldt2(dt2, tz2);
+  Fmi::date_time::LocalDateTime ldt2(dt2.date(), dt2.time_of_day(), tz2);
+  BOOST_REQUIRE(!ldt2.is_special());
   Fmi::date_time::LocalDateTime ldt1 = ldt2.to_tz(tz1);
   Fmi::date_time::LocalDateTime ldt3 = ldt2.to_tz(tz3);
   Fmi::date_time::LocalDateTime ldt4 = ldt2.to_tz(tz4);
@@ -221,7 +225,7 @@ BOOST_AUTO_TEST_CASE(advance_1)
   Fmi::date_time::Date date(2023, 3, 26);
   Fmi::date_time::TimeDuration time(2, 59, 59);
   Fmi::date_time::DateTime dt1(date, time);                     // 02:59:59
-  Fmi::date_time::LocalDateTime ldt0(dt1, tz);
+  Fmi::date_time::LocalDateTime ldt0(dt1.date(), dt1.time_of_day(), tz);
 
   Fmi::date_time::LocalDateTime ldt1(ldt0);
   ldt1.advance(Fmi::date_time::seconds(2));
@@ -322,14 +326,17 @@ BOOST_AUTO_TEST_CASE(comparison_with_boost_2)
 
     Fmi::date_time::TimeZonePtr tz1(s_tz);
     Fmi::date_time::DateTime dt1 = Fmi::date_time::time_from_string(s_dt1);
-    Fmi::date_time::LocalDateTime ldt1(dt1, tz1);
+    Fmi::date_time::LocalDateTime ldt1(dt1.date(), dt1.time_of_day(), tz1);
 
     boost::local_time::tz_database itsRegions;
     itsRegions.load_from_file(default_regions);
     auto b_tz = itsRegions.time_zone_from_region(s_tz);
     boost::posix_time::ptime b_pt1 = boost::posix_time::time_from_string(s_dt1);
-    boost::local_time::local_date_time b_ldt1(b_pt1, b_tz);
-
+    boost::local_time::local_date_time b_ldt1(
+        b_pt1.date(),
+        b_pt1.time_of_day(),
+        b_tz,
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
     std::ostringstream str1, str2;
     str1 << ldt1;
     str2 << b_ldt1;
@@ -339,6 +346,14 @@ BOOST_AUTO_TEST_CASE(comparison_with_boost_2)
     // boost::date_time behavior test for comparison
     boost::local_time::local_date_time b_ldt2(b_ldt1.utc_time(), b_tz);
     BOOST_CHECK_EQUAL(b_ldt1, b_ldt2);
+
+    boost::local_time::local_date_time b_ldt3(
+        b_ldt1.local_time().date(),
+        b_ldt1.local_time().time_of_day(),
+        b_tz,
+        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
+    BOOST_CHECK_EQUAL(b_ldt1, b_ldt2);
+    BOOST_CHECK_EQUAL(b_ldt1, b_ldt3);
 }
 
 BOOST_AUTO_TEST_CASE(test_make_date)
