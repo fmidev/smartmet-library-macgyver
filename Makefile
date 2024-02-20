@@ -39,7 +39,6 @@ REQUIRES := libpqxx icu-i18n fmt ctpp2
 include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
 
 LIBS += -L$(libdir) \
-	-lboost_date_time \
 	-lboost_regex \
 	-lboost_filesystem \
 	-lboost_chrono \
