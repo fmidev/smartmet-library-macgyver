@@ -36,6 +36,7 @@ namespace Fmi
     using Date = date_time::Date;
     using TimeDuration = date_time::TimeDuration;
     using DateTime = date_time::DateTime;
+    using DatePeriod = date_time::TimePeriod<date_time::Date>;
     using TimePeriod = date_time::TimePeriod<date_time::DateTime>;
 
     using date_time::Seconds;

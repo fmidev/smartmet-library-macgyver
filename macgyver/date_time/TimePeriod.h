@@ -27,8 +27,8 @@ namespace Fmi
         template
         <
             typename DateTimeType = DateTime,
-            typename std::enable_if<std::is_same<DateTimeType, DateTime>::value
-                || std::is_same<DateTimeType, LocalDateTime>::value, int>::type = 0
+            typename std::enable_if<!std::is_same<DateTimeType, Base>::value &&
+                                    std::is_base_of<Base, DateTimeType>::value, int>::type = 0
         >
         class TimePeriod
         {
