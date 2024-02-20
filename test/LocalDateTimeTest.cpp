@@ -38,29 +38,6 @@ namespace
             throw Fmi::Exception(BCP, "Unknown timezone").addParameter("Name", name);
         return ptr;
     }
-
-    lt::local_date_time get_boost_ldt(const Fmi::date_time::LocalDateTime& ldt)
-    {
-        const int year = ldt.date().year();
-        const int month = ldt.date().month();
-        const int day = ldt.date().day();
-        const int hours = ldt.time_of_day().hours();
-        const int minutes = ldt.time_of_day().minutes();
-        const int seconds = ldt.time_of_day().seconds();
-        const int fraction = ldt.time_of_day().fractional_seconds();
-
-        const g::date d(year, month, day);
-        const pt::time_duration td(hours, minutes, seconds, fraction);
-        const lt::time_zone_ptr tz = get_boost_tz(ldt.zone()->name());
-        return lt::local_date_time(d, td, tz, lt::local_date_time::NOT_DATE_TIME_ON_ERROR);
-    }
-
-    std::string as_string(const lt::local_date_time& ldt)
-    {
-        std::ostringstream os;
-        os << ldt;
-        return os.str();
-    }
 }
 
 test_suite* init_unit_test_suite(int argc, char* argv[])
@@ -72,7 +49,15 @@ test_suite* init_unit_test_suite(int argc, char* argv[])
   BOOST_TEST_MESSAGE("");
   BOOST_TEST_MESSAGE(name);
   BOOST_TEST_MESSAGE(std::string(std::strlen(name), '='));
-  itsRegions.load_from_file(default_regions);
+  try
+  {
+    itsRegions.load_from_file(default_regions);
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << "Failed to load time zone database: " << e.what() << std::endl;
+    throw;
+  }
   std::setlocale(LC_ALL, "C");
   return NULL;
 }
@@ -88,13 +73,13 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
     DateTime dtm2 = time_from_string("2014-05-01 12:34:56.789");
     LocalDateTime ldt1(dtm1.date(), dtm1.time_of_day(), tz1);
 
-    BOOST_CHECK_EQUAL(ldt1.date().year(), 2014);
-    BOOST_CHECK_EQUAL(ldt1.date().month(), 2);
-    BOOST_CHECK_EQUAL(ldt1.date().day(), 1);
-    BOOST_CHECK_EQUAL(ldt1.time_of_day().hours(), 12);
-    BOOST_CHECK_EQUAL(ldt1.time_of_day().minutes(), 34);
-    BOOST_CHECK_EQUAL(ldt1.time_of_day().seconds(), 56);
-    BOOST_CHECK_EQUAL(ldt1.time_of_day().fractional_seconds(), 789000);
+    BOOST_CHECK_EQUAL(ldt1.local_time().date().year(), 2014);
+    BOOST_CHECK_EQUAL(ldt1.local_time().date().month(), 2);
+    BOOST_CHECK_EQUAL(ldt1.local_time().date().day(), 1);
+    BOOST_CHECK_EQUAL(ldt1.local_time().time_of_day().hours(), 12);
+    BOOST_CHECK_EQUAL(ldt1.local_time().time_of_day().minutes(), 34);
+    BOOST_CHECK_EQUAL(ldt1.local_time().time_of_day().seconds(), 56);
+    BOOST_CHECK_EQUAL(ldt1.local_time().time_of_day().fractional_seconds(), 789000);
 
     BOOST_CHECK(!ldt1.dst_on());
     BOOST_CHECK_EQUAL(ldt1.offset(), Hours(2));
@@ -104,17 +89,18 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
     LocalDateTime ldt1b(ldt1.utc_time(), tz1);
     BOOST_CHECK_EQUAL(ldt1b, ldt1);
 
+
     //std::cout << ldt1.get_sys_info() << std::endl;
 
     LocalDateTime ldt2(dtm2.date(), dtm2.time_of_day(), tz1);
 
-    BOOST_CHECK_EQUAL(ldt2.date().year(), 2014);
-    BOOST_CHECK_EQUAL(ldt2.date().month(), 5);
-    BOOST_CHECK_EQUAL(ldt2.date().day(), 1);
-    BOOST_CHECK_EQUAL(ldt2.time_of_day().hours(), 12);
-    BOOST_CHECK_EQUAL(ldt2.time_of_day().minutes(), 34);
-    BOOST_CHECK_EQUAL(ldt2.time_of_day().seconds(), 56);
-    BOOST_CHECK_EQUAL(ldt2.time_of_day().fractional_seconds(), 789000);
+    BOOST_CHECK_EQUAL(ldt2.local_time().date().year(), 2014);
+    BOOST_CHECK_EQUAL(ldt2.local_time().date().month(), 5);
+    BOOST_CHECK_EQUAL(ldt2.local_time().date().day(), 1);
+    BOOST_CHECK_EQUAL(ldt2.local_time().time_of_day().hours(), 12);
+    BOOST_CHECK_EQUAL(ldt2.local_time().time_of_day().minutes(), 34);
+    BOOST_CHECK_EQUAL(ldt2.local_time().time_of_day().seconds(), 56);
+    BOOST_CHECK_EQUAL(ldt2.local_time().time_of_day().fractional_seconds(), 789000);
 
     BOOST_CHECK(ldt2.dst_on());
     BOOST_CHECK_EQUAL(ldt2.offset(), Hours(3));
@@ -124,13 +110,13 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
 
     LocalDateTime ldt3(dtm2, tz2);
 
-    BOOST_CHECK_EQUAL(ldt3.date().year(), 2014);
-    BOOST_CHECK_EQUAL(ldt3.date().month(), 5);
-    BOOST_CHECK_EQUAL(ldt3.date().day(), 1);
-    BOOST_CHECK_EQUAL(ldt3.time_of_day().hours(), 12);
-    BOOST_CHECK_EQUAL(ldt3.time_of_day().minutes(), 34);
-    BOOST_CHECK_EQUAL(ldt3.time_of_day().seconds(), 56);
-    BOOST_CHECK_EQUAL(ldt3.time_of_day().fractional_seconds(), 789000);
+    BOOST_CHECK_EQUAL(ldt3.local_time().date().year(), 2014);
+    BOOST_CHECK_EQUAL(ldt3.local_time().date().month(), 5);
+    BOOST_CHECK_EQUAL(ldt3.local_time().date().day(), 1);
+    BOOST_CHECK_EQUAL(ldt3.local_time().time_of_day().hours(), 12);
+    BOOST_CHECK_EQUAL(ldt3.local_time().time_of_day().minutes(), 34);
+    BOOST_CHECK_EQUAL(ldt3.local_time().time_of_day().seconds(), 56);
+    BOOST_CHECK_EQUAL(ldt3.local_time().time_of_day().fractional_seconds(), 789000);
 
     BOOST_CHECK(!ldt3.dst_on());
     BOOST_CHECK_EQUAL(ldt3.offset(), Hours(0));
@@ -242,42 +228,11 @@ BOOST_AUTO_TEST_CASE(advance_1)
   BOOST_CHECK_EQUAL(ldt1.local_time(), dt1 - Fmi::date_time::seconds(1));
 }
 
-BOOST_AUTO_TEST_CASE(conversion_to_boost_1)
-{
-    using namespace Fmi::date_time;
-
-    TimeZonePtr tz1("Europe/Helsinki");
-    lt::time_zone_ptr btz = get_boost_tz(tz1->name());
-
-    DateTime dtm1 = time_from_string("2014-02-01 12:34:56.789");
-    DateTime dtm2 = time_from_string("2014-02-01 12:34:56");
-    LocalDateTime ldt1(dtm1, tz1);
-    LocalDateTime ldt2(dtm2, tz1);
-
-    lt::local_date_time b_ldt1 = get_boost_ldt(ldt1);
-    lt::local_date_time b_ldt2 = get_boost_ldt(ldt2);
-
-    BOOST_CHECK_EQUAL(b_ldt1.date().year(), 2014);
-    BOOST_CHECK_EQUAL(b_ldt1.date().month(), 2);
-    BOOST_CHECK_EQUAL(b_ldt1.date().day(), 1);
-    const long mks1 = ldt1.local_time().time_of_day().total_microseconds();
-    const long bmks1 = b_ldt1.local_time().time_of_day().total_microseconds();
-    BOOST_CHECK_EQUAL(mks1, bmks1);
-
-    BOOST_CHECK_EQUAL(as_string(b_ldt1), ldt1.as_simple_string());
-
-    BOOST_CHECK_EQUAL(b_ldt2.date().year(), 2014);
-    BOOST_CHECK_EQUAL(b_ldt2.date().month(), 2);
-    BOOST_CHECK_EQUAL(b_ldt2.date().day(), 1);
-    const long mks2 = ldt2.local_time().time_of_day().total_microseconds();
-    const long bmks2 = b_ldt2.local_time().time_of_day().total_microseconds();
-    BOOST_CHECK_EQUAL(mks2, bmks2);
-}
-
-
 BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
 {
     using namespace Fmi::date_time;
+    namespace pt = boost::posix_time;
+    namespace lt = boost::local_time;
 
     BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: advance and comparision with boost (1)");
 
@@ -286,17 +241,19 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
     const auto s_inc = "00:37:34.654789"s;
 
     TimeZonePtr tz1("Europe/Helsinki");
+    lt::time_zone_ptr b_tz1 = get_boost_tz(tz1->name());
 
     const auto inc1 = duration_from_string(s_inc);
     const auto b_inc = boost::posix_time::duration_from_string(s_inc);
  
     DateTime dt1 = time_from_string(s_dt1);
+    pt::ptime b_pt1 = pt::time_from_string(s_dt1);
  
     LocalDateTime ldt1(time_from_string(s_dt1), tz1);
     LocalDateTime ldt2(time_from_string(s_dt2), tz1);
     LocalDateTime ldt_start = ldt1;
 
-    auto b_ldt1 = get_boost_ldt(ldt1);
+    lt::local_date_time b_ldt1(b_pt1, b_tz1);
 
     while (ldt1 < ldt2)
     {
@@ -321,39 +278,65 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
 
 BOOST_AUTO_TEST_CASE(comparison_with_boost_2)
 {
+    namespace g = boost::gregorian;
+    namespace pt = boost::posix_time;
+    namespace lt = boost::local_time;
+
     const auto s_tz = "Europe/Helsinki"s;
     const auto s_dt1 = "2024-Feb-20 08:48:57"s;
 
     Fmi::date_time::TimeZonePtr tz1(s_tz);
     Fmi::date_time::DateTime dt1 = Fmi::date_time::time_from_string(s_dt1);
-    Fmi::date_time::LocalDateTime ldt1(dt1.date(), dt1.time_of_day(), tz1);
+    Fmi::date_time::LocalDateTime ldt1(dt1, tz1);
 
-    boost::local_time::tz_database itsRegions;
-    itsRegions.load_from_file(default_regions);
-    auto b_tz = itsRegions.time_zone_from_region(s_tz);
-    boost::posix_time::ptime b_pt1 = boost::posix_time::time_from_string(s_dt1);
-    boost::local_time::local_date_time b_ldt1(
-        b_pt1.date(),
-        b_pt1.time_of_day(),
-        b_tz,
-        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
+    const auto b_tz = get_boost_tz(s_tz);
+    const auto b_pt1 = pt::time_from_string(s_dt1);
+    const auto b_ldt1 = lt::local_date_time(b_pt1, b_tz);
+
     std::ostringstream str1, str2;
     str1 << ldt1;
     str2 << b_ldt1;
     BOOST_CHECK_EQUAL(str1.str(), str2.str());
     BOOST_CHECK_EQUAL(ldt1.local_time().as_string(), pt::to_simple_string(b_ldt1.local_time()));
 
-    // boost::date_time behavior test for comparison
-    boost::local_time::local_date_time b_ldt2(b_ldt1.utc_time(), b_tz);
-    BOOST_CHECK_EQUAL(b_ldt1, b_ldt2);
+    BOOST_CHECK_EQUAL(
+        ldt1.local_time().as_iso_string(),
+        pt::to_iso_string(b_ldt1.local_time()));
 
-    boost::local_time::local_date_time b_ldt3(
-        b_ldt1.local_time().date(),
-        b_ldt1.local_time().time_of_day(),
+    BOOST_CHECK_EQUAL(
+        ldt1.utc_time().as_iso_string(),
+        pt::to_iso_string(b_ldt1.utc_time()));
+
+    BOOST_CHECK_EQUAL(
+        ldt1.date().as_iso_string(),
+        g::to_iso_string(b_ldt1.date()));
+
+    BOOST_CHECK_EQUAL(
+        ldt1.time_of_day().as_iso_string(),
+        pt::to_iso_string(b_ldt1.time_of_day()));
+    
+    BOOST_CHECK_EQUAL(
+        ldt1.local_time().as_string(),
+        "2024-Feb-20 10:48:57"s);
+
+    BOOST_CHECK_EQUAL(
+        ldt1.utc_time().as_string(),
+        s_dt1);
+
+    Fmi::date_time::LocalDateTime ldt2(
+        dt1.date(),
+        dt1.time_of_day() + Fmi::date_time::hours(2),
+        tz1);
+
+    lt::local_date_time b_ldt2(
+        b_pt1.date(),
+        b_pt1.time_of_day() + pt::hours(2),
         b_tz,
-        boost::local_time::local_date_time::NOT_DATE_TIME_ON_ERROR);
+        lt::local_date_time::NOT_DATE_TIME_ON_ERROR);
+
+    BOOST_CHECK_EQUAL(ldt1, ldt2);
+
     BOOST_CHECK_EQUAL(b_ldt1, b_ldt2);
-    BOOST_CHECK_EQUAL(b_ldt1, b_ldt3);
 }
 
 BOOST_AUTO_TEST_CASE(test_make_date)

@@ -152,7 +152,7 @@ void LocalDateTime::check_no_special(
 Date LocalDateTime::date() const
 {
     check_no_special(BCP);
-    return local_time().date();
+    return utc_time().date();
 }
 
 DateTime LocalDateTime::local_time() const
@@ -169,7 +169,7 @@ TimeZonePtr LocalDateTime::zone() const
 
 TimeDuration LocalDateTime::time_of_day() const
 {
-    return local_time().time_of_day();
+    return utc_time().time_of_day();
 }
 
 DateTime LocalDateTime::utc_time() const
