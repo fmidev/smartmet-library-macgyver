@@ -103,6 +103,11 @@ void Fmi::date_time::TimeDuration::assert_special() const
     throw Fmi::Exception(BCP, "Cannot perform operation on special time duration");
 }
 
+Fmi::date_time::TimeDuration Fmi::date_time::Days(int days)
+{
+  return Fmi::date_time::TimeDuration(detail::days_t(days));
+}
+
 Fmi::date_time::TimeDuration Fmi::date_time::Hours(int hours)
 {
   return Fmi::date_time::TimeDuration(detail::hours_t(hours));

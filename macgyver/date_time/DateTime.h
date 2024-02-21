@@ -38,6 +38,9 @@ namespace Fmi
             Date date() const;
             TimeDuration time_of_day() const;
 
+            std::time_t as_time_t() const;
+            std::tm as_tm() const;
+
             std::string as_string() const;
             std::string as_iso_string() const;
             std::string as_iso_extended_string() const;
@@ -45,6 +48,8 @@ namespace Fmi
             static DateTime from_stream(std::istream& is, bool assume_eoi = true);
 
             detail::time_point_t get_impl() const { return m_time_point; }
+
+            static const DateTime epoch;
         private:
             detail::time_point_t m_time_point;
         };

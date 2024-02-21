@@ -93,6 +93,23 @@ BOOST_AUTO_TEST_CASE(to_iso_extended_string_test_1)
     BOOST_CHECK_EQUAL(str, "2024-01-24T12:34:45.123456");
 }
 
+BOOST_AUTO_TEST_CASE(to_tm)
+{
+    using namespace Fmi::date_time;
+    BOOST_TEST_MESSAGE("Fmi::date_time: to_tm");
+    const DateTime dt1(Date(2005, 1, 1), TimeDuration(1, 2, 3));
+    const auto test = dt1.as_tm();
+    BOOST_CHECK_EQUAL(int(test.tm_year), 105);
+    BOOST_CHECK_EQUAL(int(test.tm_mon), 0);
+    BOOST_CHECK_EQUAL(int(test.tm_mday), 1);
+    BOOST_CHECK_EQUAL(int(test.tm_wday), 6); // Saturday
+    BOOST_CHECK_EQUAL(int(test.tm_yday), 0);
+    BOOST_CHECK_EQUAL(int(test.tm_hour), 1);
+    BOOST_CHECK_EQUAL(int(test.tm_min), 2);
+    BOOST_CHECK_EQUAL(int(test.tm_sec), 3);
+    BOOST_CHECK_EQUAL(int(test.tm_isdst), -1);
+}
+
 namespace
 {
     Fmi::date_time::DateTime make_datetime(int year, int month, int day,

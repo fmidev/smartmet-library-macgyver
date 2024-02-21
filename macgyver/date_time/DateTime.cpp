@@ -20,6 +20,8 @@ namespace
     }
 }
 
+const Fmi::date_time::DateTime Fmi::date_time::DateTime::epoch(Fmi::date_time::Date(1970, 1, 1), Fmi::date_time::Seconds(0));
+
 Fmi::date_time::DateTime::DateTime() = default;
 
 Fmi::date_time::DateTime::DateTime(const Type& type)
@@ -152,6 +154,31 @@ Fmi::date_time::TimeDuration Fmi::date_time::DateTime::time_of_day() const
     if (is_special())
         throw Fmi::Exception(BCP, "Cannot get time of day from special DateTime");
     return TimeDuration(m_time_point - date::floor<detail::days_t>(m_time_point));
+}
+
+std::time_t Fmi::date_time::DateTime::as_time_t() const
+{
+    if (is_special())
+        throw Fmi::Exception(BCP, "Cannot get time of day from special DateTime");
+    return std::chrono::duration_cast<Fmi::detail::seconds_t>(m_time_point - epoch.m_time_point).count();
+}
+
+struct std::tm Fmi::date_time::DateTime::as_tm() const
+{
+    const auto date_ = date();
+    const auto ymd = date_.year_month_day();
+    const auto time = time_of_day();
+    struct tm result;
+    result.tm_year = ymd.year - 1900;
+    result.tm_mon = ymd.month - 1;
+    result.tm_mday = ymd.day;
+    result.tm_wday = date_.day_of_week().iso_encoding();
+    result.tm_yday = date_.day_of_year() - 1;
+    result.tm_hour = time.hours();
+    result.tm_min = time.minutes();
+    result.tm_sec = time.seconds();
+    result.tm_isdst = -1;
+    return result;
 }
 
 std::string Fmi::date_time::DateTime::as_string() const

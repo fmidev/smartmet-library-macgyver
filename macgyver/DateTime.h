@@ -16,6 +16,7 @@ namespace Fmi
     using date_time::Seconds;
     using date_time::Minutes;
     using date_time::Hours;
+    using date_time::Days;
     using date_time::Milliseconds;
     using date_time::Microseconds;
     using date_time::Milliseconds;
