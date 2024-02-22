@@ -2,6 +2,7 @@
 
 #include "Date.h"
 #include "TimeDuration.h"
+#include <ctime>
 #include <ostream>
 
 namespace Fmi
@@ -54,6 +55,7 @@ namespace Fmi
             detail::time_point_t m_time_point;
         };
 
+        inline std::tm to_tm(const DateTime& dt) { return dt.as_tm(); }
         std::string to_simple_string(const DateTime& dt);
         std::string to_iso_string(const DateTime& dt);
         std::string to_iso_extended_string(const DateTime& dt);

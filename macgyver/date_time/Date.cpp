@@ -90,6 +90,24 @@ Fmi::date_time::Weekday Fmi::date_time::Date::day_of_week() const
     return wd;
 }
 
+// FIXME: add test for this
+std::tm Fmi::date_time::Date::as_tm() const
+{
+    assert_special();
+    std::tm tm;
+    date::year_month_day ymd(date);
+    tm.tm_year = int(ymd.year()) - 1900;
+    tm.tm_mon = unsigned(ymd.month()) - 1;
+    tm.tm_mday = unsigned(ymd.day());
+    tm.tm_hour = 0;
+    tm.tm_min = 0;
+    tm.tm_sec = 0;
+    tm.tm_wday = int(day_of_week().iso_encoding() - 1);
+    tm.tm_yday = day_of_year() - 1;
+    tm.tm_isdst = -1;
+    return tm;
+}
+
 int Fmi::date_time::Date::day_of_year() const
 {
     assert_special();
