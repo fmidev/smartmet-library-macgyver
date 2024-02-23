@@ -1,16 +1,14 @@
 #include "AsyncTask.h"
 
+#include "DateTime.h"
 #include "DebugTools.h"
 #include "TypeName.h"
 #include <chrono>
 #include <iostream>
 #include <fmt/format.h>
 #include <boost/chrono.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#
 
 
-namespace pt = boost::posix_time;
 
 bool Fmi::AsyncTask::silent = false;
 bool Fmi::AsyncTask::log_time = false;
@@ -164,7 +162,7 @@ std::exception_ptr Fmi::AsyncTask::get_exception() const
 
 void Fmi::AsyncTask::log_event_time(const AsyncTask* task, const std::string& desc)
 {
-  std::cout << pt::microsec_clock::local_time() << " [Fmi::AsyncTask]: ("
+  std::cout << Fmi::MicrosecClock::local_time() << " [Fmi::AsyncTask]: ("
             << reinterpret_cast<const void*>(task) << ") '" << task->get_name()
             << "': " << desc
             << std::endl;

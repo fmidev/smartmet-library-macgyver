@@ -29,7 +29,6 @@ using namespace std;
 using Fmi::Date;
 using Fmi::LocalDateTime;
 using Fmi::TimeZonePtr;
-using boost::posix_time::not_a_date_time;
 
 namespace Fmi
 {

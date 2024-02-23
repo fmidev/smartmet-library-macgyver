@@ -1,7 +1,5 @@
 #include "StringConversion.h"
 #include "Exception.h"
-#include <boost/date_time/gregorian/gregorian_types.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>  // for is_special() cases
 #include <boost/numeric/conversion/cast.hpp>               // numeric_cast
 #include <boost/spirit/include/qi.hpp>
 #include <fmt/format.h>

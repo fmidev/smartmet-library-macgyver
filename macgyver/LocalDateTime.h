@@ -2,18 +2,6 @@
 
 #include "DateTime.h"
 
-#ifdef USE_BOOST_DATE_TIME
-
-#include <boost/date_time/local_time/local_time.hpp>
-
-namespace Fmi
-{
-  using LocalDateTime = boost::local_time::local_date_time;
-  using TimeZonePtr = boost::local_time::time_zone_ptr;
-}
-
-#else
-
 #include "date_time/LocalDateTime.h"
 
 namespace Fmi
@@ -25,5 +13,3 @@ namespace Fmi
 
   using date_time::make_time;
 }
-
-#endif
