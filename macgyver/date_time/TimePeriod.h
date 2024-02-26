@@ -44,6 +44,17 @@ namespace Fmi
                 }
             }
 
+            TimePeriod(const DateTimeType& start, const TimeDuration& duration)
+                : m_start(start),
+                  m_end(start + duration)
+            {
+                if (start.is_special() || duration.is_special())
+                {
+                    m_start = DateTimeType();
+                    m_end = DateTimeType();
+                }
+            }
+
             TimePeriod(const TimePeriod& other)
                 : m_start(other.m_start),
                   m_end(other.m_end)
