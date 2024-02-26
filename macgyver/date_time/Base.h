@@ -136,6 +136,7 @@ namespace Fmi
             Type m_type;
         };
 
+        // FIXME: make mameber function of Base and use it in template functions below
         template <
             typename TimeType,
             typename std::enable_if<!std::is_same<TimeType, Base>::value &&
