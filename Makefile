@@ -105,6 +105,7 @@ vpath %.h $(SRC_DIRS)
 # Headers that are only needed when building the library. These are not installed
 INTERNAL_HDRS = \
 	date_time/Internal.h \
+	date_time/ParserDefinitions.h \
 	date_time/date/tz_private.h \
 	TimeParserDefinitions.h
 
