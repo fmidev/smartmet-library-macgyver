@@ -1,5 +1,6 @@
 #include "Date.h"
 #include "Internal.h"
+#include "ParserDefinitions.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
 
@@ -337,46 +338,76 @@ std::ostream& Fmi::date_time::operator<<(std::ostream& os, const Fmi::date_time:
     return os;
 }
 
-Fmi::date_time::Date 
-Fmi::date_time::Date::from_stream(std::istream& is, bool assume_eoi)
+Fmi::date_time::Date Fmi::date_time::Date::from_iso_string(const std::string& str)
 {
-    date::year year;
-    date::month month;
-    date::day day;
-    try {
-        const internal::StreamExceptionState save(is, std::ios::failbit | std::ios::badbit);
-        is >> date::parse("%Y-", year);
-        if (!is.eof() && std::isdigit(is.peek())) {
-            is >> date::parse("%m-", month);
-        } else {
-            is.exceptions(std::ios::failbit | std::ios::badbit);
-            is >> date::parse("%b-", month);
-        }
-        is >> date::parse("%d", day);
-    } catch (...) {
-        is.clear();
-        auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string");
+    using namespace boost::spirit;
+    using iterator = std::string::const_iterator;
+    // Date parser: No separator (separator=0), numeric month (true)
+    Fmi::date_time::parser::DateParser<iterator, char> parser(0, true);
+    Fmi::date_time::parser::date_members_t members;
+    iterator begin = str.begin();
+    iterator end = str.end();
+    if (!qi::parse(begin, end,
+            parser >> qi::eoi,
+            members))
+    {
+        auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string '" + str + "'");
         throw err;
     }
+    return Fmi::date_time::Date(members.year, members.month, members.mday);
+}
 
-    internal::check_parse_status(is, assume_eoi, "date");
+Fmi::date_time::Date Fmi::date_time::Date::from_iso_extended_string(const std::string& str)
+{
+    using namespace boost::spirit;
+    using iterator = std::string::const_iterator;
+    // Date parser: Separator is '-' (separator='-'), numeric month (true)
+    Fmi::date_time::parser::DateParser<iterator, char> parser('-', true);
+    Fmi::date_time::parser::date_members_t members;
+    iterator begin = str.begin();
+    iterator end = str.end();
+    if (!qi::parse(begin, end,
+            parser >> qi::eoi,
+            members))
+    {
+        auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string '" + str + "'");
+        err.addParameter("Error position", std::string(begin, end));
+        throw err;
+    }
+    return Fmi::date_time::Date(members.year, members.month, members.mday);
+}
 
-    date::year_month_day ymd(year, month, day);
-    date::local_days l_days(ymd);
-    return Fmi::date_time::Date(l_days);
+Fmi::date_time::Date Fmi::date_time::Date::from_string(const std::string& str)
+{
+    using namespace boost::spirit;
+    using iterator = std::string::const_iterator;
+    // Date parser: Separator is '-' (separator='-'), numeric month (true)
+    Fmi::date_time::parser::DateParser<iterator, char> parser1('-', true);
+    // Date parser: No separator (separator=0), numeric month (true)
+    Fmi::date_time::parser::DateParser<iterator, char> parser2(0, true);
+    // Date parser: Separator is '-' (separator='-'), alphabetic month (false) - abbrev only supported
+    Fmi::date_time::parser::DateParser<iterator, char> parser3('-', false);
+
+    Fmi::date_time::parser::date_members_t members;
+
+    iterator begin = str.begin();
+    iterator end = str.end();
+    if (!qi::parse(begin, end,
+        (parser1 | parser3 | parser2) >> qi::eoi,
+        members))
+    {
+        auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string '" + str + "'");
+        throw err;        
+    }
+    return Fmi::date_time::Date(members.year, members.month, members.mday);
+}
+
+Fmi::date_time::Date Fmi::date_time::Date::from_tm(const std::tm& tm)
+{
+    return Fmi::date_time::Date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
 }
 
 Fmi::date_time::Date Fmi::date_time::date_from_string(const std::string& str)
 {
-    std::istringstream is(Fmi::trim_copy(str));
-    try
-    {
-        return Fmi::date_time::Date::from_stream(is, true);
-    }
-    catch(...)
-    {
-        auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
-        err.addParameter("Error position", internal::handle_parse_remainder(is));
-        throw err;
-    }
+    return Fmi::date_time::Date::from_string(str);
 }

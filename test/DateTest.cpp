@@ -207,6 +207,8 @@ BOOST_AUTO_TEST_CASE(date_from_string_1)
         { "2000-2-29", "2000-Feb-29" }
         , { "2000-02-29", "2000-Feb-29" }
         , { "2000-Feb-29", "2000-Feb-29" }
+        , { "2024-01-31", "2024-Jan-31" }
+        , { "2014-02-01", "2014-Feb-01" }
     }; // end of test_data
 
     const auto test_parse =  [](const std::string& s1) -> std::string {

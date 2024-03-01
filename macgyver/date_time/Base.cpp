@@ -3,7 +3,7 @@
 #include "../Exception.h"
 #include <cctype>
 
-std::string Fmi::date_time::Base::as_string() const
+std::string Fmi::date_time::Base::special_time_as_string() const
 {
     switch(m_type)
     {

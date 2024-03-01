@@ -46,6 +46,11 @@ namespace Fmi
             std::string as_iso_string() const;
             std::string as_iso_extended_string() const;
 
+            static DateTime from_tm(const std::tm& tm);
+            static DateTime from_string(const std::string& str);
+            static DateTime from_iso_string(const std::string& str);
+            static DateTime from_iso_extended_string(const std::string& str);
+
             static DateTime from_stream(std::istream& is, bool assume_eoi = true);
 
             detail::time_point_t get_impl() const { return m_time_point; }

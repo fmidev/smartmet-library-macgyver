@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ctime>
+#include <limits>
 #include <string>
 #include "Base.h"
 
@@ -39,6 +40,11 @@ namespace Fmi
             virtual std::string as_string() const;
             std::string as_iso_string() const;
             std::string as_iso_extended_string() const;
+
+            static TimeDuration from_tm(const std::tm& tm);
+            static TimeDuration from_string(const std::string& str, bool h_24 = false);
+            static TimeDuration from_iso_string(const std::string& str, bool h_24 = false);
+            static TimeDuration from_iso_extended_string(const std::string& str, bool h_24 = false);
 
             bool operator==(const TimeDuration& other) const;
             bool operator!=(const TimeDuration& other) const;

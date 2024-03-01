@@ -1,5 +1,6 @@
 #include "TimeDuration.h"
 #include "Internal.h"
+#include "ParserDefinitions.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
 #include <boost/regex.hpp>
@@ -269,24 +270,96 @@ Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
   return td1;
 }
 
-Fmi::date_time::TimeDuration
-Fmi::date_time::duration_from_string(const std::string& str)
+Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_tm(const std::tm& tm)
 {
-  const std::string tmp = Fmi::trim_copy(str);
-  if (tmp.empty())
-    return Fmi::date_time::TimeDuration();
+  return Fmi::date_time::TimeDuration(tm.tm_hour, tm.tm_min, tm.tm_sec, 0);
+}
 
-  std::istringstream is(tmp);
-  try
-  {
-    return Fmi::date_time::TimeDuration::from_stream(is, true);
-  }
-  catch(...)
+Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_string(
+    const std::string& str,
+    bool h_24)
+{
+  (void) h_24;  // FIXME: implement h_24
+  using namespace boost::spirit::qi;
+  using iterator = std::string::const_iterator;
+
+  const std::string input = Fmi::trim_copy(str);
+  iterator begin = input.begin();
+  iterator end = input.end();
+
+  Fmi::date_time::parser::duration_members_t members;
+  Fmi::date_time::parser::DurationParser<iterator, char> parser(0);
+  bool r = parse(begin, end, parser >> eoi, members);
+  if (!r)
   {
     auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
-    err.addParameter("Error position", "'" + internal::handle_parse_remainder(is) + "'");
+    err.addParameter("Error position", "'" + std::string(begin, end) + "'");
     throw err;
   }
+
+  int hours = members.hours;
+  int minutes = members.minutes;
+  int seconds = members.seconds ? members.seconds->seconds : 0;
+  int microseconds = members.seconds ? std::stod("0." + members.seconds->frac_sec) * 1000000 : 0;
+  return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
+}
+
+Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_extended_string(
+    const std::string& str,
+    bool h_24)
+{
+  (void) h_24;  // FIXME: implement h_24
+  using namespace boost::spirit::qi;
+  using iterator = std::string::const_iterator;
+
+  const std::string input = Fmi::trim_copy(str);
+  iterator begin = input.begin();
+  iterator end = input.end();
+
+  Fmi::date_time::parser::duration_members_t members;
+  Fmi::date_time::parser::DurationParser<iterator, char> parser(':');
+  bool r = parse(begin, end, parser >> eoi, members);
+  if (!r)
+  {
+    auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
+    err.addParameter("Error position", "'" + std::string(begin, end) + "'");
+    throw err;
+  }
+
+  int hours = members.hours;
+  int minutes = members.minutes;
+  int seconds = members.seconds ? members.seconds->seconds : 0;
+  int microseconds = members.seconds ? std::stod("0." + members.seconds->frac_sec) * 1000000 : 0;
+  return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
+}
+
+Fmi::date_time::TimeDuration
+Fmi::date_time::TimeDuration::from_string(const std::string& str, bool h_24)
+{
+  (void) h_24; // FIXME: implement h_24
+  using namespace boost::spirit::qi;
+  using iterator = std::string::const_iterator;
+
+  const std::string input = Fmi::trim_copy(str);
+  iterator begin = input.begin();
+  iterator end = input.end();
+
+  Fmi::date_time::parser::duration_members_t members;
+  Fmi::date_time::parser::DurationParser<iterator, char> parser1(':');
+  Fmi::date_time::parser::DurationParser<iterator, char> parser2(0);
+  bool r = parse(begin, end, (parser1 | parser2) >> eoi, members);
+  if (!r)
+  {
+    auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");
+    err.addParameter("Error position", "'" + std::string(begin, end) + "'");
+    throw err;
+  }
+
+  int hours = members.hours;
+  int minutes = members.minutes;
+  int seconds = members.seconds ? members.seconds->seconds : 0;
+  int microseconds = members.seconds ? std::stod("0." + members.seconds->frac_sec) * 1000000 : 0;
+  return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
 }
 
 struct std::tm Fmi::date_time::to_tm(const date_time::TimeDuration& t)
@@ -318,4 +391,9 @@ std::string Fmi::date_time::to_iso_string(const TimeDuration& td)
 std::ostream& Fmi::date_time::operator<<(std::ostream& os, const TimeDuration& td)
 {
   return os << td.as_string();
+}
+
+Fmi::date_time::TimeDuration Fmi::date_time::duration_from_string(const std::string& str)
+{
+  return Fmi::date_time::TimeDuration::from_string(str);
 }

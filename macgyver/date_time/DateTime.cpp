@@ -1,5 +1,6 @@
 #include "DateTime.h"
 #include "Internal.h"
+#include "ParserDefinitions.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
 
@@ -184,53 +185,102 @@ struct std::tm Fmi::date_time::DateTime::as_tm() const
 std::string Fmi::date_time::DateTime::as_string() const
 {
     if (is_special())
-        return Base::as_string();
+        return Base::special_time_as_string();
     return date().as_string() + " " + maybe_discard_seconds_part(time_of_day().as_string());
 }
 
 std::string Fmi::date_time::DateTime::as_iso_string() const
 {
     if (is_special())
-        return Base::as_string();
+        return Base::special_time_as_string();
     return date().as_iso_string() + "T" + maybe_discard_seconds_part(time_of_day().as_iso_string());
 }
 
 std::string Fmi::date_time::DateTime::as_iso_extended_string() const
 {
     if (is_special())
-        return Base::as_string();
+        return Base::special_time_as_string();
     return date().as_iso_extended_string() + "T" + maybe_discard_seconds_part(time_of_day().as_iso_extended_string());
 }
 
-Fmi::date_time::DateTime Fmi::date_time::DateTime::from_stream(std::istream& is, bool assume_eoi)
+Fmi::date_time::DateTime Fmi::date_time::DateTime::from_tm(const std::tm& tm)
 {
-    const internal::StreamExceptionState save(is, std::ios::failbit | std::ios::badbit);
+    return DateTime(Date::from_tm(tm), TimeDuration::from_tm(tm));
+}
 
-    Fmi::date_time::Date date;
-    Fmi::date_time::TimeDuration time;
+namespace
+{
+    using namespace boost::spirit::qi;
+    using iterator = std::string::const_iterator;
 
-    try
+    Fmi::date_time::DateTime parse_impl(
+        const char* filename,     // We are not interested about this location
+        int line,                 // in backtrace. Therefire use parent one
+        const char* function,
+        const std::string& str,
+        const rule<iterator, Fmi::date_time::parser::date_time_members_t()>& rule)
     {
-        is >> std::ws;
-        date = Fmi::date_time::Date::from_stream(is, false);
-        if (is.eof())
-        {
-            time = Fmi::date_time::TimeDuration(0, 0, 0);
-        }
-        else
-        {
-            time = Fmi::date_time::TimeDuration::from_stream(is);
-        }
-    }
-    catch(const std::exception& e)
-    {
-        auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string");
-        throw err;
-    }
+        const std::string input = Fmi::trim_copy(str);
+        iterator first = input.begin();
+        iterator last = input.end();
 
-    internal::check_parse_status(is, assume_eoi, "date time");
+        Fmi::date_time::parser::date_time_members_t dt;
+        if (!parse(first, last, rule >> eoi, dt))
+        {
+            auto err = Fmi::Exception::Trace(filename, line, function,
+                "Failed to parse date time from string '" + str + "'");
+            throw err;
+        }
 
-    return DateTime(date, time);
+        Fmi::date_time::Date date(dt.date.year, dt.date.month, dt.date.mday);
+        Fmi::date_time::TimeDuration time(
+            dt.hours(),
+            dt.minutes(),
+            dt.seconds(),
+            dt.mks());
+
+        Fmi::date_time::DateTime tmp(date, time);
+
+        if (dt.tz_offset)
+        {
+            // Convert to UTC as we do not support posix time zones
+            tmp - Fmi::date_time::TimeDuration(
+                dt.tz_offset->hours, dt.tz_offset->minutes, 0, 0);
+        }
+
+        return tmp;
+    }
+}
+
+Fmi::date_time::DateTime Fmi::date_time::DateTime::from_string(const std::string& str)
+{
+    using namespace boost::spirit::qi;
+    Fmi::date_time::parser::date_time_members_t dt;
+    rule<iterator> any_space = +space;
+    Fmi::date_time::parser::IsoExtendedDateTimeParser<iterator> parser1;
+    Fmi::date_time::parser::IsoDateTimeParser<iterator> parser2;
+    Fmi::date_time::parser::GenericDateTimeParser<iterator> parser3;
+    rule<iterator, Fmi::date_time::parser::date_time_members_t()> parser =
+        (parser1 | parser2 | parser3) >> eps;
+    return parse_impl(BCP, str, parser);
+}
+
+Fmi::date_time::DateTime Fmi::date_time::DateTime::from_iso_string(const std::string& str)
+{
+    using namespace boost::spirit::qi;
+ 
+    Fmi::date_time::parser::IsoDateTimeParser<iterator> parser;
+
+    return parse_impl(BCP, str, parser >> eoi);
+}
+
+Fmi::date_time::DateTime Fmi::date_time::DateTime::from_iso_extended_string(const std::string& str)
+{
+    using namespace boost::spirit::qi;
+ 
+    Fmi::date_time::parser::IsoExtendedDateTimeParser<iterator> parser;
+
+    return parse_impl(BCP, str, parser >> eoi);
 }
 
 std::string Fmi::date_time::to_simple_string(const DateTime& dt)
@@ -250,27 +300,41 @@ std::string Fmi::date_time::to_iso_extended_string(const DateTime& dt)
 
 Fmi::date_time::DateTime Fmi::date_time::time_from_string(const std::string& src)
 {
-    std::istringstream is(src);
     try
     {
-        return Fmi::date_time::DateTime::from_stream(is, true);
+        return Fmi::date_time::DateTime::from_string(src);
     }
     catch(...)
     {
         auto err = Fmi::Exception::Trace(BCP, "Operation failed!");
-        err.addParameter("Error position", "'" + internal::handle_parse_remainder(is) + "'");
         throw err;
     }
 }
 
 Fmi::date_time::DateTime Fmi::date_time::time_from_iso_string(const std::string& str)
 {
-    throw Fmi::Exception(BCP, "IMPLEMENT ME");
+    try
+    {
+        return Fmi::date_time::DateTime::from_iso_string(str);
+    }
+    catch(...)
+    {
+        auto err = Fmi::Exception::Trace(BCP, "Operation failed!");
+        throw err;
+    }
 }
 
 Fmi::date_time::DateTime Fmi::date_time::time_from_iso_extended_string(const std::string& str)
 {
-    throw Fmi::Exception(BCP, "IMPLEMENT ME");
+    try
+    {
+        return Fmi::date_time::DateTime::from_iso_extended_string(str);
+    }
+    catch(...)
+    {
+        auto err = Fmi::Exception::Trace(BCP, "Operation failed!");
+        throw err;
+    }
 }
 
 std::ostream& Fmi::date_time::operator<<(std::ostream& os, const DateTime& dt)

@@ -113,7 +113,7 @@ namespace Fmi
 
             inline Type type() const { return m_type; }
 
-            std::string as_string() const;
+            std::string special_time_as_string() const;
 
         protected:
             inline void set_type(Type type)
@@ -146,7 +146,7 @@ namespace Fmi
         {
             if (time.is_special())
             {
-                return time.as_string();
+                return time.special_time_as_string();
             }
 
             const auto& impl = time.get_impl();

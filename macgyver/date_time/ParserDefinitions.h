@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <limits>
 #include <string>
+#include <type_traits>
 
 #include "ParserStructures.h"
 
@@ -57,6 +58,28 @@ namespace parser
     using r_uint44 = qi::uint_parser<unsigned, 10, 4, 4>;
 
     template <typename Iterator>
+    struct Separator : public qi::grammar<Iterator, void()>
+    {
+        Separator(char separator)
+            : Separator::base_type(m_separator)
+            , m_separator(separator)
+            , is_empty(separator == 0)
+        {
+        }
+
+        // Do not use this with qi::eps
+        Separator(qi::rule<Iterator> separator)
+            : Separator::base_type(m_separator)
+            , m_separator(separator)
+            , is_empty(false)
+        {
+        }
+
+        qi::rule<Iterator, void()> m_separator;
+        const bool is_empty;
+    };
+
+    template <typename Iterator>
     class MonthShortNameParser : public qi::grammar<Iterator, unsigned()>
     {
     public:
@@ -82,14 +105,15 @@ namespace parser
         qi::rule<Iterator, unsigned()> m_month;
     };
 
-    template <typename Iterator>
+    template <typename Iterator, typename DateSeparatorType>
     struct DateParser : public qi::grammar<Iterator, date_members_t()>
     {
-        DateParser(char separator, bool numerical_month)
+        DateParser(const DateSeparatorType& separator, bool numerical_month)
             : DateParser::base_type(m_date)
+            , m_sep(separator)
         {
             using namespace qi;
-            if (separator == 0)
+            if (m_sep.is_empty)
             {
                 m_year %= r_uint44()[_pass = (_1 >= 0 && _1 <= 9999)];
                 m_mday %= r_uint22()[_pass = (_1 >= 1 && _1 <= 31)];
@@ -117,18 +141,62 @@ namespace parser
                 }
                 m_date %= lexeme[
                     m_year >>
-                    omit[char_(separator)] >>
+                    omit[m_sep] >>
                     m_month >>
-                    omit[char_(separator)] >>
+                    omit[m_sep] >>
                     m_mday];
             }
         }
 
     private:
+        Separator<Iterator> m_sep;
         MonthShortNameParser<Iterator> m_month_abbrev;
         qi::rule<Iterator, unsigned()> m_year;
         qi::rule<Iterator, unsigned()> m_month;
         qi::rule<Iterator, unsigned()> m_mday;
+        qi::rule<Iterator, date_members_t()> m_date;
+    };
+
+    /**
+     *  Parses ISO 8601 date format (YYYYMMDD)
+    */
+    template <typename Iterator>
+    struct IsoDateParser : public DateParser<Iterator, char>
+    {
+        IsoDateParser()
+            : DateParser<Iterator, char>(0, true)
+        {
+        }
+    };
+
+    /**
+     *  Parses ISO 8601 extended date format (YYYY-MM-DD)
+    */
+    template <typename Iterator>
+    struct IsoExtendedDateParser : public DateParser<Iterator, char>
+    {
+        IsoExtendedDateParser()
+            : DateParser<Iterator, char>('-', true)
+        {
+        }
+    };
+
+    template <typename Iterator>
+    struct GenericDateParser : public qi::grammar<Iterator, date_members_t()>
+    {
+        GenericDateParser()
+            : GenericDateParser::base_type(m_date)
+            , m_iso_date()
+            , m_iso_extended_date()
+            , m_yyyy_mmm_dd(':', false)
+            , m_date(m_iso_extended_date | m_yyyy_mmm_dd | m_iso_date)
+        {
+        }
+
+    private:
+        IsoDateParser<Iterator> m_iso_date;
+        IsoExtendedDateParser<Iterator> m_iso_extended_date;
+        DateParser <Iterator, char> m_yyyy_mmm_dd;
         qi::rule<Iterator, date_members_t()> m_date;
     };
 
@@ -144,7 +212,7 @@ namespace parser
             } else {
                 m_full_seconds %= r_uint12()[_pass = (_1 >= 0 && _1 <= 59)];
             }
-            m_frac_seconds %= lexeme[omit['.'] >> +digit];
+            m_frac_seconds %= lexeme[omit['.'] >> *digit];
             m_seconds %= m_full_seconds
                 >> (m_frac_seconds | (eps >> attr(std::string{})));
         }
@@ -154,7 +222,7 @@ namespace parser
         qi::rule<Iterator, seconds_members_t()> m_seconds;
     };
 
-    template <typename Iterator>
+    template <typename Iterator, typename DurationSeparatorType>
     struct DurationParser : public qi::grammar<Iterator, duration_members_t()>
     {
         using iterator = std::string::const_iterator;
@@ -170,11 +238,12 @@ namespace parser
             const unsigned max_hours = std::numeric_limits<unsigned>::max())
 
             : DurationParser::base_type(m_duration)
+            , m_sep(separator)
             , m_seconds(separator == 0)
         {
             using namespace qi;
 
-            if (separator == 0)
+            if (m_sep.is_empty)
             {
                 m_hours %= r_uint22()[_pass = (_1 >= 0 && _1 <= max_hours)];
                 m_minutes %= r_uint22()[_pass = (_1 >= 0 && _1 <= 59)];
@@ -187,14 +256,15 @@ namespace parser
                 // Seconds are optional
                 m_duration %= lexeme[
                     m_hours
-                    >> omit[char_(separator)]
+                    >> omit[m_sep]
                     >> m_minutes
-                    >> -(omit[char_(separator)] >> m_seconds)
+                    >> -(omit[m_sep] >> m_seconds)
                 ];
             }
         }
 
     private:
+        Separator<Iterator> m_sep;
         qi::rule<Iterator, unsigned()> m_hours;
         qi::rule<Iterator, unsigned()> m_minutes;
         SecondsParser<Iterator> m_seconds;
@@ -230,21 +300,74 @@ namespace parser
     };
 
     template <typename Iterator>
-    struct DateTimeParser : public qi::grammar<Iterator, date_time_members_t()>
+    struct IsoDateTimeParser : public qi::grammar<Iterator, date_time_members_t()>
     {
-        DateTimeParser(char date_separator, char time_separator, bool numerical_month)
-            : DateTimeParser::base_type(m_date_time)
-            , m_date(date_separator, numerical_month)
-            , m_duration(time_separator)
+        IsoDateTimeParser()
+            : IsoDateTimeParser::base_type(m_date_time)
+            , m_date(0, true)
+            , m_duration(0)
             , m_offset()
         {
             using namespace qi;
-            m_date_time %= lexeme[m_date >> -('T' >> m_duration >> -m_offset)];
+            m_date_time %=
+                lexeme[m_date >> -(omit[char_('T')] >> m_duration >> -m_offset)];
         }
 
     private:
-        DateParser<Iterator> m_date;
-        DurationParser<Iterator> m_duration;
+        DateParser<Iterator, char> m_date;
+        DurationParser<Iterator, char> m_duration;
+        TimeZoneOffsetParser<Iterator> m_offset;
+        qi::rule<Iterator, date_time_members_t()> m_date_time;
+    };
+
+    template <typename Iterator>
+    struct IsoExtendedDateTimeParser : public qi::grammar<Iterator, date_time_members_t()>
+    {
+        IsoExtendedDateTimeParser()
+            : IsoExtendedDateTimeParser::base_type(m_date_time)
+            , m_date('-', true)
+            , m_duration(':')
+            , m_offset()
+        {
+            using namespace qi;
+            m_date_time %=
+                lexeme[m_date >> -(omit[char_('T')] >> m_duration >> -m_offset)];
+        }
+
+    private:
+        DateParser<Iterator, char> m_date;
+        DurationParser<Iterator, char> m_duration;
+        TimeZoneOffsetParser<Iterator> m_offset;
+        qi::rule<Iterator, date_time_members_t()> m_date_time;
+    };
+
+    template <typename Iterator>
+    struct GenericDateTimeParser : public qi::grammar<Iterator, date_time_members_t()>
+    {
+        GenericDateTimeParser()
+            : GenericDateTimeParser::base_type(m_date_time)
+            , m_date_1('-', true)
+            , m_date_2('-', false)
+            , m_duration(':')
+            , m_offset()
+        {
+            using namespace qi;
+
+            //m_sep %= +space;
+            m_sep %= ' ';
+
+            m_date %= m_date_1 | m_date_2;
+
+            m_date_time %= lexeme[m_date >> -(m_sep >> m_duration >> -m_offset)];
+        }
+
+    private:
+        
+        qi::rule<Iterator> m_sep;
+        DateParser<Iterator, char> m_date_1;
+        DateParser<Iterator, char> m_date_2;
+        qi::rule<Iterator, date_members_t()> m_date;
+        DurationParser<Iterator, char> m_duration;
         TimeZoneOffsetParser<Iterator> m_offset;
         qi::rule<Iterator, date_time_members_t()> m_date_time;
     };

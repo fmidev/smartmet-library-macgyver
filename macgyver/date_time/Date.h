@@ -63,6 +63,12 @@ namespace Fmi
             std::string as_iso_string() const;
             std::string as_iso_extended_string() const;
 
+            static Date from_time_t(std::time_t time);
+            static Date from_tm(const std::tm& tm);
+            static Date from_string(const std::string& str);
+            static Date from_iso_string(const std::string& str);
+            static Date from_iso_extended_string(const std::string& str);
+
             bool operator==(const Date& other) const;
             bool operator!=(const Date& other) const;
             bool operator<(const Date& other) const;
@@ -83,18 +89,6 @@ namespace Fmi
             Date& operator--();
 
             const date::local_days& get_impl() const { return date; };
-
-            /**
-             * @brief  Parse time duration from string.
-             * 
-             * @param str  String to parse.
-             * @param assume_eoi  If true, allows only whitespace after the duration.
-             * @return Parsed date.
-            */
-            static Date from_stream(std::istream& src, bool assume_eoi = true);
-
-            static Date from_time_t(std::time_t time);
-
         private:
             void assert_special() const;
 

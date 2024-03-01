@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
 
     TimeZonePtr tz1("Europe/Helsinki");
     TimeZonePtr tz2("Etc/UTC");
-    DateTime dtm1 = time_from_string("2014-02-01 12:34:56.789");
-    DateTime dtm2 = time_from_string("2014-05-01 12:34:56.789");
+    DateTime dtm1 = SHOW_EXCEPTIONS(time_from_string("2014-02-01 12:34:56.789"));
+    DateTime dtm2 = SHOW_EXCEPTIONS(time_from_string("2014-05-01 12:34:56.789"));
     LocalDateTime ldt1(dtm1.date(), dtm1.time_of_day(), tz1);
 
     BOOST_CHECK_EQUAL(ldt1.local_time().date().year(), 2014);

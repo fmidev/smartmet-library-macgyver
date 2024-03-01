@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_parse_date_iso_string)
     BOOST_TEST_MESSAGE("Parse ISO string");
     bool ok;
     Fmi::date_time::parser::date_members_t date_result;
-    Fmi::date_time::parser::DateParser<iterator> parser(0, true);
+    Fmi::date_time::parser::DateParser<iterator, char> parser(0, true);
 
     std::string input = "20170314";
     std::string::const_iterator begin = input.begin();
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_parse_date_iso_extended_string)
     BOOST_TEST_MESSAGE("Parse ISO string");
     bool ok;
     Fmi::date_time::parser::date_members_t date_result;
-    Fmi::date_time::parser::DateParser<iterator> parser('-', true);
+    Fmi::date_time::parser::DateParser<iterator, char> parser('-', true);
 
     std::string input = "2017-03-14";
     std::string::const_iterator begin = input.begin();  
@@ -177,9 +177,9 @@ BOOST_AUTO_TEST_CASE (test_simple_date_parser)
 
     using iterator = std::string::const_iterator;
 
-    Fmi::date_time::parser::DateParser<iterator> parser1('-', true);
-    Fmi::date_time::parser::DateParser<iterator> parser2(0, true);
-    Fmi::date_time::parser::DateParser<iterator> parser3('-', false);
+    Fmi::date_time::parser::DateParser<iterator, char> parser1('-', true);
+    Fmi::date_time::parser::DateParser<iterator, char> parser2(0, true);
+    Fmi::date_time::parser::DateParser<iterator, char> parser3('-', false);
 
     for (const auto& td : test_data_pass) {
         Fmi::date_time::parser::date_members_t result;
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE (test_duration_parser_1)
     using iterator = std::string::const_iterator;
 
     // No separator, up to 23 hours including
-    Fmi::date_time::parser::DurationParser<iterator> parser(0, 24);
+    Fmi::date_time::parser::DurationParser<iterator, char> parser(0, 24);
     for (const auto& td : test_data_pass) {
         Fmi::date_time::parser::duration_members_t result;
         iterator begin = td.input.begin();
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE (test_duration_parser_2)
     using iterator = std::string::const_iterator;
 
     // No separator, up to 23 hours including
-    Fmi::date_time::parser::DurationParser<iterator> parser(':', 24);
+    Fmi::date_time::parser::DurationParser<iterator, char> parser(':', 24);
     for (const auto& td : test_data_pass) {
         Fmi::date_time::parser::duration_members_t result;
         iterator begin = td.input.begin();
@@ -400,8 +400,8 @@ BOOST_AUTO_TEST_CASE (iso_date_time_parser)
     };
 
     using iterator = std::string::const_iterator;
-    Fmi::date_time::parser::DateTimeParser<iterator> iso_parser(0, 0, true);
-    Fmi::date_time::parser::DateTimeParser<iterator> iso_ext_parser('-', ':', true);
+    Fmi::date_time::parser::IsoDateTimeParser<iterator> iso_parser;
+    Fmi::date_time::parser::IsoExtendedDateTimeParser<iterator> iso_ext_parser;
 
     for (const auto& item : test_data_pass) {
         Fmi::date_time::parser::date_time_members_t result;
@@ -433,4 +433,35 @@ BOOST_AUTO_TEST_CASE (iso_date_time_parser)
             BOOST_FAIL("Parsing failed for input: " + item.input);
         }
     }
+}
+
+BOOST_AUTO_TEST_CASE (parse_date_time_2)
+{
+    using namespace boost::spirit::qi;
+    using namespace Fmi::date_time;
+    using namespace Fmi::date_time::parser;
+    using iterator = std::string::const_iterator;
+   
+    BOOST_TEST_MESSAGE("Parse date time 2");
+
+    const auto input = "2014-02-01 12:34:56.789"s;
+
+    date_time_members_t result;
+    GenericDateTimeParser<iterator> parser;
+    iterator begin = input.begin();
+    iterator end = input.end();
+    bool ok = boost::spirit::qi::parse(begin, end, parser, result);
+    if (ok) {
+        DEBUG(std::cout << input << " : " << result << std::endl);
+        BOOST_CHECK_EQUAL(result.date.year, 2014);
+        BOOST_CHECK_EQUAL(result.date.month, 2);
+        BOOST_CHECK_EQUAL(result.date.mday, 1);
+        BOOST_CHECK_EQUAL(result.hours(), 12);
+        BOOST_CHECK_EQUAL(result.minutes(), 34);
+        BOOST_CHECK_EQUAL(result.seconds(), 56);
+        BOOST_CHECK_EQUAL(result.mks(), 789000);
+    } else {
+        BOOST_FAIL("Parsing failed for input: " + input);
+    }
+    
 }
