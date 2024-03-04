@@ -142,6 +142,7 @@ BOOST_AUTO_TEST_CASE(duration_parse)
             , {"12:11:10.", "12:11:10"}
             , {"12:11:10", nullptr}
             , {"12:11 ", "12:11:00"}
+            , {"10:17", "10:17:00"}
         };
 
     const auto test_parse = [](const std::string& src) -> Fmi::date_time::TimeDuration

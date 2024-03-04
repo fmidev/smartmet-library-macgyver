@@ -346,29 +346,34 @@ namespace parser
     {
         GenericDateTimeParser()
             : GenericDateTimeParser::base_type(m_date_time)
-            , m_date_1('-', true)
-            , m_date_2('-', false)
-            , m_duration(':')
+            , m_sep_1(+qi::space)
+            , m_sep_2('T')
+            , m_date_1('-', true)    // ISO extended date
+            , m_date_2('-', false)   // YYYY-MMM-DD
+            , m_date_3(0, true)      // ISO date
+            , m_duration_1(':')
+            , m_duration_2(0)
             , m_offset()
+            , m_date_time_1(m_date_2 >> -(m_sep_1 >> m_duration_1 >> -m_offset))
+            , m_date_time_2(m_date_1 >> -((m_sep_1 | m_sep_2) >> m_duration_1 >>-m_offset))
+            , m_date_time_3(m_date_3 >> -(m_sep_2 >> m_duration_2 >> -m_offset))
+            , m_date_time(qi::lexeme[m_date_time_1 | m_date_time_2 | m_date_time_3])
         {
-            using namespace qi;
-
-            //m_sep %= +space;
-            m_sep %= ' ';
-
-            m_date %= m_date_1 | m_date_2;
-
-            m_date_time %= lexeme[m_date >> -(m_sep >> m_duration >> -m_offset)];
         }
 
     private:
         
-        qi::rule<Iterator> m_sep;
+        qi::rule<Iterator, void()> m_sep_1;
+        qi::rule<Iterator, void()> m_sep_2;
         DateParser<Iterator, char> m_date_1;
         DateParser<Iterator, char> m_date_2;
-        qi::rule<Iterator, date_members_t()> m_date;
-        DurationParser<Iterator, char> m_duration;
+        DateParser<Iterator, char> m_date_3;
+        DurationParser<Iterator, char> m_duration_1;
+        DurationParser<Iterator, char> m_duration_2;
         TimeZoneOffsetParser<Iterator> m_offset;
+        qi::rule<Iterator, date_time_members_t()> m_date_time_1;
+        qi::rule<Iterator, date_time_members_t()> m_date_time_2;
+        qi::rule<Iterator, date_time_members_t()> m_date_time_3;
         qi::rule<Iterator, date_time_members_t()> m_date_time;
     };
 

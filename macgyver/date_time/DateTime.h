@@ -3,6 +3,7 @@
 #include "Date.h"
 #include "TimeDuration.h"
 #include <ctime>
+#include <optional>
 #include <ostream>
 
 namespace Fmi
@@ -51,6 +52,10 @@ namespace Fmi
             static DateTime from_iso_string(const std::string& str);
             static DateTime from_iso_extended_string(const std::string& str);
 
+            static std::optional<DateTime> try_parse_iso_string(const std::string& src);
+            static std::optional<DateTime> try_parse_iso_extended_string(const std::string& src);
+            static std::optional<DateTime> try_parse_string(const std::string& src);
+
             static DateTime from_stream(std::istream& is, bool assume_eoi = true);
 
             detail::time_point_t get_impl() const { return m_time_point; }
@@ -60,14 +65,40 @@ namespace Fmi
             detail::time_point_t m_time_point;
         };
 
-        inline std::tm to_tm(const DateTime& dt) { return dt.as_tm(); }
-        std::string to_simple_string(const DateTime& dt);
-        std::string to_iso_string(const DateTime& dt);
-        std::string to_iso_extended_string(const DateTime& dt);
+        inline std::tm to_tm(const DateTime& dt)
+        {
+            return dt.as_tm();
+        }
 
-        DateTime time_from_string(const std::string& str);
-        DateTime time_from_iso_string(const std::string& str);
-        DateTime time_from_iso_extended_string(const std::string& str);
+        inline std::string to_simple_string(const DateTime& dt)
+        {
+            return dt.as_string();
+        }
+
+        inline std::string to_iso_string(const DateTime& dt)
+        {
+            return dt.as_iso_string();
+        }
+
+        inline std::string to_iso_extended_string(const DateTime& dt)
+        {
+            return dt.as_iso_extended_string();
+        }
+
+        inline DateTime time_from_string(const std::string& str)
+        {
+            return DateTime::from_string(str);
+        }
+
+        inline DateTime time_from_iso_string(const std::string& str)
+        {
+            return DateTime::from_iso_string(str);
+        }
+
+        inline DateTime time_from_iso_extended_string(const std::string& str)
+        {
+            return DateTime::from_iso_extended_string(str);
+        }
 
         DateTime from_time_t(std::time_t t);
 
