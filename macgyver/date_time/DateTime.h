@@ -102,6 +102,9 @@ namespace Fmi
 
         DateTime from_time_t(std::time_t t);
 
+        DateTime try_parse_iso(const std::string& str, bool* is_utc);
+        DateTime parse_iso(const std::string& str);
+
         std::ostream& operator<<(std::ostream& os, const DateTime& dt);
 
         namespace MicrosecClock

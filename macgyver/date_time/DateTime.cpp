@@ -262,7 +262,8 @@ namespace
         int line,                 // in backtrace. Therefore use parent one
         const char* function,
         const std::string& str,
-        const rule<iterator, Fmi::date_time::parser::date_time_members_t()>& rule)
+        const rule<iterator, Fmi::date_time::parser::date_time_members_t()>& rule,
+        bool* is_utc = nullptr)
     {
         try
         {
@@ -290,9 +291,13 @@ namespace
                 // Convert to UTC as we do not support posix time zones
                 tmp - Fmi::date_time::TimeDuration(
                     dt.tz_offset->hours, dt.tz_offset->minutes, 0, 0);
+                if (is_utc)
+                    *is_utc = true;
+            } else if (is_utc) {
+                *is_utc = false;
             }
 
-        return tmp;
+            return tmp;
         }
         catch (...)
         {
@@ -337,7 +342,32 @@ std::optional<Fmi::date_time::DateTime>
 Fmi::date_time::DateTime::try_parse_string(const std::string& src)
 {
     using namespace boost::spirit::qi;
-    return parse_impl(BCP, src, generic_date_time_parser >> eps);
+    return parse_impl(BCP, src, generic_date_time_parser >> eoi);
+}
+
+Fmi::date_time::DateTime
+Fmi::date_time::try_parse_iso(const std::string& str, bool* is_utc)
+{
+    using namespace boost::spirit::qi;
+    std::optional<Fmi::date_time::DateTime> result;
+    result = try_parse_impl(BCP, str, iso_extended_date_time_parser >> eoi, is_utc);
+    if (!result) {
+        result = try_parse_impl(BCP, str, iso_date_time_parser >> eoi, is_utc);
+    }
+    if (result) {
+        return *result;
+    }
+
+    return Fmi::date_time::DateTime::NOT_A_DATE_TIME;
+}
+
+Fmi::date_time::DateTime
+Fmi::date_time::parse_iso(const std::string& str)
+{
+    const auto result = Fmi::date_time::try_parse_iso(str, nullptr);
+    if (result.is_special())
+        throw Fmi::Exception(BCP, "Invalid ISO time '" + str + "'");
+    return result;
 }
 
 std::ostream& Fmi::date_time::operator<<(std::ostream& os, const DateTime& dt)

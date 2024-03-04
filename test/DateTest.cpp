@@ -225,6 +225,56 @@ BOOST_AUTO_TEST_CASE(date_from_string_1)
     }
 }
 
+BOOST_AUTO_TEST_CASE(date_from_iso_string)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::Date: date_from_iso_string");
+
+    std::vector<std::pair<std::string, std::string> > test_data = {
+        { "20000229", "2000-Feb-29" }
+        , { "20000229", "2000-Feb-29" }
+        , { "20240131", "2024-Jan-31" }
+        , { "20140201", "2014-Feb-01" }
+    }; // end of test_data
+
+    const auto test_parse =  [](const std::string& s1) -> std::string {
+        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).as_string());
+    };
+
+    for (const auto& item : test_data)
+    {
+        std::string s1;
+        BOOST_CHECK_NO_THROW(s1 = test_parse(item.first));
+        if (s1 != "") {
+            BOOST_CHECK_EQUAL(s1, item.second);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(date_from_iso_extended_string)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::Date: date_from_iso_extended_string");
+
+    std::vector<std::pair<std::string, std::string> > test_data = {
+        { "2000-2-29", "2000-Feb-29" }
+        , { "2000-02-29", "2000-Feb-29" }
+        , { "2024-01-31", "2024-Jan-31" }
+        , { "2014-02-01", "2014-Feb-01" }
+    }; // end of test_data
+
+    const auto test_parse =  [](const std::string& s1) -> std::string {
+        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).as_string());
+    };
+
+    for (const auto& item : test_data)
+    {
+        std::string s1;
+        BOOST_CHECK_NO_THROW(s1 = test_parse(item.first));
+        if (s1 != "") {
+            BOOST_CHECK_EQUAL(s1, item.second);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(format_for_locale)
 {
     BOOST_TEST_MESSAGE("Fmi::date_time::Date: format_for_locale");

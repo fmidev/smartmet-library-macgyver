@@ -229,7 +229,7 @@ namespace parser
 
         /**
          * @brief Construct a new Duration Parser object
-         * 
+         *
          * @param separator separator character between hours, minutes and seconds when not
          *                  0 and absent when 0
         */
@@ -239,7 +239,7 @@ namespace parser
 
             : DurationParser::base_type(m_duration)
             , m_sep(separator)
-            , m_seconds(separator == 0)
+            , m_seconds(m_sep.is_empty)
         {
             using namespace qi;
 
@@ -247,7 +247,7 @@ namespace parser
             {
                 m_hours %= r_uint22()[_pass = (_1 >= 0 && _1 <= max_hours)];
                 m_minutes %= r_uint22()[_pass = (_1 >= 0 && _1 <= 59)];
-                m_duration %= lexeme[m_hours >> m_minutes >> m_seconds];
+                m_duration %= lexeme[m_hours >> m_minutes >> -m_seconds];
             }
             else
             {
@@ -268,6 +268,23 @@ namespace parser
         qi::rule<Iterator, unsigned()> m_hours;
         qi::rule<Iterator, unsigned()> m_minutes;
         SecondsParser<Iterator> m_seconds;
+        qi::rule<Iterator, duration_members_t()> m_duration;
+    };
+
+    template <typename Iterator>
+    struct GenericDurationParser : public qi::grammar<Iterator, duration_members_t()>
+    {
+        GenericDurationParser(const unsigned max_hours = std::numeric_limits<unsigned>::max())
+            : GenericDurationParser::base_type(m_duration)
+            , m_iso_duration(0)
+            , m_iso_extended_duration(':')
+            , m_duration(m_iso_extended_duration | m_iso_duration)
+        {
+        }
+
+    private:
+        DurationParser<Iterator, char> m_iso_duration;
+        DurationParser<Iterator, char> m_iso_extended_duration;
         qi::rule<Iterator, duration_members_t()> m_duration;
     };
 
@@ -305,7 +322,7 @@ namespace parser
         IsoDateTimeParser()
             : IsoDateTimeParser::base_type(m_date_time)
             , m_date(0, true)
-            , m_duration(0)
+            , m_duration(0, 24)
             , m_offset()
         {
             using namespace qi;
@@ -326,7 +343,7 @@ namespace parser
         IsoExtendedDateTimeParser()
             : IsoExtendedDateTimeParser::base_type(m_date_time)
             , m_date('-', true)
-            , m_duration(':')
+            , m_duration(':', 24)
             , m_offset()
         {
             using namespace qi;
@@ -362,7 +379,7 @@ namespace parser
         }
 
     private:
-        
+
         qi::rule<Iterator, void()> m_sep_1;
         qi::rule<Iterator, void()> m_sep_2;
         DateParser<Iterator, char> m_date_1;

@@ -258,7 +258,7 @@ Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
       while (!is.eof() && std::isdigit(is.peek()))
         is.get();
     }
-  } 
+  }
   catch (...)
   {
     auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string");
@@ -345,9 +345,8 @@ Fmi::date_time::TimeDuration::from_string(const std::string& str, bool h_24)
   iterator end = input.end();
 
   Fmi::date_time::parser::duration_members_t members;
-  Fmi::date_time::parser::DurationParser<iterator, char> parser1(':');
-  Fmi::date_time::parser::DurationParser<iterator, char> parser2(0);
-  bool r = parse(begin, end, (parser1 | parser2) >> eoi, members);
+  Fmi::date_time::parser::GenericDurationParser<iterator> parser(h_24);
+  bool r = parse(begin, end, parser >> eoi, members);
   if (!r)
   {
     auto err = Fmi::Exception::Trace(BCP, "Failed to parse time duration from string '" + str + "'");

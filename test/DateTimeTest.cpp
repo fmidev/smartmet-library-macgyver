@@ -117,14 +117,14 @@ namespace
     {
         Fmi::date_time::Date d(year, month, day);
         Fmi::date_time::TimeDuration td(hours, minutes, seconds, mks);
-        return Fmi::date_time::DateTime(d, td);         
+        return Fmi::date_time::DateTime(d, td);
     }
 }
 
 BOOST_AUTO_TEST_CASE(time_from_string_test_1)
 {
-    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: time_from_string");
-    
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime::from_string");
+
     const std::string fmt = "%Y-%m-%d %H:%M:%S";
 
     const std::pair<std::string, Fmi::date_time::DateTime> tests[] = {
@@ -135,18 +135,95 @@ BOOST_AUTO_TEST_CASE(time_from_string_test_1)
         {"2024-01-31 10:17:00", make_datetime(2024, 1, 31, 10, 17, 0)},
         {"2024-01-31 10:17", make_datetime(2024, 1, 31, 10, 17, 0)},
         {"2024-Jan-31 10:17", make_datetime(2024, 1, 31, 10, 17, 0)},
-        {"2024-01-31", make_datetime(2024, 1, 31, 0, 0, 0)}
+        {"2024-01-31", make_datetime(2024, 1, 31, 0, 0, 0)},
+        {"2024-Jan-31 10:17+0300", make_datetime(2024, 1, 31, 7, 17, 0)},
+        {"2024-Jan-31 10:17Z", make_datetime(2024, 1, 31, 10, 17, 0)}
     };
 
     for (const auto& test : tests)
     {
         try {
-            Fmi::date_time::DateTime dt = SHOW_EXCEPTIONS(Fmi::date_time::time_from_string(test.first));
+            Fmi::date_time::DateTime dt =
+                SHOW_EXCEPTIONS(Fmi::date_time::DateTime::from_string(test.first));
             BOOST_CHECK_EQUAL(dt, test.second);
         }
         catch (const std::exception& e)
         {
             BOOST_ERROR("Failed to parse '" + test.first + "': " + e.what());
         }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(time_from_iso_string)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime::from_iso_string");
+
+    const std::string fmt = "%Y-%m-%d %H:%M:%S";
+
+    const std::pair<std::string, Fmi::date_time::DateTime> tests[] = {
+        {"20240131T101700", make_datetime(2024, 1, 31, 10, 17, 0)},
+        {"20240131T1017", make_datetime(2024, 1, 31, 10, 17, 0)},
+        {"20240131", make_datetime(2024, 1, 31, 0, 0, 0)},
+        {"20240131T101700+0300", make_datetime(2024, 1, 31, 7, 17, 0)},
+        {"20240131T101700Z", make_datetime(2024, 1, 31, 10, 17, 0)}
+    };
+
+    int num_tests = sizeof(tests) / sizeof(tests[0]);
+    int num_passed = 0;
+
+    for (const auto& test : tests)
+    {
+        try {
+            Fmi::date_time::DateTime dt =
+                SHOW_EXCEPTIONS(Fmi::date_time::DateTime::from_iso_string(test.first));
+            BOOST_CHECK_EQUAL(dt, test.second);
+            num_passed++;
+        }
+        catch (const std::exception& e)
+        {
+            BOOST_ERROR("Failed to parse '" + test.first + "': " + e.what());
+        }
+    }
+
+    if (num_passed != num_tests)
+    {
+        BOOST_TEST_MESSAGE("Failed " << num_tests - num_passed << " out of " << num_tests << " tests");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(time_from_iso_extended_string)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime::from_iso_string");
+
+    const std::string fmt = "%Y-%m-%d %H:%M:%S";
+
+    const std::pair<std::string, Fmi::date_time::DateTime> tests[] = {
+        {"2024-01-31T10:17:00", make_datetime(2024, 1, 31, 10, 17, 0)},
+        {"2024-01-31T10:17", make_datetime(2024, 1, 31, 10, 17, 0)},
+        {"2024-01-31", make_datetime(2024, 1, 31, 0, 0, 0)},
+        {"2024-01-31T10:17+0300", make_datetime(2024, 1, 31, 7, 17, 0)},
+        {"2024-01-31T10:17Z", make_datetime(2024, 1, 31, 10, 17, 0)}
+    };
+
+    int num_tests = sizeof(tests) / sizeof(tests[0]);
+    int num_passed = 0;
+
+    for (const auto& test : tests)
+    {
+        try {
+            Fmi::date_time::DateTime dt =
+                SHOW_EXCEPTIONS(Fmi::date_time::DateTime::from_iso_extended_string(test.first));
+            BOOST_CHECK_EQUAL(dt, test.second);
+            num_passed++;
+        }
+        catch (const std::exception& e)
+        {
+            BOOST_ERROR("Failed to parse '" + test.first + "': " + e.what());
+        }
+    }
+
+    if (num_passed != num_tests)
+    {
+        BOOST_TEST_MESSAGE("Failed " << num_tests - num_passed << " out of " << num_tests << " tests");
     }
 }

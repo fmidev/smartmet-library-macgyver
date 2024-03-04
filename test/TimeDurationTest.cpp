@@ -124,9 +124,9 @@ BOOST_AUTO_TEST_CASE(test_operations)
     BOOST_CHECK_EQUAL(td5 / 2, td1);
 }
 
-BOOST_AUTO_TEST_CASE(duration_parse)
+BOOST_AUTO_TEST_CASE(from_string)
 {
-    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: test parsing");
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration::from_string");
 
     using Fmi::date_time::duration_from_string;
 
@@ -148,6 +148,78 @@ BOOST_AUTO_TEST_CASE(duration_parse)
     const auto test_parse = [](const std::string& src) -> Fmi::date_time::TimeDuration
     {
         return SHOW_EXCEPTIONS(duration_from_string(src));
+    };
+
+    for (const auto& td : test_data)
+    {
+        const char* src = td.first;
+        const char* dst = td.second ? td.second : td.first;
+        Fmi::date_time::TimeDuration td1;
+        BOOST_CHECK_NO_THROW(td1 = test_parse(src));
+        BOOST_CHECK_EQUAL(td1.as_string(), dst);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(from_iso_string)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration::from_iso_string");
+
+    using Fmi::date_time::duration_from_string;
+
+    const std::pair<const char*, const char*> test_data[] =
+        {
+            {"121110.123456789", "12:11:10.123456"}
+            , {"121110.123456", "12:11:10.123456"}
+            , {"121110.12345", "12:11:10.123450"}
+            , {"121110.1234", "12:11:10.123400"}
+            , {"121110.123", "12:11:10.123000"}
+            , {"121110.12", "12:11:10.120000"}
+            , {"121110.1", "12:11:10.100000"}
+            , {"121110.", "12:11:10"}
+            , {"121110", "12:11:10"}
+            , {"1211 ", "12:11:00"}
+            , {"1017", "10:17:00"}
+        };
+
+    const auto test_parse = [](const std::string& src) -> Fmi::date_time::TimeDuration
+    {
+        return SHOW_EXCEPTIONS(Fmi::date_time::TimeDuration::from_iso_string(src));
+    };
+
+    for (const auto& td : test_data)
+    {
+        const char* src = td.first;
+        const char* dst = td.second ? td.second : td.first;
+        Fmi::date_time::TimeDuration td1;
+        BOOST_CHECK_NO_THROW(td1 = test_parse(src));
+        BOOST_CHECK_EQUAL(td1.as_string(), dst);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(from_iso_extended_string)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration::from_iso_extended_string");
+
+    using Fmi::date_time::duration_from_string;
+
+    const std::pair<const char*, const char*> test_data[] =
+        {
+            {"12:11:10.123456789", "12:11:10.123456"}
+            , {"12:11:10.123456", "12:11:10.123456"}
+            , {"12:11:10.12345", "12:11:10.123450"}
+            , {"12:11:10.1234", "12:11:10.123400"}
+            , {"12:11:10.123", "12:11:10.123000"}
+            , {"12:11:10.12", "12:11:10.120000"}
+            , {"12:11:10.1", "12:11:10.100000"}
+            , {"12:11:10.", "12:11:10"}
+            , {"12:11:10", "12:11:10"}
+            , {"12:11 ", "12:11:00"}
+            , {"10:17", "10:17:00"}
+        };
+
+    const auto test_parse = [](const std::string& src) -> Fmi::date_time::TimeDuration
+    {
+        return SHOW_EXCEPTIONS(Fmi::date_time::TimeDuration::from_iso_extended_string(src));
     };
 
     for (const auto& td : test_data)
