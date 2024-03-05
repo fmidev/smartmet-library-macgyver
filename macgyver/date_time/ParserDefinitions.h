@@ -12,6 +12,8 @@
 
 #include "ParserStructures.h"
 
+#define SUPPORT_DATE_TIME_PARSER_GRAMMAR 0
+
 // Adapt structs, so they behave like boost::fusion::vector's
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -37,11 +39,15 @@ BOOST_FUSION_ADAPT_STRUCT(
     (unsigned, hours)
     (unsigned, minutes))
 
+#if SUPPORT_DATE_TIME_PARSER_GRAMMAR
+
 BOOST_FUSION_ADAPT_STRUCT(
     Fmi::date_time::parser::date_time_members_t,
     (Fmi::date_time::parser::date_members_t, date)
     (std::optional<Fmi::date_time::parser::duration_members_t>, time)
     (std::optional<Fmi::date_time::parser::time_zone_offset_members_t>, tz_offset))
+
+#endif
 
 namespace Fmi
 {
@@ -316,6 +322,9 @@ namespace parser
         qi::rule<Iterator, time_zone_offset_members_t()> m_offset;
     };
 
+// The following does not seem to work correctlty (tz_offset is never stored
+// enen vhen specofied in the input string.
+#if 0
     template <typename Iterator>
     struct IsoDateTimeParser : public qi::grammar<Iterator, date_time_members_t()>
     {
@@ -393,6 +402,7 @@ namespace parser
         qi::rule<Iterator, date_time_members_t()> m_date_time_3;
         qi::rule<Iterator, date_time_members_t()> m_date_time;
     };
+#endif // SUPPORT_DATE_TIME_PARSER_GRAMMAR
 
 }  // namespace parser
 

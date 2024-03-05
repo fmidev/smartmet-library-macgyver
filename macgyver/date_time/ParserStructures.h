@@ -4,10 +4,13 @@
 #include <optional>
 #include <string>
 
+#include <iostream>
+
 namespace Fmi
 {
 namespace date_time
 {
+
 namespace parser
 {
     struct date_members_t
@@ -50,6 +53,19 @@ namespace parser
         char sign;
         unsigned hours;
         unsigned minutes;
+
+        int get_offset_minutes() const
+        {
+            switch (sign)
+            {
+                case '-':
+                    return -1 * (hours * 60 + minutes);
+                case '+':
+                    return hours * 60 + minutes;
+                default:
+                    return 0;
+            }
+        }
     };
 
     struct date_time_members_t

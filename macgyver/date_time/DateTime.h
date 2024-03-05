@@ -52,9 +52,14 @@ namespace Fmi
             static DateTime from_iso_string(const std::string& str);
             static DateTime from_iso_extended_string(const std::string& str);
 
-            static std::optional<DateTime> try_parse_iso_string(const std::string& src);
-            static std::optional<DateTime> try_parse_iso_extended_string(const std::string& src);
-            static std::optional<DateTime> try_parse_string(const std::string& src);
+            static std::optional<DateTime>
+            try_parse_iso_string(const std::string& src, bool* have_tz = nullptr);
+
+            static std::optional<DateTime>
+            try_parse_iso_extended_string(const std::string& src, bool* have_tz = nullptr);
+
+            static std::optional<DateTime>
+            try_parse_string(const std::string& src, bool* have_tz = nullptr);
 
             static DateTime from_stream(std::istream& is, bool assume_eoi = true);
 
