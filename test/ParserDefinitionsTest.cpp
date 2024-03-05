@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE (test_duration_parser_2)
     }
 }
 
-BOOST_AUTO_TEST_CASE (time_zone_offset)
+BOOST_AUTO_TEST_CASE (time_zone_offset_1)
 {
     BOOST_TEST_MESSAGE("Time zone offset parser");
     struct {
@@ -358,6 +358,44 @@ BOOST_AUTO_TEST_CASE (time_zone_offset)
             BOOST_CHECK_EQUAL(result.sign, td.sign);
             BOOST_CHECK_EQUAL(result.hours, td.hours);
             BOOST_CHECK_EQUAL(result.minutes, td.minutes);
+        } else {
+            BOOST_FAIL("Parsing failed for input: " + td.input + ", position="
+                + std::string(begin, end));
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE (time_zone_offset_2)
+{
+    BOOST_TEST_MESSAGE("Time zone offset parser 2");
+    struct {
+        std::string input;
+        char sign;
+        unsigned hours;
+        unsigned minutes;
+    } const test_data_pass[] = {
+        {"+02:00"s, '+', 2, 0},
+        {"-02:00"s, '-', 2, 0},
+        {"+02:30"s, '+', 2, 30},
+        {"-02:30"s, '-', 2, 30},
+        {"Z"s, 'Z', 0, 0}
+    };
+
+    using iterator = std::string::const_iterator;
+    Fmi::date_time::parser::TimeZoneOffsetParser<iterator> parser;
+    for (const auto& td : test_data_pass) {
+        std::optional<Fmi::date_time::parser::time_zone_offset_members_t> result;
+        iterator begin = td.input.begin();
+        iterator end = td.input.end();
+        bool ok = boost::spirit::qi::parse(begin, end, -parser >> qi::eoi, result);
+        if (ok) {
+            if (result) {
+                BOOST_CHECK_EQUAL(result->sign, td.sign);
+                BOOST_CHECK_EQUAL(result->hours, td.hours);
+                BOOST_CHECK_EQUAL(result->minutes, td.minutes);
+            } else {
+                BOOST_FAIL("Unexpected empty result for input: " + td.input);
+            }
         } else {
             BOOST_FAIL("Parsing failed for input: " + td.input + ", position="
                 + std::string(begin, end));
@@ -392,7 +430,7 @@ BOOST_AUTO_TEST_CASE (iso_date_time_parser)
         {"2017-03-14T12:34:56.789-02:00"s, 2017, 3, 14, 12, 34, 56, "789"},
         {"2017-03-14T12:34:56-02:00"s, 2017, 3, 14, 12, 34, 56, ""},
         {"2017-03-14T12:34-02:00"s, 2017, 3, 14, 12, 34, 0, ""},
-        {"2017-03-14T12:34:56.7-02:00"s, 2017, 3, 14, 12, 34, 56, "7"},
+        {"2017-03-14T12:34:56.7-0200"s, 2017, 3, 14, 12, 34, 56, "7"},
         {"2017-03-14T12:34:56.789Z"s, 2017, 3, 14, 12, 34, 56, "789"},
         {"2017-03-14T12:34:56Z"s, 2017, 3, 14, 12, 34, 56, ""},
         {"2017-03-14"s, 2017, 3, 14, 0, 0, 0, ""},

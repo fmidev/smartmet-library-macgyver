@@ -137,6 +137,8 @@ BOOST_AUTO_TEST_CASE(time_from_string_test_1)
         {"2024-Jan-31 10:17", make_datetime(2024, 1, 31, 10, 17, 0)},
         {"2024-01-31", make_datetime(2024, 1, 31, 0, 0, 0)},
         {"2024-Jan-31 10:17+0300", make_datetime(2024, 1, 31, 7, 17, 0)},
+        {"2024-01-31T10:17+0300", make_datetime(2024, 1, 31, 7, 17, 0)},
+        {"20240131T1017+0300", make_datetime(2024, 1, 31, 7, 17, 0)},
         {"2024-Jan-31 10:17Z", make_datetime(2024, 1, 31, 10, 17, 0)}
     };
 
