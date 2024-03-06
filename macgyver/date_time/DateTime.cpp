@@ -417,7 +417,7 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::from_string(const std::string
         using namespace Fmi::date_time::parser;
         DateParser<iterator, char> p_date_1('-', false);
         DateParser<iterator, char> p_date_2('-', true);
-        DurationParser<iterator, char> p_time(':', 24);
+        DurationParser<iterator, char> p_time(':', false, 24);
         rule<iterator> date_time_separator = +space;
         const auto result = parse(BCP,
             str,
@@ -439,7 +439,7 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::from_iso_string(const std::st
         using namespace boost::spirit::qi;
         using namespace Fmi::date_time::parser;
         DateParser<iterator, char> p_date(0, true);
-        DurationParser<iterator, char> p_time(0, 24);
+        DurationParser<iterator, char> p_time(0, false, 24);
         rule<iterator> date_time_separator = char_('T');
         const auto result = parse(BCP, str, p_date, p_time, date_time_separator);
         return result;
@@ -457,7 +457,7 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::from_iso_extended_string(cons
         using namespace boost::spirit::qi;
         using namespace Fmi::date_time::parser;
         DateParser<iterator, char> p_date('-', true);
-        DurationParser<iterator, char> p_time(':', 24);
+        DurationParser<iterator, char> p_time(':', false, 24);
         rule<iterator> date_time_separator = char_('T');
         const auto result = parse(BCP, str, p_date, p_time, date_time_separator);
         return result;
@@ -476,7 +476,7 @@ Fmi::date_time::DateTime::try_parse_iso_string(
     using namespace boost::spirit::qi;
     using namespace Fmi::date_time::parser;
     DateParser<iterator, char> p_date(0, true);
-    DurationParser<iterator, char> p_time(0, 24);
+    DurationParser<iterator, char> p_time(0, false, 24);
     rule<iterator> date_time_separator = char_('T');
     const auto result = try_parse(BCP, str, p_date, p_time, date_time_separator, have_tz);
     return result;
@@ -490,7 +490,7 @@ Fmi::date_time::DateTime::try_parse_iso_extended_string(
     using namespace boost::spirit::qi;
     using namespace Fmi::date_time::parser;
     DateParser<iterator, char> p_date(':', true);
-    DurationParser<iterator, char> p_time('-', 24);
+    DurationParser<iterator, char> p_time('-', false, 24);
     rule<iterator> date_time_separator = char_('T');
     const auto result = try_parse(BCP, str, p_date, p_time, date_time_separator, have_tz);
     return result;
@@ -505,7 +505,7 @@ Fmi::date_time::DateTime::try_parse_string(
     using namespace Fmi::date_time::parser;
     DateParser<iterator, char> p_date_1('-', false);
     DateParser<iterator, char> p_date_2('-', true);
-    DurationParser<iterator, char> p_time(':', 24);
+    DurationParser<iterator, char> p_time(':', false, 24);
     rule<iterator> date_time_separator = +space;
     const std::optional<Fmi::date_time::DateTime> result =
         try_parse(BCP, str, p_date_2 | p_date_1, p_time, date_time_separator, have_tz);

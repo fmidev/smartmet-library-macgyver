@@ -126,6 +126,8 @@ BOOST_AUTO_TEST_CASE(test_operations)
 
 BOOST_AUTO_TEST_CASE(from_string)
 {
+    // FIXME: test also limit support
+
     BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration::from_string");
 
     using Fmi::date_time::duration_from_string;
@@ -141,6 +143,8 @@ BOOST_AUTO_TEST_CASE(from_string)
             , {"12:11:10.1", "12:11:10.100000"}
             , {"12:11:10.", "12:11:10"}
             , {"12:11:10", nullptr}
+            , {"-12:11:10", nullptr}
+            , {"+12:11:10", "12:11:10"}
             , {"12:11 ", "12:11:00"}
             , {"10:17", "10:17:00"}
         };
@@ -174,6 +178,8 @@ BOOST_AUTO_TEST_CASE(from_iso_string)
             , {"121110.1234", "12:11:10.123400"}
             , {"121110.123", "12:11:10.123000"}
             , {"121110.12", "12:11:10.120000"}
+            , {"-121110.12", "-12:11:10.120000"}
+            , {"+121110.12", "12:11:10.120000"}
             , {"121110.1", "12:11:10.100000"}
             , {"121110.", "12:11:10"}
             , {"121110", "12:11:10"}

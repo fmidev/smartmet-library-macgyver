@@ -139,7 +139,6 @@ BOOST_AUTO_TEST_CASE(test_parse_date_iso_extended_string)
     ok = boost::spirit::qi::parse(begin, end, parser, date_result);
     BOOST_CHECK(ok);
     if (ok) {
-        std::cout << "year=" << date_result.year << ", month=" << date_result.month << ", mday=" << date_result.mday << std::endl;
         BOOST_CHECK_EQUAL(date_result.year, 2017);
         BOOST_CHECK_EQUAL(date_result.month, 3);
         BOOST_CHECK_EQUAL(date_result.mday, 14);
@@ -248,22 +247,23 @@ BOOST_AUTO_TEST_CASE (test_duration_parser_1)
 
     struct {
         std::string input;
+        int sign;
         unsigned hours;
         unsigned minutes;
         unsigned seconds;
         std::string frac_sec;
     }
     const test_data_pass[] = {
-        {"123456.789"s, 12, 34, 56, "789"},
-        {"123456.7"s, 12, 34, 56, "7"},
-        {"123456"s, 12, 34, 56, ""},
+        {"123456.789"s, 1, 12, 34, 56, "789"},
+        {"123456.7"s, 1, 12, 34, 56, "7"},
+        {"123456"s, 1, 12, 34, 56, ""},
     };
 
  
     using iterator = std::string::const_iterator;
 
     // No separator, up to 23 hours including
-    Fmi::date_time::parser::DurationParser<iterator, char> parser(0, 24);
+    Fmi::date_time::parser::DurationParser<iterator, char> parser(0, false, 24);
     for (const auto& td : test_data_pass) {
         Fmi::date_time::parser::duration_members_t result;
         iterator begin = td.input.begin();
@@ -292,29 +292,127 @@ BOOST_AUTO_TEST_CASE (test_duration_parser_2)
 
     struct {
         std::string input;
+        int sign;
         unsigned hours;
         unsigned minutes;
         unsigned seconds;
         std::string frac_sec;
     }
     const test_data_pass[] = {
-        {"12:34:56.789"s, 12, 34, 56, "789"},
-        {"12:34:56.7"s, 12, 34, 56, "7"},
-        {"12:34:56"s, 12, 34, 56, ""},
-        {"12:34"s, 12, 34, 0, ""},
-        {"12:3:4.56"s, 12, 3, 4, "56"}
+        {"12:34:56.789"s, 1, 12, 34, 56, "789"},
+        {"12:34:56.7"s, 1, 12, 34, 56, "7"},
+        {"12:34:56"s, 1, 12, 34, 56, ""},
+        {"12:34"s, 1, 12, 34, 0, ""},
+        {"12:3:4.56"s, 1, 12, 3, 4, "56"}
     };
  
     using iterator = std::string::const_iterator;
 
     // No separator, up to 23 hours including
-    Fmi::date_time::parser::DurationParser<iterator, char> parser(':', 24);
+    Fmi::date_time::parser::DurationParser<iterator, char> parser(':', false, 24);
     for (const auto& td : test_data_pass) {
         Fmi::date_time::parser::duration_members_t result;
         iterator begin = td.input.begin();
         iterator end = td.input.end();
         bool ok = boost::spirit::qi::parse(begin, end, parser, result);
         if (ok) {
+            BOOST_CHECK_EQUAL(result.sign, td.sign);
+            BOOST_CHECK_EQUAL(result.hours, td.hours);
+            BOOST_CHECK_EQUAL(result.minutes, td.minutes);
+            if (result.seconds) {
+                BOOST_CHECK_EQUAL(result.seconds->seconds, td.seconds);
+                BOOST_CHECK_EQUAL(result.seconds->frac_sec, td.frac_sec);
+            } else {
+                BOOST_CHECK_EQUAL(td.seconds, 0);
+                BOOST_CHECK_EQUAL(td.frac_sec, "");
+            }
+        } else {
+            BOOST_FAIL("Parsing failed for input: " + td.input + ", position="
+                + std::string(begin, end));
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE (test_duration_parser_3)
+{
+    BOOST_TEST_MESSAGE("Duration parser (iso format, no 24 hours limit)");
+
+    struct {
+        std::string input;
+        int sign;
+        unsigned hours;
+        unsigned minutes;
+        unsigned seconds;
+        std::string frac_sec;
+    }
+    const test_data_pass[] = {
+        {"123456.789"s, 1, 12, 34, 56, "789"},
+        {"-123456.789"s, -1, 12, 34, 56, "789"},
+        {"+123456.789"s, 1, 12, 34, 56, "789"},
+        {"123456.7"s, 1, 12, 34, 56, "7"},
+        {"123456"s, 1, 12, 34, 56, ""},
+    };
+
+
+    using iterator = std::string::const_iterator;
+
+    // No separator, up to 23 hours including
+    Fmi::date_time::parser::DurationParser<iterator, char> parser(0, true, std::numeric_limits<unsigned>::max());
+    for (const auto& td : test_data_pass) {
+        Fmi::date_time::parser::duration_members_t result;
+        iterator begin = td.input.begin();
+        iterator end = td.input.end();
+        bool ok = boost::spirit::qi::parse(begin, end, parser, result);
+        if (ok) {
+            BOOST_CHECK_EQUAL(result.hours, td.hours);
+            BOOST_CHECK_EQUAL(result.minutes, td.minutes);
+            if (result.seconds) {
+                BOOST_CHECK_EQUAL(result.seconds->seconds, td.seconds);
+                BOOST_CHECK_EQUAL(result.seconds->frac_sec, td.frac_sec);
+            } else {
+                BOOST_CHECK_EQUAL(td.seconds, 0);
+                BOOST_CHECK_EQUAL(td.frac_sec, "");
+            }
+        } else {
+            BOOST_FAIL("Parsing failed for input: " + td.input + ", position="
+                + std::string(begin, end));
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE (test_duration_parser_4)
+{
+    BOOST_TEST_MESSAGE("Duration parser (iso extended format, no 24 hours limit)");
+
+    struct {
+        std::string input;
+        int sign;
+        unsigned hours;
+        unsigned minutes;
+        unsigned seconds;
+        std::string frac_sec;
+    }
+    const test_data_pass[] = {
+        {"12:34:56.789"s, 1, 12, 34, 56, "789"},
+        {"-12:34:56.789"s, -1, 12, 34, 56, "789"},
+        {"+12:34:56.789"s, 1, 12, 34, 56, "789"},
+        {"12:34:56.7"s, 1, 12, 34, 56, "7"},
+        {"12:34:56"s, 1, 12, 34, 56, ""},
+        {"12:34"s, 1, 12, 34, 0, ""},
+        {"12:3:4.56"s, 1, 12, 3, 4, "56"}
+    };
+
+    using iterator = std::string::const_iterator;
+
+    // No separator, up to 23 hours including
+    Fmi::date_time::parser::DurationParser<iterator, char> parser(':', true, std::numeric_limits<unsigned>::max());
+    for (const auto& td : test_data_pass) {
+        Fmi::date_time::parser::duration_members_t result;
+        iterator begin = td.input.begin();
+        iterator end = td.input.end();
+        bool ok = boost::spirit::qi::parse(begin, end, parser, result);
+        if (ok) {
+            BOOST_CHECK_EQUAL(result.sign, td.sign);
             BOOST_CHECK_EQUAL(result.hours, td.hours);
             BOOST_CHECK_EQUAL(result.minutes, td.minutes);
             if (result.seconds) {

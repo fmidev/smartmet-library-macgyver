@@ -42,9 +42,21 @@ namespace Fmi
             std::string as_iso_extended_string() const;
 
             static TimeDuration from_tm(const std::tm& tm);
-            static TimeDuration from_string(const std::string& str, bool h_24 = false);
-            static TimeDuration from_iso_string(const std::string& str, bool h_24 = false);
-            static TimeDuration from_iso_extended_string(const std::string& str, bool h_24 = false);
+
+            static TimeDuration from_string(
+                const std::string& str,
+                bool supports_negative = true,
+                unsigned max_hours = std::numeric_limits<unsigned>::max());
+
+            static TimeDuration from_iso_string(
+                const std::string& str,
+                bool supports_negative = true,
+                unsigned max_hours = std::numeric_limits<unsigned>::max());
+
+            static TimeDuration from_iso_extended_string(
+                const std::string& str,
+                bool supports_negative = true,
+                unsigned max_hours = std::numeric_limits<unsigned>::max());
 
             bool operator==(const TimeDuration& other) const;
             bool operator!=(const TimeDuration& other) const;

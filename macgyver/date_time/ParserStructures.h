@@ -33,18 +33,29 @@ namespace parser
 
     struct duration_members_t
     {
+        int sign;
         unsigned hours;
         unsigned minutes;
         std::optional<seconds_members_t> seconds;
 
+        int get_hours() const
+        {
+            return sign * int(hours);
+        }
+
+        int get_minutes() const
+        {
+            return sign * int(minutes);
+        }
+
         int get_seconds() const
         {
-            return seconds ? seconds->seconds : 0;
+            return seconds ? sign * seconds->seconds : 0;
         }
 
         int get_mks() const
         {
-            return seconds ? std::stod("0." + seconds->frac_sec) * 1e6 : 0;
+            return seconds ? sign * std::stod("0." + seconds->frac_sec) * 1e6 : 0;
         }
     };
 

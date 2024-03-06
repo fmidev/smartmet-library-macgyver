@@ -29,6 +29,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     Fmi::date_time::parser::duration_members_t,
+    (int, sign)
     (unsigned, hours)
     (unsigned, minutes)
     (std::optional<Fmi::date_time::parser::seconds_members_t>, seconds))
@@ -240,7 +241,8 @@ namespace parser
          *                  0 and absent when 0
         */
         DurationParser(
-            const char separator = ':',
+            char separator = ':',
+            bool supports_negative = true,
             const unsigned max_hours = std::numeric_limits<unsigned>::max())
 
             : DurationParser::base_type(m_duration)
@@ -249,11 +251,21 @@ namespace parser
         {
             using namespace qi;
 
+            if (supports_negative)
+            {
+                m_sign %= ('-' >> attr(-1))
+                          | (('+' | eps) >> attr(1));
+            }
+            else
+            {
+                m_sign %= attr(1);
+            }
+
             if (m_sep.is_empty)
             {
                 m_hours %= r_uint22()[_pass = (_1 >= 0 && _1 <= max_hours)];
                 m_minutes %= r_uint22()[_pass = (_1 >= 0 && _1 <= 59)];
-                m_duration %= lexeme[m_hours >> m_minutes >> -m_seconds];
+                m_duration %= lexeme[m_sign >> m_hours >> m_minutes >> -m_seconds];
             }
             else
             {
@@ -261,7 +273,8 @@ namespace parser
                 m_minutes %= r_uint12()[_pass = (_1 >= 0 && _1 <= 59)];
                 // Seconds are optional
                 m_duration %= lexeme[
-                    m_hours
+                    m_sign
+                    >> m_hours
                     >> omit[m_sep]
                     >> m_minutes
                     >> -(omit[m_sep] >> m_seconds)
@@ -270,6 +283,7 @@ namespace parser
         }
 
     private:
+        qi::rule<Iterator, int()> m_sign;
         Separator<Iterator> m_sep;
         qi::rule<Iterator, unsigned()> m_hours;
         qi::rule<Iterator, unsigned()> m_minutes;
@@ -280,10 +294,13 @@ namespace parser
     template <typename Iterator>
     struct GenericDurationParser : public qi::grammar<Iterator, duration_members_t()>
     {
-        GenericDurationParser(const unsigned max_hours = std::numeric_limits<unsigned>::max())
+        GenericDurationParser(
+            bool supports_negative = true,
+            const unsigned max_hours = std::numeric_limits<unsigned>::max())
+
             : GenericDurationParser::base_type(m_duration)
-            , m_iso_duration(0)
-            , m_iso_extended_duration(':')
+            , m_iso_duration(0, supports_negative, max_hours)
+            , m_iso_extended_duration(':', supports_negative, max_hours)
             , m_duration(m_iso_extended_duration | m_iso_duration)
         {
         }

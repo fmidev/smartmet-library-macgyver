@@ -275,11 +275,12 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_tm(const std::tm
   return Fmi::date_time::TimeDuration(tm.tm_hour, tm.tm_min, tm.tm_sec, 0);
 }
 
-Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_string(
+Fmi::date_time::TimeDuration
+Fmi::date_time::TimeDuration::from_iso_string(
     const std::string& str,
-    bool h_24)
+    bool supports_negative,
+    unsigned max_hours)
 {
-  (void) h_24;  // FIXME: implement h_24
   using namespace boost::spirit::qi;
   using iterator = std::string::const_iterator;
 
@@ -288,7 +289,7 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_string(
   iterator end = input.end();
 
   Fmi::date_time::parser::duration_members_t members;
-  Fmi::date_time::parser::DurationParser<iterator, char> parser(0);
+  Fmi::date_time::parser::DurationParser<iterator, char> parser(0, supports_negative, max_hours);
   bool r = parse(begin, end, parser >> eoi, members);
   if (!r)
   {
@@ -297,18 +298,18 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_string(
     throw err;
   }
 
-  int hours = members.hours;
-  int minutes = members.minutes;
-  int seconds = members.seconds ? members.seconds->seconds : 0;
-  int microseconds = members.seconds ? std::stod("0." + members.seconds->frac_sec) * 1000000 : 0;
+  int hours = members.get_hours();
+  int minutes = members.get_minutes();
+  int seconds = members.get_seconds();
+  int microseconds = members.get_mks();
   return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_extended_string(
     const std::string& str,
-    bool h_24)
+    bool supports_negative,
+    unsigned max_hours)
 {
-  (void) h_24;  // FIXME: implement h_24
   using namespace boost::spirit::qi;
   using iterator = std::string::const_iterator;
 
@@ -317,7 +318,7 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_extended_str
   iterator end = input.end();
 
   Fmi::date_time::parser::duration_members_t members;
-  Fmi::date_time::parser::DurationParser<iterator, char> parser(':');
+  Fmi::date_time::parser::DurationParser<iterator, char> parser(':', supports_negative, max_hours);
   bool r = parse(begin, end, parser >> eoi, members);
   if (!r)
   {
@@ -326,17 +327,16 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_extended_str
     throw err;
   }
 
-  int hours = members.hours;
-  int minutes = members.minutes;
-  int seconds = members.seconds ? members.seconds->seconds : 0;
-  int microseconds = members.seconds ? std::stod("0." + members.seconds->frac_sec) * 1000000 : 0;
+  int hours = members.get_hours();
+  int minutes = members.get_minutes();
+  int seconds = members.get_seconds();
+  int microseconds = members.get_mks();
   return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
 }
 
 Fmi::date_time::TimeDuration
-Fmi::date_time::TimeDuration::from_string(const std::string& str, bool h_24)
+Fmi::date_time::TimeDuration::from_string(const std::string& str, bool supports_negative, unsigned max_hours)
 {
-  (void) h_24; // FIXME: implement h_24
   using namespace boost::spirit::qi;
   using iterator = std::string::const_iterator;
 
@@ -345,7 +345,7 @@ Fmi::date_time::TimeDuration::from_string(const std::string& str, bool h_24)
   iterator end = input.end();
 
   Fmi::date_time::parser::duration_members_t members;
-  Fmi::date_time::parser::GenericDurationParser<iterator> parser(h_24);
+  Fmi::date_time::parser::GenericDurationParser<iterator> parser(supports_negative, max_hours);
   bool r = parse(begin, end, parser >> eoi, members);
   if (!r)
   {
@@ -354,10 +354,10 @@ Fmi::date_time::TimeDuration::from_string(const std::string& str, bool h_24)
     throw err;
   }
 
-  int hours = members.hours;
-  int minutes = members.minutes;
-  int seconds = members.seconds ? members.seconds->seconds : 0;
-  int microseconds = members.seconds ? std::stod("0." + members.seconds->frac_sec) * 1000000 : 0;
+  int hours = members.get_hours();
+  int minutes = members.get_minutes();
+  int seconds = members.get_seconds();
+  int microseconds = members.get_mks();
   return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
 }
 
