@@ -165,7 +165,7 @@ namespace Fmi
         {
             if (time.is_special())
             {
-                return time.as_string();
+                return time.special_time_as_string();
             }
 
             const auto& impl = time.get_impl();
