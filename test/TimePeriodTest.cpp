@@ -45,6 +45,15 @@ namespace
     };
 }
 
+BOOST_AUTO_TEST_CASE(zero_length)
+{
+    TestValues1 test;
+
+    TimePeriod<DateTime> period(test.dt1, test.dt1);
+    // We do not accept zero length periods
+    BOOST_CHECK(period.is_null());
+}
+
 BOOST_AUTO_TEST_CASE(test_1)
 {
     TestValues1 test;
