@@ -10,6 +10,8 @@
 #include <functional>
 #include <iostream>
 #include <boost/test/included/unit_test.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace boost::unit_test;
@@ -259,4 +261,37 @@ BOOST_AUTO_TEST_CASE(factory_methods)
 
     BOOST_CHECK_EQUAL(Minutes(-1445).as_string(), "-24:05:00");
     BOOST_CHECK_EQUAL(Seconds(-86401).as_string(), "-24:00:01");
+}
+
+BOOST_AUTO_TEST_CASE(serialization_test)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::TimeDuration: test serialization");
+
+    using namespace Fmi::date_time;
+
+    std::vector<TimeDuration> test_data =
+        {
+                TimeDuration(1, 2, 3, 4),
+                TimeDuration(TimeDuration::NOT_A_DATE_TIME),
+                TimeDuration(TimeDuration::POS_INFINITY),
+                TimeDuration(TimeDuration::NEG_INFINITY)
+        };
+
+        for (const auto& td : test_data)
+        {
+            std::stringstream ss;
+            {
+                boost::archive::text_oarchive oa(ss);
+                oa << td;
+            }
+
+            TimeDuration td1;
+            {
+                boost::archive::text_iarchive ia(ss);
+                ia >> td1;
+            }
+
+            BOOST_CHECK_MESSAGE(td == td1, "Serialization failed for " + td.as_string()
+                + ". Got " + td1.as_string());
+        }
 }

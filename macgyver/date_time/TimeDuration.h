@@ -4,6 +4,8 @@
 #include <limits>
 #include <string>
 #include "Base.h"
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/split_member.hpp>
 
 namespace Fmi
 {
@@ -82,12 +84,18 @@ namespace Fmi
 
             /**
              * @brief  Parse time duration from string.
-             * 
+             *
              * @param str  String to parse.
              * @param assume_eoi  If true, allows only whitespace after the duration.
              * @return TimeDuration  Parsed time duration.
             */
             static TimeDuration from_stream(std::istream& src, bool assume_eoi = true);
+
+            template <typename ArchiveType> void save(ArchiveType& archive, const unsigned int version) const;
+
+            template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER();
 
         private:
             void assert_special() const;
@@ -111,5 +119,31 @@ namespace Fmi
         std::string to_iso_string(const TimeDuration& td);
 
         std::ostream& operator<<(std::ostream& os, const TimeDuration& td);
+
+        template <typename ArchiveType>
+        void TimeDuration::save(ArchiveType& archive, const unsigned int version) const
+        {
+            const auto duration_type = type();
+            archive & duration_type;
+            if (duration_type == NORMAL)
+            {
+                const detail::duration_t::rep cnt = m_duration.count();
+                archive & cnt;
+            }
+        }
+
+        template <typename ArchiveType>
+        void TimeDuration::load(ArchiveType& archive, const unsigned int version)
+        {
+            Type duration_type;
+            archive & duration_type;
+            set_type(duration_type);
+            if (duration_type == NORMAL)
+            {
+                detail::duration_t::rep cnt;
+                archive & cnt;
+                m_duration = detail::duration_t(cnt);
+            }
+        }
     }
 }
