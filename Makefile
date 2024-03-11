@@ -41,6 +41,7 @@ include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
 LIBS += -L$(libdir) \
 	-lboost_regex \
 	-lboost_filesystem \
+	-lboost_serialization \
 	-lboost_chrono \
 	-lboost_iostreams \
 	-lboost_thread \

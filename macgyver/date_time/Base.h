@@ -80,10 +80,13 @@ namespace Fmi
                 NOT_A_DATE_TIME = 2
             };
 
+        protected:
+            // This constructor is for derived classes only and is not intended to be used directly
             Base(Type type = NOT_A_DATE_TIME) : m_type(type)
             {
             }
 
+        public:
             virtual ~Base() = default;
 
             bool is_special() const
@@ -114,6 +117,8 @@ namespace Fmi
             inline Type type() const { return m_type; }
 
             std::string special_time_as_string() const;
+
+            static Type check_type(const Type& type);
 
         protected:
             inline void set_type(Type type)

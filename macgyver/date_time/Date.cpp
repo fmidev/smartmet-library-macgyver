@@ -45,7 +45,7 @@ Fmi::date_time::Date::Date(const date::local_days& date)
     : Base(Date::NORMAL)
     , date(date)
 {
-} 
+}
 
 Fmi::date_time::Date::~Date() = default;
 
@@ -204,37 +204,49 @@ std::string Fmi::date_time::Date::as_iso_extended_string() const
 
 bool Fmi::date_time::Date::operator==(const Date& other) const
 {
-    assert_special();
+    if (is_special() || other.is_special())
+        return Fmi::date_time::Base::operator == (other);
+
     return date == other.date;
 }
 
 bool Fmi::date_time::Date::operator!=(const Date& other) const
 {
-    assert_special();
+    if (is_special() || other.is_special())
+        return Fmi::date_time::Base::operator != (other);
+
     return date != other.date;
 }
 
 bool Fmi::date_time::Date::operator<(const Date& other) const
 {
-    assert_special();
+    if (is_special() || other.is_special())
+        return Fmi::date_time::Base::operator < (other);
+
     return date < other.date;
 }
 
 bool Fmi::date_time::Date::operator<=(const Date& other) const
 {
-    assert_special();
+    if (is_special() || other.is_special())
+        return Fmi::date_time::Base::operator <= (other);
+
     return date <= other.date;
 }
 
 bool Fmi::date_time::Date::operator>(const Date& other) const
 {
-    assert_special();
+    if (is_special() || other.is_special())
+        return Fmi::date_time::Base::operator > (other);
+
     return date > other.date;
 }
 
 bool Fmi::date_time::Date::operator>=(const Date& other) const
 {
-    assert_special();
+    if (is_special() || other.is_special())
+        return Fmi::date_time::Base::operator <= (other);
+
     return date >= other.date;
 }
 
@@ -397,7 +409,7 @@ Fmi::date_time::Date Fmi::date_time::Date::from_string(const std::string& str)
         members))
     {
         auto err = Fmi::Exception::Trace(BCP, "Failed to parse date from string '" + str + "'");
-        throw err;        
+        throw err;
     }
     return Fmi::date_time::Date(members.year, members.month, members.mday);
 }

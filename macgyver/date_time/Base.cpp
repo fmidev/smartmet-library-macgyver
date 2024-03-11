@@ -18,6 +18,16 @@ std::string Fmi::date_time::Base::special_time_as_string() const
     }
 }
 
+Fmi::date_time::Base::Type
+Fmi::date_time::Base::check_type(const Fmi::date_time::Base::Type& type)
+{
+    if (type != NORMAL && type != POS_INFINITY && type != NEG_INFINITY && type != NOT_A_DATE_TIME)
+    {
+        throw std::runtime_error("Invalid type");
+    }
+    return type;
+}
+
 bool Fmi::date_time::Base::operator == (const Base& other) const
 {
     if (!is_special() && !other.is_special())

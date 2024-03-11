@@ -2,6 +2,8 @@
 
 #include <ctime>
 #include "Base.h"
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/split_member.hpp>
 
 namespace Fmi
 {
@@ -89,6 +91,13 @@ namespace Fmi
             Date& operator--();
 
             const date::local_days& get_impl() const { return date; };
+
+            template <typename ArchiveType> void save(ArchiveType& archive, const unsigned int version) const;
+
+            template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER();
+
         private:
             void assert_special() const;
 
@@ -108,5 +117,31 @@ namespace Fmi
 
         struct tm to_tm(const Date& date);
         Date from_tm(const struct tm& tm);
+
+        template <typename ArchiveType>
+        void Date::save(ArchiveType& archive, const unsigned int version) const
+        {
+            const auto date_type = type();
+            archive & date_type;
+            if (date_type == NORMAL)
+            {
+                const date::local_days::rep days = date.time_since_epoch().count();
+                archive & days;
+            }
+        }
+
+        template <typename ArchiveType>
+        void Date::load(ArchiveType& archive, const unsigned int version)
+        {
+            Type date_type;
+            archive & date_type;
+            set_type(date_type);
+            if (date_type == NORMAL)
+            {
+                date::local_days::rep days;
+                archive & days;
+                date = date::local_days(date::days(days));
+            }
+        }
     }
 }

@@ -8,6 +8,8 @@
 #include "date_time/Date.h"
 #include "Exception.h"
 #include "DebugTools.h"
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
@@ -313,4 +315,39 @@ BOOST_AUTO_TEST_CASE(format_for_locale)
 
     BOOST_TEST_MESSAGE(std::to_string(num_tested) + " locales of "
         + std::to_string(num_tests) + " tested");
+}
+
+BOOST_AUTO_TEST_CASE(serialize_date)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::Date: serialize_date");
+    using Fmi::date_time::Date;
+    std::vector<Date> test_dates =
+        {
+            Date(2024, 2, 19),
+            Date(Date::NOT_A_DATE_TIME),
+            Date(Date::POS_INFINITY),
+            Date(Date::NEG_INFINITY)
+        };
+
+    for (const auto& d : test_dates)
+    {
+        std::string archive;
+        {
+            std::ostringstream os;
+            boost::archive::text_oarchive oa(os);
+            oa << d;
+            archive += os.str();
+        }
+
+        //std::cout << "Serialized(" + d.as_string() + "): " << archive << std::endl;
+
+        Date result;
+        {
+            std::istringstream os(archive);
+            boost::archive::text_iarchive ia(os);
+            ia >> result;
+        }
+
+        BOOST_CHECK_MESSAGE(result == d, "Serialization failed for " + d.as_string() + ". Got " + result.as_string());
+    }
 }
