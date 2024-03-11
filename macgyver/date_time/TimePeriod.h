@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <type_traits>
 
 namespace Fmi
@@ -166,7 +167,7 @@ namespace Fmi
 
             /**
              * Merge the time periods.
-             * 
+             *
              * Note: returns a null time period if the time periods do not intersect.
             */
             TimePeriod merge(const TimePeriod& period) const
@@ -246,9 +247,24 @@ namespace Fmi
                 return m_start >= other.m_end;
             }
 
+            std::ostream& printOn(std::ostream& os) const
+            {
+                os << m_start << " - " << m_end;
+                return os;
+            }
+
         private:
             DateTimeType m_start;
             DateTimeType m_end;
         };
+
+        template <typename DateTimeType>
+        std::ostream& operator<<(
+            std::ostream& os,
+            const TimePeriod<DateTimeType>& period)
+        {
+            period.printOn(os);
+            return os;
+        }
     }
 }
