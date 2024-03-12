@@ -36,7 +36,7 @@ namespace Fmi
             DateTime operator + (const TimeDuration& duration) const;
             DateTime operator - (const TimeDuration& duration) const;
             TimeDuration operator - (const DateTime& other) const;
-          
+
             Date date() const;
             TimeDuration time_of_day() const;
 
@@ -64,6 +64,12 @@ namespace Fmi
             static DateTime from_stream(std::istream& is, bool assume_eoi = true);
 
             detail::time_point_t get_impl() const { return m_time_point; }
+
+            template <typename ArchiveType> void save(ArchiveType& archive, const unsigned int version) const;
+
+            template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER();
 
             static const DateTime epoch;
         private:
@@ -124,5 +130,32 @@ namespace Fmi
             DateTime local_time();
         };
 
+        template <typename Archive>
+        void DateTime::save(Archive& archive, const unsigned int version) const
+        {
+            Type date_type = type();
+            archive & BOOST_SERIALIZATION_NVP(date_type);
+            if (date_type == NORMAL)
+            {
+                const detail::duration_t duration = m_time_point - epoch.m_time_point;
+                const int64_t value = duration.count();
+                archive & BOOST_SERIALIZATION_NVP(value);
+            }
+        }
+
+        template <typename Archive>
+        void DateTime::load(Archive& archive, const unsigned int version)
+        {
+            Type date_type;
+            archive & BOOST_SERIALIZATION_NVP(date_type);
+            set_type(date_type);
+            if (date_type == NORMAL)
+            {
+                int64_t value;
+                archive & BOOST_SERIALIZATION_NVP(value);
+                const detail::duration_t duration(value);
+                m_time_point = epoch.m_time_point + duration;
+            }
+        }
     }
 }

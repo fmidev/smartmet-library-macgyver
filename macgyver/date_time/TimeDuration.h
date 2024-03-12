@@ -6,6 +6,8 @@
 #include "Base.h"
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/split_member.hpp>
+#include <boost/serialization/nvp.hpp>
+
 
 namespace Fmi
 {
@@ -95,8 +97,7 @@ namespace Fmi
 
             template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
 
-            BOOST_SERIALIZATION_SPLIT_MEMBER();
-
+            BOOST_SERIALIZATION_SPLIT_MEMBER()
         private:
             void assert_special() const;
 
@@ -124,11 +125,11 @@ namespace Fmi
         void TimeDuration::save(ArchiveType& archive, const unsigned int version) const
         {
             const auto duration_type = type();
-            archive & duration_type;
+            archive & BOOST_SERIALIZATION_NVP(duration_type);
             if (duration_type == NORMAL)
             {
                 const detail::duration_t::rep cnt = m_duration.count();
-                archive & cnt;
+                archive & BOOST_SERIALIZATION_NVP(cnt);
             }
         }
 
@@ -136,12 +137,12 @@ namespace Fmi
         void TimeDuration::load(ArchiveType& archive, const unsigned int version)
         {
             Type duration_type;
-            archive & duration_type;
+            archive & BOOST_SERIALIZATION_NVP(duration_type);
             set_type(duration_type);
             if (duration_type == NORMAL)
             {
                 detail::duration_t::rep cnt;
-                archive & cnt;
+                archive & BOOST_SERIALIZATION_NVP(cnt);
                 m_duration = detail::duration_t(cnt);
             }
         }

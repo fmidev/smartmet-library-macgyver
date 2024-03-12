@@ -8,6 +8,10 @@
 #include "date_time/DateTime.h"
 #include "DebugTools.h"
 #include "Exception.h"
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
@@ -227,4 +231,51 @@ BOOST_AUTO_TEST_CASE(time_from_iso_extended_string)
     {
         BOOST_TEST_MESSAGE("Failed " << num_tests - num_passed << " out of " << num_tests << " tests");
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_serialization_1)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: serialization (text archive)");
+
+    Fmi::date_time::DateTime dt1(Fmi::date_time::Date(1971, 1, 24), Fmi::date_time::TimeDuration(12, 34, 45, 123456));
+    std::ostringstream os;
+    {
+        boost::archive::text_oarchive oa(os);
+        oa & dt1;
+    }
+
+    //std::cout << "\ntext archive: " << os.str() << std::endl;
+
+    Fmi::date_time::DateTime dt2;
+    std::istringstream is(os.str());
+    {
+        boost::archive::text_iarchive ia(is);
+        ia & dt2;
+    }
+
+    BOOST_CHECK_EQUAL(dt1, dt2);
+}
+
+
+BOOST_AUTO_TEST_CASE(test_serialization_2)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: serialization (xml archive)");
+
+    Fmi::date_time::DateTime dt1(Fmi::date_time::Date(2014, 1, 24), Fmi::date_time::TimeDuration(12, 34, 45, 123456));
+    std::ostringstream os;
+    {
+        boost::archive::xml_oarchive oa(os);
+        oa & BOOST_SERIALIZATION_NVP(dt1);
+    }
+
+    //std::cout << "\nxml archive: " << os.str() << std::endl;
+
+    Fmi::date_time::DateTime dt2;
+    std::istringstream is(os.str());
+    {
+        boost::archive::xml_iarchive ia(is);
+        ia & BOOST_SERIALIZATION_NVP(dt2);
+    }
+
+    BOOST_CHECK_EQUAL(dt1, dt2);
 }

@@ -2,6 +2,7 @@
 
 #include <ctime>
 #include "Base.h"
+#include <boost/serialization/nvp.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -122,7 +123,7 @@ namespace Fmi
         void Date::save(ArchiveType& archive, const unsigned int version) const
         {
             const auto date_type = type();
-            archive & date_type;
+            archive & BOOST_SERIALIZATION_NVP(date_type);
             if (date_type == NORMAL)
             {
                 const date::local_days::rep days = date.time_since_epoch().count();
@@ -134,12 +135,12 @@ namespace Fmi
         void Date::load(ArchiveType& archive, const unsigned int version)
         {
             Type date_type;
-            archive & date_type;
+            archive & BOOST_SERIALIZATION_NVP(date_type);
             set_type(date_type);
             if (date_type == NORMAL)
             {
                 date::local_days::rep days;
-                archive & days;
+                archive & BOOST_SERIALIZATION_NVP(days);
                 date = date::local_days(date::days(days));
             }
         }
