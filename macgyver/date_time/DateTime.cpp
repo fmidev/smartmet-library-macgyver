@@ -201,6 +201,44 @@ Fmi::date_time::TimeDuration Fmi::date_time::DateTime::operator-(const DateTime&
     return TimeDuration(m_time_point - other.get_impl());
 }
 
+Fmi::date_time::DateTime Fmi::date_time::DateTime::operator ++ (int)
+{
+  if (is_special())
+    return *this;
+
+  const auto tmp(*this);
+  m_time_point += detail::duration_t(1);
+  return tmp;
+}
+
+Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator++()
+{
+  if (is_special())
+    return *this;
+
+  m_time_point += detail::duration_t(1);
+  return *this;
+}
+
+Fmi::date_time::DateTime Fmi::date_time::DateTime::operator--(int)
+{
+  if (is_special())
+    return *this;
+
+  const auto tmp(*this);
+  m_time_point -= detail::duration_t(1);
+  return tmp;
+}
+
+Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator--()
+{
+  if (is_special())
+    return *this;
+
+  m_time_point -= detail::duration_t(1);
+  return *this;
+}
+
 Fmi::date_time::Date Fmi::date_time::DateTime::date() const
 {
     if (is_special())

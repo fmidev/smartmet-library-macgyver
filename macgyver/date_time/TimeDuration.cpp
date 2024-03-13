@@ -241,6 +241,40 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator/(int64_t fac
   return TimeDuration(m_duration / factor);
 }
 
+Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator++(int)
+{
+  if (is_special())
+    return *this;
+
+  TimeDuration tmp(*this);
+  m_duration ++;
+  return tmp;
+}
+
+Fmi::date_time::TimeDuration& Fmi::date_time::TimeDuration::operator++()
+{
+  if (!is_special())
+    m_duration ++;
+  return *this;
+}
+
+Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator--(int)
+{
+  if (is_special())
+    return *this;
+
+  TimeDuration tmp(*this);
+  m_duration --;
+  return tmp;
+}
+
+Fmi::date_time::TimeDuration& Fmi::date_time::TimeDuration::operator--()
+{
+  if (!is_special())
+    m_duration --;
+  return *this;
+}
+
 Fmi::date_time::TimeDuration
 Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
 {

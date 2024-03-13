@@ -81,6 +81,14 @@ namespace Fmi
                 return m_end;
             }
 
+            DateTimeType last() const
+            {
+                if (m_start.is_special() || m_end.is_special())
+                    return DateTimeType();
+                auto end = m_end;
+                return --end;
+            }
+
             /**
              * Shift the time period by the given duration.
             */

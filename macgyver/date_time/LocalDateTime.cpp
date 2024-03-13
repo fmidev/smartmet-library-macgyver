@@ -52,10 +52,10 @@ LocalDateTime::LocalDateTime(
     {
         if (err_handling == EXCEPTION_ON_ERROR)
             throw Fmi::Exception::Trace(BCP, e.what());
-            
+
         set_type(NOT_A_DATE_TIME);
     }
-    
+
 }
 
 LocalDateTime::LocalDateTime(
@@ -270,7 +270,7 @@ std::string LocalDateTime::as_iso_string() const
     const std::string s_zone = zone().zone_ptr() == TimeZonePtr::utc.zone_ptr()
         ? "Z"
         : date::format("%z", ldt);
-    return s_dt + s_zone;        
+    return s_dt + s_zone;
 }
 
 std::string LocalDateTime::as_iso_extended_string() const
@@ -280,7 +280,7 @@ std::string LocalDateTime::as_iso_extended_string() const
     const std::string s_zone = zone().zone_ptr() == TimeZonePtr::utc.zone_ptr()
         ? "Z"
         : date::format("%Ez", ldt);
-    return s_dt + s_zone;        
+    return s_dt + s_zone;
 }
 
 void LocalDateTime::advance(const TimeDuration& td)
@@ -389,6 +389,33 @@ TimeDuration Fmi::date_time::operator - (const LocalDateTime& to, const LocalDat
     const auto sys_from = from.get_impl().get_sys_time();
     const auto sys_to = to.get_impl().get_sys_time();
     return Fmi::date_time::TimeDuration(sys_to - sys_from);
+}
+
+
+LocalDateTime Fmi::date_time::LocalDateTime::operator ++ (int)
+{
+    LocalDateTime tmp(*this);
+    advance(TimeDuration(detail::duration_t(1)));
+    return tmp;
+}
+
+LocalDateTime& Fmi::date_time::LocalDateTime::operator ++ ()
+{
+    advance(TimeDuration(detail::duration_t(1)));
+    return *this;
+}
+
+LocalDateTime Fmi::date_time::LocalDateTime::operator -- (int)
+{
+    LocalDateTime tmp(*this);
+    advance(TimeDuration(detail::duration_t(-1)));
+    return tmp;
+}
+
+LocalDateTime& Fmi::date_time::LocalDateTime::operator -- ()
+{
+    advance(TimeDuration(detail::duration_t(-1)));
+    return *this;
 }
 
 std::string Fmi::date_time::to_simple_string(const LocalDateTime& time)

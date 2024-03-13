@@ -82,6 +82,11 @@ namespace Fmi
             TimeDuration& operator*=(int64_t factor);
             TimeDuration& operator/=(int64_t factor);
 
+            TimeDuration operator++(int);
+            TimeDuration& operator++();
+            TimeDuration operator--(int);
+            TimeDuration& operator--();
+
             detail::duration_t get_impl() const { return m_duration; }
 
             /**

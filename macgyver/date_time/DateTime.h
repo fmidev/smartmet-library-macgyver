@@ -37,6 +37,11 @@ namespace Fmi
             DateTime operator - (const TimeDuration& duration) const;
             TimeDuration operator - (const DateTime& other) const;
 
+            DateTime operator ++ (int);
+            DateTime& operator ++ ();
+            DateTime operator -- (int);
+            DateTime& operator -- ();
+
             Date date() const;
             TimeDuration time_of_day() const;
 

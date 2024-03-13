@@ -33,7 +33,7 @@ namespace Fmi
             {
                 EARLIEST,
                 LATEST
-            };            
+            };
 
             LocalDateTime();
 
@@ -71,7 +71,7 @@ namespace Fmi
                 const detail::time_point_t& time,
                 const date::time_zone* tz,
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
-          
+
             virtual ~LocalDateTime();
 
             LocalDateTime& operator = (const LocalDateTime& src);
@@ -102,7 +102,7 @@ namespace Fmi
 
             /**
              * Convert the local date time to the specified time zone
-             * 
+             *
              *  @param zone Time zone to convert to
              *  @return Local date time in the specified time zone
              *  @exception Fmi::Exception if operation failed
@@ -130,7 +130,7 @@ namespace Fmi
 #if !USE_OS_TZDB
             /**
              *   Get the DST offset
-             * 
+             *
              *   Not supported for OS TZDB database
             */
 
@@ -151,14 +151,19 @@ namespace Fmi
 
             /**
              *  Add specified time duration to the local date time
-             * 
+             *
              *  @param td Time duration to add
              *  @exception Fmi::Exception if local date time is not a normal date time or operration failed
-             */            
+             */
             void advance(const TimeDuration& td);
 
             inline LocalDateTime& operator += (const TimeDuration& td) { advance(td); return *this; }
             inline LocalDateTime& operator -= (const TimeDuration& td) { advance(-td); return *this; }
+
+            LocalDateTime operator ++ (int);
+            LocalDateTime& operator ++ ();
+            LocalDateTime operator -- (int);
+            LocalDateTime& operator -- ();
 
             bool operator < (const LocalDateTime& other) const;
             bool operator > (const LocalDateTime& other) const;
