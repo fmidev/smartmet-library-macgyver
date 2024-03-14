@@ -77,6 +77,8 @@ namespace Fmi
             BOOST_SERIALIZATION_SPLIT_MEMBER();
 
             static const DateTime epoch;
+            static const DateTime min;
+            static const DateTime max;
         private:
             detail::time_point_t m_time_point;
         };

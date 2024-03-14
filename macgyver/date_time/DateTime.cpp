@@ -81,6 +81,10 @@ namespace
 
 const Fmi::date_time::DateTime Fmi::date_time::DateTime::epoch(Fmi::date_time::Date(1970, 1, 1), Fmi::date_time::Seconds(0));
 
+// FIXME: do we need narrower area?
+const Fmi::date_time::DateTime Fmi::date_time::DateTime::min = detail::time_point_t::min();
+const Fmi::date_time::DateTime Fmi::date_time::DateTime::max = detail::time_point_t::max();
+
 Fmi::date_time::DateTime::DateTime() = default;
 
 Fmi::date_time::DateTime::DateTime(const Type& type)
