@@ -31,6 +31,7 @@ namespace Fmi
         >
         class TimePeriod
         {
+            // FIXME: support POS_INFINITY and NEG_INFINITY
         public:
             TimePeriod() = default;
 
@@ -38,7 +39,7 @@ namespace Fmi
                 : m_start(start),
                   m_end(end)
             {
-                if (start.is_special() || end.is_special() || m_end <= m_start)
+                if (start.is_not_a_date_time() || end.is_not_a_date_time() || m_end <= m_start)
                 {
                     m_start = DateTimeType();
                     m_end = DateTimeType();
