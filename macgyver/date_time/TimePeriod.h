@@ -256,10 +256,9 @@ namespace Fmi
                 return m_start >= other.m_end;
             }
 
-            std::ostream& printOn(std::ostream& os) const
+            std::string to_string()
             {
-                os << m_start << " - " << m_end;
-                return os;
+                return "[" + m_start.to_string() + "/" + m_end.to_string() + "]";
             }
 
         private:
@@ -272,7 +271,7 @@ namespace Fmi
             std::ostream& os,
             const TimePeriod<DateTimeType>& period)
         {
-            period.printOn(os);
+            os << period.to_string();
             return os;
         }
     }
