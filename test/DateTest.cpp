@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(to_simple_string_test)
     {
         Fmi::date_time::Date d2(d1.year(), d1.month(), d1.day());
         const auto s1 = g::to_simple_string(d1);
-        const auto s2 = d2.as_string();
+        const auto s2 = d2.to_simple_string();
         if (s1 != s2)
             num_err++;
         BOOST_CHECK_EQUAL(s1, s2);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(to_iso_string_test)
     {
         Fmi::date_time::Date d2(d1.year(), d1.month(), d1.day());
         const auto s1 = g::to_iso_string(d1);
-        const auto s2 = d2.as_iso_string();
+        const auto s2 = d2.to_iso_string();
         if (s1 != s2)
             num_err++;
         BOOST_CHECK_EQUAL(s1, s2);
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(date_from_string_1)
     }; // end of test_data
 
     const auto test_parse =  [](const std::string& s1) -> std::string {
-        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).as_string());
+        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).to_simple_string());
     };
 
     for (const auto& item : test_data)
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(date_from_iso_string)
     }; // end of test_data
 
     const auto test_parse =  [](const std::string& s1) -> std::string {
-        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).as_string());
+        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).to_simple_string());
     };
 
     for (const auto& item : test_data)
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(date_from_iso_extended_string)
     }; // end of test_data
 
     const auto test_parse =  [](const std::string& s1) -> std::string {
-        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).as_string());
+        return SHOW_EXCEPTIONS(Fmi::date_time::date_from_string(s1).to_simple_string());
     };
 
     for (const auto& item : test_data)
@@ -348,6 +348,7 @@ BOOST_AUTO_TEST_CASE(serialize_date)
             ia >> result;
         }
 
-        BOOST_CHECK_MESSAGE(result == d, "Serialization failed for " + d.as_string() + ". Got " + result.as_string());
+        BOOST_CHECK_MESSAGE(result == d, "Serialization failed for "
+            + d.to_simple_string() + ". Got " + result.to_simple_string());
     }
 }

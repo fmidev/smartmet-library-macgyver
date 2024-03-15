@@ -143,11 +143,11 @@ namespace Fmi
 
             std::pair<detail::sys_time_t, detail::sys_time_t> get_dst_times() const;
 
-            std::string as_simple_string() const;
+            std::string to_simple_string() const override;
 
-            std::string as_iso_string() const;
+            std::string to_iso_string() const override;
 
-            std::string as_iso_extended_string() const;
+            std::string to_iso_extended_string() const override;
 
             /**
              *  Add specified time duration to the local date time
@@ -184,15 +184,9 @@ namespace Fmi
         LocalDateTime operator - (const LocalDateTime& time, const TimeDuration& td);
         TimeDuration operator - (const LocalDateTime& to, const LocalDateTime& from);
 
-        std::string to_simple_string(const LocalDateTime& time);
-        std::string to_iso_string(const LocalDateTime& time);
-        std::string to_iso_extended_string(const LocalDateTime& time);
-
         inline TimeDuration seconds(int s) { return TimeDuration(detail::duration_t(std::chrono::seconds(s))); }
         inline TimeDuration minutes(int m) { return TimeDuration(detail::duration_t(std::chrono::minutes(m))); }
         inline TimeDuration hours(int h) { return TimeDuration(detail::duration_t(std::chrono::hours(h))); }
-
-        std::ostream& operator << (std::ostream& os, const LocalDateTime& time);
 
         /**
          *  Make a local date time from a date and time of day (preffers summer time in case of ambiguity)

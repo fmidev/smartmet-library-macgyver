@@ -245,10 +245,10 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
 
     const auto inc1 = duration_from_string(s_inc);
     const auto b_inc = boost::posix_time::duration_from_string(s_inc);
- 
+
     DateTime dt1 = time_from_string(s_dt1);
     pt::ptime b_pt1 = pt::time_from_string(s_dt1);
- 
+
     LocalDateTime ldt1(time_from_string(s_dt1), tz1);
     LocalDateTime ldt2(time_from_string(s_dt2), tz1);
     LocalDateTime ldt_start = ldt1;
@@ -259,17 +259,17 @@ BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
     {
         ldt1.advance(inc1);
         b_ldt1 += b_inc;
-        const std::string s1 = ldt1.local_time().as_string();
+        const std::string s1 = ldt1.local_time().to_simple_string();
         const std::string s2 = pt::to_simple_string(b_ldt1.local_time());
         //std::cout << s1 << " == " << s2 << std::endl;
         BOOST_REQUIRE_EQUAL(s1, s2);
-    }  
+    }
 
     while (ldt1 > ldt_start)
     {
         ldt1.advance(-inc1);
         b_ldt1 -= b_inc;
-        const std::string s1 = ldt1.local_time().as_string();
+        const std::string s1 = ldt1.local_time().to_simple_string();
         const std::string s2 = pt::to_simple_string(b_ldt1.local_time());
         //std::cout << s1 << " == " << s2 << std::endl;
         BOOST_REQUIRE_EQUAL(s1, s2);
@@ -297,30 +297,30 @@ BOOST_AUTO_TEST_CASE(comparison_with_boost_2)
     str1 << ldt1;
     str2 << b_ldt1;
     BOOST_CHECK_EQUAL(str1.str(), str2.str());
-    BOOST_CHECK_EQUAL(ldt1.local_time().as_string(), pt::to_simple_string(b_ldt1.local_time()));
+    BOOST_CHECK_EQUAL(ldt1.local_time().to_simple_string(), pt::to_simple_string(b_ldt1.local_time()));
 
     BOOST_CHECK_EQUAL(
-        ldt1.local_time().as_iso_string(),
+        ldt1.local_time().to_iso_string(),
         pt::to_iso_string(b_ldt1.local_time()));
 
     BOOST_CHECK_EQUAL(
-        ldt1.utc_time().as_iso_string(),
+        ldt1.utc_time().to_iso_string(),
         pt::to_iso_string(b_ldt1.utc_time()));
 
     BOOST_CHECK_EQUAL(
-        ldt1.date().as_iso_string(),
+        ldt1.date().to_iso_string(),
         g::to_iso_string(b_ldt1.date()));
 
     BOOST_CHECK_EQUAL(
-        ldt1.time_of_day().as_iso_string(),
+        ldt1.time_of_day().to_iso_string(),
         pt::to_iso_string(b_ldt1.time_of_day()));
-    
+
     BOOST_CHECK_EQUAL(
-        ldt1.local_time().as_string(),
+        ldt1.local_time().to_simple_string(),
         "2024-Feb-20 10:48:57"s);
 
     BOOST_CHECK_EQUAL(
-        ldt1.utc_time().as_string(),
+        ldt1.utc_time().to_simple_string(),
         s_dt1);
 
     Fmi::date_time::LocalDateTime ldt2(

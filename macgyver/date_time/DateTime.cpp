@@ -282,25 +282,25 @@ struct std::tm Fmi::date_time::DateTime::as_tm() const
     return result;
 }
 
-std::string Fmi::date_time::DateTime::as_string() const
+std::string Fmi::date_time::DateTime::to_simple_string() const
 {
     if (is_special())
         return Base::special_time_as_string();
-    return date().as_string() + " " + maybe_discard_seconds_part(time_of_day().as_string());
+    return date().to_simple_string() + " " + maybe_discard_seconds_part(time_of_day().to_simple_string());
 }
 
-std::string Fmi::date_time::DateTime::as_iso_string() const
+std::string Fmi::date_time::DateTime::to_iso_string() const
 {
     if (is_special())
         return Base::special_time_as_string();
-    return date().as_iso_string() + "T" + maybe_discard_seconds_part(time_of_day().as_iso_string());
+    return date().to_iso_string() + "T" + maybe_discard_seconds_part(time_of_day().to_iso_string());
 }
 
-std::string Fmi::date_time::DateTime::as_iso_extended_string() const
+std::string Fmi::date_time::DateTime::to_iso_extended_string() const
 {
     if (is_special())
         return Base::special_time_as_string();
-    return date().as_iso_extended_string() + "T" + maybe_discard_seconds_part(time_of_day().as_iso_extended_string());
+    return date().to_iso_extended_string() + "T" + maybe_discard_seconds_part(time_of_day().to_iso_extended_string());
 }
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::from_tm(const std::tm& tm)
@@ -578,12 +578,6 @@ Fmi::date_time::parse_iso(const std::string& str)
     if (result.is_special())
         throw Fmi::Exception(BCP, "Invalid ISO time '" + str + "'");
     return result;
-}
-
-std::ostream& Fmi::date_time::operator<<(std::ostream& os, const DateTime& dt)
-{
-    os << dt.as_string();
-    return os;
 }
 
 Fmi::date_time::DateTime Fmi::date_time::from_time_t(long time)

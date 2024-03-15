@@ -66,6 +66,27 @@ bool Fmi::date_time::Base::operator >= (const Base& other) const
     return m_type >= other.m_type;
 }
 
+std::string Fmi::date_time::to_simple_string(const Fmi::date_time::Base& time)
+{
+    return time.to_simple_string();
+}
+
+std::string Fmi::date_time::to_iso_string(const Fmi::date_time::Base& time)
+{
+    return time.to_iso_string();
+}
+
+std::string Fmi::date_time::to_iso_extended_string(const Fmi::date_time::Base& time)
+{
+    return time.to_iso_extended_string();
+}
+
+std::ostream& Fmi::date_time::operator << (std::ostream& os, const Fmi::date_time::Base& time)
+{
+    os << time.to_simple_string();
+    return os;
+}
+
 void Fmi::date_time::Base::assert_supported() const
 {
     if (is_not_a_date_time())

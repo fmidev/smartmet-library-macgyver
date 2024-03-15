@@ -70,7 +70,7 @@ int64_t Fmi::date_time::TimeDuration::total_microseconds() const
   return std::chrono::duration_cast<detail::microsec_t>(m_duration).count();
 }
 
-std::string Fmi::date_time::TimeDuration::as_string() const
+std::string Fmi::date_time::TimeDuration::to_simple_string() const
 {
   const std::string str = format_time("%H:%M:%S", *this);
   const std::size_t pos = str.find_last_of(".,");
@@ -80,7 +80,7 @@ std::string Fmi::date_time::TimeDuration::as_string() const
   return str;
 }
 
-std::string Fmi::date_time::TimeDuration::as_iso_string() const
+std::string Fmi::date_time::TimeDuration::to_iso_string() const
 {
   const std::string str = format_time("%H%M%S", *this);
   const std::size_t pos = str.find_last_of(".,");
@@ -89,7 +89,7 @@ std::string Fmi::date_time::TimeDuration::as_iso_string() const
   return str;
 }
 
-std::string Fmi::date_time::TimeDuration::as_iso_extended_string() const
+std::string Fmi::date_time::TimeDuration::to_iso_extended_string() const
 {
   const std::string str = format_time("%H:%M:%S", *this);
   const std::size_t pos = str.find_last_of(".,");
@@ -409,21 +409,6 @@ struct std::tm Fmi::date_time::to_tm(const date_time::TimeDuration& t)
   result.tm_sec = t.seconds();
   result.tm_isdst = -1;
   return result;
-}
-
-std::string Fmi::date_time::to_simple_string(const TimeDuration& td)
-{
-  return td.as_string();
-}
-
-std::string Fmi::date_time::to_iso_string(const TimeDuration& td)
-{
-  return td.as_iso_string();
-}
-
-std::ostream& Fmi::date_time::operator<<(std::ostream& os, const TimeDuration& td)
-{
-  return os << td.as_string();
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::duration_from_string(const std::string& str)

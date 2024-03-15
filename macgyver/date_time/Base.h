@@ -1,7 +1,7 @@
 #pragma once
 
 #include <chrono>
-#include <sstream>
+#include <ostream>
 #include <string>
 
 #define FMI_NEW_DATE_TIME 1
@@ -116,6 +116,12 @@ namespace Fmi
 
             inline Type type() const { return m_type; }
 
+            virtual std::string to_simple_string() const = 0;
+
+            virtual std::string to_iso_string() const = 0;
+
+            virtual std::string to_iso_extended_string() const = 0;
+
             std::string special_time_as_string() const;
 
             static Type check_type(const Type& type);
@@ -176,5 +182,13 @@ namespace Fmi
             const auto& impl = time.get_impl();
             return date::format(locale, format, impl);
         }
+
+        std::string to_simple_string(const Base& time);
+
+        std::string to_iso_string(const Base& time);
+
+        std::string to_iso_extended_string(const Base& time);
+
+        std::ostream& operator << (std::ostream& os, const Base& time);
     }
 }

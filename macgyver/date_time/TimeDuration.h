@@ -41,9 +41,9 @@ namespace Fmi
 
             constexpr int64_t ticks_per_second() const { return detail::period_t::den; }
 
-            virtual std::string as_string() const;
-            std::string as_iso_string() const;
-            std::string as_iso_extended_string() const;
+            std::string to_simple_string() const override;
+            std::string to_iso_string() const override;
+            std::string to_iso_extended_string() const override;
 
             static TimeDuration from_tm(const std::tm& tm);
 
@@ -120,11 +120,6 @@ namespace Fmi
         TimeDuration duration_from_string(const std::string& str);
 
         struct std::tm to_tm(const TimeDuration& td);
-
-        std::string to_simple_string(const TimeDuration& td);
-        std::string to_iso_string(const TimeDuration& td);
-
-        std::ostream& operator<<(std::ostream& os, const TimeDuration& td);
 
         template <typename ArchiveType>
         void TimeDuration::save(ArchiveType& archive, const unsigned int version) const

@@ -241,12 +241,12 @@ LocalDateTime::get_dst_times() const
     return result;
 }
 
-std::string LocalDateTime::as_simple_string() const
+std::string LocalDateTime::to_simple_string() const
 {
     switch (type())
     {
         case Type::NORMAL:
-            return internal::remove_trailing_zeros(local_time().as_string())
+            return internal::remove_trailing_zeros(local_time().to_simple_string())
                     + " " + abbrev();
 
         case Type::NOT_A_DATE_TIME:
@@ -263,20 +263,20 @@ std::string LocalDateTime::as_simple_string() const
     }
 }
 
-std::string LocalDateTime::as_iso_string() const
+std::string LocalDateTime::to_iso_string() const
 {
     check_no_special(BCP);
-    const std::string s_dt = local_time().as_iso_string();
+    const std::string s_dt = local_time().to_iso_string();
     const std::string s_zone = zone().zone_ptr() == TimeZonePtr::utc.zone_ptr()
         ? "Z"
         : date::format("%z", ldt);
     return s_dt + s_zone;
 }
 
-std::string LocalDateTime::as_iso_extended_string() const
+std::string LocalDateTime::to_iso_extended_string() const
 {
     check_no_special(BCP);
-    const std::string s_dt = local_time().as_iso_extended_string();
+    const std::string s_dt = local_time().to_iso_extended_string();
     const std::string s_zone = zone().zone_ptr() == TimeZonePtr::utc.zone_ptr()
         ? "Z"
         : date::format("%Ez", ldt);
@@ -416,27 +416,6 @@ LocalDateTime& Fmi::date_time::LocalDateTime::operator -- ()
 {
     advance(TimeDuration(detail::duration_t(-1)));
     return *this;
-}
-
-std::string Fmi::date_time::to_simple_string(const LocalDateTime& time)
-{
-    return time.as_simple_string();
-}
-
-std::string Fmi::date_time::to_iso_string(const LocalDateTime& time)
-{
-    return time.as_iso_string();
-}
-
-std::string Fmi::date_time::to_iso_extended_string(const LocalDateTime& time)
-{
-    return time.as_iso_extended_string();
-}
-
-std::ostream& Fmi::date_time::operator << (std::ostream& os, const LocalDateTime& time)
-{
-    os << time.as_simple_string();
-    return os;
 }
 
 Fmi::date_time::DateTime Fmi::date_time::MicrosecClock::universal_time()

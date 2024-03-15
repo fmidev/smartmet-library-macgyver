@@ -187,17 +187,17 @@ int Fmi::date_time::Date::week_number() const
     }
 }
 
-std::string Fmi::date_time::Date::as_string() const
+std::string Fmi::date_time::Date::to_simple_string() const
 {
     return format_time("%Y-%b-%d", *this);
 }
 
-std::string Fmi::date_time::Date::as_iso_string() const
+std::string Fmi::date_time::Date::to_iso_string() const
 {
     return format_time("%Y%m%d", *this);
 }
 
-std::string Fmi::date_time::Date::as_iso_extended_string() const
+std::string Fmi::date_time::Date::to_iso_extended_string() const
 {
     return format_time("%Y-%m-%d", *this);
 }
@@ -327,27 +327,6 @@ void Fmi::date_time::Date::assert_special() const
 {
     if (is_special())
         throw Fmi::Exception(BCP, "Operation not supported for special values");
-}
-
-std::string Fmi::date_time::to_simple_string(const Fmi::date_time::Date& date)
-{
-    return date.as_string();
-}
-
-std::string Fmi::date_time::to_iso_string(const Fmi::date_time::Date& date)
-{
-    return date.as_iso_string();
-}
-
-std::string Fmi::date_time::to_iso_extended_string(const Fmi::date_time::Date& date)
-{
-    return date.as_iso_extended_string();
-}
-
-std::ostream& Fmi::date_time::operator<<(std::ostream& os, const Fmi::date_time::Date& date)
-{
-    os << date.as_string();
-    return os;
 }
 
 Fmi::date_time::Date Fmi::date_time::Date::from_iso_string(const std::string& str)

@@ -62,9 +62,9 @@ namespace Fmi
 
             std::tm as_tm() const;
 
-            std::string as_string() const;
-            std::string as_iso_string() const;
-            std::string as_iso_extended_string() const;
+            std::string to_simple_string() const override;
+            std::string to_iso_string() const override;
+            std::string to_iso_extended_string() const override;
 
             static Date from_time_t(std::time_t time);
             static Date from_tm(const std::tm& tm);
@@ -109,12 +109,6 @@ namespace Fmi
         Date date_from_string(const std::string& str);
 
         inline std::tm to_tm(const Date& date) { return date.as_tm(); }
-
-        std::string to_simple_string(const Date& date);
-        std::string to_iso_string(const Date& date);
-        std::string to_iso_extended_string(const Date& date);
-
-        std::ostream& operator<<(std::ostream& os, const Date& date);
 
         struct tm to_tm(const Date& date);
         Date from_tm(const struct tm& tm);

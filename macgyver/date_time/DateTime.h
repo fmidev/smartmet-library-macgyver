@@ -48,9 +48,9 @@ namespace Fmi
             std::time_t as_time_t() const;
             std::tm as_tm() const;
 
-            std::string as_string() const;
-            std::string as_iso_string() const;
-            std::string as_iso_extended_string() const;
+            std::string to_simple_string() const override;
+            std::string to_iso_string() const override;
+            std::string to_iso_extended_string() const override;
 
             static DateTime from_tm(const std::tm& tm);
             static DateTime from_string(const std::string& str);
@@ -88,21 +88,6 @@ namespace Fmi
             return dt.as_tm();
         }
 
-        inline std::string to_simple_string(const DateTime& dt)
-        {
-            return dt.as_string();
-        }
-
-        inline std::string to_iso_string(const DateTime& dt)
-        {
-            return dt.as_iso_string();
-        }
-
-        inline std::string to_iso_extended_string(const DateTime& dt)
-        {
-            return dt.as_iso_extended_string();
-        }
-
         inline DateTime time_from_string(const std::string& str)
         {
             return DateTime::from_string(str);
@@ -122,8 +107,6 @@ namespace Fmi
 
         DateTime try_parse_iso(const std::string& str, bool* is_utc);
         DateTime parse_iso(const std::string& str);
-
-        std::ostream& operator<<(std::ostream& os, const DateTime& dt);
 
         namespace MicrosecClock
         {

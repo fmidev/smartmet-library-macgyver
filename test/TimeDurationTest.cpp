@@ -49,10 +49,10 @@ BOOST_AUTO_TEST_CASE(test_TimeDuration_1)
             TimeDuration td(hours, minutes, seconds, mks);
             int frac = mks * time_duration::ticks_per_second() / td.ticks_per_second();
             time_duration pt(hours, minutes, seconds, frac);
-            const std::string str1 = td.as_string();
+            const std::string str1 = td.to_simple_string();
             const std::string str2 = boost::posix_time::to_simple_string(pt);
 
-            const std::string str3 = td.as_iso_string();
+            const std::string str3 = td.to_iso_string();
             const std::string str4 = boost::posix_time::to_iso_string(pt);
             if (str1 != str2)
             {
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_TimeDuration_2)
     BOOST_REQUIRE_EQUAL(td1.minutes(), pt1.minutes());
     BOOST_REQUIRE_EQUAL(td1.seconds(), pt1.seconds());
 
-    const std::string str1 = td1.as_string();
+    const std::string str1 = td1.to_simple_string();
     const std::string str2 = boost::posix_time::to_simple_string(pt1);
     BOOST_REQUIRE_EQUAL(str1, str2);
 }
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(from_string)
         const char* dst = td.second ? td.second : td.first;
         Fmi::date_time::TimeDuration td1;
         BOOST_CHECK_NO_THROW(td1 = test_parse(src));
-        BOOST_CHECK_EQUAL(td1.as_string(), dst);
+        BOOST_CHECK_EQUAL(td1.to_simple_string(), dst);
     }
 }
 
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(from_iso_string)
         const char* dst = td.second ? td.second : td.first;
         Fmi::date_time::TimeDuration td1;
         BOOST_CHECK_NO_THROW(td1 = test_parse(src));
-        BOOST_CHECK_EQUAL(td1.as_string(), dst);
+        BOOST_CHECK_EQUAL(td1.to_simple_string(), dst);
     }
 }
 
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(from_iso_extended_string)
         const char* dst = td.second ? td.second : td.first;
         Fmi::date_time::TimeDuration td1;
         BOOST_CHECK_NO_THROW(td1 = test_parse(src));
-        BOOST_CHECK_EQUAL(td1.as_string(), dst);
+        BOOST_CHECK_EQUAL(td1.to_simple_string(), dst);
     }
 }
 
@@ -250,17 +250,17 @@ BOOST_AUTO_TEST_CASE(factory_methods)
     using Fmi::date_time::Milliseconds;
     using Fmi::date_time::Microseconds;
 
-    BOOST_CHECK_EQUAL(Hours(1).as_string(), "01:00:00");
-    BOOST_CHECK_EQUAL(Minutes(1).as_string(), "00:01:00");
-    BOOST_CHECK_EQUAL(Seconds(1).as_string(), "00:00:01");
-    BOOST_CHECK_EQUAL(Milliseconds(1).as_string(), "00:00:00.001000");
-    BOOST_CHECK_EQUAL(Microseconds(1).as_string(), "00:00:00.000001");
+    BOOST_CHECK_EQUAL(Hours(1).to_simple_string(), "01:00:00");
+    BOOST_CHECK_EQUAL(Minutes(1).to_simple_string(), "00:01:00");
+    BOOST_CHECK_EQUAL(Seconds(1).to_simple_string(), "00:00:01");
+    BOOST_CHECK_EQUAL(Milliseconds(1).to_simple_string(), "00:00:00.001000");
+    BOOST_CHECK_EQUAL(Microseconds(1).to_simple_string(), "00:00:00.000001");
 
-    BOOST_CHECK_EQUAL(Minutes(1445).as_string(), "24:05:00");
-    BOOST_CHECK_EQUAL(Seconds(86401).as_string(), "24:00:01");
+    BOOST_CHECK_EQUAL(Minutes(1445).to_simple_string(), "24:05:00");
+    BOOST_CHECK_EQUAL(Seconds(86401).to_simple_string(), "24:00:01");
 
-    BOOST_CHECK_EQUAL(Minutes(-1445).as_string(), "-24:05:00");
-    BOOST_CHECK_EQUAL(Seconds(-86401).as_string(), "-24:00:01");
+    BOOST_CHECK_EQUAL(Minutes(-1445).to_simple_string(), "-24:05:00");
+    BOOST_CHECK_EQUAL(Seconds(-86401).to_simple_string(), "-24:00:01");
 }
 
 BOOST_AUTO_TEST_CASE(serialization_test)
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(serialization_test)
                 ia >> td1;
             }
 
-            BOOST_CHECK_MESSAGE(td == td1, "Serialization failed for " + td.as_string()
-                + ". Got " + td1.as_string());
+            BOOST_CHECK_MESSAGE(td == td1, "Serialization failed for " + td.to_simple_string()
+                + ". Got " + td1.to_simple_string());
         }
 }

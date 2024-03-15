@@ -256,9 +256,9 @@ namespace Fmi
                 return m_start >= other.m_end;
             }
 
-            std::string to_string()
+            std::string to_simple_string() const
             {
-                return "[" + m_start.to_string() + "/" + m_end.to_string() + "]";
+                return "[" + m_start.to_simple_string() + "/" + m_end.to_simple_string() + "]";
             }
 
         private:
@@ -267,11 +267,17 @@ namespace Fmi
         };
 
         template <typename DateTimeType>
+        std::string to_simple_string(const TimePeriod<DateTimeType>& period)
+        {
+            return period.to_simple_string();
+        }
+
+        template <typename DateTimeType>
         std::ostream& operator<<(
             std::ostream& os,
             const TimePeriod<DateTimeType>& period)
         {
-            os << period.to_string();
+            os << period.to_simple_string();
             return os;
         }
     }
