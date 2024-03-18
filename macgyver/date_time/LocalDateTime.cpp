@@ -36,6 +36,12 @@ LocalDateTime::LocalDateTime(
 
     : Base(NORMAL)
 {
+    if (time.is_special())
+    {
+        set_type(time.type());
+        return;
+    }
+
     if (!tz)
         throw Fmi::Exception(BCP, "Time zone not set");
 
@@ -66,6 +72,18 @@ LocalDateTime::LocalDateTime(
 
     : Base()
 {
+    if (date.is_special())
+    {
+        set_type(date.type());
+        return;
+    }
+
+    if (time.is_special())
+    {
+        set_type(time.type());
+        return;
+    }
+
     if (!tz)
         throw Fmi::Exception(BCP, "Time zone not set");
 
@@ -89,6 +107,18 @@ LocalDateTime::LocalDateTime(const Date& date, const TimeDuration& time,
                              const TimeZonePtr& tz, enum Choose choose)
     : Base()
 {
+    if (date.is_special())
+    {
+        set_type(date.type());
+        return;
+    }
+
+    if (time.is_special())
+    {
+        set_type(time.type());
+        return;
+    }
+
     if (!tz)
         throw Fmi::Exception(BCP, "Time zone not set");
 
