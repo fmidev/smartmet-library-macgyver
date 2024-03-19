@@ -11,19 +11,19 @@ using Fmi::date_time::LocalDateTime;
 
 namespace detail = Fmi::detail;
 
-LocalDateTime::LocalDateTime()
+LocalDateTime::LocalDateTime() noexcept
     : Base()
 {
 }
 
-LocalDateTime::LocalDateTime(Type type)
+LocalDateTime::LocalDateTime(Type type) noexcept
     : Base(type)
 {
 }
 
-LocalDateTime::LocalDateTime(const LocalDateTime& src) = default;
+LocalDateTime::LocalDateTime(const LocalDateTime& src) noexcept = default;
 
-LocalDateTime::LocalDateTime(const detail::zoned_time_t& zoned_time)
+LocalDateTime::LocalDateTime(const detail::zoned_time_t& zoned_time) noexcept
     : Base(NORMAL)
     , ldt(zoned_time)
 {

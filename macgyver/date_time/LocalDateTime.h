@@ -35,13 +35,13 @@ namespace Fmi
                 LATEST
             };
 
-            LocalDateTime();
+            LocalDateTime() noexcept;
 
-            explicit LocalDateTime(Type type);
+            explicit LocalDateTime(Type type) noexcept;
 
-            LocalDateTime(const LocalDateTime& src);
+            LocalDateTime(const LocalDateTime& src) noexcept;
 
-            LocalDateTime(const detail::zoned_time_t& zoned_time);
+            LocalDateTime(const detail::zoned_time_t& zoned_time) noexcept;
 
             /**
              * Construct a local date time from UTC time and time zone

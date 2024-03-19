@@ -82,39 +82,40 @@ namespace Fmi
 
         protected:
             // This constructor is for derived classes only and is not intended to be used directly
-            Base(Type type = NOT_A_DATE_TIME) : m_type(type)
+            constexpr Base(Type type = NOT_A_DATE_TIME) noexcept
+                : m_type(type)
             {
             }
 
         public:
             virtual ~Base() = default;
 
-            bool is_special() const
+            bool is_special() const noexcept
             {
                 return m_type != NORMAL;
             }
 
-            bool is_pos_infinity() const
+            bool is_pos_infinity() const noexcept
             {
                 return m_type == POS_INFINITY;
             }
 
-            bool is_neg_infinity() const
+            bool is_neg_infinity() const noexcept
             {
                 return m_type == NEG_INFINITY;
             }
 
-            bool is_infinity() const
+            bool is_infinity() const noexcept
             {
                 return m_type == POS_INFINITY || m_type == NEG_INFINITY;
             }
 
-            bool is_not_a_date_time() const
+            bool is_not_a_date_time() const noexcept
             {
                 return m_type == NOT_A_DATE_TIME;
             }
 
-            inline Type type() const { return m_type; }
+            inline Type type() const noexcept { return m_type; }
 
             virtual std::string to_simple_string() const = 0;
 
@@ -127,7 +128,7 @@ namespace Fmi
             static Type check_type(const Type& type);
 
         protected:
-            inline void set_type(Type type)
+            inline void set_type(Type type) noexcept
             {
                 m_type = type;
             }
