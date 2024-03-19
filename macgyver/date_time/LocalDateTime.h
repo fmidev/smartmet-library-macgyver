@@ -29,8 +29,9 @@ namespace Fmi
              *  EARLIEST - choose the earliest time
              *  LATEST - choose the latest time
              */
-            enum Choose
+            enum class Choose
             {
+                NONE,
                 EARLIEST,
                 LATEST
             };
@@ -55,17 +56,21 @@ namespace Fmi
                 const TimeZonePtr& tz,
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
 
+            /**
+             * Construct a local date time from date, time of day and time zone
+             *
+             * @param date Date
+             * @param time Time of day (local time)
+             * @param tz Time zone
+             * @param err_handling Error handling policy
+             * @param choose Ambiguous/non-existant time handling policy
+            */
             LocalDateTime(
                 const Date& date,
                 const TimeDuration& time,
                 const TimeZonePtr& tz,
-                enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
-
-            LocalDateTime(
-                const Date& date,
-                const TimeDuration& time,
-                const TimeZonePtr& tz,
-                enum Choose choose);
+                enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR,
+                enum Choose choose = Choose::EARLIEST);
 
             LocalDateTime(
                 const detail::time_point_t& time,

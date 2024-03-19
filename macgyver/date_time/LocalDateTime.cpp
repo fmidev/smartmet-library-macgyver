@@ -36,103 +36,109 @@ LocalDateTime::LocalDateTime(
 
     : Base(NORMAL)
 {
-    if (time.is_special())
-    {
-        set_type(time.type());
-        return;
-    }
-
-    if (!tz)
-        throw Fmi::Exception(BCP, "Time zone not set");
-
     try
     {
-        const auto ldt_utc  = detail::zoned_time_t(
-            TimeZonePtr::utc.zone_ptr(),
-            detail::time_point_t(time.get_impl()) );
-        const auto sys_time = ldt_utc.get_sys_time();
-        ldt = detail::zoned_time_t(tz, tz.zone_ptr()->to_local(sys_time));
-        set_type(NORMAL);
+        if (time.is_special())
+        {
+            set_type(time.type());
+            return;
+        }
+
+        if (!tz)
+            throw Fmi::Exception(BCP, "Time zone not set");
+
+        try
+        {
+            const auto ldt_utc  = detail::zoned_time_t(
+                TimeZonePtr::utc.zone_ptr(),
+                detail::time_point_t(time.get_impl()) );
+            const auto sys_time = ldt_utc.get_sys_time();
+            ldt = detail::zoned_time_t(tz, tz.zone_ptr()->to_local(sys_time));
+            set_type(NORMAL);
+        }
+        catch(const std::exception& e)
+        {
+            if (err_handling == EXCEPTION_ON_ERROR)
+                throw;
+
+            set_type(NOT_A_DATE_TIME);
+        }
     }
-    catch(const std::exception& e)
+    catch (...)
     {
-        if (err_handling == EXCEPTION_ON_ERROR)
-            throw Fmi::Exception::Trace(BCP, e.what());
-
-        set_type(NOT_A_DATE_TIME);
+        auto err = Fmi::Exception::Trace(BCP, "Failed to construct Fmi::date_time::LocalDateTime");
+        err.addParameter("Time", time.to_simple_string());
+        err.addParameter("TimeZone", tz->name());
+        throw err;
     }
-
 }
 
 LocalDateTime::LocalDateTime(
     const Date& date,
     const TimeDuration& time,
     const TimeZonePtr& tz,
-    enum ErrorHandling err_handling)
+    enum ErrorHandling err_handling,
+    enum Choose choose)
 
     : Base()
 {
-    if (date.is_special())
-    {
-        set_type(date.type());
-        return;
-    }
-
-    if (time.is_special())
-    {
-        set_type(time.type());
-        return;
-    }
-
-    if (!tz)
-        throw Fmi::Exception(BCP, "Time zone not set");
-
     try
     {
-        ldt = detail::zoned_time_t(
-            tz.zone_ptr(),
-            detail::time_point_t(date.get_impl() + time.get_impl()) );
-        set_type(NORMAL);
-    }
-    catch(...)
-    {
-        if (err_handling == EXCEPTION_ON_ERROR)
-            throw Fmi::Exception::Trace(BCP, "Operation failed!");
+        if (date.is_special())
+        {
+            set_type(date.type());
+            return;
+        }
 
-        set_type(NOT_A_DATE_TIME);
-    }
-}
+        if (time.is_special())
+        {
+            set_type(time.type());
+            return;
+        }
 
-LocalDateTime::LocalDateTime(const Date& date, const TimeDuration& time,
-                             const TimeZonePtr& tz, enum Choose choose)
-    : Base()
-{
-    if (date.is_special())
-    {
-        set_type(date.type());
-        return;
-    }
+        if (!tz)
+            throw Fmi::Exception(BCP, "Time zone not set");
 
-    if (time.is_special())
-    {
-        set_type(time.type());
-        return;
-    }
+        try
+        {
+            switch (choose)
+            {
+                case Choose::EARLIEST:
+                    ldt = detail::zoned_time_t(
+                        tz.zone_ptr(),
+                        detail::time_point_t(date.get_impl() + time.get_impl()),
+                        date::choose::earliest);
+                    break;
 
-    if (!tz)
-        throw Fmi::Exception(BCP, "Time zone not set");
+                case Choose::LATEST:
+                    ldt = detail::zoned_time_t(
+                        tz.zone_ptr(),
+                        detail::time_point_t(date.get_impl() + time.get_impl()),
+                        date::choose::latest);
+                    break;
 
-    try
-    {
-        ldt = detail::zoned_time_t(
-            tz.zone_ptr(),
-            detail::time_point_t(date.get_impl() + time.get_impl()),
-            choose == EARLIEST ? date::choose::earliest : date::choose::latest);
-        set_type(NORMAL);
+                default:
+                    ldt = detail::zoned_time_t(
+                        tz.zone_ptr(),
+                        detail::time_point_t(date.get_impl() + time.get_impl()) );
+            }
+            set_type(NORMAL);
+        }
+        catch(...)
+        {
+            if (err_handling == EXCEPTION_ON_ERROR)
+                throw;
+
+            set_type(NOT_A_DATE_TIME);
+        }
     }
     catch (...)
     {
-        set_type(NOT_A_DATE_TIME);
+        auto err = Fmi::Exception::Trace(BCP, "Failed to construct Fmi::date_time::LocalDateTime");
+        err.addParameter("Date", date.to_simple_string());
+        err.addParameter("Time", time.to_simple_string());
+        err.addParameter("TimeZone", tz->name());
+        throw err;
     }
 }
 

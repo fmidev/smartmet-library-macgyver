@@ -143,7 +143,9 @@ BOOST_AUTO_TEST_CASE(dst_test_1)
     BOOST_CHECK_EQUAL(ldt1.dst_on(), false);
 
     // 1 second in gap (begin of summertime) -> invalid local time
-    Fmi::date_time::LocalDateTime ldt2(dt2.date(), dt2.time_of_day(), tz);
+    Fmi::date_time::LocalDateTime ldt2(dt2.date(), dt2.time_of_day(), tz,
+        Fmi::date_time::LocalDateTime::NOT_DATE_TIME_ON_ERROR,
+        Fmi::date_time::LocalDateTime::Choose::NONE);
     BOOST_CHECK_EQUAL(ldt2.is_special(), true);
 
     Fmi::date_time::LocalDateTime ldt3(dt3.date(), dt3.time_of_day(), tz);
