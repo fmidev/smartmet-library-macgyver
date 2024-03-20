@@ -38,7 +38,7 @@ namespace Fmi
 
             TimePeriod(const DateTimeType& start, const DateTimeType& end)
             {
-                if (start.is_not_a_date_time() || end.is_not_a_date_time() || end <= start)
+                if (start.is_not_a_date_time() || end.is_not_a_date_time() || end < start)
                 {
                     m_start = DateTimeType();
                     m_end = DateTimeType();
@@ -56,7 +56,7 @@ namespace Fmi
             {
                 if (start.is_special()
                     || duration.is_special()
-                    || duration <= TimeDuration(0, 0, 0))
+                    || duration < TimeDuration(0, 0, 0))
                 {
                     m_start = DateTimeType();
                     m_end = DateTimeType();
@@ -140,7 +140,9 @@ namespace Fmi
             */
             bool is_null() const
             {
-                return m_start.is_not_a_date_time() || m_end.is_not_a_date_time();
+                return m_start.is_not_a_date_time()
+                    || m_end.is_not_a_date_time()
+                    || m_start == m_end;
             }
 
             /**
