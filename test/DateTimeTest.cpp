@@ -279,3 +279,24 @@ BOOST_AUTO_TEST_CASE(test_serialization_2)
 
     BOOST_CHECK_EQUAL(dt1, dt2);
 }
+
+BOOST_AUTO_TEST_CASE(test_inf)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: infinity");
+
+    using namespace Fmi::date_time;
+    DateTime neg_inf = DateTime::NEG_INFINITY;
+    DateTime pos_inf = DateTime::POS_INFINITY;
+    DateTime dt1(Date(2024, 2, 16), TimeDuration(0, 0, 0));
+
+    BOOST_CHECK(pos_inf > neg_inf);
+    BOOST_CHECK(neg_inf < pos_inf);
+    BOOST_CHECK(neg_inf < dt1);
+    BOOST_CHECK(pos_inf > dt1);
+
+    BOOST_CHECK(neg_inf != pos_inf);
+    BOOST_CHECK(neg_inf != dt1);
+    BOOST_CHECK(pos_inf != dt1);
+    BOOST_CHECK(neg_inf == neg_inf);
+    BOOST_CHECK(pos_inf == pos_inf);
+}
