@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <type_traits>
+#include "../Exception.h"
 
 namespace Fmi
 {
@@ -36,13 +37,16 @@ namespace Fmi
             TimePeriod() = default;
 
             TimePeriod(const DateTimeType& start, const DateTimeType& end)
-                : m_start(start),
-                  m_end(end)
             {
-                if (start.is_not_a_date_time() || end.is_not_a_date_time() || m_end <= m_start)
+                if (start.is_not_a_date_time() || end.is_not_a_date_time() || end <= start)
                 {
                     m_start = DateTimeType();
                     m_end = DateTimeType();
+                }
+                else
+                {
+                    m_start = start;
+                    m_end = end;
                 }
             }
 
@@ -50,22 +54,29 @@ namespace Fmi
                 : m_start(start),
                   m_end(start + duration)
             {
-                if (start.is_special() || duration.is_special())
+                if (start.is_special()
+                    || duration.is_special()
+                    || duration <= TimeDuration(0, 0, 0))
                 {
                     m_start = DateTimeType();
                     m_end = DateTimeType();
                 }
+                else
+                {
+                    m_start = start;
+                    m_end = start + duration;
+                }
             }
 
             TimePeriod(const TimePeriod& other)
-                : m_start(other.m_start),
-                  m_end(other.m_end)
+                : m_start(other.m_start)
+                , m_end(other.m_end)
             {
             }
 
             virtual ~TimePeriod() = default;
 
-            TimePeriod& operator=(const TimePeriod& other)
+            TimePeriod& operator = (const TimePeriod& other)
             {
                 m_start = other.m_start;
                 m_end = other.m_end;
@@ -129,7 +140,7 @@ namespace Fmi
             */
             bool is_null() const
             {
-                return m_start.is_special() || m_end.is_special();
+                return m_start.is_not_a_date_time() || m_end.is_not_a_date_time();
             }
 
             /**
@@ -137,18 +148,26 @@ namespace Fmi
             */
             bool contains(const DateTimeType& time) const
             {
-                if (m_start.is_special() || m_end.is_special() || time.is_special())
+                if (is_null() || time.is_not_a_date_time())
                     return false;
-                return m_start <= time && time <= m_end;
+                bool result = m_start <= time && time <= m_end;
+                return result;
             }
 
             /**
-             * Check if the time period contains the given time period.
+             * sCheck if the time period contains the given time period.
              */
             bool contains(const TimePeriod& period) const
             {
-                if (m_start.is_special() || m_end.is_special() || period.m_start.is_special() || period.m_end.is_special())
+                if (m_start.is_not_a_date_time()
+                    || m_end.is_not_a_date_time()
+                    || period.m_start.is_not_a_date_time()
+                    || period.m_end.is_not_a_date_time())
+                    if (m_start.is_special() || m_end.is_special() || period.m_start.is_special() || period.m_end.is_special())
+                {
                     return false;
+                }
+
                 return m_start <= period.m_start && period.m_end <= m_end;
             }
 
@@ -157,8 +176,14 @@ namespace Fmi
              */
             bool intersects(const TimePeriod& period) const
             {
-                if (m_start.is_special() || m_end.is_special() || period.m_start.is_special() || period.m_end.is_special())
+                if (m_start.is_not_a_date_time()
+                    || m_end.is_not_a_date_time()
+                    || period.m_start.is_not_a_date_time()
+                    || period.m_end.is_not_a_date_time())
+                {
                     return false;
+                }
+
                 return m_start < period.m_end && period.m_start < m_end;
             }
 
@@ -167,8 +192,14 @@ namespace Fmi
             */
             TimePeriod intersection(const TimePeriod& period) const
             {
-                if (m_start.is_special() || m_end.is_special() || period.m_start.is_special() || period.m_end.is_special())
+                if (m_start.is_not_a_date_time()
+                    || m_end.is_not_a_date_time()
+                    || period.m_start.is_not_a_date_time()
+                    || period.m_end.is_not_a_date_time())
+                {
                     return TimePeriod();
+                }
+
                 DateTimeType start = m_start > period.m_start ? m_start : period.m_start;
                 DateTimeType end = m_end < period.m_end ? m_end : period.m_end;
                 return TimePeriod(start, end);
@@ -181,8 +212,14 @@ namespace Fmi
             */
             TimePeriod merge(const TimePeriod& period) const
             {
-                if (m_start.is_special() || m_end.is_special() || period.m_start.is_special() || period.m_end.is_special())
+                if (m_start.is_not_a_date_time()
+                    || m_end.is_not_a_date_time()
+                    || period.m_start.is_not_a_date_time()
+                    || period.m_end.is_not_a_date_time())
+                {
                     return TimePeriod();
+                }
+
                 if (intersects(period))
                 {
                     DateTimeType start = m_start < period.m_start ? m_start : period.m_start;
@@ -201,8 +238,14 @@ namespace Fmi
             */
             TimePeriod span(const TimePeriod& period) const
             {
-                if (m_start.is_special() || m_end.is_special() || period.m_start.is_special() || period.m_end.is_special())
+                if (m_start.is_not_a_date_time()
+                    || m_end.is_not_a_date_time()
+                    || period.m_start.is_not_a_date_time()
+                    || period.m_end.is_not_a_date_time())
+                {
                     return TimePeriod();
+                }
+
                 DateTimeType start = m_start < period.m_start ? m_start : period.m_start;
                 DateTimeType end = m_end > period.m_end ? m_end : period.m_end;
                 return TimePeriod(start, end);
@@ -229,6 +272,13 @@ namespace Fmi
              **/
             bool operator<(const TimePeriod& other) const
             {
+                if (is_null() || other.is_null())
+                {
+                    Fmi::Exception exc(BCP, ": operation not supported for null values");
+                    exc.addParameter("this", to_simple_string());
+                    exc.addParameter("other", to_simple_string(other));
+                    throw exc;
+                }
                 return m_end < other.m_start;
             }
 
@@ -237,6 +287,13 @@ namespace Fmi
             */
             bool operator<=(const TimePeriod& other) const
             {
+                if (is_null() || other.is_null())
+                {
+                    Fmi::Exception exc(BCP, ": operation not supported for null values");
+                    exc.addParameter("this", to_simple_string());
+                    exc.addParameter("other", to_simple_string(other));
+                    throw exc;
+                }
                 return m_end <= other.m_start;
             }
 
@@ -245,6 +302,13 @@ namespace Fmi
             */
             bool operator>(const TimePeriod& other) const
             {
+                if (is_null() || other.is_null())
+                {
+                    Fmi::Exception exc(BCP, ": operation not supported for null values");
+                    exc.addParameter("this", to_simple_string());
+                    exc.addParameter("other", to_simple_string(other));
+                    throw exc;
+                }
                 return m_start > other.m_end;
             }
 
@@ -253,6 +317,13 @@ namespace Fmi
             */
             bool operator>=(const TimePeriod& other) const
             {
+                if (is_null() || other.is_null())
+                {
+                    Fmi::Exception exc(BCP, ": operation not supported for null values");
+                    exc.addParameter("this", to_simple_string());
+                    exc.addParameter("other", to_simple_string(other));
+                    throw exc;
+                }
                 return m_start >= other.m_end;
             }
 

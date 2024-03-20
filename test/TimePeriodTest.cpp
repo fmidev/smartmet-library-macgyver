@@ -47,6 +47,8 @@ namespace
 
 BOOST_AUTO_TEST_CASE(zero_length)
 {
+    BOOST_TEST_MESSAGE("TimePeriod<DateTime>: zero length");
+
     TestValues1 test;
 
     TimePeriod<DateTime> period(test.dt1, test.dt1);
@@ -56,6 +58,8 @@ BOOST_AUTO_TEST_CASE(zero_length)
 
 BOOST_AUTO_TEST_CASE(test_1)
 {
+    BOOST_TEST_MESSAGE("TimePeriod<DateTime>: construction, detection whether value is inside interval");
+
     TestValues1 test;
 
     TimePeriod<DateTime> period12(test.dt1, test.dt2);
@@ -77,6 +81,8 @@ BOOST_AUTO_TEST_CASE(test_1)
 
 BOOST_AUTO_TEST_CASE(local_time_interval_test_1)
 {
+    BOOST_TEST_MESSAGE("TimePeriod<LocalDateTime>: test with different time zones");
+
     TestValues1 test;
     TimeZonePtr tz1("Europe/Helsinki");
     TimeZonePtr tz2("UTC");
@@ -96,18 +102,20 @@ BOOST_AUTO_TEST_CASE(local_time_interval_test_1)
 
 BOOST_AUTO_TEST_CASE(shift_interval)
 {
+    BOOST_TEST_MESSAGE("TimePeriod<DateTime>: interval shift");
     TestValues1 test;
-    
+
     TimePeriod<DateTime> period(test.dt1, test.dt2);
     period.shift(Minutes(30));
     BOOST_CHECK_EQUAL(period.begin(), test.dt1 + Minutes(30));
     BOOST_CHECK_EQUAL(period.end(), test.dt2 + Minutes(30));
-}      
+}
 
 BOOST_AUTO_TEST_CASE(expand_interval)
 {
+    BOOST_TEST_MESSAGE("TimePeriod<DateTime>: interval expand");
     TestValues1 test;
-    
+
     TimePeriod<DateTime> period(test.dt1, test.dt2);
     period.expand(Minutes(30));
     BOOST_CHECK_EQUAL(period.begin(), test.dt1 - Minutes(30));
@@ -116,21 +124,23 @@ BOOST_AUTO_TEST_CASE(expand_interval)
 
 BOOST_AUTO_TEST_CASE(contains_period)
 {
+    BOOST_TEST_MESSAGE("TimePeriod<DateTime>: contains period");
     TestValues1 test;
-    
+
     TimePeriod<DateTime> period1(test.dt1, test.dt2);
     TimePeriod<DateTime> period2(test.dt1 + Minutes(10), test.dt2 - Minutes(10));
     TimePeriod<DateTime> period3(test.dt1 + Minutes(90), test.dt2 + Minutes(120));
 
     BOOST_CHECK(period1.contains(period2));
     BOOST_CHECK(!period2.contains(period1));
-    BOOST_CHECK(!period1.contains(period3)); 
+    BOOST_CHECK(!period1.contains(period3));
 }
 
 BOOST_AUTO_TEST_CASE(intersects)
 {
+    BOOST_TEST_MESSAGE("TimePeriod<DateTime>: intersects");
     TestValues1 test;
-    
+
     TimePeriod<DateTime> period1(test.dt1, test.dt2);
     TimePeriod<DateTime> period2(test.dt1 + Minutes(10), test.dt2 - Minutes(10));
     TimePeriod<DateTime> period3(test.dt1 + Minutes(90), test.dt2 + Minutes(120));
@@ -138,4 +148,26 @@ BOOST_AUTO_TEST_CASE(intersects)
     BOOST_CHECK(period1.intersects(period2));
     BOOST_CHECK(period2.intersects(period1));
     BOOST_CHECK(!period1.intersects(period3));
+}
+
+BOOST_AUTO_TEST_CASE(inf_1)
+{
+    BOOST_TEST_MESSAGE("TimePeriod<DateTime>: infinite interval limits");
+    DateTime neg_inf = DateTime::NEG_INFINITY;
+    DateTime pos_inf = DateTime::POS_INFINITY;
+    DateTime dt1(Date(2024, 2, 16), TimeDuration(0, 0, 0));
+    DateTime dt2(Date(2024, 3, 19), TimeDuration(1, 0, 0));
+
+    TimePeriod<DateTime> period1(neg_inf, dt2);
+    BOOST_CHECK(not period1.is_null());
+    BOOST_CHECK(period1.contains(neg_inf));
+    BOOST_CHECK(!period1.contains(pos_inf));
+    BOOST_CHECK(period1.contains(dt1));
+
+    TimePeriod<DateTime> period2(dt1, dt2);
+    TimePeriod<DateTime> period3(dt1, pos_inf);
+    BOOST_CHECK(not period2.is_null());
+    BOOST_CHECK(period1.contains(period2));
+    BOOST_CHECK(!period3.contains(period1));
+    BOOST_CHECK_EQUAL(period1.intersection(period3), period2);
 }
