@@ -10,7 +10,7 @@
 // ======================================================================
 
 #pragma once
-#include "DateTime.h"
+#include "LocalDateTime.h"
 #include <boost/optional.hpp>
 #include <string>
 
@@ -51,15 +51,20 @@ std::size_t stosz(const std::string& str);  // B,K,M,G,T,P suffixes allowed
 
 std::string to_iso_string(const std::time_t time);
 std::string to_iso_string(const TimeDuration& duration);
-std::string to_simple_string(const TimeDuration& duration);
-// this has been accidentally named incorrectly
-std::string to_iso_extended_string(const TimeDuration& duration);
 std::string to_iso_string(const Fmi::Date& date);
-std::string to_simple_string(const Fmi::Date& date);
-std::string to_iso_extended_string(const Fmi::Date& date);
-std::string to_simple_string(const DateTime& time);
 std::string to_iso_string(const DateTime& time);
+std::string to_iso_string(const LocalDateTime& time);
+
+std::string to_iso_extended_string(const TimeDuration& duration);
+std::string to_iso_extended_string(const Fmi::Date& date);
 std::string to_iso_extended_string(const DateTime& time);
+std::string to_iso_extended_string(const LocalDateTime& time);
+
+std::string to_simple_string(const TimeDuration& duration);
+std::string to_simple_string(const Fmi::Date& date);
+std::string to_simple_string(const DateTime& time);
+std::string to_simple_string(const LocalDateTime& time);
+
 std::string to_http_string(const DateTime& time);
 std::string to_timestamp_string(const DateTime& time);
 

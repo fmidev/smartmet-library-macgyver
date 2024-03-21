@@ -853,6 +853,78 @@ std::string to_iso_extended_string(const DateTime& time)
   }
 }
 
+std::string to_iso_string(const LocalDateTime& time)
+{
+  try
+  {
+    std::string result;
+    result += to_iso_string(time.local_time());
+    const auto offset = time.offset().total_seconds();
+    if (offset == 0)
+    {
+      result += 'Z';
+      return result;
+    }
+    result += offset < 0 ? '-' : '+';
+    const auto hours = std::abs(offset) / 3600;
+    const auto minutes = (std::abs(offset) % 3600) / 60;
+    result += fmt::sprintf("%02d%02d", hours, minutes);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+std::string to_iso_extended_string(const LocalDateTime& time)
+{
+  try
+  {
+    std::string result;
+    result += to_iso_extended_string(time.local_time());
+    const auto offset = time.offset().total_seconds();
+    if (offset == 0)
+    {
+      result += 'Z';
+      return result;
+    }
+
+    result += offset < 0 ? '-' : '+';
+    const auto hours = std::abs(offset) / 3600;
+    const auto minutes = (std::abs(offset) % 3600) / 60;
+    result += fmt::sprintf("%02d:%02d", hours, minutes);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+std::string to_simple_string(const LocalDateTime& time)
+{
+  try
+  {
+    std::string result;
+    result += to_simple_string(time.local_time());
+    const auto offset = time.offset().total_seconds();
+    if (offset == 0)
+    {
+      result += 'Z';
+      return result;
+    }
+     result += offset < 0 ? '-' : '+';
+    const auto hours = std::abs(offset) / 3600;
+    const auto minutes = (std::abs(offset) % 3600) / 60;
+    result += fmt::sprintf("%02d%02d", hours, minutes);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 // Convert to form YYYY-mmm-DD HH:MM:SS.fffffffff string where mmm 3 char month name
 std::string to_simple_string(const Fmi::date_time::DateTime& time)
 {
