@@ -44,8 +44,13 @@ LocalDateTime::LocalDateTime(
             return;
         }
 
-        if (!tz)
-            throw Fmi::Exception(BCP, "Time zone not set");
+        if (!tz) {
+            ldt = detail::zoned_time_t(
+                TimeZonePtr::utc.zone_ptr(),
+                time.get_impl());
+            set_type(NORMAL);
+            return;
+        }
 
         try
         {
@@ -97,7 +102,13 @@ LocalDateTime::LocalDateTime(
         }
 
         if (!tz)
-            throw Fmi::Exception(BCP, "Time zone not set");
+        {
+            ldt = detail::zoned_time_t(
+                TimeZonePtr::utc.zone_ptr(),
+                detail::time_point_t(date.get_impl() + time.get_impl()) );
+            set_type(NORMAL);
+            return;
+        }
 
         try
         {
@@ -150,7 +161,13 @@ LocalDateTime::LocalDateTime(
     : Base(NORMAL)
 {
     if (!tz)
-        throw Fmi::Exception(BCP, "Time zone not set");
+    {
+        ldt = detail::zoned_time_t(
+            TimeZonePtr::utc.zone_ptr(),
+            time);
+        set_type(NORMAL);
+        return;
+    }
 
     try
     {

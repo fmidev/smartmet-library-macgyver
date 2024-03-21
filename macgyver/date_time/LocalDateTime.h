@@ -53,7 +53,7 @@ namespace Fmi
             */
             LocalDateTime(
                 const DateTime& time,
-                const TimeZonePtr& tz,
+                const TimeZonePtr& tz = TimeZonePtr(),
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
 
             /**
@@ -68,13 +68,13 @@ namespace Fmi
             LocalDateTime(
                 const Date& date,
                 const TimeDuration& time,
-                const TimeZonePtr& tz,
+                const TimeZonePtr& tz = TimeZonePtr(),
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR,
                 enum Choose choose = Choose::EARLIEST);
 
             LocalDateTime(
                 const detail::time_point_t& time,
-                const date::time_zone* tz,
+                const date::time_zone* tz = TimeZonePtr(),
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
 
             virtual ~LocalDateTime();
