@@ -341,6 +341,28 @@ BOOST_AUTO_TEST_CASE(comparison_with_boost_2)
     BOOST_CHECK_EQUAL(b_ldt1, b_ldt2);
 }
 
+BOOST_AUTO_TEST_CASE(comparison_with_boost_3)
+{
+    namespace g = boost::gregorian;
+    namespace pt = boost::posix_time;
+    namespace lt = boost::local_time;
+
+    const auto s_dt1 = "2024-Feb-20 08:48:57"s;
+
+    Fmi::date_time::DateTime dt1 = Fmi::date_time::time_from_string(s_dt1);
+    Fmi::date_time::LocalDateTime ldt1(dt1);
+
+    const auto b_pt1 = pt::time_from_string(s_dt1);
+    const auto b_ldt1 = lt::local_date_time(b_pt1, lt::time_zone_ptr());
+
+    std::ostringstream tmp;
+    tmp << b_ldt1;
+
+    BOOST_CHECK_EQUAL(
+        Fmi::date_time::to_simple_string(ldt1),
+        tmp.str());
+}
+
 BOOST_AUTO_TEST_CASE(test_make_date)
 {
     using namespace Fmi::date_time;
