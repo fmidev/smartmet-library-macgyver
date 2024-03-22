@@ -392,3 +392,19 @@ BOOST_AUTO_TEST_CASE(test_make_date)
     }
     BOOST_REQUIRE_EQUAL(num_err, 0);
 }
+
+BOOST_AUTO_TEST_CASE(utc_zone_detection)
+{
+    using namespace Fmi::date_time;
+    TimeZonePtr tz1("Europe/Helsinki");
+    TimeZonePtr tz2("Etc/UTC");
+    TimeZonePtr tz3("UTC");
+    TimeZonePtr tz4("GMT");
+    TimeZonePtr tz5("Europe/London");
+
+    BOOST_CHECK(!tz1.is_utc());
+    BOOST_CHECK(tz2.is_utc());
+    BOOST_CHECK(tz3.is_utc());
+    BOOST_CHECK(tz4.is_utc());
+    BOOST_CHECK(!tz5.is_utc());
+}

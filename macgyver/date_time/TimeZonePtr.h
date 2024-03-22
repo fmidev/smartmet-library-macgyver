@@ -79,6 +79,8 @@ namespace Fmi
             std::string name() const { return tz->name(); }
             //inline std::string get_abbrev(const LocalDateTime& time) { return time.get_sys_info().abbrev; }
 
+            bool is_utc() const;
+
             //LocalDateTime now() const;
 
             /**

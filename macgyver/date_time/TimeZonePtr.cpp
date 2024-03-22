@@ -38,7 +38,21 @@ const date::time_zone* Fmi::date_time::TimeZonePtr::zone_ptr() const
     return tz;
 }
 
-#include <iostream>
+bool TimeZonePtr::is_utc() const
+{
+    if (!tz)
+        throw Fmi::Exception(BCP, "Time zone not set");
+
+    // I wanted to use offset, but it seems that there is no easy
+    // way to see whether zone has also DST.
+    // So fall back to detection by name (AP 2024/03/27)
+    std::string name = tz->name();
+
+    if (name.substr(0, 4) == "Etc/")
+        name = name.substr(4);
+
+    return (name == "UTC" || name == "GMT");
+}
 
 std::vector<std::string> TimeZonePtr::get_region_list()
 {
