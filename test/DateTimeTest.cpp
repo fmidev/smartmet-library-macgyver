@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(test_serialization_2)
     BOOST_CHECK_EQUAL(dt1, dt2);
 }
 
-BOOST_AUTO_TEST_CASE(test_inf)
+BOOST_AUTO_TEST_CASE(test_inf_1)
 {
     BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: infinity");
 
@@ -299,4 +299,33 @@ BOOST_AUTO_TEST_CASE(test_inf)
     BOOST_CHECK(pos_inf != dt1);
     BOOST_CHECK(neg_inf == neg_inf);
     BOOST_CHECK(pos_inf == pos_inf);
+}
+
+BOOST_AUTO_TEST_CASE(test_inf_2)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: infinity");
+
+    using namespace Fmi::date_time;
+    DateTime ndt = DateTime::NOT_A_DATE_TIME;
+    DateTime dt_neg_inf = DateTime::NEG_INFINITY;
+    DateTime dt_norm(Date(2024, 2, 16), TimeDuration(0, 0, 0));
+    DateTime dt_pos_inf = DateTime::POS_INFINITY;
+    TimeDuration ntd = TimeDuration::NOT_A_DURATION;
+    TimeDuration td_pos_inf = TimeDuration::POS_INFINITY;
+    TimeDuration td_norm = TimeDuration(1, 2, 3);
+    TimeDuration td_neg_inf = TimeDuration::NEG_INFINITY;
+
+    BOOST_CHECK_EQUAL(dt_neg_inf + td_norm, dt_neg_inf);
+    BOOST_CHECK_EQUAL(dt_neg_inf - td_pos_inf, dt_neg_inf);
+    BOOST_CHECK_EQUAL(dt_pos_inf + td_norm, dt_pos_inf);
+    BOOST_CHECK_EQUAL(dt_pos_inf - td_pos_inf, ndt);
+
+    BOOST_CHECK_EQUAL(dt_neg_inf - td_norm, dt_neg_inf);
+    BOOST_CHECK_EQUAL(dt_neg_inf + td_neg_inf, dt_neg_inf);
+
+    BOOST_CHECK_EQUAL(dt_pos_inf - td_norm, dt_pos_inf);
+    BOOST_CHECK_EQUAL(dt_pos_inf + td_neg_inf, ndt);
+
+    // FIXME: add misisng tests
+
 }

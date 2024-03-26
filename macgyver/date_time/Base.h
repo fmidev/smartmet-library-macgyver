@@ -128,6 +128,10 @@ namespace Fmi
             static Type check_type(const Type& type);
 
         protected:
+            static Type add_impl(Type a, Type b);
+
+            static Type sub_impl(Type a, Type b);
+
             inline void set_type(Type type) noexcept
             {
                 m_type = type;

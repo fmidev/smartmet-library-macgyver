@@ -105,6 +105,81 @@ void Fmi::date_time::Base::assert_supported(const Base& other) const
         throw Fmi::Exception(BCP, "INTERNAL ERROR: operation not supported for normal values");
 }
 
+Fmi::date_time::Base::Type
+Fmi::date_time::Base::add_impl(Fmi::date_time::Base::Type a, Fmi::date_time::Base::Type b)
+{
+    switch (a)
+    {
+    default:
+    case NOT_A_DATE_TIME:   return NOT_A_DATE_TIME;
+
+    case NEG_INFINITY:
+        switch (b)
+        {
+        case NEG_INFINITY:
+        case NORMAL:           return NEG_INFINITY;
+        case POS_INFINITY:
+        default:               return NOT_A_DATE_TIME;
+        }
+
+    case POS_INFINITY:
+        switch (b)
+        {
+        case POS_INFINITY:
+        case NORMAL:           return POS_INFINITY;
+        case NEG_INFINITY:
+        default:               return NOT_A_DATE_TIME;
+        }
+
+    case NORMAL:
+        switch (b)
+        {
+        case NEG_INFINITY:     return NEG_INFINITY;
+        case POS_INFINITY:     return POS_INFINITY;
+        case NORMAL:           return NORMAL;
+        default:               return NOT_A_DATE_TIME;
+        }
+    }
+}
+
+Fmi::date_time::Base::Type
+Fmi::date_time::Base::sub_impl(Fmi::date_time::Base::Type a, Fmi::date_time::Base::Type b)
+{
+    switch (a)
+    {
+    default:
+    case NOT_A_DATE_TIME:   return NOT_A_DATE_TIME;
+
+    case NEG_INFINITY:
+        switch (b)
+        {
+        case POS_INFINITY:
+        case NORMAL:           return NEG_INFINITY;
+        case NEG_INFINITY:
+        default:               return NOT_A_DATE_TIME;
+        }
+
+    case POS_INFINITY:
+        switch (b)
+        {
+        case NEG_INFINITY:
+        case NORMAL:           return POS_INFINITY;
+        case POS_INFINITY:
+        default:               return NOT_A_DATE_TIME;
+        }
+
+    case NORMAL:
+        switch (b)
+        {
+        case NEG_INFINITY:     return NEG_INFINITY;
+        case POS_INFINITY:     return POS_INFINITY;
+        case NORMAL:           return NORMAL;
+        default:               return NOT_A_DATE_TIME;
+        }
+    }
+}
+
+
 std::string
 Fmi::date_time::internal::handle_parse_remainder(std::istringstream& is)
 {

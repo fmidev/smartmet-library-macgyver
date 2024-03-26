@@ -137,72 +137,121 @@ bool Fmi::date_time::DateTime::operator!=(const DateTime& other) const
 }
 
 bool Fmi::date_time::DateTime::operator<(const DateTime& other) const
+try
 {
     if (is_special() || other.is_special())
         return Base::operator<(other);
 
     return m_time_point < other.m_time_point;
 }
+catch (...)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 bool Fmi::date_time::DateTime::operator<=(const DateTime& other) const
+try
 {
     if (is_special() || other.is_special())
         return Base::operator<=(other);
 
     return m_time_point <= other.m_time_point;
 }
+catch (...)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 bool Fmi::date_time::DateTime::operator>(const DateTime& other) const
+try
 {
     if (is_special() || other.is_special())
         return Base::operator>(other);
 
     return m_time_point > other.m_time_point;
 }
+catch (...)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 bool Fmi::date_time::DateTime::operator>=(const DateTime& other) const
+try
 {
     if (is_special() || other.is_special())
         return Base::operator>=(other);
 
     return m_time_point >= other.m_time_point;
 }
+catch (...)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator+=(const TimeDuration& duration)
 {
-    if (is_special() || duration.is_special())
-        throw Fmi::Exception(BCP, "Cannot add special TimeDuration to DateTime");
-    m_time_point += duration.get_impl();
+    const Type new_type = add_impl(type(), duration.type());
+
+    if (new_type != NORMAL)
+    {
+        set_type(new_type);
+    }
+    else
+    {
+        m_time_point += duration.get_impl();
+    }
     return *this;
 }
 
 Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator-=(const TimeDuration& duration)
 {
-    if (is_special() || duration.is_special())
-        throw Fmi::Exception(BCP, "Cannot subtract special TimeDuration from DateTime");
-    m_time_point -= duration.get_impl();
+    const Type new_type = sub_impl(type(), duration.type());
+
+    if (new_type != NORMAL)
+    {
+        set_type(new_type);
+    }
+    else
+    {
+        m_time_point -= duration.get_impl();
+    }
     return *this;
 }
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::operator+(const TimeDuration& duration) const
 {
-    if (is_special() || duration.is_special())
-        throw Fmi::Exception(BCP, "Cannot add special TimeDuration to DateTime");
+    const Type new_type = add_impl(type(), duration.type());
+
+    if (new_type != NORMAL)
+    {
+        return DateTime(new_type);
+    }
+
     return DateTime(m_time_point + duration.get_impl());
 }
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::operator-(const TimeDuration& duration) const
 {
-    if (is_special() || duration.is_special())
-        throw Fmi::Exception(BCP, "Cannot subtract special TimeDuration from DateTime");
+    const Type new_type = sub_impl(type(), duration.type());
+
+    if (new_type != NORMAL)
+    {
+        return DateTime(new_type);
+    }
+
     return DateTime(m_time_point - duration.get_impl());
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::DateTime::operator-(const DateTime& other) const
 {
-    if (is_special() || other.is_special())
-        throw Fmi::Exception(BCP, "Cannot subtract special DateTime from DateTime");
-    return TimeDuration(m_time_point - other.get_impl());
+    const Type new_type = sub_impl(type(), other.type());
+
+    if (new_type != NORMAL)
+    {
+        return TimeDuration(new_type);
+    }
+
+    return TimeDuration(m_time_point - other.m_time_point);
 }
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::operator ++ (int)

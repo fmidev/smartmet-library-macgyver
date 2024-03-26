@@ -204,13 +204,17 @@ void LocalDateTime::check_no_special(
 
 Date LocalDateTime::date() const
 {
-    check_no_special(BCP);
+    if (is_special())
+        return Date(type());
+
     return utc_time().date();
 }
 
 DateTime LocalDateTime::local_time() const
 {
-    check_no_special(BCP);
+    if (is_special())
+        return DateTime(type());
+
     return DateTime(ldt.get_local_time());
 }
 
@@ -227,6 +231,9 @@ TimeDuration LocalDateTime::time_of_day() const
 
 DateTime LocalDateTime::utc_time() const
 {
+    if (is_special())
+        return DateTime(type());
+
     TimeDuration diff(get_sys_info().offset);
     return local_time() - diff;
 }
@@ -337,14 +344,12 @@ std::string LocalDateTime::to_iso_extended_string() const
 }
 
 void LocalDateTime::advance(const TimeDuration& td)
+try
 {
-    if (is_special()) {
-        return;
-    }
-
-    if (td.is_special())
+    const Type new_type = add_impl(type(), td.type());
+    if (new_type != NORMAL)
     {
-        set_type(NOT_A_DATE_TIME);
+        set_type(new_type);
         return;
     }
 
@@ -359,44 +364,86 @@ void LocalDateTime::advance(const TimeDuration& td)
     const detail::zoned_time_t new_local_pt(tz, new_sys_pt);
     ldt = detail::zoned_time_t(tz, new_local_pt);
 }
+catch (...)
+{
+    throw std::move(Fmi::Exception::Trace(BCP, "Operation failed!")
+        .addParameter("this", to_simple_string())
+        .addParameter("advance", td.to_simple_string()));
+}
 
 bool LocalDateTime::operator == (const LocalDateTime& other) const
+try
 {
     return compare_with(other) == 0;
 }
+catch (const std::exception& e)
+{
+    throw std::move(Fmi::Exception::Trace(BCP, e.what())
+        .addParameter("This", to_simple_string())
+        .addParameter("Other", other.to_simple_string()));
+}
 
 bool LocalDateTime::operator != (const LocalDateTime& other) const
+try
 {
     return compare_with(other) != 0;
 }
+catch (const std::exception& e)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 bool LocalDateTime::operator < (const LocalDateTime& other) const
+try
 {
     return compare_with(other) < 0;
 }
+catch (const std::exception& e)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 bool LocalDateTime::operator > (const LocalDateTime& other) const
+try
 {
     return compare_with(other) > 0;
 }
+catch (const std::exception& e)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 bool LocalDateTime::operator <= (const LocalDateTime& other) const
+try
 {
     return compare_with(other) <= 0;
 }
+catch (const std::exception& e)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
+}
 
 bool LocalDateTime::operator >= (const LocalDateTime& other) const
+try
 {
     return compare_with(other) >= 0;
+}
+catch (const std::exception& e)
+{
+    throw Fmi::Exception::Trace(BCP, "Operation failed");
 }
 
 int LocalDateTime::compare_with(const LocalDateTime& other) const
 {
+    if (is_not_a_date_time() || other.is_not_a_date_time())
+        throw
+            std::move(
+                Fmi::Exception(BCP, "Operation not supported for NOT_A_DATE_TIME")
+                .addParameter("This", to_simple_string())
+                .addParameter("Other", other.to_simple_string()));
+
     if (is_special() || other.is_special())
     {
-        check_no_special(BCP);
-        other.check_no_special(BCP);
-
         if (type() == other.type())
             return 0;
 
@@ -512,6 +559,11 @@ Fmi::date_time::make_time(
 {
     try
     {
+#if 1
+        return LocalDateTime(date, time, tz,
+            LocalDateTime::NOT_DATE_TIME_ON_ERROR,
+            LocalDateTime::Choose::EARLIEST);
+#else
         detail::time_point_t tp = date.get_impl() + time.get_impl();
         try
         {
@@ -530,6 +582,7 @@ Fmi::date_time::make_time(
             detail::zoned_time_t ldt(tz.zone_ptr(), tp, date::choose::earliest);
             return LocalDateTime(ldt);
         }
+#endif
     }
     catch (...)
     {
