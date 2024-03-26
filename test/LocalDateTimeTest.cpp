@@ -363,11 +363,11 @@ BOOST_AUTO_TEST_CASE(comparison_with_boost_3)
         tmp.str());
 }
 
-BOOST_AUTO_TEST_CASE(test_make_date)
+BOOST_AUTO_TEST_CASE(test_make_date_1)
 {
     using namespace Fmi::date_time;
 
-    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: make_date");
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: make_date (DST: EEST -> EET transition 2024 Oct 27)");
 
     Fmi::date_time::Date date(2024, 10, 27);
     TimeZonePtr tz1("Europe/Helsinki");
@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(test_make_date)
     {
         Fmi::date_time::LocalDateTime ldt1;
         const auto time = Fmi::date_time::Minutes(10*i);
-        ldt1 = make_time(date, time, tz1);
+        ldt1 = SHOW_EXCEPTIONS(make_time(date, time, tz1));
         const std::string exp_abbrev = time.hours() < 4 ? "EEST" : "EET";
         if (ldt1.abbrev() != exp_abbrev)
         {
@@ -388,6 +388,54 @@ BOOST_AUTO_TEST_CASE(test_make_date)
                           << std::endl;
             }
             num_err++;
+        }
+        const Fmi::date_time::TimeDuration td_actual = ldt1.local_time().time_of_day();
+        if (time != td_actual)
+        {
+            std::cout << "INFO: Local time "
+                << Fmi::date_time::to_iso_extended_string(td_actual)
+                << " is not the same as original one: "
+                << Fmi::date_time::to_iso_extended_string(time)
+                << std::endl;
+        }
+    }
+    BOOST_REQUIRE_EQUAL(num_err, 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_make_date_2)
+{
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: make_date (DST: EET -> EEST transition 2024 Mar 31)");
+
+    Fmi::date_time::Date date(2024, 3, 31);
+    TimeZonePtr tz1("Europe/Helsinki");
+
+    int num_err = 0;
+    for (int i = 0; i < 33; i++)
+    {
+        Fmi::date_time::LocalDateTime ldt1;
+        const auto time = Fmi::date_time::Minutes(10*i);
+        ldt1 = SHOW_EXCEPTIONS(make_time(date, time, tz1));
+        const std::string exp_abbrev = time.hours() < 3 ? "EET" : "EEST";
+        if (ldt1.abbrev() != exp_abbrev)
+        {
+            if (num_err < 10)
+            {
+                std::cout << "Error: " << ldt1.abbrev() << " != " << exp_abbrev
+                          << " at " << Fmi::date_time::to_iso_extended_string(ldt1)
+                          << std::endl;
+            }
+            num_err++;
+        }
+        const Fmi::date_time::TimeDuration td_actual = ldt1.local_time().time_of_day();
+        if (time != td_actual)
+        {
+            std::cout << "INFO: Local time "
+                << Fmi::date_time::to_iso_extended_string(td_actual)
+                << " is not the same as original one: "
+                << Fmi::date_time::to_iso_extended_string(time)
+                << std::endl;
         }
     }
     BOOST_REQUIRE_EQUAL(num_err, 0);
