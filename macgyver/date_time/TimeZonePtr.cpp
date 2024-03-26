@@ -8,7 +8,7 @@ using namespace Fmi::date_time;
 TimeZonePtr TimeZonePtr::utc("UTC");
 
 TimeZonePtr::TimeZonePtr() noexcept
-    : tz(nullptr)
+    : tz(utc.zone_ptr())
 {
 }
 
@@ -32,9 +32,6 @@ TimeZonePtr& Fmi::date_time::TimeZonePtr::operator = (const TimeZonePtr& src) no
 
 const date::time_zone* Fmi::date_time::TimeZonePtr::zone_ptr() const
 {
-    if (!tz)
-        throw Fmi::Exception(BCP, "Time zone not set");
-
     return tz;
 }
 
