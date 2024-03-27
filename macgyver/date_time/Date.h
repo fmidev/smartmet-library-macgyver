@@ -100,9 +100,6 @@ namespace Fmi
             BOOST_SERIALIZATION_SPLIT_MEMBER();
 
         private:
-            void assert_special() const;
-
-        private:
             date::local_days date;
         };
 

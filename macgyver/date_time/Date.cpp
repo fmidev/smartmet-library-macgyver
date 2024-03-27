@@ -53,28 +53,36 @@ Fmi::date_time::Date& Fmi::date_time::Date::operator=(const Date& other) = defau
 
 int Fmi::date_time::Date::year() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     date::year_month_day ymd(date);
     return int(ymd.year());
 }
 
 unsigned Fmi::date_time::Date::month() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     date::year_month_day ymd(date);
     return unsigned(ymd.month());
 }
 
 unsigned Fmi::date_time::Date::day() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     date::year_month_day ymd(date);
     return unsigned(ymd.day());
 }
 
 Fmi::date_time::YMD Fmi::date_time::Date::year_month_day() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     date::year_month_day ymd(date);
 
     YMD result;
@@ -86,7 +94,9 @@ Fmi::date_time::YMD Fmi::date_time::Date::year_month_day() const
 
 Fmi::date_time::Weekday Fmi::date_time::Date::day_of_week() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     date::weekday wd(date);
     return wd;
 }
@@ -94,7 +104,9 @@ Fmi::date_time::Weekday Fmi::date_time::Date::day_of_week() const
 // FIXME: add test for this
 std::tm Fmi::date_time::Date::as_tm() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     std::tm tm;
     date::year_month_day ymd(date);
     tm.tm_year = int(ymd.year()) - 1900;
@@ -111,7 +123,9 @@ std::tm Fmi::date_time::Date::as_tm() const
 
 int Fmi::date_time::Date::day_of_year() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     date::year year_(year());
     date::month month_(1);
     date::day day_(1);
@@ -121,7 +135,9 @@ int Fmi::date_time::Date::day_of_year() const
 
 Fmi::date_time::Date Fmi::date_time::Date::end_of_month() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     const auto ymd1 = year_month_day();
     date::year year_(ymd1.year);
     date::month month_(ymd1.month);
@@ -137,18 +153,25 @@ Fmi::date_time::Date Fmi::date_time::Date::end_of_month() const
 
 long Fmi::date_time::Date::modjulian_day() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     return *this - epoch + 40587;
 }
 
 long Fmi::date_time::Date::julian_day() const
 {
-    assert_special();
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     return *this - epoch + 2440588;
 }
 
 int Fmi::date_time::Date::week_number() const
 {
+    if (is_special())
+        throw Fmi::Exception(BCP, "Operation not supported for special values");
+
     // Code ported from boost (boost/date_time/gregorian/gregorian_calendar.ipp)
     const auto ymd = year_month_day();
     const auto jBegin = Date(ymd.year, 1, 1).julian_day();
@@ -189,16 +212,25 @@ int Fmi::date_time::Date::week_number() const
 
 std::string Fmi::date_time::Date::to_simple_string() const
 {
+    if (is_special())
+        return special_time_as_string();
+
     return format_time("%Y-%b-%d", *this);
 }
 
 std::string Fmi::date_time::Date::to_iso_string() const
 {
+    if (is_special())
+        return special_time_as_string();
+
     return format_time("%Y%m%d", *this);
 }
 
 std::string Fmi::date_time::Date::to_iso_extended_string() const
 {
+    if (is_special())
+        return special_time_as_string();
+
     return format_time("%Y-%m-%d", *this);
 }
 
@@ -252,7 +284,9 @@ bool Fmi::date_time::Date::operator>=(const Date& other) const
 
 Fmi::date_time::Date Fmi::date_time::Date::operator+(int num_days) const
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date::local_days tmp(date);
     tmp += date::days(num_days);
     return Date(tmp);
@@ -260,7 +294,9 @@ Fmi::date_time::Date Fmi::date_time::Date::operator+(int num_days) const
 
 Fmi::date_time::Date Fmi::date_time::Date::operator-(int num_days) const
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date::local_days tmp(date);
     tmp -= date::days(num_days);
     return Date(tmp);
@@ -268,27 +304,37 @@ Fmi::date_time::Date Fmi::date_time::Date::operator-(int num_days) const
 
 int Fmi::date_time::Date::operator-(const Date& other) const
 {
-    assert_special();
+    if (is_special() || other.is_special())
+        throw std::move(Fmi::Exception(BCP, "Operation not supported for special values")
+            .addParameter("this", to_simple_string())
+            .addParameter("other", other.to_simple_string()));
+
     return (date - other.date).count();
 }
 
 Fmi::date_time::Date& Fmi::date_time::Date::operator+=(int num_days)
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date += date::days(num_days);
     return *this;
 }
 
 Fmi::date_time::Date& Fmi::date_time::Date::operator-=(int num_days)
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date -= date::days(num_days);
     return *this;
 }
 
 Fmi::date_time::Date Fmi::date_time::Date::operator ++ (int)
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date::local_days tmp(date);
     date += date::days(1);
     return Date(tmp);
@@ -296,7 +342,9 @@ Fmi::date_time::Date Fmi::date_time::Date::operator ++ (int)
 
 Fmi::date_time::Date Fmi::date_time::Date::operator -- (int)
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date::local_days tmp(date);
     date -= date::days(1);
     return Date(tmp);
@@ -304,14 +352,18 @@ Fmi::date_time::Date Fmi::date_time::Date::operator -- (int)
 
 Fmi::date_time::Date& Fmi::date_time::Date::operator ++ ()
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date += date::days(1);
     return *this;
 }
 
 Fmi::date_time::Date& Fmi::date_time::Date::operator -- ()
 {
-    assert_special();
+    if (is_special())
+        return *this;
+
     date -= date::days(1);
     return *this;
 }
@@ -321,12 +373,6 @@ Fmi::date_time::Date Fmi::date_time::Date::from_time_t(std::time_t time)
     const Fmi::detail::seconds_t seconds(time);
     const Fmi::detail::days_t days = std::chrono::duration_cast<Fmi::detail::days_t>(seconds);
     return epoch + days.count();
-}
-
-void Fmi::date_time::Date::assert_special() const
-{
-    if (is_special())
-        throw Fmi::Exception(BCP, "Operation not supported for special values");
 }
 
 Fmi::date_time::Date Fmi::date_time::Date::from_iso_string(const std::string& str)
