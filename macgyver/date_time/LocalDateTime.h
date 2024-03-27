@@ -50,11 +50,14 @@ namespace Fmi
              * @param time UTC Time
              * @param tz Time zone
              * @param err_handling Error handling policy
-            */
+             * @param choose Ambiguous/non-existant time handling policy. Default value (EARLIEST)
+             *        is selected for compatibility with earlier code
+             */
             LocalDateTime(
                 const DateTime& time,
                 const TimeZonePtr& tz = TimeZonePtr(),
-                enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
+                enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR,
+                enum Choose choose = Choose::EARLIEST);
 
             /**
              * Construct a local date time from date, time of day and time zone
@@ -182,6 +185,12 @@ namespace Fmi
 
             void check_no_special(const char* _filename, int _line, const char* _function) const;
 
+            static detail::zoned_time_t make_zoned_time(
+                const detail::time_point_t& time,
+                const date::time_zone* tz,
+                enum Choose choose);
+
+        private:
             detail::zoned_time_t ldt;
         };
 

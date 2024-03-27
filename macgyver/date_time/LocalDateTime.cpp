@@ -32,7 +32,8 @@ LocalDateTime::LocalDateTime(const detail::zoned_time_t& zoned_time) noexcept
 LocalDateTime::LocalDateTime(
     const DateTime& time,
     const TimeZonePtr& tz,
-    enum ErrorHandling err_handling)
+    enum ErrorHandling err_handling,
+    enum Choose choose)
 
     : Base(NORMAL)
 {
@@ -58,7 +59,7 @@ LocalDateTime::LocalDateTime(
                 TimeZonePtr::utc.zone_ptr(),
                 detail::time_point_t(time.get_impl()) );
             const auto sys_time = ldt_utc.get_sys_time();
-            ldt = detail::zoned_time_t(tz, tz.zone_ptr()->to_local(sys_time));
+            ldt = make_zoned_time(tz.zone_ptr()->to_local(sys_time), tz, choose);
             set_type(NORMAL);
         }
         catch(const std::exception& e)
@@ -112,27 +113,7 @@ LocalDateTime::LocalDateTime(
 
         try
         {
-            switch (choose)
-            {
-                case Choose::EARLIEST:
-                    ldt = detail::zoned_time_t(
-                        tz.zone_ptr(),
-                        detail::time_point_t(date.get_impl() + time.get_impl()),
-                        date::choose::earliest);
-                    break;
-
-                case Choose::LATEST:
-                    ldt = detail::zoned_time_t(
-                        tz.zone_ptr(),
-                        detail::time_point_t(date.get_impl() + time.get_impl()),
-                        date::choose::latest);
-                    break;
-
-                default:
-                    ldt = detail::zoned_time_t(
-                        tz.zone_ptr(),
-                        detail::time_point_t(date.get_impl() + time.get_impl()) );
-            }
+            ldt = make_zoned_time(date.get_impl() + time.get_impl(), tz.zone_ptr(), choose);
             set_type(NORMAL);
         }
         catch(...)
@@ -516,6 +497,26 @@ LocalDateTime& Fmi::date_time::LocalDateTime::operator -- ()
 {
     advance(TimeDuration(detail::duration_t(-1)));
     return *this;
+}
+
+Fmi::detail::zoned_time_t
+Fmi::date_time::LocalDateTime::make_zoned_time(
+    const detail::time_point_t& time,
+    const date::time_zone* tz,
+    enum Fmi::date_time::LocalDateTime::Choose choose)
+{
+    switch (choose)
+    {
+        case Choose::EARLIEST:
+            return Fmi::detail::zoned_time_t(tz, time, date::choose::earliest);
+
+        case Choose::LATEST:
+            return detail::zoned_time_t(tz, time, date::choose::latest);
+            break;
+
+        default:
+            return detail::zoned_time_t(tz, time);
+    }
 }
 
 Fmi::date_time::DateTime Fmi::date_time::MicrosecClock::universal_time()
