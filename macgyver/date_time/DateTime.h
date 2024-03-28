@@ -13,6 +13,16 @@ namespace Fmi
         class DateTime : public Base
         {
         public:
+            /**
+             * @brief Simple wrapper for use as index in std::map
+             *
+             * The problem with using directly DateTime is that comparisson
+             * of one of possible values (NOT_A_DATE_TIM) is not permitted.
+             * That causes difficult to debug problems when std::map index is
+             * DateTime.
+             */
+            class Index;
+
             DateTime();
             DateTime(const Type& type);
             DateTime(const DateTime& other);
@@ -81,6 +91,22 @@ namespace Fmi
             static const DateTime max;
         private:
             detail::time_point_t m_time_point;
+        };
+
+        class DateTime::Index final
+        {
+            DateTime m_date_time;
+        public:
+            Index() = default;
+            Index(const DateTime& date_time) : m_date_time(date_time) {}
+            Index(const Index& other) : m_date_time(other.m_date_time) {}
+            Index& operator = (const Index& other) { m_date_time = other.m_date_time; return *this; }
+            ~Index() = default;
+
+            const DateTime& operator * () const { return m_date_time; }
+            const DateTime* operator -> () const { return &m_date_time; }
+
+            bool operator < (const Index& other) const;
         };
 
         inline std::tm to_tm(const DateTime& dt)

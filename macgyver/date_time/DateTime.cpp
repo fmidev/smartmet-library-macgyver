@@ -459,6 +459,17 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::from_tm(const std::tm& tm)
     return DateTime(Date::from_tm(tm), TimeDuration::from_tm(tm));
 }
 
+bool Fmi::date_time::DateTime::Index::operator<(const Index& other) const
+{
+    if (m_date_time.is_not_a_date_time())
+        return ! other.m_date_time.is_not_a_date_time();
+
+    if (other.m_date_time.is_not_a_date_time())
+        return false;
+
+    return m_date_time < other.m_date_time;
+}
+
 namespace
 {
     using namespace boost::spirit::qi;

@@ -329,3 +329,47 @@ BOOST_AUTO_TEST_CASE(test_inf_2)
     // FIXME: add misisng tests
 
 }
+
+BOOST_AUTO_TEST_CASE(test_date_time_map_1)
+{
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: DateTime map index");
+
+    using namespace Fmi::date_time;
+    using namespace std::string_literals;
+
+    const DateTime dt1(Date(2024, 1, 24), TimeDuration(12, 34, 45));
+    const DateTime dt2(Date(2024, 1, 24), TimeDuration(12, 35, 45));
+    const DateTime dt3(Date(2024, 1, 24), TimeDuration(12, 36, 45));
+    const DateTime dt_ni(DateTime::NEG_INFINITY);
+    const DateTime dt_pi(DateTime::POS_INFINITY);
+    const DateTime dt_nad(DateTime::NOT_A_DATE_TIME);
+
+    std::map<DateTime::Index, std::string> m;
+
+    m[dt1] = "first";
+    m[dt2] = "second";
+    m[dt_pi] = "pos infinity";
+    m[dt_nad] = "not a date time";
+    m[dt_ni] = "neg infinity";
+
+    std::string str;
+    BOOST_REQUIRE_NO_THROW(str = m[dt_nad]);
+    BOOST_CHECK_EQUAL(str, "not a date time"s);
+
+    BOOST_REQUIRE_NO_THROW(str = m[dt_ni]);
+    BOOST_CHECK_EQUAL(str, "neg infinity"s);
+
+    const auto it1 = m.find(dt1);
+    BOOST_REQUIRE_EQUAL(it1->first->to_simple_string(), dt1.to_simple_string());
+}
+
+#if 0
+// Must not compile
+std::map<Fmi::date_time::DateTime::Index, std::string>
+make_map(const std::map<Fmi::date_time::DateTime, std::string>& m)
+{
+    std::map<Fmi::date_time::DateTime::Index, std::string> res;
+    res = m;
+    return res;
+}
+#endif
