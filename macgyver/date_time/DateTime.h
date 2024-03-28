@@ -23,12 +23,49 @@ namespace Fmi
              */
             class Index;
 
+            /**
+             * @brief Default constructor.
+             *
+             * The resulting value is NOT_A_DATE_TIME
+             */
             DateTime();
+
+            /**
+             * @brief Constructor for a spial values of DateTime
+             *
+             * Specifying DateTime::NORMAL is not permitted
+            */
             DateTime(const Type& type);
+
+            /**
+             * @brief Copy constructor
+            */
             DateTime(const DateTime& other);
+
+            /**
+             * @brief Constructor for a date
+             *
+             * The time part is set to 00:00:00
+            */
             DateTime(const Date& date);
+
+            /**
+             * @brief Constructor for a date and time
+             *
+             * The time part is set to the specified value
+             *
+             * @param date Date part
+             * @param time Time part
+            */
             DateTime(const Date& date, const TimeDuration& time);
+
+            /**
+             * @brief Constructor for a std::chrono time point
+             *
+             * Intended mostly for internal use
+            */
             DateTime(const detail::time_point_t& time_point);
+
             virtual ~DateTime();
 
             DateTime& operator = (const DateTime& other);
