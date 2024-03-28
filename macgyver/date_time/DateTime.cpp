@@ -120,21 +120,40 @@ Fmi::date_time::DateTime::~DateTime() = default;
 
 Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator=(const DateTime& other) = default;
 
+
 bool Fmi::date_time::DateTime::operator==(const DateTime& other) const
+try
 {
     if (is_special() || other.is_special())
         return Base::operator==(other);
 
     return m_time_point == other.m_time_point;
 }
+catch (...)
+{
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("other", other.to_simple_string());
+    throw err;
+}
+
 
 bool Fmi::date_time::DateTime::operator!=(const DateTime& other) const
+try
 {
     if (is_special() || other.is_special())
         return Base::operator!=(other);
 
     return m_time_point != other.m_time_point;
 }
+catch (...)
+{
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("other", other.to_simple_string());
+    throw err;
+}
+
 
 bool Fmi::date_time::DateTime::operator<(const DateTime& other) const
 try
@@ -146,8 +165,12 @@ try
 }
 catch (...)
 {
-    throw Fmi::Exception::Trace(BCP, "Operation failed");
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("other", other.to_simple_string());
+    throw err;
 }
+
 
 bool Fmi::date_time::DateTime::operator<=(const DateTime& other) const
 try
@@ -159,8 +182,12 @@ try
 }
 catch (...)
 {
-    throw Fmi::Exception::Trace(BCP, "Operation failed");
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("other", other.to_simple_string());
+    throw err;
 }
+
 
 bool Fmi::date_time::DateTime::operator>(const DateTime& other) const
 try
@@ -172,8 +199,12 @@ try
 }
 catch (...)
 {
-    throw Fmi::Exception::Trace(BCP, "Operation failed");
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("other", other.to_simple_string());
+    throw err;
 }
+
 
 bool Fmi::date_time::DateTime::operator>=(const DateTime& other) const
 try
@@ -185,10 +216,14 @@ try
 }
 catch (...)
 {
-    throw Fmi::Exception::Trace(BCP, "Operation failed");
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("other", other.to_simple_string());
+    throw err;
 }
 
 Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator+=(const TimeDuration& duration)
+try
 {
     const Type new_type = add_impl(type(), duration.type());
 
@@ -202,8 +237,16 @@ Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator+=(const TimeDuratio
     }
     return *this;
 }
+catch (...)
+{
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("duration", duration.to_simple_string());
+    throw err;
+}
 
 Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator-=(const TimeDuration& duration)
+try
 {
     const Type new_type = sub_impl(type(), duration.type());
 
@@ -217,8 +260,16 @@ Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator-=(const TimeDuratio
     }
     return *this;
 }
+catch (...)
+{
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("duration", duration.to_simple_string());
+    throw err;
+}
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::operator+(const TimeDuration& duration) const
+try
 {
     const Type new_type = add_impl(type(), duration.type());
 
@@ -229,8 +280,16 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::operator+(const TimeDuration&
 
     return DateTime(m_time_point + duration.get_impl());
 }
+catch (...)
+{
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("duration", duration.to_simple_string());
+    throw err;
+}
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::operator-(const TimeDuration& duration) const
+try
 {
     const Type new_type = sub_impl(type(), duration.type());
 
@@ -241,8 +300,16 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::operator-(const TimeDuration&
 
     return DateTime(m_time_point - duration.get_impl());
 }
+catch (...)
+{
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("duration", duration.to_simple_string());
+    throw err;
+}
 
 Fmi::date_time::TimeDuration Fmi::date_time::DateTime::operator-(const DateTime& other) const
+try
 {
     const Type new_type = sub_impl(type(), other.type());
 
@@ -253,8 +320,16 @@ Fmi::date_time::TimeDuration Fmi::date_time::DateTime::operator-(const DateTime&
 
     return TimeDuration(m_time_point - other.m_time_point);
 }
+catch (...)
+{
+    auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+    err.addParameter("this", to_simple_string());
+    err.addParameter("other", other.to_simple_string());
+    throw err;
+}
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::operator ++ (int)
+try
 {
   if (is_special())
     return *this;
@@ -262,9 +337,16 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::operator ++ (int)
   const auto tmp(*this);
   m_time_point += detail::duration_t(1);
   return tmp;
+}
+catch (...)
+{
+  auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+  err.addParameter("this", to_simple_string());
+  throw err;
 }
 
 Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator++()
+try
 {
   if (is_special())
     return *this;
@@ -272,8 +354,15 @@ Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator++()
   m_time_point += detail::duration_t(1);
   return *this;
 }
+catch (...)
+{
+  auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+  err.addParameter("this", to_simple_string());
+  throw err;
+}
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::operator--(int)
+try
 {
   if (is_special())
     return *this;
@@ -282,14 +371,27 @@ Fmi::date_time::DateTime Fmi::date_time::DateTime::operator--(int)
   m_time_point -= detail::duration_t(1);
   return tmp;
 }
+catch (...)
+{
+  auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+  err.addParameter("this", to_simple_string());
+  throw err;
+}
 
 Fmi::date_time::DateTime& Fmi::date_time::DateTime::operator--()
+try
 {
   if (is_special())
     return *this;
 
   m_time_point -= detail::duration_t(1);
   return *this;
+}
+catch (...)
+{
+  auto err = Fmi::Exception::Trace(BCP, "Operation failed");
+  err.addParameter("this", to_simple_string());
+  throw err;
 }
 
 Fmi::date_time::Date Fmi::date_time::DateTime::date() const
