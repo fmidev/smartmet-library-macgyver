@@ -75,9 +75,9 @@ namespace Fmi
             enum Type
             {
                 NORMAL = 0,
-                POS_INFINITY = 1,
+                POS_INFINITY = 2,
                 NEG_INFINITY = -1,
-                NOT_A_DATE_TIME = 2
+                NOT_A_DATE_TIME = 1
             };
 
         protected:

@@ -89,18 +89,12 @@ std::ostream& Fmi::date_time::operator << (std::ostream& os, const Fmi::date_tim
 
 void Fmi::date_time::Base::assert_supported() const
 {
-    if (is_not_a_date_time())
-        throw Fmi::Exception(BCP, "Operation not supported for NOT_A_DATE_TIME");
-
     if (!is_special())
         throw Fmi::Exception(BCP, "INTERNAL ERROR: operation not supported for normal values");
 }
 
 void Fmi::date_time::Base::assert_supported(const Base& other) const
 {
-    if (is_not_a_date_time() || other.is_not_a_date_time())
-        throw Fmi::Exception(BCP, "Operation not supported for NOT_A_DATE_TIME");
-
     if (!is_special() && !other.is_special())
         throw Fmi::Exception(BCP, "INTERNAL ERROR: operation not supported for normal values");
 }
