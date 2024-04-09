@@ -97,7 +97,7 @@ namespace Fmi
 
             template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
 
-            BOOST_SERIALIZATION_SPLIT_MEMBER();
+            BOOST_SERIALIZATION_SPLIT_MEMBER()
 
         private:
             date::local_days date;

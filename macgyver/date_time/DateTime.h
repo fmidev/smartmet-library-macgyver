@@ -121,7 +121,7 @@ namespace Fmi
 
             template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
 
-            BOOST_SERIALIZATION_SPLIT_MEMBER();
+            BOOST_SERIALIZATION_SPLIT_MEMBER()
 
             static const DateTime epoch;
             static const DateTime min;
