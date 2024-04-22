@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
 
 BOOST_AUTO_TEST_CASE(dst_test_1)
 {
-    BOOST_TEST_MESSAGE("Fmi::date_time::LocalDateTime: handling beging of DST");
+    BOOST_TEST_MESSAGE("Fmi::date_time::LocalDateTime: handling beging of DST)");
     Fmi::date_time::TimeZonePtr tz("Europe/Helsinki");
 
     Fmi::date_time::Date date(2023, 3, 26);
@@ -208,6 +208,8 @@ BOOST_AUTO_TEST_CASE(tz_convert_1)
 
 BOOST_AUTO_TEST_CASE(advance_1)
 {
+  BOOST_TEST_MESSAGE("Fmi::date_time::LocalDateTime::advance(): begin of DST");
+
   Fmi::date_time::TimeZonePtr tz("Europe/Helsinki");
 
   Fmi::date_time::Date date(2023, 3, 26);
@@ -228,6 +230,19 @@ BOOST_AUTO_TEST_CASE(advance_1)
   ldt1.advance(-Fmi::date_time::seconds(3));
   BOOST_CHECK_EQUAL(ldt1.is_special(), false);
   BOOST_CHECK_EQUAL(ldt1.local_time(), dt1 - Fmi::date_time::seconds(1));
+
+  // Jump forward exactly to the begin of the DST gap
+  Fmi::date_time::LocalDateTime ldt2(ldt0);
+  SHOW_EXCEPTIONS(ldt2.advance(Fmi::date_time::seconds(1)));
+  BOOST_CHECK_EQUAL(ldt2.is_special(), false);
+  BOOST_CHECK_EQUAL(ldt2.local_time(), dt1 + Fmi::date_time::seconds(3601));
+
+  // Jump backward exactly to the end of the DST gap
+  Fmi::date_time::LocalDateTime ldt3(dt1.date(), dt1.time_of_day() + Fmi::date_time::seconds(3602), tz);
+  SHOW_EXCEPTIONS(ldt3.advance(-Fmi::date_time::seconds(1)));
+  BOOST_CHECK_EQUAL(ldt3.is_special(), false);
+  // NOTE: we prefer DST instead of ambiguity
+  BOOST_CHECK_EQUAL(ldt3.local_time(), dt1 + Fmi::date_time::seconds(3601));
 }
 
 BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
