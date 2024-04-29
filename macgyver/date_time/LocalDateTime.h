@@ -33,7 +33,8 @@ namespace Fmi
             {
                 NONE,
                 EARLIEST,
-                LATEST
+                LATEST,
+                AUTO
             };
 
             LocalDateTime() noexcept;
@@ -57,7 +58,7 @@ namespace Fmi
                 const DateTime& time,
                 const TimeZonePtr& tz = TimeZonePtr(),
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR,
-                enum Choose choose = Choose::EARLIEST);
+                enum Choose choose = Choose::AUTO);
 
             /**
              * Construct a local date time from date, time of day and time zone
@@ -73,7 +74,7 @@ namespace Fmi
                 const TimeDuration& time,
                 const TimeZonePtr& tz = TimeZonePtr(),
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR,
-                enum Choose choose = Choose::EARLIEST);
+                enum Choose choose = Choose::AUTO);
 
             LocalDateTime(
                 const detail::time_point_t& time,

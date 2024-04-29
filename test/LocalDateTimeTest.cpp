@@ -456,6 +456,101 @@ BOOST_AUTO_TEST_CASE(test_make_date_2)
     BOOST_REQUIRE_EQUAL(num_err, 0);
 }
 
+BOOST_AUTO_TEST_CASE(to_wintertime_1)
+{
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: to_wintertime (DST: EEST -> EET transition 2024 Oct 27) part 1/2");
+
+    int num_err = 0;
+    Fmi::date_time::Date date(2024, 10, 27);
+    TimeZonePtr tz1("Europe/Helsinki");
+
+    for (int seconds = -10; seconds < 7210; seconds += 10)
+    {
+        int expected_seconds = seconds + 3600 * (seconds < 3600 ? 3 : 2);
+        Fmi::date_time::DateTime dt1 = Fmi::date_time::DateTime(date, Fmi::date_time::Seconds(seconds));
+        Fmi::date_time::LocalDateTime ldt1(dt1, tz1,
+            Fmi::date_time::LocalDateTime::NOT_DATE_TIME_ON_ERROR,
+            Fmi::date_time::LocalDateTime::Choose::AUTO);
+
+        if (ldt1.is_special())
+        {
+            if (num_err < 10)
+            {
+                std::cout << "Error: " << dt1 << " --> " << ldt1 << std::endl;
+            }
+            num_err++;
+            continue;
+        }
+
+        int actual_seconds = ldt1.local_time().time_of_day().total_seconds();
+        //std::cout << dt1 << " --> " << ldt1 << "  ("
+        //     << seconds << " : " << expected_seconds << " : " << actual_seconds << ")"
+        //     << std::endl;
+        if (actual_seconds != expected_seconds)
+        {
+            if (num_err < 10)
+            {
+                std::cout << "Error: " << dt1 << " --> " << ldt1 << std::endl;
+            }
+            num_err++;
+        }
+    }
+
+    BOOST_REQUIRE_EQUAL(num_err, 0);
+}
+
+BOOST_AUTO_TEST_CASE(to_wintertime_2)
+{
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: to_wintertime (DST: EEST -> EET transition 2024 Oct 27) part 2/2");
+
+    int num_err = 0;
+    Fmi::date_time::Date date(2024, 10, 27);
+    TimeZonePtr tz1("Europe/Helsinki");
+
+    const int begin_seconds = Fmi::date_time::hours(3).total_seconds() - 10;
+    const int end_seconds = Fmi::date_time::hours(4).total_seconds() + 10;
+    for (int seconds = begin_seconds; seconds <= end_seconds; seconds += 10)
+    {
+        int expected_seconds = seconds;
+        Fmi::date_time::TimeDuration time = Fmi::date_time::seconds(seconds);
+        Fmi::date_time::LocalDateTime ldt1(
+            date,
+            time,
+            tz1,
+            Fmi::date_time::LocalDateTime::NOT_DATE_TIME_ON_ERROR,
+            Fmi::date_time::LocalDateTime::Choose::AUTO);
+
+        if (ldt1.is_special())
+        {
+            if (num_err < 10)
+            {
+                std::cout << "Error: " << time << " --> " << ldt1 << std::endl;
+            }
+            num_err++;
+            continue;
+        }
+
+        int actual_seconds = ldt1.local_time().time_of_day().total_seconds();
+        //std::cout << Fmi::date_time::seconds(seconds)
+        //     << seconds << " : " << expected_seconds << " : " << actual_seconds
+        //     << std::endl;
+        if (actual_seconds != expected_seconds)
+        {
+            if (num_err < 10)
+            {
+                std::cout << "Error: " << time << " -> " << ldt1 << std::endl;
+            }
+            num_err++;
+        }
+    }
+
+    BOOST_REQUIRE_EQUAL(num_err, 0);
+}
+
 BOOST_AUTO_TEST_CASE(utc_zone_detection)
 {
     using namespace Fmi::date_time;

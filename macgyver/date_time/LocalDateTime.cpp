@@ -514,6 +514,19 @@ Fmi::date_time::LocalDateTime::make_zoned_time(
             return detail::zoned_time_t(tz, time, date::choose::latest);
             break;
 
+        case Choose::AUTO:
+            try {
+                return detail::zoned_time_t(tz, time);
+            }
+            catch (const date::ambiguous_local_time&)
+            {
+                return detail::zoned_time_t(tz, time, date::choose::latest);
+            }
+            catch (const date::nonexistent_local_time&)
+            {
+                return detail::zoned_time_t(tz, time, date::choose::earliest);
+            }
+
         default:
             return detail::zoned_time_t(tz, time);
     }
@@ -549,8 +562,6 @@ Fmi::date_time::DateTime Fmi::date_time::SecondClock::local_time()
     const LocalDateTime utc_time(Fmi::date_time::SecondClock::universal_time(), TimeZonePtr::utc);
     return utc_time.to_tz(tz).local_time();
 }
-
-#include <iostream>
 
 Fmi::date_time::LocalDateTime
 Fmi::date_time::make_time(
