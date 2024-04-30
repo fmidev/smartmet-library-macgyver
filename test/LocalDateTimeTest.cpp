@@ -471,8 +471,7 @@ BOOST_AUTO_TEST_CASE(to_wintertime_1)
         int expected_seconds = seconds + 3600 * (seconds < 3600 ? 3 : 2);
         Fmi::date_time::DateTime dt1 = Fmi::date_time::DateTime(date, Fmi::date_time::Seconds(seconds));
         Fmi::date_time::LocalDateTime ldt1(dt1, tz1,
-            Fmi::date_time::LocalDateTime::NOT_DATE_TIME_ON_ERROR,
-            Fmi::date_time::LocalDateTime::Choose::AUTO);
+            Fmi::date_time::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
         if (ldt1.is_special())
         {

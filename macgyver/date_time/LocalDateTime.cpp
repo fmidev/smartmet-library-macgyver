@@ -32,8 +32,7 @@ LocalDateTime::LocalDateTime(const detail::zoned_time_t& zoned_time) noexcept
 LocalDateTime::LocalDateTime(
     const DateTime& time,
     const TimeZonePtr& tz,
-    enum ErrorHandling err_handling,
-    enum Choose choose)
+    enum ErrorHandling err_handling)
 
     : Base(NORMAL)
 {
@@ -59,7 +58,7 @@ LocalDateTime::LocalDateTime(
                 TimeZonePtr::utc.zone_ptr(),
                 detail::time_point_t(time.get_impl()) );
             const auto sys_time = ldt_utc.get_sys_time();
-            ldt = make_zoned_time(tz.zone_ptr()->to_local(sys_time), tz, choose);
+            ldt = detail::zoned_time_t(tz.zone_ptr(), sys_time);
             set_type(NORMAL);
         }
         catch(const std::exception& e)

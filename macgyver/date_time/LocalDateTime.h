@@ -57,8 +57,7 @@ namespace Fmi
             LocalDateTime(
                 const DateTime& time,
                 const TimeZonePtr& tz = TimeZonePtr(),
-                enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR,
-                enum Choose choose = Choose::AUTO);
+                enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
 
             /**
              * Construct a local date time from date, time of day and time zone
