@@ -430,19 +430,12 @@ int LocalDateTime::compare_with(const LocalDateTime& other) const
         return type() < other.type() ? -1 : 1;
     }
 
-    if (get_impl().get_time_zone() == other.get_impl().get_time_zone())
-    {
-        if (get_impl().get_local_time() == other.get_impl().get_local_time())
-            return 0;
-
-        return get_impl().get_local_time() < other.get_impl().get_local_time() ? -1 : 1;
-    }
-
-    const auto other_local = other.to_tz(get_impl().get_time_zone()).get_impl().get_local_time();
-    if (get_impl().get_local_time() == other_local)
+    const auto sys_time = get_impl().get_sys_time();
+    const auto other_sys_time = other.get_impl().get_sys_time();
+    if (sys_time == other_sys_time)
         return 0;
 
-    return get_impl().get_local_time() < other_local ? -1 : 1;
+    return sys_time < other_sys_time ? -1 : 1;
 }
 
 LocalDateTime Fmi::date_time::operator + (const LocalDateTime& time, const TimeDuration& td)
