@@ -13,12 +13,14 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
 #include <locale>
 
 using namespace boost::unit_test;
 namespace g = boost::gregorian;
+namespace pt = boost::posix_time;
 
 test_suite* init_unit_test_suite(int argc, char* argv[])
 {
@@ -112,6 +114,17 @@ BOOST_AUTO_TEST_CASE(to_tm)
     BOOST_CHECK_EQUAL(int(test.tm_min), 2);
     BOOST_CHECK_EQUAL(int(test.tm_sec), 3);
     BOOST_CHECK_EQUAL(int(test.tm_isdst), -1);
+}
+
+BOOST_AUTO_TEST_CASE(to_time_t)
+{
+    using namespace Fmi::date_time;
+    BOOST_TEST_MESSAGE("Fmi::date_time: as_time_t() and from_time_t()");
+    const DateTime dt1(Date(2005, 1, 1), TimeDuration(1, 2, 3));
+    const auto test = dt1.as_time_t();
+    BOOST_CHECK_EQUAL(test, 1104541323);
+
+    const DateTime dt2 = Fmi::date_time::from_time_t(test);
 }
 
 namespace
