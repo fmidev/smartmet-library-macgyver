@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.1.17
+Version: 24.5.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -126,6 +126,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon May  6 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.6-1.fmi
+- Use Date library (https://github.com/HowardHinnant/date) instead of boost date_time
+
 * Wed Jan 17 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.1.17-1.fmi
 - Fixed infinite recursion bug in sunrise calculations
 
