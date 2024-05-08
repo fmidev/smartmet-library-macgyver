@@ -28,7 +28,6 @@ BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: gcc-c++
 BuildRequires: imake
 BuildRequires: libicu-devel
-BuildRequires: date-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
@@ -45,7 +44,6 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: double-conversion
 Requires: ctpp2
-Requires: date
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: libicu >= 50.2
 
@@ -66,7 +64,6 @@ BuildRequires: libpqxx-devel
 %endif
 
 #TestRequires: %{smartmet_boost}-devel
-#TestRequires: %{smartmet_boost}-date-time
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
 #TestRequires: make

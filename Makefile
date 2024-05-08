@@ -48,7 +48,7 @@ LIBS += -L$(libdir) \
 	-lboost_system \
 	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
-	-ldate-tz $(EXTRA_TZDB_LIBS) \
+	$(EXTRA_TZDB_LIBS) \
 	-lpthread -lrt
 
 RPMBUILD_OPT ?=
