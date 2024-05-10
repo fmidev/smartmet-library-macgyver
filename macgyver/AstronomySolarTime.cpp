@@ -449,80 +449,71 @@ JulianTime calcJDofNextPrevRiseSet(
 // Function to calculate local time of sunrise or sunset
 // rise = 1 for sunrise, 0 for sunset
 std::tuple<double, double, double> calcSunriseSet(
-    bool rise, double JD, double latitude, double longitude, double timezone, bool first = true)
+    bool rise, double JD, double latitude, double longitude, double timezone)
 {
-  double timeUTC = calcSunriseSetUTC(rise, JD, latitude, longitude);
-  double newTimeUTC = calcSunriseSetUTC(rise, JD + timeUTC / 1440.0, latitude, longitude);
-
-  double timeLocal = 0;
-  double azimuth = -1;
-
-  if (std::isfinite(newTimeUTC))
+  while (true)
   {
-    timeLocal = newTimeUTC + (timezone * 60.0);
-    double riseT = calcTimeJulianCent(JD + newTimeUTC / 1440.0);
-    auto azel = calcAzEl(riseT, timeLocal, latitude, longitude, timezone);
-    azimuth = std::get<0>(azel);
+    double timeUTC = calcSunriseSetUTC(rise, JD, latitude, longitude);
+    double newTimeUTC = calcSunriseSetUTC(rise, JD + timeUTC / 1440.0, latitude, longitude);
 
-    double jday = JD;
-
-    if ((timeLocal < 0.0) || (timeLocal >= 1440.0))
+    if (std::isfinite(newTimeUTC))
     {
-      double increment = ((timeLocal < 0) ? 1 : -1);
-      while ((timeLocal < 0.0) || (timeLocal >= 1440.0))
+      double timeLocal = newTimeUTC + (timezone * 60.0);
+      double riseT = calcTimeJulianCent(JD + newTimeUTC / 1440.0);
+      auto azel = calcAzEl(riseT, timeLocal, latitude, longitude, timezone);
+      auto azimuth = std::get<0>(azel);
+
+      double jday = JD;
+
+      if ((timeLocal < 0.0) || (timeLocal >= 1440.0))
       {
-        timeLocal += increment * 1440.0;
-        jday -= increment;
+        double increment = ((timeLocal < 0) ? 1 : -1);
+        while ((timeLocal < 0.0) || (timeLocal >= 1440.0))
+        {
+          timeLocal += increment * 1440.0;
+          jday -= increment;
+        }
       }
-    }
 
-    return std::make_tuple(jday, timeLocal, azimuth);
-  }
-
-  // no sunrise/set found
-  int doy = calcDoyFromJD(JD);
-
-  // Original NOAA code used lat=66.4 as a reference value here. However, since the latest
-  // code has added refraction terms, the comparison incorrectly deduced that Kuusamo Finland
-  // at latitude 65.96 should be treated as if it were in the southern hemisphere. It is
-  // sufficient to compare the latitude against zero and get Kuusamo to work again.
-  //
-  // The original NOAA code also did no recursive calls here, and hence did not return an
-  // accurate time. Instead, the time was set to 00:00 and only the date was returned.
-  // Using recursion fixes the issue, and doing it only once prevents an eternal loop
-  // very close to the poles.
-
-  if (((latitude > 0) && (doy > 79) && (doy < 267)) ||
-      ((latitude < 0) && ((doy < 83) || (doy > 263))))
-  {
-    // previous sunrise/next sunset
-    double jday = calcJDofNextPrevRiseSet(!rise, rise, JD, latitude, longitude, timezone);
-
-    if (jday == JD)  // This fixes infinite recursion issues
-    {
-      if (!first)
-        return std::make_tuple(jday, timeLocal, azimuth);
-
-      double increment = (!rise ? 1.0 : -1.0);
-      jday += increment;
-    }
-    return calcSunriseSet(rise, jday, latitude, longitude, timezone, false);
-  }
-
-  // previous sunset/next sunrise
-  double jday = calcJDofNextPrevRiseSet(rise, rise, JD, latitude, longitude, timezone);
-
-  if (jday == JD)  // This fixes infinite recursion issues
-  {
-    if (!first)
       return std::make_tuple(jday, timeLocal, azimuth);
+    }
 
-    double increment = (rise ? 1.0 : -1.0);
-    jday += increment;
+    // no sunrise/set found
+    int doy = calcDoyFromJD(JD);
+
+    // Original NOAA code used lat=66.4 as a reference value here. However, since the latest
+    // code has added refraction terms, the comparison incorrectly deduced that Kuusamo Finland
+    // at latitude 65.96 should be treated as if it were in the southern hemisphere. It is
+    // sufficient to compare the latitude against zero and get Kuusamo to work again.
+    //
+    // Note that we had to modify the day of year limits by one or there would be an infinite
+    // loop since consecutive iterations would alter between the two if-branches for poles.
+
+    double jday = 0;
+
+    if (((latitude > 0) && (doy > 80) && (doy < 266)) ||
+        ((latitude < 0) && ((doy < 82) || (doy > 262))))
+    {
+      // previous sunrise/next sunset
+      jday = calcJDofNextPrevRiseSet(!rise, rise, JD, latitude, longitude, timezone);
+
+      if (!rise)
+        JD = (jday > JD ? jday : JD + 1);
+      else
+        JD = (jday < JD ? jday : JD - 1);
+    }
+    else
+    {
+      // previous sunset/next sunrise
+      jday = calcJDofNextPrevRiseSet(rise, rise, JD, latitude, longitude, timezone);
+
+      if (rise)
+        JD = (jday > JD ? jday : JD + 1);
+      else
+        JD = (jday < JD ? jday : JD - 1);
+    }
   }
-  return calcSunriseSet(rise, jday, latitude, longitude, timezone, false);
 }
-
 }  // namespace
 
 /*=== Public interface =====================*/
