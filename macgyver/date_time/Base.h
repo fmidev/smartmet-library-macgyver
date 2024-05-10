@@ -6,7 +6,17 @@
 
 #define FMI_NEW_DATE_TIME 1
 
-#if __cplusplus >= 202002L && defined(__cpp_lib_chrono) && __cpp_lib_chrono >= 201907L
+// Specify whether use std::chrono only (instead of Date library)
+// in case when C++20 is being used and C++ standard library is complete enough
+// to support time zone, zoned_time etc.
+//
+// Does not do anything if C++20 is not being used or C++ standard library
+// is not complete enough.
+//
+// Note: not ready yet - so just disable for now
+#define FMI_ENABLE_STD_CHRONO_ONLY 0
+
+#if FMI_ENABLE_STD_CHRONO_ONLY && __cplusplus >= 202002L && defined(__cpp_lib_chrono) && __cpp_lib_chrono >= 201907L
 // Time zone, zoned_time etc is supported in libstdc++ => use it
 
 #define FMI_CALENDAR_USES_STD_CHRONO 1
