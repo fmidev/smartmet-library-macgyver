@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.5.6
+Version: 24.5.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri May 10 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.10-1.fmi
+- Prevent eternal loop in sunrise calculations very close to poles and just return time 00:00 and azimuth -1 like NOAA
+
 * Mon May  6 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.6-1.fmi
 - Use Date library (https://github.com/HowardHinnant/date) instead of boost date_time
 
