@@ -4,10 +4,9 @@
 #include "Exception.h"
 #include "LocalDateTime.h"
 #include "StringConversion.h"
+#include <array>
 #include <cmath>
 #include <tuple>
-
-#include <array>
 
 using JulianTime = double;
 
@@ -444,24 +443,26 @@ JulianTime calcJDofNextPrevRiseSet(
     timeLocal += incr * 1440.0;
     julianday -= incr;
   }
-
   return julianday;
 }
 
 // Function to calculate local time of sunrise or sunset
 // rise = 1 for sunrise, 0 for sunset
 std::tuple<double, double, double> calcSunriseSet(
-    bool rise, double JD, double latitude, double longitude, double timezone)
+    bool rise, double JD, double latitude, double longitude, double timezone, bool first = true)
 {
   double timeUTC = calcSunriseSetUTC(rise, JD, latitude, longitude);
   double newTimeUTC = calcSunriseSetUTC(rise, JD + timeUTC / 1440.0, latitude, longitude);
 
+  double timeLocal = 0;
+  double azimuth = -1;
+
   if (std::isfinite(newTimeUTC))
   {
-    double timeLocal = newTimeUTC + (timezone * 60.0);
+    timeLocal = newTimeUTC + (timezone * 60.0);
     double riseT = calcTimeJulianCent(JD + newTimeUTC / 1440.0);
     auto azel = calcAzEl(riseT, timeLocal, latitude, longitude, timezone);
-    auto azimuth = std::get<0>(azel);
+    azimuth = std::get<0>(azel);
 
     double jday = JD;
 
@@ -488,7 +489,8 @@ std::tuple<double, double, double> calcSunriseSet(
   //
   // The original NOAA code also did no recursive calls here, and hence did not return an
   // accurate time. Instead, the time was set to 00:00 and only the date was returned.
-  // Using recursion fixes the issue.
+  // Using recursion fixes the issue, and doing it only once prevents an eternal loop
+  // very close to the poles.
 
   if (((latitude > 0) && (doy > 79) && (doy < 267)) ||
       ((latitude < 0) && ((doy < 83) || (doy > 263))))
@@ -498,10 +500,13 @@ std::tuple<double, double, double> calcSunriseSet(
 
     if (jday == JD)  // This fixes infinite recursion issues
     {
+      if (!first)
+        return std::make_tuple(jday, timeLocal, azimuth);
+
       double increment = (!rise ? 1.0 : -1.0);
       jday += increment;
     }
-    return calcSunriseSet(rise, jday, latitude, longitude, timezone);
+    return calcSunriseSet(rise, jday, latitude, longitude, timezone, false);
   }
 
   // previous sunset/next sunrise
@@ -509,10 +514,13 @@ std::tuple<double, double, double> calcSunriseSet(
 
   if (jday == JD)  // This fixes infinite recursion issues
   {
+    if (!first)
+      return std::make_tuple(jday, timeLocal, azimuth);
+
     double increment = (rise ? 1.0 : -1.0);
     jday += increment;
   }
-  return calcSunriseSet(rise, jday, latitude, longitude, timezone);
+  return calcSunriseSet(rise, jday, latitude, longitude, timezone, false);
 }
 
 }  // namespace
