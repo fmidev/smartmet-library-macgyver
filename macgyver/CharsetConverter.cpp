@@ -49,8 +49,7 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
                              std::to_string(int(max_len)));
   }
   std::size_t o_len = 1024;
-  char* out = s_out;
-  char* out_ptr = out;
+  char* out_ptr = s_out;
 
   errno = 0;
   std::unique_lock<std::mutex> lock(impl->m);
@@ -65,7 +64,7 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
       i_len = src.length();
       o_len = 4 * i_len;
       char* x_out = new char[o_len + 1];
-      out = out_ptr = x_out;
+      out_ptr = x_out;
       result = ::iconv(impl->itsIconv, &in, &i_len, &out_ptr, &o_len);
       if (result != (std::size_t)-1)
       {
@@ -97,6 +96,6 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
   }
   else
   {
-    return std::string(out, out_ptr);
+    return std::string(s_out, out_ptr);
   }
 }
