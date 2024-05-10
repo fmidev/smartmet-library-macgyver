@@ -4,8 +4,6 @@
 #include <ostream>
 #include <string>
 
-#define FMI_NEW_DATE_TIME 1
-
 // Specify whether use std::chrono only (instead of Date library)
 // in case when C++20 is being used and C++ standard library is complete enough
 // to support time zone, zoned_time etc.
