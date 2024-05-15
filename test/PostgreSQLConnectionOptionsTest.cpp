@@ -7,7 +7,6 @@
 
 #include "PostgreSQLConnection.h"
 #include "TypeName.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <regression/tframe.h>
 #include <string>
 
@@ -35,7 +34,7 @@ void parse_options_1()
   }
   if (opt.port != 8001)
   {
-    TEST_FAILED("opt.port='" + boost::lexical_cast<std::string>(opt.port) +
+    TEST_FAILED("opt.port='" + std::to_string(opt.port) +
                 "' but not expected 8001");
   }
   if (opt.encoding != "UTF8")
@@ -44,7 +43,7 @@ void parse_options_1()
   }
   if (opt.connect_timeout != 0)
   {
-    TEST_FAILED("opt.connect_timeout=" + boost::lexical_cast<std::string>(opt.connect_timeout) +
+    TEST_FAILED("opt.connect_timeout=" + std::to_string(opt.connect_timeout) +
                 "' but not expected 0");
   }
 
