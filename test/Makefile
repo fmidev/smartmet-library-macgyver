@@ -83,9 +83,9 @@ clean:
 test test-installed: $(PROG) $(patsubst %.cpp,%.CompileOnly,$(COMPILE_TESTS)) $(TEST_PREPARE_TARGETS)
 	@echo Running tests:
 	@rm -f *.err
-#	@for prog in $(PROG); do \
-#	  ( ./$$prog || touch $$prog.err ) ; \
-#	done;
+	@for prog in $(PROG); do \
+	  ( ./$$prog || touch $$prog.err ) ; \
+	done;
 	$(MAKE) $(TEST_FINISH_TARGETS);
 	@test `find . -name \*.err | wc -l` = "0" || ( echo ; echo "The following tests have errors:" ; \
 		for i in *.err ; do echo `basename $$i .err`; done ; rm -f *.err ; false )
