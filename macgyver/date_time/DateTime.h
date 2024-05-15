@@ -175,13 +175,13 @@ namespace Fmi
         {
             DateTime universal_time();
             DateTime local_time();
-        };
+        }
 
         namespace SecondClock
         {
             DateTime universal_time();
             DateTime local_time();
-        };
+        }
 
         template <typename Archive>
         void DateTime::save(Archive& archive, const unsigned int version) const
