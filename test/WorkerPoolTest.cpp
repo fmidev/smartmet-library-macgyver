@@ -3,7 +3,6 @@
 #include <chrono>
 #include <condition_variable>
 #include <thread>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/optional/optional_io.hpp>
 #include <boost/test/included/unit_test.hpp>
 

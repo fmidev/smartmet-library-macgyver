@@ -12,7 +12,6 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace boost::unit_test;
 
