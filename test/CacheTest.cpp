@@ -215,7 +215,7 @@ void testinstantexpire()
   thisCache.insert(5, "heihei", twosTags);
 
   thisCache.expire(1);
-  boost::this_thread::sleep(boost::posix_time::seconds(2));
+  boost::this_thread::sleep_for(boost::chrono::seconds(2));
 
   auto value1 = thisCache.find(1);
   auto value2 = thisCache.find(2);
@@ -372,7 +372,7 @@ void testregularexpiringcache()
   insert_and_expire(thisCache, 4, "terve");
   insert_and_expire(thisCache, 5, "moikka");
 
-  boost::this_thread::sleep(boost::posix_time::seconds(3));
+  boost::this_thread::sleep_for(boost::chrono::seconds(3));
 
   insert_and_expire(thisCache, 6, "terve");
   insert_and_expire(thisCache, 7, "moikka");
