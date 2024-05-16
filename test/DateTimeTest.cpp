@@ -12,15 +12,11 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
 #include <locale>
 
 using namespace boost::unit_test;
-namespace g = boost::gregorian;
-namespace pt = boost::posix_time;
 
 test_suite* init_unit_test_suite(int argc, char* argv[])
 {
