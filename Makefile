@@ -182,7 +182,7 @@ install:
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
 test test-installed:
-	# $(MAKE) -C test $@
+	$(MAKE) -C test $@
 
 rpm: clean $(SPEC).spec
 	rm -f $(SPEC).tar.gz # Clean a possible leftover from previous attempt
