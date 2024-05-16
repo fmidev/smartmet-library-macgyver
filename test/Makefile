@@ -34,6 +34,7 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	$(REQUIRED_LIBS) \
 	-lboost_filesystem \
 	-lboost_locale \
+	-lboost_date_time \
 	-lboost_serialization \
 	-lboost_regex \
 	-lboost_iostreams \
@@ -71,7 +72,6 @@ endif
 ##########################################################
 
 all: $(PROG)
-
 clean:
 	rm -f $(PROG) *~
 	rm -f PostgreSQLConnectionTest.conf

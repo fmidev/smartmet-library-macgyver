@@ -10,6 +10,7 @@
 #include "DebugTools.h"
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
 #include <locale>
