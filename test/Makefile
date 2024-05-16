@@ -30,11 +30,13 @@ endif
 
 INCLUDES += $(MACGYVER_INCLUDES) -I /usr/include/smartmet
 
+EXTRA_LIBS :=
+
 LIBS += $(MACGYVER_LDFLAGS) \
 	$(REQUIRED_LIBS) \
+	$(EXTRA_LIBS) \
 	-lboost_filesystem \
 	-lboost_locale \
-	-lboost_date_time \
 	-lboost_serialization \
 	-lboost_regex \
 	-lboost_iostreams \
@@ -43,6 +45,8 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	-lboost_system \
 	-ldate-tz \
 	-lpthread
+
+DateTest LocalDateTimeTest TimeDurationTest: EXTRA_LIBS += -lboost_date_time
 
 #######  Test database for PostgrSQLConnection tests ######
 TEST_DB_DIR := $(shell pwd)/tmp-geonames-db
