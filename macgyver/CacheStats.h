@@ -32,7 +32,7 @@ struct CacheStats
   {
   }
 
-  DateTime starttime;
+  DateTime starttime = Fmi::SecondClock::universal_time();
   std::size_t maxsize = 0;
   std::size_t size = 0;
   std::size_t inserts = 0;
