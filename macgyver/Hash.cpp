@@ -35,52 +35,36 @@ std::size_t hash_value(const std::string& str)
 
 std::size_t hash_value(const Fmi::Date& date)
 {
-  if (!date.is_special())
-  {
-    const auto ymd = date.year_month_day();
-    auto hash = hash_value(ymd.year);
-    hash_combine(hash, hash_value(ymd.month));
-    hash_combine(hash, hash_value(ymd.day));
-    return hash;
-  }
-
-  auto hash = hash_value(date.is_infinity());
-  hash_combine(hash, hash_value(date.is_neg_infinity()));
-  hash_combine(hash, hash_value(date.is_pos_infinity()));
-  hash_combine(hash, hash_value(date.is_not_a_date()));
+  const auto type = date.type();
+  auto hash = hash_value(1024 + static_cast<int>(type));
+  if (type == Fmi::date_time::Base::NORMAL)
+    hash_combine(hash, hash_value(date.get_impl().time_since_epoch().count()));
   return hash;
 }
 
 std::size_t hash_value(const TimeDuration& duration)
 {
-  if (!duration.is_special())
-    return hash_value(duration.total_nanoseconds());
-
-  auto hash = hash_value(duration.is_neg_infinity());
-  hash_combine(hash, hash_value(duration.is_pos_infinity()));
-  hash_combine(hash, hash_value(duration.is_not_a_date_time()));
+  const auto type = duration.type();
+  auto hash = hash_value(2048 + static_cast<int>(type));
+  if (type == Fmi::date_time::Base::NORMAL)
+    hash_combine(hash, hash_value(duration.get_impl().count()));
   return hash;
 }
 
 std::size_t hash_value(const DateTime& time)
 {
-  if (!time.is_special())
-  {
-    auto hash = hash_value(time.date());
-    hash_combine(hash, hash_value(time.time_of_day()));
-    return hash;
-  }
-
-  auto hash = hash_value(time.is_infinity());
-  hash_combine(hash, hash_value(time.is_neg_infinity()));
-  hash_combine(hash, hash_value(time.is_pos_infinity()));
-  hash_combine(hash, hash_value(time.is_not_a_date_time()));
+  const auto type = time.type();
+  auto hash = hash_value(3072 + static_cast<int>(type));
+  if (type == Fmi::date_time::Base::NORMAL)
+    hash_combine(hash, hash_value(time.get_impl().time_since_epoch().count()));
   return hash;
 }
 
 std::size_t hash_value(const Fmi::LocalDateTime& time)
 {
-  auto hash = Fmi::hash_value(time.utc_time());
+  // Getting UTC time gets local time at first and then converts it to UTC
+  // As result local time is used here for better efficiency
+  auto hash = Fmi::hash_value(time.local_time());
   Fmi::hash_combine(hash, Fmi::hash_value(time.zone()));
   return hash;
 }
