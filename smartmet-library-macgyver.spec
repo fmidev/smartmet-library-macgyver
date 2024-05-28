@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.5.27
+Version: 24.5.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue May 28 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.28-1.fmi
+- Reimplement hash calculation for Fmi::date_time::* classes
+
 * Mon May 27 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.27-1.fmi
 - Fixed CacheStats to be initialized from the wall clock
 
