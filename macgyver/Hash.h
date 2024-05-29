@@ -118,4 +118,12 @@ inline std::size_t hash_value(const std::set<T>& objs)
   return hash;
 }
 
+template <typename T, typename... Ts>
+std::size_t hash(const T& obj1, Ts &&... ts)
+{
+  std::size_t val = hash_value(obj1);
+  ([&]{ hash_combine(val, hash_value(ts)); }(), ...);
+  return val;
+}
+
 }  // namespace Fmi
