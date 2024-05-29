@@ -17,11 +17,11 @@ const std::size_t bad_hash = 6178996271928UL;
 void hash_combine(std::size_t& seed, std::size_t value);
 
 std::size_t hash_value(const std::string& str);
-std::size_t hash_value(const Fmi::Date& date);
+std::size_t hash_value(const Date& date);
 std::size_t hash_value(const TimeDuration& duration);
 std::size_t hash_value(const DateTime& time);
-std::size_t hash_value(const Fmi::LocalDateTime& time);
-std::size_t hash_value(const Fmi::TimeZonePtr& zone);
+std::size_t hash_value(const LocalDateTime& time);
+std::size_t hash_value(const TimeZonePtr& zone);
 
 std::size_t hash_value(bool value);
 std::size_t hash_value(char value);
