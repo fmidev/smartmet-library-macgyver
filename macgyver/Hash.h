@@ -16,6 +16,19 @@ const std::size_t bad_hash = 6178996271928UL;
 
 void hash_combine(std::size_t& seed, std::size_t value);
 
+
+// FIXME: make hash_value to return HashValue instead of std::size_t.
+//        That would be ABI muutos and would require recompilation of many
+//        packages
+struct HashValue
+{
+  std::size_t value;
+  HashValue(std::size_t value) : value(value) {}
+  operator std::size_t() const { return value; }
+  HashValue(const HashValue& other) = default;
+  HashValue& operator = (const HashValue& other) = default;
+};
+
 std::size_t hash_value(const std::string& str);
 std::size_t hash_value(const Date& date);
 std::size_t hash_value(const TimeDuration& duration);
@@ -41,6 +54,7 @@ std::size_t hash_value(unsigned long long value);
 std::size_t hash_value(float value);
 std::size_t hash_value(double value);
 std::size_t hash_value(long double value);
+std::size_t hash_value(const HashValue& hv) { return hv.value; }
 
 // Optional objects with a normal hash_value implementation
 template <typename T>

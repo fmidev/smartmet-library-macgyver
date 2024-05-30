@@ -46,8 +46,9 @@ BOOST_AUTO_TEST_CASE(hash_combine)
   BOOST_CHECK_EQUAL(2432900628487897600UL, hash);
 }
 
-BOOST_AUTO_TEST_CASE(variadic_hash_template)
+BOOST_AUTO_TEST_CASE(variadic_hash_template_1)
 {
+  BOOST_TEST_MESSAGE(" + Fmi::hash variadic template function (1/2)");
   const std::string str = "Hello, World!";
   const std::vector<double> vec = {1.0, 2.0, 3.0};
   const int64_t i = 42;
@@ -61,4 +62,20 @@ BOOST_AUTO_TEST_CASE(variadic_hash_template)
 
   // Must check also that the variadic template works with a single argument
   BOOST_CHECK_EQUAL(Fmi::hash(str), Fmi::hash_value(str));
+}
+
+BOOST_AUTO_TEST_CASE(variadic_hash_template_2)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::hash variadic template function (2/2)");
+  const std::string str = "Hello, World!";
+  const std::vector<double> vec = {1.0, 2.0, 3.0};
+  const int64_t i = 42;
+
+  std::size_t hash1 = Fmi::hash_value(str);
+  Fmi::hash_combine(hash1, Fmi::hash_value(vec));
+  Fmi::hash_combine(hash1, Fmi::hash_value(i));
+
+  // Case when one of hashes is already calculated (e.g. returned of method call of some class)
+  std::size_t hash2 = Fmi::hash(str, Fmi::HashValue(Fmi::hash_value(vec)), i);
+  BOOST_CHECK_EQUAL(hash1, hash2);
 }
