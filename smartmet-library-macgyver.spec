@@ -15,7 +15,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 24.5.30
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu May 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.30-2.fmi
+- Hash.h: Add missing inline keywoard
+
 * Thu May 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.30-1.fmi
 - Improvements of hash generation
 
