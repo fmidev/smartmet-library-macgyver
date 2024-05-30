@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.5.28
+Version: 24.5.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -123,6 +123,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu May 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.30-1.fmi
+- Improvements of hash generation
+
 * Tue May 28 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.28-1.fmi
 - Reimplement hash calculation for Fmi::date_time::* classes
 
