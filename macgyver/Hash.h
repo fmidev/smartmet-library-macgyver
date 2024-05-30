@@ -54,7 +54,7 @@ std::size_t hash_value(unsigned long long value);
 std::size_t hash_value(float value);
 std::size_t hash_value(double value);
 std::size_t hash_value(long double value);
-std::size_t hash_value(const HashValue& hv) { return hv.value; }
+inline std::size_t hash_value(const HashValue& hv) { return hv.value; }
 
 // Optional objects with a normal hash_value implementation
 template <typename T>
