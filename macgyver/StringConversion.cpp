@@ -220,7 +220,7 @@ std::string to_string(unsigned long value)
  */
 // ----------------------------------------------------------------------
 
-boost::optional<int> stoi_opt(const std::string& str)
+std::optional<int> stoi_opt(const std::string& str)
 {
   try
   {
@@ -254,7 +254,7 @@ int stoi(const std::string& str)
   }
 }
 
-boost::optional<long> stol_opt(const std::string& str)
+std::optional<long> stol_opt(const std::string& str)
 {
   try
   {
@@ -288,7 +288,7 @@ long stol(const std::string& str)
   }
 }
 
-boost::optional<unsigned long> stoul_opt(const std::string& str)
+std::optional<unsigned long> stoul_opt(const std::string& str)
 {
   try
   {
@@ -322,7 +322,7 @@ unsigned long stoul(const std::string& str)
   }
 }
 
-boost::optional<float> stof_opt(const std::string& str)
+std::optional<float> stof_opt(const std::string& str)
 {
   try
   {
@@ -365,7 +365,7 @@ float stof(const std::string& str)
   }
 }
 
-boost::optional<double> stod_opt(const std::string& str)
+std::optional<double> stod_opt(const std::string& str)
 {
   try
   {
