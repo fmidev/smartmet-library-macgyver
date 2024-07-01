@@ -1,12 +1,14 @@
 #pragma once
 
+#include <any>
 #include <map>
 #include <typeinfo>
 #include <typeindex>
-#include <boost/any.hpp>
-#include <boost/variant.hpp>
+#include <variant>
 #include "Exception.h"
 #include "TypeName.h"
+
+#include <iostream>
 
 namespace Fmi
 {
@@ -19,16 +21,16 @@ namespace Fmi
  *
  *   An example for use with std::function<std::string(const boost::any&) kanssa:
  *   @code
- *   TypeMap<std::function<std::string(const boost::any&)> > W;
+ *   TypeMap<std::function<std::string(const std::any&)> > W;
  *   W.add<int>(
- *        [](const boost::any& x) -> std::string
+ *        [](const std::any& x) -> std::string
  *        {
  *            return "INT: " + std::to_string(boost::any_cast<int>(x));
  *        });
  *    W.add<std::string>(
- *        [](const boost::any& x) -> std::string
+ *        [](const std::any& x) -> std::string
  *        {
- *            return "STRING: '" + boost::any_cast<std::string>(x) + "'";
+ *            return "STRING: '" + std::any_cast<std::string>(x) + "'";
  *        });
  *    boost::any foo = int(1), bar(std::string("bar"));
  *    std::cout << W[foo](foo) << std::endl;
@@ -36,20 +38,20 @@ namespace Fmi
  *
  *   @endcode
  *
- *   Similar example for boost::variant<>:
+ *   Similar example for std::variant<>:
  *   @code
- *    TypeMap<std::function<std::string(const boost::variant<int, std::string>&)> > W;
+ *    TypeMap<std::function<std::string(const std::variant<int, std::string>&)> > W;
  *    W.add<int>([](
- *            const boost::variant<int, std::string> x) -> std::string
+ *            const std::variant<int, std::string> x) -> std::string
  *            {
- *                return "INT: " + std::to_string(boost::get<int>(x));
+ *                return "INT: " + std::to_string(std::get<int>(x));
  *            });
  *    W.add<std::string>([](
- *            const boost::variant<int, std::string> x) -> std::string
+ *            const std::variant<int, std::string> x) -> std::string
  *            {
- *                return "STRING: '" + boost::get<std::string>(x) + "'";
+ *                return "STRING: '" + std::get<std::string>(x) + "'";
  *            });
- *    boost::variant<int, std::string> foo = int(42), bar = "24";
+ *    std::variant<int, std::string> foo = int(42), bar = "24";
  *    std::cout << W[foo](foo) << std::endl;
  *    std::cout << W[bar](bar) << std::endl;
  *   @edcode
@@ -57,6 +59,19 @@ namespace Fmi
 template <typename ValueType>
 class TypeMap
 {
+    template <typename Obj>
+    struct Visitor
+    {
+        Visitor(const Obj& x) : x(x) {}
+        const Obj& x;
+
+        template <typename Type>
+        const std::type_info& operator () (const Type& x) const
+        {
+            const std::type_info &ti = typeid(Type);
+            return ti;
+        }
+    };
 public:
     TypeMap() = default;
     virtual ~TypeMap() = default;
@@ -79,17 +94,18 @@ public:
         }
     };
 
-    const ValueType& operator [] (const boost::any& x) const
+    const ValueType& operator [] (const std::any& x) const
     {
         return operator [] (x.type());
     };
 
     template <class... VariantTypes>
-    const ValueType& operator [] (const boost::variant<VariantTypes...>& x) const
+    const ValueType& operator [] (const std::variant<VariantTypes...>& x) const
     {
-        return operator [] (x.type());
+        Visitor visitor(x);
+        const std::type_info& ti = std::visit(visitor, x);
+        return operator [] (ti);
     };
-
 private:
     std::map<std::type_index, ValueType> content;
 };
