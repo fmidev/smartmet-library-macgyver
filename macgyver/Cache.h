@@ -11,7 +11,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
@@ -1210,7 +1209,7 @@ class Cache
   }
 
   // Find value from cache
-  boost::optional<ValueType> find(const KeyType& key)
+  std::optional<ValueType> find(const KeyType& key)
   {
     Lock lock(itsMutex);
     LeftIteratorType it = itsMap.left.find(key);
@@ -1258,7 +1257,7 @@ class Cache
   }
 
   // Find value from cache and return also its hits
-  boost::optional<ValueType> find(const KeyType& key, std::size_t& hits)
+  std::optional<ValueType> find(const KeyType& key, std::size_t& hits)
   {
     Lock mapLock(itsMutex);
     LeftIteratorType it = itsMap.left.find(key);
@@ -1490,7 +1489,7 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  boost::optional<std::string> find(std::size_t key);
+  std::optional<std::string> find(std::size_t key);
 
   // ----------------------------------------------------------------------
   /*!

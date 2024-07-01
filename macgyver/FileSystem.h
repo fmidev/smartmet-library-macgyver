@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
+#include <optional>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/optional.hpp>
 
 namespace Fmi
 {
@@ -26,7 +26,7 @@ namespace Fmi
     /**
      *   Lookup file (including compressed ones)
      */
-    boost::optional<std::string> lookup_file(const std::string& theFileName);
+    std::optional<std::string> lookup_file(const std::string& theFileName);
 
     class IStream : public boost::iostreams::filtering_stream<boost::iostreams::input>
     {

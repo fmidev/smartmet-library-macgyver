@@ -36,9 +36,9 @@ enum Fmi::Compression Fmi::guess_compression_type(const std::string& theFileName
     return Compression::NONE;
 }
 
-boost::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
+std::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
 {
-    boost::optional<std::string> result;
+    std::optional<std::string> result;
 
     const auto check_fn = [](const std::string& fn) -> bool
         {
@@ -48,7 +48,7 @@ boost::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
         };
 
     if (check_fn(theFileName))
-        return boost::optional<std::string>(theFileName);
+        return std::optional<std::string>(theFileName);
 
     if (Fmi::guess_compression_type(theFileName) == Fmi::Compression::NONE)
     {
@@ -65,11 +65,11 @@ boost::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
         {
             const std::string zfn = theFileName + ext;
             if (check_fn(zfn))
-                return boost::optional<std::string>(zfn);
+                return std::optional<std::string>(zfn);
         }
     }
 
-    return boost::none;
+    return std::optional<std::string>();
 }
 
 Fmi::IStream::IStream(std::istream& raw_input, const std::string& name)

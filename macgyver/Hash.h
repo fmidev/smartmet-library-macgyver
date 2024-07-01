@@ -59,7 +59,7 @@ inline std::size_t hash_value(const HashValue& hv) { return hv.value; }
 
 // Optional objects with a normal hash_value implementation
 template <typename T>
-inline std::size_t hash_value(const std::optional<T>& obj)
+inline std::size_t hash_value(const boost::optional<T>& obj)
 {
   if (!obj)
     return std::hash<bool>{}(false);
@@ -69,7 +69,7 @@ inline std::size_t hash_value(const std::optional<T>& obj)
 }
 
 template <typename T>
-inline std::size_t hash_value(const boost::optional<T>& obj)
+inline std::size_t hash_value(const std::optional<T>& obj)
 {
   if (!obj)
     return std::hash<bool>{}(false);

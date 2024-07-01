@@ -7,7 +7,6 @@
 #endif
 
 #include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/optional.hpp>
 #include <boost/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
 
@@ -28,9 +27,9 @@ enum ParserId
 
 };
 
-using OptionalInt = boost::optional<unsigned int>;
-using OptionalString = boost::optional<std::string>;
-using OptionalChar = boost::optional<char>;
+using OptionalInt = std::optional<unsigned int>;
+using OptionalString = std::optional<std::string>;
+using OptionalChar = std::optional<char>;
 
 struct TimeZoneOffset
 {

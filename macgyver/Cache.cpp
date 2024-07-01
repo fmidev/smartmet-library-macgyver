@@ -80,7 +80,7 @@ FileCache::FileCache(const fs::path& directory, std::size_t maxSize)
   }
 }
 
-boost::optional<std::string> FileCache::find(std::size_t key)
+std::optional<std::string> FileCache::find(std::size_t key)
 {
   try
   {
@@ -92,7 +92,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     if (it == itsContentMap.left.end())
     {
       ++itsMissCount;
-      return boost::optional<std::string>();
+      return std::optional<std::string>();
     }
 
     // Found in the map, but somebody may have cleaned the file
@@ -103,7 +103,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     {
       // Should we remove the entry here? It will be re-inserted anyways eventually
       ++itsMissCount;
-      return boost::optional<std::string>();
+      return std::optional<std::string>();
     }
 
     std::size_t size = it->second.fileSize;
@@ -115,7 +115,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     {
       // Report file opening error
       ++itsMissCount;
-      return boost::optional<std::string>();
+      return std::optional<std::string>();
     }
 
     std::string ret;
@@ -127,7 +127,7 @@ boost::optional<std::string> FileCache::find(std::size_t key)
     itsContentMap.right.relocate(itsContentMap.right.end(), itsContentMap.project_right(it));
 
     ++itsHitCount;
-    return boost::optional<std::string>(std::move(ret));
+    return std::optional<std::string>(std::move(ret));
   }
   catch (...)
   {
