@@ -9,9 +9,9 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/locale.hpp>
-#include <boost/make_shared.hpp>
 #include <regression/tframe.h>
 #include <fstream>
+#include <memory>
 #include <string>
 
 namespace TernarySearchTreeTest
@@ -22,7 +22,7 @@ void insert()
 {
   Fmi::TernarySearchTree<std::string> tree;
 
-  boost::shared_ptr<std::string> foo = boost::make_shared<std::string>("not empty now");
+  std::shared_ptr<std::string> foo = std::make_shared<std::string>("not empty now");
 
   if (!tree.insert("ii", foo))
     TEST_FAILED("Failed to insert ii");
@@ -71,9 +71,9 @@ void find()
 
   element_type res;
 
-  element_type imatra = boost::make_shared<std::string>("imatra");
-  element_type ii = boost::make_shared<std::string>("ii");
-  element_type iisalmi = boost::make_shared<std::string>("iisalmi");
+  element_type imatra = std::make_shared<std::string>("imatra");
+  element_type ii = std::make_shared<std::string>("ii");
+  element_type iisalmi = std::make_shared<std::string>("iisalmi");
 
   tree.insert("imatra", imatra);
   tree.insert("ii", ii);
@@ -108,9 +108,9 @@ void findprefix()
   Fmi::TernarySearchTree<std::string>::result_type res;
   typedef Fmi::TernarySearchTree<std::string>::element_type element_type;
 
-  element_type imatra = boost::make_shared<std::string>("imatra");
-  element_type ii = boost::make_shared<std::string>("ii");
-  element_type iisalmi = boost::make_shared<std::string>("iisalmi");
+  element_type imatra = std::make_shared<std::string>("imatra");
+  element_type ii = std::make_shared<std::string>("ii");
+  element_type iisalmi = std::make_shared<std::string>("iisalmi");
 
   tree.insert("imatra", imatra);
   tree.insert("ii", ii);
@@ -149,7 +149,7 @@ void wordlist()
     TEST_FAILED("Failed to open data/words.txt for reading");
 
   int count = 0;
-  element_type dummy = boost::make_shared<std::string>("foobar");
+  element_type dummy = std::make_shared<std::string>("foobar");
 
   std::string word;
   std::string collated;
