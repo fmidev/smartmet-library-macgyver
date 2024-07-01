@@ -49,7 +49,7 @@ SharedFormatter TemplateFactory::get(const boost::filesystem::path& theFilename)
 
     TemplateInfo newinfo;
     newinfo.modtime = modtime;
-    newinfo.formatter = boost::make_shared<Fmi::TemplateFormatter>();
+    newinfo.formatter = std::make_shared<Fmi::TemplateFormatter>();
     newinfo.formatter->load_template(theFilename.c_str());
 
     // Cache the new formatter

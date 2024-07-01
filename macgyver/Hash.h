@@ -6,6 +6,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -57,6 +58,16 @@ std::size_t hash_value(long double value);
 inline std::size_t hash_value(const HashValue& hv) { return hv.value; }
 
 // Optional objects with a normal hash_value implementation
+template <typename T>
+inline std::size_t hash_value(const std::optional<T>& obj)
+{
+  if (!obj)
+    return std::hash<bool>{}(false);
+  std::size_t hash = std::hash<bool>{}(true);
+  hash_combine(hash, hash_value(*obj));
+  return hash;
+}
+
 template <typename T>
 inline std::size_t hash_value(const boost::optional<T>& obj)
 {

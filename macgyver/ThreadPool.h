@@ -34,10 +34,10 @@ using ConditionVariableType = boost::condition_variable;
 // ======================================================================
 
 template <class Executor>
-class Worker : public boost::enable_shared_from_this<Worker<Executor> >
+class Worker : public std::enable_shared_from_this<Worker<Executor> >
 {
   using ParentPtr = Executor*;
-  using IteratorType = typename std::list<boost::shared_ptr<Worker<Executor> > >::iterator;
+  using IteratorType = typename std::list<std::shared_ptr<Worker<Executor> > >::iterator;
 
  public:
   // ======================================================================
@@ -105,7 +105,7 @@ class Worker : public boost::enable_shared_from_this<Worker<Executor> >
  private:
   ParentPtr itsParent;
 
-  boost::shared_ptr<boost::thread> itsThread;
+  std::shared_ptr<boost::thread> itsThread;
 
   IteratorType itsLocation;
 };
@@ -501,7 +501,7 @@ class ThreadPool
   void addWorker()
   {
     // The calling function must lock the mutex!
-    boost::shared_ptr<Worker<PoolType> > newWorker(new Worker<PoolType>(this));
+    std::shared_ptr<Worker<PoolType> > newWorker(new Worker<PoolType>(this));
     itsWorkers.push_back(newWorker);
     auto thisIterator = --itsWorkers.end();
     newWorker->setLocation(thisIterator);
@@ -518,7 +518,7 @@ class ThreadPool
    */
   // ======================================================================
 
-  void workerDied(boost::shared_ptr<Worker<PoolType> > theWorkerThatDied)
+  void workerDied(std::shared_ptr<Worker<PoolType> > theWorkerThatDied)
   {
     // Is called from the worker thread, must lock the pool mutex
     Lock lock(itsMutex);
@@ -564,7 +564,7 @@ class ThreadPool
 
   SchedulingPolicy itsScheduler;
 
-  std::list<boost::shared_ptr<Worker<PoolType> > > itsWorkers;
+  std::list<std::shared_ptr<Worker<PoolType> > > itsWorkers;
 };
 }  // namespace ThreadPool
 }  // namespace Fmi

@@ -194,7 +194,7 @@ class NearTree
   std::multimap<double, value_type> nearestones(const value_type& thePoint, double theRadius) const;
 
  private:
-  boost::shared_ptr<Impl> impl;
+  std::shared_ptr<Impl> impl;
 
   using buffer_type = std::vector<value_type>;
   mutable buffer_type buffer;

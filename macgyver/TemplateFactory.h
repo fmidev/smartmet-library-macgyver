@@ -12,7 +12,7 @@
 
 namespace Fmi
 {
-using SharedFormatter = boost::shared_ptr<Fmi::TemplateFormatter>;
+using SharedFormatter = std::shared_ptr<Fmi::TemplateFormatter>;
 
 class TemplateFactory
 {
