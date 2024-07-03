@@ -1,7 +1,9 @@
 #include "FileSystem.h"
+#include <chrono>
 #include <istream>
+#include <optional>
 #include <ostream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/iostreams/filtering_stream.hpp>
 
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -11,7 +13,18 @@
 #include <boost/iostreams/filter/zstd.hpp>
 #endif
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
+
+std::optional<std::time_t>
+Fmi::last_write_time(const fs::path& path)
+{
+    std::error_code ec;
+    std::optional<time_t> result = std::nullopt;
+    const auto diff = fs::last_write_time(path, ec) - fs::file_time_type();
+    if (!ec)
+      result = std::chrono::duration_cast<std::chrono::duration<long, std::ratio<1, 1>>>(diff).count();
+    return result;
+}
 
 enum Fmi::Compression Fmi::guess_compression_type(const std::string& theFileName)
 {
@@ -42,7 +55,7 @@ std::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
 
     const auto check_fn = [](const std::string& fn) -> bool
         {
-            boost::system::error_code ec;
+            std::error_code ec;
             return fs::exists(fn, ec)
                 && (fs::is_regular_file(fn, ec) || fs::is_symlink(fn, ec));
         };
@@ -151,4 +164,3 @@ void Fmi::OStream::init(std::ostream& raw_output, Compression compression)
 #endif
     push(raw_output);
 }
-

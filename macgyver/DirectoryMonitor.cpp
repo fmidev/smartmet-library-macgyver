@@ -24,6 +24,7 @@
 
 #include "DirectoryMonitor.h"
 #include "Exception.h"
+#include "FileSystem.h"
 #include "StringConversion.h"
 #include <boost/chrono.hpp>
 #include <boost/thread.hpp>
@@ -42,19 +43,6 @@ using ReadLock = boost::shared_lock<MutexType>;
 using WriteLock = boost::unique_lock<MutexType>;
 
 namespace fs = std::filesystem;
-
-namespace
-{
-  std::optional<std::time_t> last_update_time(const fs::path& path)
-  {
-    std::error_code ec;
-    std::optional<time_t> result = std::nullopt;
-    const auto diff = fs::last_write_time(path, ec) - fs::file_time_type();
-    if (!ec)
-      result = std::chrono::duration_cast<std::chrono::duration<long, std::ratio<1, 1>>>(diff).count();
-    return result;
-  }
-}
 
 namespace Fmi
 {
@@ -104,7 +92,7 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
           {
             if (boost::regex_match(it->path().filename().string(), pattern))
             {
-              const auto t = last_update_time(it->path());
+              const auto t = Fmi::last_write_time(it->path());
               if (t)
                 contents.insert(Contents::value_type(it->path(), *t));
             }
@@ -112,7 +100,7 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
 
           else
           {
-            const auto t = last_update_time(it->path());
+            const auto t = Fmi::last_write_time(it->path());
             if (t)
               contents.insert(Contents::value_type(it->path(), *t));
           }
@@ -122,7 +110,7 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
     else
     {
       // No regex checking for single files
-      const auto t = last_update_time(path);
+      const auto t = Fmi::last_write_time(path);
       if (t)
         contents.insert(Contents::value_type(path, *t));
     }
@@ -457,7 +445,7 @@ void DirectoryMonitor::run()
               std::optional<std::time_t> tchange;
               if (fs::exists(mon.path))
               {
-                tchange = last_update_time(mon.path);
+                tchange = Fmi::last_write_time(mon.path);
                 // Actually directory is scanned later if changes detected,
                 // but we are interested in how often changes are checked
                 if (mon.mask & DirectoryMonitor::SCAN)

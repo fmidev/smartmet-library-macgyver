@@ -1,10 +1,13 @@
 #pragma once
 #include <string>
 #include <optional>
+#include <filesystem>
 #include <boost/iostreams/filtering_stream.hpp>
 
 namespace Fmi
 {
+    std::optional<std::time_t> last_write_time(const std::filesystem::path& path);
+
     enum Compression
     {
         NONE
