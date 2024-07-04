@@ -4,6 +4,7 @@
 #include <optional>
 #include <ostream>
 #include <filesystem>
+#include <sys/stat.h>
 #include <boost/iostreams/filtering_stream.hpp>
 
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -18,12 +19,12 @@ namespace fs = std::filesystem;
 std::optional<std::time_t>
 Fmi::last_write_time(const fs::path& path)
 {
-    std::error_code ec;
-    std::optional<time_t> result = std::nullopt;
-    const auto diff = fs::last_write_time(path, ec) - fs::file_time_type();
-    if (!ec)
-      result = std::chrono::duration_cast<std::chrono::duration<long, std::ratio<1, 1>>>(diff).count();
-    return result;
+    const char* fn = path.c_str();
+    struct stat st;
+    if (stat(fn, &st) == 0)
+        return st.st_mtime;
+    else
+        return std::nullopt;
 }
 
 enum Fmi::Compression Fmi::guess_compression_type(const std::string& theFileName)

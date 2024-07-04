@@ -140,6 +140,28 @@ void test_none()
     TEST_PASSED();
 }
 
+void test_last_write_time()
+{
+    const std::time_t t = std::time(nullptr);
+    std::filesystem::create_directories("tmp");
+    std::ofstream out("tmp/test.txt");
+    out << "test";
+    out.close();
+    const std::optional<std::time_t> t2 = *Fmi::last_write_time("tmp/test.txt");
+    if (!t2)
+    {
+        TEST_FAILED("Failed to get last write time");
+    }
+
+    if (std::abs(*t2 - t) > 2)
+    {
+        std::cout << "now=" << t << " last=" << *t2 << std::endl;
+        TEST_FAILED("Last write time differs too much");
+    }
+
+    TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * The actual test suite
@@ -159,6 +181,7 @@ class tests : public tframe::tests
     TEST(test_bzip2);
     TEST(test_gzip);
     TEST(test_none);
+    TEST(test_last_write_time);
   }
 };
 
