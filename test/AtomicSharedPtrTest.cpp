@@ -25,6 +25,14 @@ test_suite* init_unit_test_suite(int argc, char* argv[])
   return NULL;
 }
 
+BOOST_AUTO_TEST_CASE(atomic_shared_ptr_constructor_1)
+{
+  std::shared_ptr<std::string> foo = std::make_shared<std::string>("not empty now");
+  Fmi::AtomicSharedPtr<std::string> ptr(foo);
+  BOOST_CHECK(bool(ptr.load()));
+  BOOST_CHECK_EQUAL(*ptr.load(), "not empty now");
+}
+
 BOOST_AUTO_TEST_CASE(atomic_shared_ptr_test_1)
 {
   Fmi::AtomicSharedPtr<std::string> ptr;

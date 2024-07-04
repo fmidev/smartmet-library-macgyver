@@ -25,7 +25,7 @@ namespace Fmi
 
         AtomicSharedPtr<Type>& operator=(const AtomicSharedPtr<Type>& ptr)
         {
-            std::atomic_store(&content, ptr);
+            std::atomic_store(&content, ptr.load());
             return *this;
         }
 
@@ -34,7 +34,7 @@ namespace Fmi
             return std::atomic_load(&content);
         }
 
-        void store(std::shared_ptr<Type>& ptr)
+        void store(const std::shared_ptr<Type>& ptr)
         {
             std::atomic_store(&content, ptr);
         }
@@ -42,12 +42,6 @@ namespace Fmi
         void reset()
         {
             std::atomic_store(&content, std::shared_ptr<Type>());
-        }
-
-        void store(std::unique_ptr<Type>&& ptr)
-        {
-            std::shared_ptr<Type> tmp(ptr.release());
-            std::atomic_store(&content, tmp);
         }
 
         std::shared_ptr<Type> exchange(std::shared_ptr<Type>& ptr)
