@@ -10,7 +10,7 @@
 #include <regression/tframe.h>
 #include <sstream>
 #include <fstream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
@@ -30,7 +30,7 @@ void read_gzip_compressed_stream()
 {
     std::string s1, s2 = read_orig_file();
 
-    boost::filesystem::create_directory("tmp");
+    std::filesystem::create_directories("tmp");
     system("cat FileSystemTest.cpp | gzip >tmp/FileSystemTest.cpp.gz");
     std::ifstream pipe("tmp/FileSystemTest.cpp.gz");
     Fmi::IStream input(pipe, "tmp/FileSystemTest.cpp.gz");
@@ -46,7 +46,7 @@ void read_xz_compressed_stream()
 {
     std::string s1, s2 = read_orig_file();
 
-    boost::filesystem::create_directory("tmp");
+    std::filesystem::create_directory("tmp");
     system("cat FileSystemTest.cpp | xz >tmp/FileSystemTest.cpp.xz");
     std::ifstream pipe("tmp/FileSystemTest.cpp.xz");
     Fmi::IStream input(pipe, Fmi::Compression::XZ);
