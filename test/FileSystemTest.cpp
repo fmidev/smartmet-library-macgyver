@@ -125,7 +125,7 @@ void test_gzip()
     TEST_PASSED();
 }
 
-void test_none()
+void test_no_compression()
 {
     std::string s0 = read_orig_file();
     std::string s1 = compress(s0, Fmi::Compression::NONE);
@@ -180,7 +180,7 @@ class tests : public tframe::tests
     TEST(test_zstd);
     TEST(test_bzip2);
     TEST(test_gzip);
-    TEST(test_none);
+    TEST(test_no_compression);
     TEST(test_last_write_time);
   }
 };
