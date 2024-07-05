@@ -1,6 +1,7 @@
 #include "Cache.h"
 
 #include <boost/algorithm/string.hpp>
+#include <filesystem>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
@@ -10,10 +11,15 @@
 #include <list>
 #include <string>
 
+// FIXME: unfortunatelly no similar function to boost::filesystem::unique_pth is
+//        present in std::filesystem. As result we have to use boost::filesystem in tests
+
 using namespace std;
 using namespace Fmi::Cache;
 
-static boost::filesystem::path* testpaths[3] = {nullptr};
+namespace fs = std::filesystem;
+
+static std::filesystem::path* testpaths[3] = {nullptr};
 
 namespace CacheTest
 {
@@ -573,7 +579,7 @@ static void atexit_handler()
   {
     if (testpaths[i] != nullptr)
     {
-      boost::filesystem::remove_all(*testpaths[i]);
+      std::filesystem::remove_all(*testpaths[i]);
       delete testpaths[i];
     }
   }
@@ -586,9 +592,9 @@ int main(void)
   atexit(atexit_handler);  // Remove this if you need to debug test directory contents after test
   for (unsigned int i = 0; i < sizeof(testpaths) / sizeof(*testpaths); i++)
   {
-    testpaths[i] = new boost::filesystem::path(
-        boost::filesystem::unique_path(boost::filesystem::temp_directory_path().string() + "/" +
-                                       "MacGyver_CacheTest_" + to_string(i) + "_%%%%%%%%"));
+    testpaths[i] = new std::filesystem::path(
+        boost::filesystem::unique_path(std::filesystem::temp_directory_path().string() + "/" +
+                                       "MacGyver_CacheTest_" + to_string(i) + "_%%%%%%%%").string());
     // cout << "Testpath " << i << " is " << *testpaths[i] << endl;
   }
   CacheTest::tests t;

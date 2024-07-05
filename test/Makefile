@@ -35,7 +35,6 @@ EXTRA_LIBS :=
 LIBS += $(MACGYVER_LDFLAGS) \
 	$(REQUIRED_LIBS) \
 	$(EXTRA_LIBS) \
-	-lboost_filesystem \
 	-lboost_locale \
 	-lboost_serialization \
 	-lboost_regex \
@@ -46,6 +45,7 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	-lpthread
 
 DateTest LocalDateTimeTest TimeDurationTest: EXTRA_LIBS += -lboost_date_time
+CacheTest: EXTRA_LIBS += -lboost_filesystem
 
 #######  Test database for PostgrSQLConnection tests ######
 TEST_DB_DIR := $(shell pwd)/tmp-geonames-db

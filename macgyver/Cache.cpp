@@ -1,10 +1,14 @@
 #include "Cache.h"
 #include "Exception.h"
+#include <fstream>
 
 namespace Fmi
 {
 namespace Cache
 {
+
+namespace fs = std::filesystem;
+
 bool parse_size_t(const std::string& input, std::size_t& result)
 {
   try
@@ -85,7 +89,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
   try
   {
     UpgradeReadLock theLock(itsMutex);
-    boost::system::error_code err;
+    std::error_code err;
 
     auto it = itsContentMap.left.find(key);
 
@@ -110,7 +114,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
 
     // Read and return the file
 
-    fs::fstream file(fullPath, fs::fstream::binary | fs::fstream::in);
+    std::ifstream file(fullPath, std::ios::in|std::ios::binary);
     if (!file)
     {
       // Report file opening error
@@ -140,7 +144,7 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
   try
   {
     WriteLock theLock(itsMutex);
-    boost::system::error_code err;
+    std::error_code err;
 
     auto it = itsContentMap.left.find(key);
     if (it != itsContentMap.left.end())
@@ -254,7 +258,7 @@ bool FileCache::performCleanup(std::size_t space_needed)
 {
   try
   {
-    boost::system::error_code err;
+    std::error_code err;
     while ((itsMaxSize - itsSize) < space_needed)
     {
       if (itsContentMap.empty())
@@ -289,7 +293,7 @@ void FileCache::update()
   {
     fs::recursive_directory_iterator iter(itsDirectory);
     fs::recursive_directory_iterator end;
-    boost::system::error_code err;
+    std::error_code err;
 
     std::string current_subdir;
 
@@ -352,7 +356,7 @@ bool FileCache::writeFile(const fs::path& theDir,
   {
     // Create subdir if needed
 
-    boost::system::error_code err;
+    std::error_code err;
 
     bool exists = fs::exists(theDir);  // fs::exists with error code argument throws error if
                                        // directory does not exist, instead of returning false
@@ -385,7 +389,7 @@ bool FileCache::writeFile(const fs::path& theDir,
     }
 
     fs::path fullPath = theDir / fileName;
-    fs::fstream file(fullPath, fs::fstream::binary | fs::fstream::out);
+    std::ofstream file(fullPath, std::ios::out|std::ios::binary);
     if (!file)
     {
 // Could not open file

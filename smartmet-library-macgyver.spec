@@ -37,7 +37,6 @@ BuildRequires: smartmet-utils-devel >= 23.9.6
 BuildRequires: smartmet-library-regression
 %endif
 Requires: %{smartmet_boost}-chrono
-Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
@@ -64,6 +63,7 @@ BuildRequires: libpqxx-devel
 %endif
 
 #TestRequires: %{smartmet_boost}-devel
+#TestRequires: %{smartmet_boost}-filesystem
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
 #TestRequires: make

@@ -40,7 +40,7 @@ class Handler
   }
 
   void errorhandler(DirectoryMonitor::Watcher id,
-                    boost::filesystem::path dir,
+                    std::filesystem::path dir,
                     boost::regex pattern,
                     std::string message) const
   {
@@ -48,7 +48,7 @@ class Handler
   }
 
   void listener(DirectoryMonitor::Watcher id,
-                boost::filesystem::path dir,
+                std::filesystem::path dir,
                 boost::regex pattern,
                 DirectoryMonitor::Status status) const
   {
@@ -71,20 +71,20 @@ class Handler
     }
   }
 
-  void add_watches(const boost::filesystem::path& dir)
+  void add_watches(const std::filesystem::path& dir)
   {
-    if (!boost::filesystem::exists(dir))
+    if (!std::filesystem::exists(dir))
       throw std::runtime_error("Directory " + dir.string() + " does not exist");
-    if (!boost::filesystem::is_directory(dir))
+    if (!std::filesystem::is_directory(dir))
       throw std::runtime_error(dir.string() + " is not a directory");
 
-    boost::filesystem::directory_iterator end;
-    for (boost::filesystem::directory_iterator it(dir); it != end; ++it)
+    std::filesystem::directory_iterator end;
+    for (std::filesystem::directory_iterator it(dir); it != end; ++it)
     {
-      std::string trig = it->path().leaf().string();
+      std::string trig = it->path().filename().string();
       std::replace(trig.begin(), trig.end(), ':', '/');
       trig = '/' + trig;
-      if (boost::filesystem::exists(trig) && boost::filesystem::is_directory(trig))
+      if (std::filesystem::exists(trig) && std::filesystem::is_directory(trig))
       {
         // we omit modify since it require full directory polling
         // delete is omitted since it does not trigger action

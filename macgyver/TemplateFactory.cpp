@@ -2,6 +2,7 @@
 
 #include "TemplateFactory.h"
 #include "Exception.h"
+#include "FileSystem.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
@@ -18,7 +19,7 @@ struct TemplateInfo
   TemplateInfo() = default;
 };
 
-using TemplateMap = std::map<boost::filesystem::path, TemplateInfo>;
+using TemplateMap = std::map<std::filesystem::path, TemplateInfo>;
 thread_local TemplateMap itsTemplates{};
 
 TemplateFactory::TemplateFactory() = default;
@@ -29,7 +30,7 @@ TemplateFactory::TemplateFactory() = default;
  */
 // ----------------------------------------------------------------------
 
-SharedFormatter TemplateFactory::get(const boost::filesystem::path& theFilename) const
+SharedFormatter TemplateFactory::get(const std::filesystem::path& theFilename) const
 {
   try
   {
@@ -38,7 +39,14 @@ SharedFormatter TemplateFactory::get(const boost::filesystem::path& theFilename)
 
     const auto& tinfo = itsTemplates.find(theFilename);
 
-    const std::time_t modtime = boost::filesystem::last_write_time(theFilename);
+    const std::optional<std::time_t> opt_modtime = Fmi::last_write_time(theFilename);
+    if (!opt_modtime)
+    {
+      Fmi::Exception err(BCP, "Failed to get file modification time");
+      err.addParameter("Path", theFilename);
+      throw err;
+    }
+    const std::time_t modtime = *opt_modtime;
 
     // Use cached template if it is up to date
     if (tinfo != itsTemplates.end())

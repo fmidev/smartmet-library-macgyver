@@ -7,7 +7,7 @@
 #pragma once
 
 #include "TemplateFormatter.h"
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/shared_ptr.hpp>
 
 namespace Fmi
@@ -17,7 +17,7 @@ using SharedFormatter = std::shared_ptr<Fmi::TemplateFormatter>;
 class TemplateFactory
 {
  public:
-  SharedFormatter get(const boost::filesystem::path& theFilename) const;
+  SharedFormatter get(const std::filesystem::path& theFilename) const;
 
   TemplateFactory();
 
