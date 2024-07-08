@@ -9,13 +9,14 @@
 #include <optional>
 #include <ostream>
 
-namespace Fmi
+// std namespace does not provide stream input and output operators for std
+namespace std
 {
 
 template<class CharType, class CharTrait>
 inline
-std::basic_ostream<CharType, CharTrait>&
-operator<<(std::basic_ostream<CharType, CharTrait>& out, std::nullopt_t)
+basic_ostream<CharType, CharTrait>&
+operator<<(basic_ostream<CharType, CharTrait>& out, nullopt_t)
 {
   if (out.good())
   {
@@ -27,8 +28,8 @@ operator<<(std::basic_ostream<CharType, CharTrait>& out, std::nullopt_t)
 
 template<class CharType, class CharTrait, class T>
 inline
-std::basic_ostream<CharType, CharTrait>&
-operator<<(std::basic_ostream<CharType, CharTrait>& out, const std::optional<T> const& v)
+basic_ostream<CharType, CharTrait>&
+operator<<(basic_ostream<CharType, CharTrait>& out, const optional<T>& v)
 {
   if (out.good())
   {
@@ -42,8 +43,8 @@ operator<<(std::basic_ostream<CharType, CharTrait>& out, const std::optional<T> 
 
 template<class CharType, class CharTrait, class T>
 inline
-std::basic_istream<CharType, CharTrait>&
-operator>>(std::basic_istream<CharType, CharTrait>& in, std::optional<T>& v)
+basic_istream<CharType, CharTrait>&
+operator>>(basic_istream<CharType, CharTrait>& in, optional<T>& v)
 {
   if (in.good())
   {
@@ -67,7 +68,7 @@ operator>>(std::basic_istream<CharType, CharTrait>& in, std::optional<T>& v)
         }
       }
 
-      in.setstate( std::ios::failbit );
+      in.setstate( ios::failbit );
     }
   }
 
