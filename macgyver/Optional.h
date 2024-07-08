@@ -28,7 +28,7 @@ operator<<(std::basic_ostream<CharType, CharTrait>& out, std::nullopt_t)
 template<class CharType, class CharTrait, class T>
 inline
 std::basic_ostream<CharType, CharTrait>&
-operator<<(std::basic_ostream<CharType, CharTrait>& out, std::optional<T> const& v)
+operator<<(std::basic_ostream<CharType, CharTrait>& out, const std::optional<T> const& v)
 {
   if (out.good())
   {
