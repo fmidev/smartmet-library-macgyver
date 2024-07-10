@@ -88,21 +88,21 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
         char dot = '.';
         if (it->path().filename().native().at(0) != dot)
         {
+          std::error_code ec;
           if (hasregex)
           {
             if (boost::regex_match(it->path().filename().string(), pattern))
             {
-              const auto t = Fmi::last_write_time(it->path());
-              if (t)
-                contents.insert(Contents::value_type(it->path(), *t));
+              const std::time_t t = Fmi::last_write_time(it->path(), ec);
+              if (!ec)
+                contents.insert(Contents::value_type(it->path(), t));
             }
           }
-
           else
           {
-            const auto t = Fmi::last_write_time(it->path());
-            if (t)
-              contents.insert(Contents::value_type(it->path(), *t));
+            const std::time_t t = Fmi::last_write_time(it->path(), ec);
+            if (!ec)
+              contents.insert(Contents::value_type(it->path(), t));
           }
         }
       }
@@ -110,9 +110,10 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
     else
     {
       // No regex checking for single files
-      const auto t = Fmi::last_write_time(path);
-      if (t)
-        contents.insert(Contents::value_type(path, *t));
+      std::error_code ec;
+      const std::time_t t = Fmi::last_write_time(path, ec);
+      if (!ec)
+        contents.insert(Contents::value_type(path, t));
     }
     return contents;
   }

@@ -11,11 +11,13 @@
 #include <sstream>
 #include <fstream>
 #include <filesystem>
+#include <vector>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <stdio.h>
 
+namespace fs = std::filesystem;
 namespace io = boost::iostreams;
 
 std::string read_orig_file()
@@ -142,21 +144,85 @@ void test_no_compression()
 
 void test_last_write_time()
 {
+    std::error_code ec;
     const std::time_t t = std::time(nullptr);
     std::filesystem::create_directories("tmp");
     std::ofstream out("tmp/test.txt");
     out << "test";
     out.close();
-    const std::optional<std::time_t> t2 = *Fmi::last_write_time("tmp/test.txt");
-    if (!t2)
+    const std::time_t t2 = Fmi::last_write_time("tmp/test.txt", ec);
+    if (ec)
     {
-        TEST_FAILED("Failed to get last write time");
+        TEST_FAILED("Failed to get last write time. Error: " + ec.message());
     }
 
-    if (std::abs(*t2 - t) > 2)
+    if (std::abs(t2 - t) > 2)
     {
-        std::cout << "now=" << t << " last=" << *t2 << std::endl;
+        std::cout << "now=" << t << " last=" << t2 << std::endl;
         TEST_FAILED("Last write time differs too much");
+    }
+
+    Fmi::last_write_time("tmp/nonexistent.txt", ec);
+    if (!ec)
+    {
+        TEST_FAILED("last_write_time should have failed");
+    }
+    if (ec.value() != ENOENT)
+    {
+        TEST_FAILED("last_write_time failed with wrong error code: " + ec.message());
+    }
+
+    try
+    {
+        (void)Fmi::last_write_time("tmp/nonexistent.txt");
+        TEST_FAILED("last_write_time should have thrown");
+    }
+    catch(const Fmi::Exception&)
+    {
+    }
+    catch(...)
+    {
+        TEST_FAILED("last_write_time should have thrown Fmi::Exception");
+    }
+
+    TEST_PASSED();
+}
+
+void test_unique_path()
+{
+    int num_err = 0;
+    std::vector<fs::path> paths;
+    fs::create_directories("tmp");
+    for (int i = 0; i < 100; i++)
+    {
+        const fs::path p = Fmi::unique_path("tmp/%%%%-%%%%-%%%%-%%%%");
+        if (fs::exists(p))
+        {
+            ++num_err;
+        }
+        else
+        {
+            std::ofstream ofs(p.c_str());
+            if (!ofs)
+            {
+                ++num_err;
+            }
+            else
+            {
+                ofs << "test";
+                ofs.close();
+            }
+        }
+        paths.push_back(Fmi::unique_path("tmp/%%%%-%%%%-%%%%-%%%%"));
+    }
+
+    // Make sure all paths are unique
+    const std::size_t n = paths.size();
+    std::sort(paths.begin(), paths.end());
+    (void)std::unique(paths.begin(), paths.end()); // remove duplicates
+    if (paths.size() != n)
+    {
+        TEST_FAILED("Not all unique paths are unique");
     }
 
     TEST_PASSED();
@@ -182,6 +248,9 @@ class tests : public tframe::tests
     TEST(test_gzip);
     TEST(test_no_compression);
     TEST(test_last_write_time);
+    TEST(test_unique_path);
+
+    fs::remove_all("tmp");
   }
 };
 
@@ -189,5 +258,6 @@ int main(void)
 {
   std::cout << std::endl << "FileSystem utils tester" << std::endl << "=====================" << std::endl;
   tests t;
+
   return t.run();
 }
