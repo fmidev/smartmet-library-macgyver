@@ -219,7 +219,7 @@ void test_unique_path()
     // Make sure all paths are unique
     const std::size_t n = paths.size();
     std::sort(paths.begin(), paths.end());
-    (void)std::unique(paths.begin(), paths.end()); // remove duplicates
+    paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
     if (paths.size() != n)
     {
         TEST_FAILED("Not all unique paths are unique");
