@@ -16,23 +16,23 @@ namespace Fmi
 /**
  *   @brief A template class to associate object with specified types
  *
- *   Intended mostly for use with boost::any and boost::variant which can
+ *   Intended mostly for use with std::any and boost::variant which can
  *   contain data of different types to avoid long if then else chains
  *
- *   An example for use with std::function<std::string(const boost::any&) kanssa:
+ *   An example for use with std::function<std::string(const std::any&) kanssa:
  *   @code
  *   TypeMap<std::function<std::string(const std::any&)> > W;
  *   W.add<int>(
  *        [](const std::any& x) -> std::string
  *        {
- *            return "INT: " + std::to_string(boost::any_cast<int>(x));
+ *            return "INT: " + std::to_string(std::any_cast<int>(x));
  *        });
  *    W.add<std::string>(
  *        [](const std::any& x) -> std::string
  *        {
  *            return "STRING: '" + std::any_cast<std::string>(x) + "'";
  *        });
- *    boost::any foo = int(1), bar(std::string("bar"));
+ *    std::any foo = int(1), bar(std::string("bar"));
  *    std::cout << W[foo](foo) << std::endl;
  *    std::cout << W[bar](bar) << std::endl;
  *
