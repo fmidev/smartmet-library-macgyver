@@ -162,6 +162,12 @@ void test_last_write_time()
         TEST_FAILED("Last write time differs too much");
     }
 
+    std::time_t t2a = Fmi::last_write_time_or("tmp/test.txt", 1);
+    if (t2 != t2a)
+    {
+        TEST_FAILED("Fmi::last_write_time_or() must return the same resylt as Fmi::last_write_time if file exists");
+    }
+
     Fmi::last_write_time("tmp/nonexistent.txt", ec);
     if (!ec)
     {
@@ -170,6 +176,12 @@ void test_last_write_time()
     if (ec.value() != ENOENT)
     {
         TEST_FAILED("last_write_time failed with wrong error code: " + ec.message());
+    }
+    t2a = Fmi::last_write_time_or("tmp/nonexistent.txt", 1);
+    if (t2a != 1)
+    {
+        TEST_FAILED("Fmi::last_write_time_or() must return provided default value in case of an error getting last write time ("
+                "got " + std::to_string(t2a) + ")");
     }
 
     try
