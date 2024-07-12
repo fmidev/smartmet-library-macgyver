@@ -24,6 +24,7 @@
 
 #include "DirectoryMonitor.h"
 #include "Exception.h"
+#include "FileSystem.h"
 #include "StringConversion.h"
 #include <boost/chrono.hpp>
 #include <boost/thread.hpp>
@@ -32,6 +33,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <atomic>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 
 // scoped read/write lock types
@@ -40,7 +42,7 @@ using MutexType = boost::shared_mutex;
 using ReadLock = boost::shared_lock<MutexType>;
 using WriteLock = boost::unique_lock<MutexType>;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace Fmi
 {
@@ -50,7 +52,7 @@ namespace Fmi
  */
 // ----------------------------------------------------------------------
 
-using Contents = std::map<boost::filesystem::path, std::time_t>;
+using Contents = std::map<fs::path, std::time_t>;
 
 // ----------------------------------------------------------------------
 /*!
@@ -86,20 +88,19 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
         char dot = '.';
         if (it->path().filename().native().at(0) != dot)
         {
-          boost::system::error_code ec;
+          std::error_code ec;
           if (hasregex)
           {
             if (boost::regex_match(it->path().filename().string(), pattern))
             {
-              std::time_t t = fs::last_write_time(it->path(), ec);
+              const std::time_t t = Fmi::last_write_time(it->path(), ec);
               if (!ec)
                 contents.insert(Contents::value_type(it->path(), t));
             }
           }
-
           else
           {
-            std::time_t t = fs::last_write_time(it->path(), ec);
+            const std::time_t t = Fmi::last_write_time(it->path(), ec);
             if (!ec)
               contents.insert(Contents::value_type(it->path(), t));
           }
@@ -109,8 +110,8 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
     else
     {
       // No regex checking for single files
-      boost::system::error_code ec;
-      std::time_t t = fs::last_write_time(path, ec);
+      std::error_code ec;
+      const std::time_t t = Fmi::last_write_time(path, ec);
       if (!ec)
         contents.insert(Contents::value_type(path, t));
     }
@@ -442,10 +443,10 @@ void DirectoryMonitor::run()
 
             try
             {
-              std::time_t tchange;
+              std::optional<std::time_t> tchange;
               if (fs::exists(mon.path))
               {
-                tchange = fs::last_write_time(mon.path);
+                tchange = Fmi::last_write_time(mon.path);
                 // Actually directory is scanned later if changes detected,
                 // but we are interested in how often changes are checked
                 if (mon.mask & DirectoryMonitor::SCAN)
@@ -489,7 +490,7 @@ void DirectoryMonitor::run()
                 // update schedule and status
 
                 mon.contents = newcontents;
-                mon.lastmodified = tchange;
+                mon.lastmodified = tchange ? *tchange : 0;
 
                 std::time_t tnext = std::time(nullptr) + mon.interval;
                 impl->schedule.insert(std::make_pair(tnext, mon));

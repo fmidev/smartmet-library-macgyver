@@ -95,13 +95,13 @@
 
 #pragma once
 
-#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <optional>
 #include <random>
 #include <vector>
 
@@ -144,11 +144,11 @@ class NearTree
 
     void insert(const value_type& theObject);
 
-    void nearest(boost::optional<value_type>& theClosest,
+    void nearest(std::optional<value_type>& theClosest,
                  const value_type& thePoint,
                  double& theRadius) const;
 
-    void farthest(boost::optional<value_type>& theFarthest,
+    void farthest(std::optional<value_type>& theFarthest,
                   const value_type& thePoint,
                   double& theRadius) const;
 
@@ -187,14 +187,14 @@ class NearTree
 
   void insert(const value_type& theObject);
 
-  boost::optional<value_type> nearest(const value_type& thePoint, double theRadius = -1.0) const;
+  std::optional<value_type> nearest(const value_type& thePoint, double theRadius = -1.0) const;
 
-  boost::optional<value_type> farthest(const value_type& thePoint) const;
+  std::optional<value_type> farthest(const value_type& thePoint) const;
 
   std::multimap<double, value_type> nearestones(const value_type& thePoint, double theRadius) const;
 
  private:
-  boost::shared_ptr<Impl> impl;
+  std::shared_ptr<Impl> impl;
 
   using buffer_type = std::vector<value_type>;
   mutable buffer_type buffer;
@@ -395,13 +395,13 @@ void NearTree<T, F>::Impl::nearestones(std::multimap<double, value_type>& theClo
  *
  * \param theClosest The found closest point
  * \param thePoint The probe point
- * \param theRadius The smallest currently known distance of an object from
+ *ï¿½\param theRadius The smallest currently known distance of an object from
  *                  the probe point.
  */
 // ----------------------------------------------------------------------
 
 template <typename T, typename F>
-void NearTree<T, F>::Impl::nearest(boost::optional<value_type>& theClosest,
+void NearTree<T, F>::Impl::nearest(std::optional<value_type>& theClosest,
                                    const value_type& thePoint,
                                    double& theRadius) const
 {
@@ -466,7 +466,7 @@ void NearTree<T, F>::Impl::nearest(boost::optional<value_type>& theClosest,
 // ----------------------------------------------------------------------
 
 template <typename T, typename F>
-void NearTree<T, F>::Impl::farthest(boost::optional<value_type>& theFarthest,
+void NearTree<T, F>::Impl::farthest(std::optional<value_type>& theFarthest,
                                     const value_type& thePoint,
                                     double& theRadius) const
 {
@@ -580,11 +580,11 @@ void NearTree<T, F>::insert(const value_type& theObject)
 // ----------------------------------------------------------------------
 
 template <typename T, typename F>
-boost::optional<typename NearTree<T, F>::value_type> NearTree<T, F>::nearest(
+std::optional<typename NearTree<T, F>::value_type> NearTree<T, F>::nearest(
     const value_type& thePoint, double theRadius) const
 {
   this->flush();
-  boost::optional<value_type> near;
+  std::optional<value_type> near;
   double radius = theRadius;
   impl->nearest(near, thePoint, radius);
   return near;
@@ -606,11 +606,11 @@ boost::optional<typename NearTree<T, F>::value_type> NearTree<T, F>::nearest(
 // ----------------------------------------------------------------------
 
 template <typename T, typename F>
-boost::optional<typename NearTree<T, F>::value_type> NearTree<T, F>::farthest(
+std::optional<typename NearTree<T, F>::value_type> NearTree<T, F>::farthest(
     const value_type& thePoint) const
 {
   this->flush();
-  boost::optional<value_type> far;
+  std::optional<value_type> far;
   double radius = -1;
   impl->farthest(far, thePoint, radius);
   return far;

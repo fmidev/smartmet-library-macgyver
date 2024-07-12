@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include <boost/filesystem.hpp>
-#include <boost/function.hpp>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <ctime>
+#include <filesystem>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -41,8 +41,8 @@ class DirectoryMonitor
 
   // Directory listing with modification state
 
-  using StatusMap = std::map<boost::filesystem::path, Change>;
-  using Status = boost::shared_ptr<StatusMap>;
+  using StatusMap = std::map<std::filesystem::path, Change>;
+  using Status = std::shared_ptr<StatusMap>;
 
   DirectoryMonitor();
   ~DirectoryMonitor();
@@ -66,26 +66,26 @@ class DirectoryMonitor
   // test shows that the code compiles if the callee declares
   // references instead of copies.
 
-  using Listener = boost::function<void(Watcher id,
-                                        const boost::filesystem::path& path,
+  using Listener = std::function<void(Watcher id,
+                                        const std::filesystem::path& path,
                                         const boost::regex& pattern,
                                         const Status& status)>;
 
-  using ErrorHandler = boost::function<void(Watcher id,
-                                            const boost::filesystem::path& path,
+  using ErrorHandler = std::function<void(Watcher id,
+                                            const std::filesystem::path& path,
                                             const boost::regex& pattern,
                                             const std::string& message)>;
 
   // Request new monitored path/regex
 
-  Watcher watch(const boost::filesystem::path& path,
+  Watcher watch(const std::filesystem::path& path,
                 const boost::regex& pattern,
                 Listener callback,
                 ErrorHandler errorhandler,
                 int interval = 60,
                 Change mask = ALL);
 
-  Watcher watch(const boost::filesystem::path& path,
+  Watcher watch(const std::filesystem::path& path,
                 const std::string& pattern,
                 Listener callback,
                 ErrorHandler errorhandler,
@@ -93,7 +93,7 @@ class DirectoryMonitor
                 Change mask = ALL);
 
   // Request new monitored path, without regex
-  Watcher watch(const boost::filesystem::path& path,
+  Watcher watch(const std::filesystem::path& path,
                 Listener callback,
                 ErrorHandler errorhandler,
                 int interval = 60,

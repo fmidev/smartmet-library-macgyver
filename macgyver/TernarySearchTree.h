@@ -9,11 +9,9 @@
 
 #pragma once
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <iostream>
 #include <list>
+#include <memory>
 #include <string>
 
 namespace Fmi
@@ -22,7 +20,7 @@ template <typename T>
 class TernarySearchTree
 {
  public:
-  using element_type = boost::shared_ptr<T>;
+  using element_type = std::shared_ptr<T>;
   using result_type = std::list<element_type>;
 
  private:
@@ -136,7 +134,7 @@ inline size_t TernarySearchTree<T>::size() const
 template <typename T>
 inline bool TernarySearchTree<T>::insert(const std::string& key, const T& data)
 {
-  return insert(key, boost::make_shared<T>(data));
+  return insert(key, std::make_shared<T>(data));
 }
 
 // ----------------------------------------------------------------------

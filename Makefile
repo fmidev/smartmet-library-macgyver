@@ -34,13 +34,12 @@ export EXTRA_TZDB_LIBS
 
 DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
-REQUIRES := libpqxx icu-i18n fmt ctpp2
+REQUIRES := libpqxx icu-i18n fmt ctpp2 filesystem
 
 include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
 
 LIBS += -L$(libdir) \
 	-lboost_regex \
-	-lboost_filesystem \
 	-lboost_serialization \
 	-lboost_chrono \
 	-lboost_iostreams \

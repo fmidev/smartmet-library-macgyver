@@ -8,10 +8,9 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/list_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
@@ -1210,7 +1209,7 @@ class Cache
   }
 
   // Find value from cache
-  boost::optional<ValueType> find(const KeyType& key)
+  std::optional<ValueType> find(const KeyType& key)
   {
     Lock lock(itsMutex);
     LeftIteratorType it = itsMap.left.find(key);
@@ -1258,7 +1257,7 @@ class Cache
   }
 
   // Find value from cache and return also its hits
-  boost::optional<ValueType> find(const KeyType& key, std::size_t& hits)
+  std::optional<ValueType> find(const KeyType& key, std::size_t& hits)
   {
     Lock mapLock(itsMutex);
     LeftIteratorType it = itsMap.left.find(key);
@@ -1445,15 +1444,13 @@ bool parse_size_t(const std::string& input, std::size_t& result);
  * \brief File Cache object for filesystem-backed caching
  */
 // ----------------------------------------------------------------------
-namespace fs = boost::filesystem;
-
 struct FileCacheStruct
 {
-  FileCacheStruct(const fs::path& thePath, std::size_t theSize) : path(thePath), fileSize(theSize)
+  FileCacheStruct(const std::filesystem::path& thePath, std::size_t theSize) : path(thePath), fileSize(theSize)
   {
   }
 
-  fs::path path;
+  std::filesystem::path path;
   std::size_t fileSize;
 };
 
@@ -1477,7 +1474,7 @@ class FileCache
    * This attempts to validate the cache directory for permission failures etc.
    */
   // ----------------------------------------------------------------------
-  FileCache(const fs::path& directory, std::size_t maxSize);
+  FileCache(const std::filesystem::path& directory, std::size_t maxSize);
 
   FileCache(const FileCache& other) = delete;
   FileCache(FileCache&& other) = delete;
@@ -1490,7 +1487,7 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  boost::optional<std::string> find(std::size_t key);
+  std::optional<std::string> find(std::size_t key);
 
   // ----------------------------------------------------------------------
   /*!
@@ -1557,7 +1554,7 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  bool writeFile(const fs::path& theDir,
+  bool writeFile(const std::filesystem::path& theDir,
                  const std::string& fileName,
                  const std::string& theValue) const;
 
@@ -1567,7 +1564,7 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  bool checkForDiskSpace(const fs::path& thePath, const std::string& theValue, bool doCleanup);
+  bool checkForDiskSpace(const std::filesystem::path& thePath, const std::string& theValue, bool doCleanup);
 
   // ----------------------------------------------------------------------
   /*!
@@ -1595,7 +1592,7 @@ class FileCache
 
   const DateTime itsStartTime = Fmi::SecondClock::universal_time();
 
-  fs::path itsDirectory;
+  std::filesystem::path itsDirectory;
 
   MapType itsContentMap;
 

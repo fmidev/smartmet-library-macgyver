@@ -15,19 +15,19 @@
 using namespace std;
 using namespace Fmi;
 
-boost::filesystem::path p("tmp");
+std::filesystem::path p("tmp");
 
 const int timeout = 30;
 
 void sighandler(int)
 {
   cout << "Removing " << p << " after signal catch" << endl;
-  boost::filesystem::remove_all(p);
+  std::filesystem::remove_all(p);
   exit(0);
 }
 
 void listener(DirectoryMonitor::Watcher id,
-              boost::filesystem::path dir,
+              std::filesystem::path dir,
               boost::regex pattern,
               DirectoryMonitor::Status status)
 {
@@ -49,7 +49,7 @@ void listener(DirectoryMonitor::Watcher id,
 }
 
 void errorhandler(DirectoryMonitor::Watcher id,
-                  boost::filesystem::path dir,
+                  std::filesystem::path dir,
                   boost::regex pattern,
                   std::string message)
 {
@@ -64,7 +64,7 @@ int main()
   signal(SIGABRT, &sighandler);
   signal(SIGTERM, &sighandler);
 
-  boost::filesystem::create_directories(p);
+  std::filesystem::create_directories(p);
 
   cout << endl
        << "\tThis program has just created a local subfolder named tmp," << endl
@@ -92,7 +92,7 @@ int main()
 
   cout << endl << "Removing " << p << " after " << timeout << " second timeout" << endl;
 
-  boost::filesystem::remove_all(p);
+  std::filesystem::remove_all(p);
 
   return 0;
 }
