@@ -59,12 +59,8 @@ namespace Fmi
 template <typename ValueType>
 class TypeMap
 {
-    template <typename Obj>
-    struct Visitor
+    struct GetTypeVisitor
     {
-        Visitor(const Obj& x) : x(x) {}
-        const Obj& x;
-
         template <typename Type>
         const std::type_info& operator () (const Type& x) const
         {
@@ -102,8 +98,7 @@ public:
     template <class... VariantTypes>
     const ValueType& operator [] (const std::variant<VariantTypes...>& x) const
     {
-        Visitor visitor(x);
-        const std::type_info& ti = std::visit(visitor, x);
+        const std::type_info& ti = std::visit(GetTypeVisitor(), x);
         return operator [] (ti);
     };
 private:
