@@ -111,7 +111,6 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: date-devel
 Requires: smartmet-utils-devel >= 23.9.6
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
