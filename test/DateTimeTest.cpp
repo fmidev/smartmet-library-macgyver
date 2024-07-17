@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(test_date_time_map_1)
     const DateTime dt_pi(DateTime::POS_INFINITY);
     const DateTime dt_nad(DateTime::NOT_A_DATE_TIME);
 
-    std::map<DateTime::Index, std::string> m;
+    std::map<DateTime, std::string> m;
 
     m[dt1] = "first";
     m[dt2] = "second";
@@ -369,16 +369,5 @@ BOOST_AUTO_TEST_CASE(test_date_time_map_1)
     BOOST_CHECK_EQUAL(str, "neg infinity"s);
 
     const auto it1 = m.find(dt1);
-    BOOST_REQUIRE_EQUAL(it1->first->to_simple_string(), dt1.to_simple_string());
+    BOOST_REQUIRE_EQUAL(it1->first.to_simple_string(), dt1.to_simple_string());
 }
-
-#if 0
-// Must not compile
-std::map<Fmi::date_time::DateTime::Index, std::string>
-make_map(const std::map<Fmi::date_time::DateTime, std::string>& m)
-{
-    std::map<Fmi::date_time::DateTime::Index, std::string> res;
-    res = m;
-    return res;
-}
-#endif
