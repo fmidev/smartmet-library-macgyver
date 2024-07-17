@@ -52,6 +52,24 @@ int64_t Fmi::date_time::TimeDuration::fractional_seconds() const
   return (int)(mks - seconds * 1000000);
 }
 
+int64_t Fmi::date_time::TimeDuration::total_days() const
+{
+  assert_special();
+  return std::chrono::duration_cast<detail::days_t>(m_duration).count();
+}
+
+int64_t Fmi::date_time::TimeDuration::total_hours() const
+{
+  assert_special();
+  return std::chrono::duration_cast<detail::hours_t>(m_duration).count();
+}
+
+int64_t Fmi::date_time::TimeDuration::total_minutes() const
+{
+  assert_special();
+  return std::chrono::duration_cast<detail::minutes_t>(m_duration).count();
+}
+
 int64_t Fmi::date_time::TimeDuration::total_seconds() const
 {
   assert_special();

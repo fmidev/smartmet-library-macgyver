@@ -34,6 +34,9 @@ namespace Fmi
             int64_t seconds() const;
             int64_t fractional_seconds() const;
 
+            int64_t total_days() const;
+            int64_t total_hours() const;
+            int64_t total_minutes() const;
             int64_t total_seconds() const;
             int64_t total_milliseconds() const;
             int64_t total_microseconds() const;
