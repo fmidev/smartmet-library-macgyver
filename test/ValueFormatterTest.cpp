@@ -66,10 +66,10 @@ void nan()
   {
     Fmi::ValueFormatterParam opt;
     opt.floatField = "none";
-    opt.missingText = "NULL";
+    opt.missingText = "nullptr";
     Fmi::ValueFormatter fmt(opt);
-    if ((result = fmt.format(nan, precision)) != "NULL")
-      TEST_FAILED("Failed to return 'NULL' for NaN value, result = " + result);
+    if ((result = fmt.format(nan, precision)) != "nullptr")
+      TEST_FAILED("Failed to return 'nullptr' for NaN value, result = " + result);
   }
 
   TEST_PASSED();

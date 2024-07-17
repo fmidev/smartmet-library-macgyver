@@ -80,21 +80,21 @@ void find()
   tree.insert("iisalmi", iisalmi);
 
   res = tree.find("X");
-  if (res != NULL)
+  if (res != nullptr)
     TEST_FAILED("Should not have found X");
 
   res = tree.find("imatra");
-  if (res == NULL)
+  if (res == nullptr)
     TEST_FAILED("Should have found imatra");
   if (*res != "imatra")
     TEST_FAILED("Should have found imatra result, found " + *res + " instead");
 
   res = tree.find("imatraX");
-  if (res != NULL)
+  if (res != nullptr)
     TEST_FAILED("Should not have found imatraX");
 
   res = tree.find("Imatr");
-  if (res != NULL)
+  if (res != nullptr)
     TEST_FAILED("Should not have found Imatr");
 
   TEST_PASSED();

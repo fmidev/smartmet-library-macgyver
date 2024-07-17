@@ -81,7 +81,7 @@ void findAndInsert(Fmi::TimedCache::Cache<std::string, std::string>& cache,
 
 void lruEvictionWithMultipleThreads()
 {
-  srand48(std::time(NULL));
+  srand48(std::time(nullptr));
   const size_t maxInsertions = 10000;
   const size_t uniqueRandValues = 10;
 

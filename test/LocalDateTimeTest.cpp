@@ -59,7 +59,7 @@ test_suite* init_unit_test_suite(int argc, char* argv[])
     throw;
   }
   std::setlocale(LC_ALL, "C");
-  return NULL;
+  return nullptr;
 }
 
 BOOST_AUTO_TEST_CASE(construct_and_extract_1)

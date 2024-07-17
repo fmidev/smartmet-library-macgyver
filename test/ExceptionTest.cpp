@@ -41,7 +41,7 @@ void test_std_library_exception_reporting_1()
   {
     TEST_FAILED_UNLESS(e.getWhat() == std::string("Bar"));
     const Fmi::Exception* prev = e.getPrevException();
-    TEST_FAILED_UNLESS(prev != NULL);
+    TEST_FAILED_UNLESS(prev != nullptr);
     TEST_FAILED_UNLESS(prev->getWhat() == std::string("[Runtime error] Foo"));
   }
   catch (...)
@@ -98,7 +98,7 @@ void test_std_library_exception_reporting_2()
   {
     TEST_FAILED_UNLESS(e.getWhat() == std::string("Bar"));
     const Fmi::Exception* prev = e.getPrevException();
-    TEST_FAILED_UNLESS(prev != NULL);
+    TEST_FAILED_UNLESS(prev != nullptr);
     TEST_FAILED_UNLESS(prev->getWhat() ==
                        std::string("[ExceptionTest::MyRuntimeError] My runtime error"));
   }
@@ -131,7 +131,7 @@ void test_other_exception_reporting_1()
   {
     TEST_FAILED_UNLESS(e.getWhat() == std::string("Bar"));
     const Fmi::Exception* prev = e.getPrevException();
-    TEST_FAILED_UNLESS(prev != NULL);
+    TEST_FAILED_UNLESS(prev != nullptr);
     TEST_FAILED_UNLESS(prev->getWhat() == std::string("[ExceptionTest::MyException1]"));
   }
   catch (...)
