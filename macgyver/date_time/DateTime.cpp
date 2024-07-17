@@ -713,7 +713,7 @@ Fmi::date_time::DateTime::try_parse_string(
     rule<iterator> date_time_separator = +space;
     const std::optional<Fmi::date_time::DateTime> result =
         try_parse(BCP, str, p_date_2 | p_date_1, p_time, date_time_separator, have_tz);
-    return *result;
+    return result;
 }
 
 Fmi::date_time::DateTime
