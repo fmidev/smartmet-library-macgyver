@@ -7,7 +7,6 @@
 
 #include "NearTree.h"
 #include "NearTreeLatLon.h"
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regression/tframe.h>
 #include <iostream>

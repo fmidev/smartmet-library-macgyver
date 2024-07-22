@@ -6,7 +6,6 @@
 // ======================================================================
 
 #include "TernarySearchTree.h"
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/locale.hpp>
 #include <regression/tframe.h>
