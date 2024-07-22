@@ -7,7 +7,7 @@
 #pragma once
 
 #include "ReferenceEllipsoid.h"
-#include <boost/array.hpp>
+#include <array>
 #include <string>
 
 namespace Fmi
@@ -30,7 +30,7 @@ class HelmertTransformation
    */
   HelmertTransformation();
 
-  boost::array<double, 3> operator()(const boost::array<double, 3>& x) const;
+  std::array<double, 3> operator()(const std::array<double, 3>& x) const;
 
   /**
    *  @brief Creates Helmert transformation from FMI sphere to provided
