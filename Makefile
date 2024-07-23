@@ -48,7 +48,7 @@ LIBS += \
 	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
 	$(EXTRA_TZDB_LIBS) \
-	-L$(libdir) \
+	$(PREFIX_LDFLAGS) \
 	-lpthread -lrt
 
 RPMBUILD_OPT ?=

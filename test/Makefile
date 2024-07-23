@@ -42,7 +42,8 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	-lboost_thread \
 	-lboost_chrono \
 	-lboost_system \
-	-lpthread
+	-lpthread \
+	$(PREFIX_LDFLAGS)
 
 DateTest LocalDateTimeTest TimeDurationTest: EXTRA_LIBS += -lboost_date_time
 CacheTest: EXTRA_LIBS += -lboost_filesystem
