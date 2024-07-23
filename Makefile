@@ -39,6 +39,7 @@ REQUIRES := libpqxx icu-i18n fmt ctpp2 filesystem
 include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
 
 LIBS += \
+	$(PREFIX_LDFLAGS) \
 	-lboost_regex \
 	-lboost_serialization \
 	-lboost_chrono \
@@ -48,7 +49,6 @@ LIBS += \
 	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
 	$(EXTRA_TZDB_LIBS) \
-	$(PREFIX_LDFLAGS) \
 	-lpthread -lrt
 
 RPMBUILD_OPT ?=

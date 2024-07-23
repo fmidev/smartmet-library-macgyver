@@ -32,7 +32,8 @@ INCLUDES += $(MACGYVER_INCLUDES) -I /usr/include/smartmet
 
 EXTRA_LIBS :=
 
-LIBS += $(MACGYVER_LDFLAGS) \
+LIBS += $(PREFIX_LDFLAGS) \
+	$(MACGYVER_LDFLAGS) \
 	$(REQUIRED_LIBS) \
 	$(EXTRA_LIBS) \
 	-lboost_locale \
@@ -42,8 +43,7 @@ LIBS += $(MACGYVER_LDFLAGS) \
 	-lboost_thread \
 	-lboost_chrono \
 	-lboost_system \
-	-lpthread \
-	$(PREFIX_LDFLAGS)
+	-lpthread
 
 DateTest LocalDateTimeTest TimeDurationTest: EXTRA_LIBS += -lboost_date_time
 CacheTest: EXTRA_LIBS += -lboost_filesystem
