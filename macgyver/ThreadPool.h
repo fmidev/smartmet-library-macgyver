@@ -38,17 +38,33 @@ class Worker : public std::enable_shared_from_this<Worker<Executor> >
 {
   using ParentPtr = Executor*;
   using IteratorType = typename std::list<std::shared_ptr<Worker<Executor> > >::iterator;
+  using Ptr = std::shared_ptr<Worker<Executor> >;
+
+  struct Private { public: explicit Private() = default; };
 
  public:
   // ======================================================================
   /*!
-   * \brief Worker constructor
+   * \brief Worker constructor (private due to use of private struct - use factory method instead)
    *
    * Construct Worker with the associated pool
    */
   // ======================================================================
 
-  Worker(ParentPtr theParentPool) : itsParent(theParentPool), itsThread() {}
+  Worker(Private, ParentPtr theParentPool) : itsParent(theParentPool), itsThread() {}
+
+  // ======================================================================
+  /*!
+   * \brief Worker factory method
+   *
+   * Factory method to create a new Worker
+   */
+  // ======================================================================
+  static Ptr create(ParentPtr theParentPool)
+  {
+    return std::make_shared<Worker<Executor> >(Private(), theParentPool);
+  }
+
   ~Worker() {}
   // ======================================================================
   /*!
@@ -501,7 +517,7 @@ class ThreadPool
   void addWorker()
   {
     // The calling function must lock the mutex!
-    std::shared_ptr<Worker<PoolType> > newWorker(new Worker<PoolType>(this));
+    std::shared_ptr<Worker<PoolType> > newWorker = Worker<PoolType>::create(this);
     itsWorkers.push_back(newWorker);
     auto thisIterator = --itsWorkers.end();
     newWorker->setLocation(thisIterator);
