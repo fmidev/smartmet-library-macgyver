@@ -64,8 +64,7 @@ class TypeMap
         template <typename Type>
         const std::type_info& operator () (const Type& x) const
         {
-            const std::type_info &ti = typeid(Type);
-            return ti;
+            return typeid(Type);
         }
     };
 public:
@@ -98,8 +97,7 @@ public:
     template <class... VariantTypes>
     const ValueType& operator [] (const std::variant<VariantTypes...>& x) const
     {
-        const std::type_info& ti = std::visit(GetTypeVisitor(), x);
-        return operator [] (ti);
+        return operator [] (std::visit(GetTypeVisitor(), x));
     };
 private:
     std::map<std::type_index, ValueType> content;
