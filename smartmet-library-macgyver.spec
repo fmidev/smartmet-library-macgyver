@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.7.30
+Version: 24.7.31
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jul 31 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.31-1.fmi
+- Add class StaticCleanup
+
 * Tue Jul 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.30-1.fmi
 - ThreadPool: fix use os std:.enable_shared_from_this
 
