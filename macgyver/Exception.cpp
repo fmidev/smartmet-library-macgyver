@@ -99,35 +99,39 @@ Exception::Exception(const char* _filename,
   {
     prevException.reset(new Exception(*_prevException));
   }
-  else if (std::current_exception())
+  else
   {
-    try
+    const std::exception_ptr eptr = std::current_exception();
+    if (eptr)
     {
-      throw;
-    }
-    catch (Fmi::Exception& e)
-    {
-      prevException.reset(new Exception(e));
-      // Propagate the flags to the top
-      mStackTraceDisabled = e.mStackTraceDisabled;
-      mLoggingDisabled = e.mLoggingDisabled;
-    }
-    catch (const boost::thread_interrupted&)
-    {
-      throw;
-    }
-    catch (std::exception& e)
-    {
-      const std::string cxx_name = Fmi::get_type_name(&e);
-      auto it = exception_name_map.find(cxx_name);
-      const std::string print_name = it == exception_name_map.end() ? cxx_name : it->second;
-      prevException.reset(new Exception(
-          _filename, _line, _function, std::string("[") + print_name + "] " + e.what()));
-    }
-    catch (...)
-    {
-      prevException.reset(new Exception(
-          _filename, _line, _function, std::string("[") + Fmi::current_exception_type() + "]"));
+      try
+      {
+        std::rethrow_exception(eptr);
+      }
+      catch (Fmi::Exception& e)
+      {
+        prevException.reset(new Exception(e));
+        // Propagate the flags to the top
+        mStackTraceDisabled = e.mStackTraceDisabled;
+        mLoggingDisabled = e.mLoggingDisabled;
+      }
+      catch (const boost::thread_interrupted&)
+      {
+        throw;
+      }
+      catch (std::exception& e)
+      {
+        const std::string cxx_name = Fmi::get_type_name(&e);
+        auto it = exception_name_map.find(cxx_name);
+        const std::string print_name = it == exception_name_map.end() ? cxx_name : it->second;
+        prevException.reset(new Exception(
+            _filename, _line, _function, std::string("[") + print_name + "] " + e.what()));
+      }
+      catch (...)
+      {
+          prevException.reset(new Exception(
+            _filename, _line, _function, std::string("[") + Fmi::current_exception_type() + "]"));
+      }
     }
   }
 }
@@ -265,10 +269,10 @@ const char* Exception::getParameterNameByIndex(unsigned int _index) const
 
 const char* Exception::getParameterValue(const char* _name) const
 {
-  size_t size = parameterVector.size();
+  std::size_t size = parameterVector.size();
   if (size > 0)
   {
-    for (size_t t = 0; t < size; t++)
+    for (std::size_t t = 0; t < size; t++)
     {
       const auto& p = parameterVector.at(t);
       if (p.first == _name)
@@ -479,12 +483,12 @@ std::string Exception::getHtmlStackTrace() const
         e->filename,
         e->line);
 
-    size_t size = e->detailVector.size();
+    std::size_t size = e->detailVector.size();
     if (size > 0)
     {
       out += "<li><it>Details :</it></li>";
       out += "<ol>";
-      for (size_t t = 0; t < size; t++)
+      for (std::size_t t = 0; t < size; t++)
       {
         out += "<li>";
         out += e->detailVector.at(t);
@@ -498,7 +502,7 @@ std::string Exception::getHtmlStackTrace() const
     {
       out += "<li><it>Parameters :</it>";
       out += "<ol>";
-      for (size_t t = 0; t < size; t++)
+      for (std::size_t t = 0; t < size; t++)
       {
         auto p = e->parameterVector.at(t);
         out += "<li>";

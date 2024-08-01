@@ -13,12 +13,12 @@ Fmi::HelmertTransformation::HelmertTransformation() : m(1), ex(0), ey(0), ez(0),
 {
 }
 
-boost::array<double, 3> Fmi::HelmertTransformation::operator()(
-    const boost::array<double, 3>& x) const
+std::array<double, 3> Fmi::HelmertTransformation::operator()(
+    const std::array<double, 3>& x) const
 {
   try
   {
-    boost::array<double, 3> y = {m * (x[0] + (-ez) * x[1] + (ey)*x[2]) + tx,
+    std::array<double, 3> y = {m * (x[0] + (-ez) * x[1] + (ey)*x[2]) + tx,
                                  m * ((ez)*x[0] + x[1] + (-ex) * x[2]) + ty,
                                  m * ((-ey) * x[0] + (ex)*x[1] + x[2]) + tz};
     return y;
@@ -44,7 +44,7 @@ void Fmi::HelmertTransformation::set_fmi_sphere_to_reference_ellipsoid_conv(
     if (scaling_type == FMI_SPHERE_NO_SCALING)
     {
       m = 1;
-      const boost::array<double, 3> x0 = ref.to_geocentric(lat, lon, -r);
+      const std::array<double, 3> x0 = ref.to_geocentric(lat, lon, -r);
       tx = x0[0];
       ty = x0[1];
       tz = x0[2];
@@ -99,7 +99,7 @@ void Fmi::HelmertTransformation::set_reference_ellipsoid_to_fmi_sphere_conv(
     if (scaling_type == FMI_SPHERE_NO_SCALING)
     {
       m = 1;
-      const boost::array<double, 3> x0 = ref.to_geocentric(lat, lon, -r);
+      const std::array<double, 3> x0 = ref.to_geocentric(lat, lon, -r);
       tx = -x0[0];
       ty = -x0[1];
       tz = -x0[2];

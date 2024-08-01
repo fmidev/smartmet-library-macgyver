@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.6.13
+Version: 24.7.31
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -37,7 +37,6 @@ BuildRequires: smartmet-utils-devel >= 23.9.6
 BuildRequires: smartmet-library-regression
 %endif
 Requires: %{smartmet_boost}-chrono
-Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-regex
 Requires: %{smartmet_boost}-system
@@ -64,6 +63,7 @@ BuildRequires: libpqxx-devel
 %endif
 
 #TestRequires: %{smartmet_boost}-devel
+#TestRequires: %{smartmet_boost}-filesystem
 #TestRequires: fmt-devel
 #TestRequires: gcc-c++
 #TestRequires: make
@@ -111,7 +111,6 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: date-devel
 Requires: smartmet-utils-devel >= 23.9.6
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
@@ -123,6 +122,18 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jul 31 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.31-1.fmi
+- Add class StaticCleanup
+
+* Tue Jul 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.30-1.fmi
+- ThreadPool: fix use os std:.enable_shared_from_this
+
+* Mon Jul 22 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.22-1.fmi
+- Replace BOOST_FOREACH and boost::array
+
+* Fri Jul 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.12-1.fmi
+- Replace many boost library types with C++ standard library ones
+
 * Thu Jun 13 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.6.13-1.fmi
 - Improved error message in case a cache directory is not readable
 

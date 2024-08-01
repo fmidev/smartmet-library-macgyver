@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Exception.h"
-#include <boost/optional.hpp>
 #include <boost/thread.hpp>
 #include <chrono>
 #include <map>
@@ -168,23 +167,23 @@ class Cache
 
   /** Finds object with specific key.
    *  @param key Key of the object to search for.
-   *  @return Non empty boost::optional value if the object is found.
+   *  @return Non empty std::optional value if the object is found.
    */
-  boost::optional<ValueType> find(const KeyType& key) const
+  std::optional<ValueType> find(const KeyType& key) const
   {
     Lock lock(mMutex);
 
     if (mMaxSize == 0)
     {
       mCacheStatistics.miss();
-      return boost::optional<ValueType>();
+      return std::optional<ValueType>();
     }
 
     auto mapIt = mKeyTimeValueMap.find(key);
     if (mapIt == mKeyTimeValueMap.end())
     {
       mCacheStatistics.miss();
-      return boost::optional<ValueType>();
+      return std::optional<ValueType>();
     }
 
     TimeType now = ClockType::now();
@@ -200,7 +199,7 @@ class Cache
 
         mCacheStatistics.eviction();
         mCacheStatistics.miss();
-        return boost::optional<ValueType>();
+        return std::optional<ValueType>();
       }
     }
 
@@ -217,7 +216,7 @@ class Cache
     mapIt->second = listIt;
 
     mCacheStatistics.hit();
-    return boost::optional<ValueType>(listIt->second.second);
+    return std::optional<ValueType>(listIt->second.second);
   }
 
   std::size_t size() const { return mKeyTimeValueMap.size(); }

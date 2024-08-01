@@ -5,11 +5,12 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
-#include <boost/variant.hpp>
 #include <fmt/format.h>
 #include <cassert>
 #include <iostream>
+#include <optional>
 #include <sstream>
+#include <variant>
 #include <vector>
 
 namespace ba = boost::algorithm;
@@ -27,7 +28,7 @@ struct Ignore
 {
 } ignore;
 
-const std::map<std::string, boost::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def =
+const std::map<std::string, std::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def =
     {{"host", &PostgreSQLConnectionOptions::host},
      {"dbname", &PostgreSQLConnectionOptions::database},
      {"port", &PostgreSQLConnectionOptions::port},
@@ -65,16 +66,16 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
         throw Fmi::Exception(BCP, "Unrecognized field '" + part + "'");
       }
 
-      switch (it->second.which())
+      switch (it->second.index())
       {
         case 0:
           // std::cout << METHOD_NAME << ": field '" << part << "' ignored" << std::endl;
           break;
         case 1:
-          this->*boost::get<uint_member_ptr>(it->second) = boost::lexical_cast<unsigned int>(value);
+          this->*std::get<uint_member_ptr>(it->second) = boost::lexical_cast<unsigned int>(value);
           break;
         case 2:
-          this->*boost::get<string_member_ptr>(it->second) = value;
+          this->*std::get<string_member_ptr>(it->second) = value;
           break;
 
         default:  // Not supposed to be here
@@ -274,7 +275,7 @@ class PostgreSQLConnection::Impl
 
       const std::string conn_str = itsConnectionOptions;
 
-      boost::optional<std::string> error_message;
+      std::optional<std::string> error_message;
 
       // Retry connections automatically. Especially useful after boots if the database is in the
       // same server.

@@ -130,22 +130,6 @@ namespace Fmi
             detail::time_point_t m_time_point;
         };
 
-        class DateTime::Index final
-        {
-            DateTime m_date_time;
-        public:
-            Index() = default;
-            Index(const DateTime& date_time) : m_date_time(date_time) {}
-            Index(const Index& other) : m_date_time(other.m_date_time) {}
-            Index& operator = (const Index& other) { m_date_time = other.m_date_time; return *this; }
-            ~Index() = default;
-
-            const DateTime& operator * () const { return m_date_time; }
-            const DateTime* operator -> () const { return &m_date_time; }
-
-            bool operator < (const Index& other) const;
-        };
-
         inline std::tm to_tm(const DateTime& dt)
         {
             return dt.as_tm();

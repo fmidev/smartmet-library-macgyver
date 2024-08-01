@@ -17,7 +17,7 @@ utf::test_suite* init_unit_test_suite(int argc, char* argv[])
   BOOST_TEST_MESSAGE("");
   BOOST_TEST_MESSAGE(name);
   BOOST_TEST_MESSAGE(std::string(std::strlen(name), '='));
-  return NULL;
+  return nullptr;
 }
 
 namespace env

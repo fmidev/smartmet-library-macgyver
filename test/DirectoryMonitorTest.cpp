@@ -9,7 +9,7 @@
 #include <condition_variable>
 #include <thread>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace microsec_clock = Fmi::date_time::MicrosecClock;
 

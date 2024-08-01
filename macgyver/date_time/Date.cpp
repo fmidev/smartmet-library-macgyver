@@ -305,10 +305,12 @@ Fmi::date_time::Date Fmi::date_time::Date::operator-(int num_days) const
 int Fmi::date_time::Date::operator-(const Date& other) const
 {
     if (is_special() || other.is_special())
-        throw std::move(Fmi::Exception(BCP, "Operation not supported for special values")
-            .addParameter("this", to_simple_string())
-            .addParameter("other", other.to_simple_string()));
-
+    {
+        Fmi::Exception error(BCP, "Operation not supported for special values");
+        error.addParameter("this", to_simple_string());
+        error.addParameter("other", other.to_simple_string());
+        throw error;
+    }
     return (date - other.date).count();
 }
 

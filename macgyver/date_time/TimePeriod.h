@@ -76,8 +76,11 @@ namespace Fmi
 
             TimePeriod& operator = (const TimePeriod& other)
             {
-                m_start = other.m_start;
-                m_end = other.m_end;
+                if (this != &other)
+                {
+                    m_start = other.m_start;
+                    m_end = other.m_end;
+                }
                 return *this;
             }
 

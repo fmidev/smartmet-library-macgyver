@@ -7,7 +7,6 @@
 #include "ValueFormatter.h"
 #include "Exception.h"
 #include "StringConversion.h"
-#include <boost/optional.hpp>
 #include <fmt/format.h>
 #include <fmt/printf.h>
 #include <cmath>

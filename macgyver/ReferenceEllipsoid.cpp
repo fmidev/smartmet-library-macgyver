@@ -9,11 +9,11 @@ Fmi::ReferenceEllipsoid::ReferenceEllipsoid(double theA, double theF)
 {
 }
 
-boost::array<double, 3> Fmi::ReferenceEllipsoid::to_geocentric(double lat,
+std::array<double, 3> Fmi::ReferenceEllipsoid::to_geocentric(double lat,
                                                                double lon,
                                                                double h) const
 {
-  boost::array<double, 3> x;
+  std::array<double, 3> x;
   double N = transverse_curvature_radius(lat);
   x[0] = (N + h) * cos(lat) * cos(lon);
   x[1] = (N + h) * cos(lat) * sin(lon);
@@ -21,7 +21,7 @@ boost::array<double, 3> Fmi::ReferenceEllipsoid::to_geocentric(double lat,
   return x;
 }
 
-void Fmi::ReferenceEllipsoid::to_geodetic(const boost::array<double, 3> &x,
+void Fmi::ReferenceEllipsoid::to_geodetic(const std::array<double, 3> &x,
                                           double *lat,
                                           double *lon,
                                           double *height) const

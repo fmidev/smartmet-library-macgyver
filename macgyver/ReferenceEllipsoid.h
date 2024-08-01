@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <boost/array.hpp>
+#include <array>
 #include <cmath>
 
 namespace Fmi
@@ -33,14 +33,14 @@ class ReferenceEllipsoid
    *   @param lat the latitude (radians)
    *   @param lon the latitude (radians)
    *   @param height the height above reference ellipsoid
-   *   @return Geocentric coordinates as boost::array of size 3
+   *   @return Geocentric coordinates as std::array of size 3
    */
-  boost::array<double, 3> to_geocentric(double lat, double lon, double height = 0) const;
+  std::array<double, 3> to_geocentric(double lat, double lon, double height = 0) const;
 
   /**
    *   @brief Converts provided geocentric coordinates to geodetic ones
    */
-  void to_geodetic(const boost::array<double, 3> &x,
+  void to_geodetic(const std::array<double, 3> &x,
                    double *lat,
                    double *lon,
                    double *height = nullptr) const;
