@@ -9,8 +9,8 @@
 %define smartmet_boost boost
 %endif
 
-%define smartmet_fmt_min 8.1.1
-%define smartmet_fmt_max 8.2.0
+%define smartmet_fmt_min 11.0.1
+%define smartmet_fmt_max 12.0.0
 
 Summary: macgyver library
 Name: %{SPECNAME}
@@ -43,7 +43,7 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: double-conversion
 Requires: ctpp2
-Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
+Requires: fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 Requires: libicu >= 50.2
 
 %if 0%{?rhel} && 0%{rhel} == 8
