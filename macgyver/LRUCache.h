@@ -89,7 +89,7 @@ class LRUCache
   std::optional<std::shared_ptr<T>> get(std::size_t key)
   {
     Shard& shard = shards[getShardIndex(key)];
-    std::unique_lock lock(shard.mutex);  // unique since we splice the LRU list on a match
+    std::shared_lock lock(shard.mutex);
 
     auto it = shard.map.find(key);
     if (it == shard.map.end())
@@ -98,6 +98,10 @@ class LRUCache
       return std::nullopt;
     }
 
+    // Upgrade to a unique lock to modify the LRU list on last accessed elements
+    shared_lock.unlock();
+
+    std::unique_lock unique_lock(shard.mutex);
     stats.hits.fetch_add(1, std::memory_order_relaxed);
     shard.list.splice(shard.list.begin(), shard.list, it->second);
     return it->second->value;
