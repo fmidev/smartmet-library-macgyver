@@ -72,7 +72,12 @@ BuildRequires: libpqxx-devel
 #TestRequires: smartmet-timezones >= 24.5.27
 #TestRequires: smartmet-utils-devel >= 24.7.19
 #TestRequires: smartmet-test-db
-#TestRequires: catch2-devel
+
+%if 0%{?rhel} && 0%{rhel} >= 9
+#TestRequires: catch2-devel >= 2.1.3
+%else
+#TestRequires: catch-devel >= 2.1.3
+%endif
 
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
