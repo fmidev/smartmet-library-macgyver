@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.7.31
+Version: 24.8.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -31,8 +31,8 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
-BuildRequires: smartmet-timezones >= 23.10.30
-BuildRequires: smartmet-utils-devel >= 23.9.6
+BuildRequires: smartmet-timezones >= 24.5.27
+BuildRequires: smartmet-utils-devel >= 24.7.19
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -69,8 +69,8 @@ BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 23.10.30
-#TestRequires: smartmet-utils-devel >= 23.9.6
+#TestRequires: smartmet-timezones >= 24.5.27
+#TestRequires: smartmet-utils-devel >= 24.7.19
 #TestRequires: smartmet-test-db
 Provides: %{SPECNAME}
 Obsoletes: libsmartmet_macgyver < 16.12.20
@@ -111,7 +111,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 23.9.6
+Requires: smartmet-utils-devel >= 24.7.19
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -122,6 +122,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Aug  5 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.8.5-1.fmi
+- Added a simple generic LRU cache (BRAINSTORM-2969)
+
 * Wed Jul 31 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.31-1.fmi
 - Add class StaticCleanup
 
