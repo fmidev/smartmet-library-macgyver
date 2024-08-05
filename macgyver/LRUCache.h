@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <list>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <shared_mutex>
 #include <stdexcept>
@@ -12,7 +13,7 @@
 
 namespace Fmi
 {
-template <typename T, size_t NumShards = 32>
+template <typename T, std::size_t NumShards = 32>
 class LRUCache
 {
  private:
@@ -99,7 +100,7 @@ class LRUCache
     }
 
     // Upgrade to a unique lock to modify the LRU list on last accessed elements
-    shared_lock.unlock();
+    lock.unlock();
 
     std::unique_lock unique_lock(shard.mutex);
     stats.hits.fetch_add(1, std::memory_order_relaxed);
