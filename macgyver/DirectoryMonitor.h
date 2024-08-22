@@ -7,8 +7,6 @@
 #pragma once
 
 #include <boost/regex.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <ctime>
 #include <filesystem>
 #include <functional>
