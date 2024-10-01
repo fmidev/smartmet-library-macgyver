@@ -27,6 +27,7 @@ struct PostgreSQLConnectionOptions
   std::string password;
   std::string encoding = "UTF8";
   unsigned int connect_timeout = 0;
+  unsigned int slow_query_limit = 0; // seconds
   bool debug = false;
 
   PostgreSQLConnectionOptions() = default;

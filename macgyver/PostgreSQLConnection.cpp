@@ -6,7 +6,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
+#include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <optional>
 #include <sstream>
@@ -28,17 +30,17 @@ struct Ignore
 {
 } ignore;
 
-const std::map<std::string, std::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def =
-    {{"host", &PostgreSQLConnectionOptions::host},
-     {"dbname", &PostgreSQLConnectionOptions::database},
-     {"port", &PostgreSQLConnectionOptions::port},
-     {"user", &PostgreSQLConnectionOptions::username},
-     {"password", &PostgreSQLConnectionOptions::password},
-     {"client_encoding", &PostgreSQLConnectionOptions::encoding},
-     {"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
-     // FIXME: add parameters we ignore
-     ,
-     {"options", ignore}};
+const std::map<std::string, std::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def = {
+    {"host", &PostgreSQLConnectionOptions::host},
+    {"dbname", &PostgreSQLConnectionOptions::database},
+    {"port", &PostgreSQLConnectionOptions::port},
+    {"user", &PostgreSQLConnectionOptions::username},
+    {"password", &PostgreSQLConnectionOptions::password},
+    {"client_encoding", &PostgreSQLConnectionOptions::encoding},
+    {"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
+    // FIXME: add parameters we ignore
+    ,
+    {"options", ignore}};
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -214,7 +216,7 @@ class PostgreSQLConnection::Impl
   std::shared_ptr<pqxx::connection> get_connection() const
   {
     if (itsConnection && isConnected())
-        return itsConnection;
+      return itsConnection;
 
     return {};
   }
@@ -227,8 +229,7 @@ class PostgreSQLConnection::Impl
     if (reconnectDisabled.load() || itsCanceled.load())
     {
       throw Fmi::Exception(
-          BCP,
-          METHOD_NAME + ": not connected and reconnecting is disabled or connection canceled");
+          BCP, METHOD_NAME + ": not connected and reconnecting is disabled or connection canceled");
     }
 
     return reopen();
@@ -360,16 +361,16 @@ class PostgreSQLConnection::Impl
           }
 
           boost::unique_lock<boost::mutex> lock(m);
-          for (const auto& item : prepared_sqls) {
+          for (const auto& item : prepared_sqls)
+          {
             try
             {
               itsConnection->prepare(item.first, item.second);
             }
             catch (const std::exception& e)
             {
-              std::cout << "Error restoring prepared SQL statement: name=" <<  item.first
-                        << " sql='" << item.second << "': " << e.what()
-                        << std::endl;
+              std::cout << "Error restoring prepared SQL statement: name=" << item.first << " sql='"
+                        << item.second << "': " << e.what() << std::endl;
             }
           }
 
@@ -386,6 +387,29 @@ class PostgreSQLConnection::Impl
     catch (...)
     {
       throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+  }
+
+  void checkSlowQuery(const std::string& theSQLStatement,
+                      const std::chrono::time_point<std::chrono::high_resolution_clock>& start,
+                      const std::chrono::time_point<std::chrono::high_resolution_clock>& end) const
+  {
+    auto limit = itsConnectionOptions.slow_query_limit;
+
+    if (limit > 0)
+    {
+      const auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+      if (duration.count() >= limit)
+      {
+        auto sql = theSQLStatement;
+        std::replace(sql.begin(), sql.end(), '\n', ' ');
+        std::cerr << fmt::format("Slow {}:{} query took {} seconds, limit is {}. SQL: {}\n",
+                                 itsConnectionOptions.host,
+                                 itsConnectionOptions.database,
+                                 duration.count(),
+                                 limit,
+                                 sql);
+      }
     }
   }
 
@@ -408,7 +432,12 @@ class PostgreSQLConnection::Impl
       try
       {
         pqxx::nontransaction nitsTransaction(*conn);
-        return nitsTransaction.exec(theSQLStatement);
+
+        const auto start = std::chrono::high_resolution_clock::now();
+        auto result = nitsTransaction.exec(theSQLStatement);
+        const auto end = std::chrono::high_resolution_clock::now();
+        checkSlowQuery(theSQLStatement, start, end);
+        return result;
       }
       catch (const std::exception& e)
       {
@@ -426,7 +455,11 @@ class PostgreSQLConnection::Impl
             try
             {
               pqxx::nontransaction nitsTransaction(*conn);
-              return nitsTransaction.exec(theSQLStatement);
+              const auto start = std::chrono::high_resolution_clock::now();
+              auto result = nitsTransaction.exec(theSQLStatement);
+              const auto end = std::chrono::high_resolution_clock::now();
+              checkSlowQuery(theSQLStatement, start, end);
+              return result;
             }
             catch (const std::exception& e2)
             {
@@ -501,8 +534,8 @@ class PostgreSQLConnection::Impl
 
   Impl(const Impl&) = delete;
   Impl(Impl&&) = delete;
-  Impl& operator = (const Impl&) = delete;
-  Impl& operator = (Impl&&) = delete;
+  Impl& operator=(const Impl&) = delete;
+  Impl& operator=(Impl&&) = delete;
 };
 
 // ----------------------------------------------------------------------
@@ -584,10 +617,10 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   }
 }
 
-PostgreSQLConnection::PreparedSQL::Ptr
-PostgreSQLConnection::prepare(const std::string& name, const std::string& theSQLStatement) const
+PostgreSQLConnection::PreparedSQL::Ptr PostgreSQLConnection::prepare(
+    const std::string& name, const std::string& theSQLStatement) const
 {
-    return std::make_shared<PreparedSQL>(*this, name, theSQLStatement);
+  return std::make_shared<PreparedSQL>(*this, name, theSQLStatement);
 }
 
 void PostgreSQLConnection::cancel()
@@ -774,33 +807,30 @@ void PostgreSQLConnection::Transaction::rollback()
   }
 }
 
-PostgreSQLConnection::PreparedSQL::PreparedSQL(
-    const PostgreSQLConnection& theConnection,
-    const std::string& name,
-    const std::string& theSQLStatement)
+PostgreSQLConnection::PreparedSQL::PreparedSQL(const PostgreSQLConnection& theConnection,
+                                               const std::string& name,
+                                               const std::string& theSQLStatement)
 
-    : conn(theConnection)
-    , name(name)
-    , sql(theSQLStatement)
+    : conn(theConnection), name(name), sql(theSQLStatement)
 {
-   try
-   {
-     auto c = conn.impl->check_connection();
-     if (!c)
-     {
-       throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-     }
+  try
+  {
+    auto c = conn.impl->check_connection();
+    if (!c)
+    {
+      throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
+    }
 
-     c->prepare(name, sql);
+    c->prepare(name, sql);
 
-     // FIXME: report conflicts (repeated sama name). Additionally one could ignore call
-     //        if the new SQL statement is identical to the previous one
-     conn.impl->register_prepared_sql(name, theSQLStatement);
-   }
-   catch (...)
-   {
-     throw Fmi::Exception::Trace(BCP, "Operation failed!");
-   }
+    // FIXME: report conflicts (repeated sama name). Additionally one could ignore call
+    //        if the new SQL statement is identical to the previous one
+    conn.impl->register_prepared_sql(name, theSQLStatement);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 PostgreSQLConnection::PreparedSQL::~PreparedSQL()
@@ -811,7 +841,7 @@ PostgreSQLConnection::PreparedSQL::~PreparedSQL()
     auto c = conn.impl->get_connection();
     conn.impl->unregister_prepared_sql(name);
     if (c)
-        c->unprepare(name);
+      c->unprepare(name);
   }
   catch (...)
   {
