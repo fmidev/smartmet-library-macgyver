@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.8.7
+Version: 24.9.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -129,6 +129,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Sep 28 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.9.28-1.fmi
+- Added possibility to get warnings on slow queries, by default there is now time limit
+
 * Wed Aug  7 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.8.7-1.fmi
 - Update to gdal-3.8, geos-3.12, proj-94 and fmt-11
 
