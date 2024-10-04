@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.9.28
+Version: 24.10.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -129,6 +129,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Oct  4 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.10.4-1.fmi
+- Add static bool member Exception::global_enable_stack_trace
+
 * Sat Sep 28 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.9.28-1.fmi
 - Added possibility to get warnings on slow queries, by default there is now time limit
 
