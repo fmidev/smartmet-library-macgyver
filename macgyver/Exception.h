@@ -129,6 +129,14 @@ class Exception : public std::exception
       bool prev;
   };
 
+  /**
+   * @brief Force outputting stack trace for the all threads
+   *
+   * This is a global setting that affects all threads. It is useful for debugging purposes only.
+   * It is not recommended to use this in production code.
+   */
+  static bool global_force_stack_trace;
+
  protected:
   ExceptionTimeStamp timestamp;
   std::string filename;

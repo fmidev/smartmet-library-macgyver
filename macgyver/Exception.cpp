@@ -23,7 +23,8 @@ const std::map<std::string, std::string> exception_name_map = {
     {"std::logic_error", "Logic error"}};
 }
 
-thread_local bool Exception::force_stack_trace = false;
+bool Exception::global_force_stack_trace = false;
+thread_local bool Exception::force_stack_trace = Exception::global_force_stack_trace;
 
 Exception::Exception()
 {
