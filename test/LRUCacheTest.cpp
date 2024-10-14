@@ -69,7 +69,7 @@ TEST_CASE("LRUCache concurrent operations", "[multi-threaded]")
     for (int i = 0; i < NUM_THREADS; ++i)
     {
       threads.emplace_back(
-          [&cache, i]()
+          [&cache]()
           {
             std::random_device rd;
             std::mt19937 gen(rd());
@@ -101,7 +101,7 @@ TEST_CASE("LRUCache concurrent operations", "[multi-threaded]")
     for (int i = 0; i < NUM_THREADS; ++i)
     {
       threads.emplace_back(
-          [&cache, i]()
+          [&cache]()
           {
             for (int j = 0; j < OPERATIONS_PER_THREAD; ++j)
             {
