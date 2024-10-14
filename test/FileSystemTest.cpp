@@ -232,6 +232,12 @@ void test_unique_path()
     const std::size_t n = paths.size();
     std::sort(paths.begin(), paths.end());
     paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
+
+    if (num_err)
+    {
+        TEST_FAILED(std::to_string(num_err) + " errors while creating unique paths");
+    }
+
     if (paths.size() != n)
     {
         TEST_FAILED("Not all unique paths are unique");
