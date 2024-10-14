@@ -42,17 +42,17 @@ class LRUCache
   };
 
   std::array<Shard, NumShards> shards;
-  size_t capacity_per_shard;
+  std::size_t capacity_per_shard;
   Statistics stats;
 
-  size_t getShardIndex(std::size_t key) const
+  std::size_t getShardIndex(std::size_t key) const
   {
     constexpr std::size_t prime = 2654435761;
     return (key * prime) % NumShards;
   }
 
  public:
-  explicit LRUCache(size_t total_capacity)
+  explicit LRUCache(std::size_t total_capacity)
       : capacity_per_shard((total_capacity + NumShards - 1) / NumShards)
   {
     static_assert(NumShards > 0, "Number of shards must be greater than 0");
@@ -125,9 +125,9 @@ class LRUCache
             stats.evictions.load(std::memory_order_relaxed)};
   }
 
-  size_t getTotalCapacity() const { return capacity_per_shard * NumShards; }
+  std::size_t getTotalCapacity() const { return capacity_per_shard * NumShards; }
 
-  size_t getCapacityPerShard() const { return capacity_per_shard; }
+  std::size_t getCapacityPerShard() const { return capacity_per_shard; }
 };
 
 }  // namespace Fmi
