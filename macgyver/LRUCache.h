@@ -5,11 +5,10 @@
 #include <cstdint>
 #include <list>
 #include <memory>
-#include <mutex>
 #include <optional>
-#include <shared_mutex>
 #include <stdexcept>
 #include <unordered_map>
+#include <boost/thread/shared_mutex.hpp>
 #include "CacheStats.h"
 
 namespace Fmi
@@ -30,7 +29,7 @@ class LRUCache
   {
     std::list<Entry> list;
     std::unordered_map<std::size_t, typename std::list<Entry>::iterator> map;
-    mutable std::shared_mutex mutex;
+    mutable boost::shared_mutex mutex;
   };
 
   struct Statistics
@@ -65,7 +64,7 @@ class LRUCache
   void put(std::size_t key, const std::shared_ptr<T>& value)
   {
     Shard& shard = shards[getShardIndex(key)];
-    std::unique_lock lock(shard.mutex);
+    boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
 
     auto it = shard.map.find(key);
     if (it != shard.map.end())
@@ -91,7 +90,7 @@ class LRUCache
   std::optional<std::shared_ptr<T>> get(std::size_t key)
   {
     Shard& shard = shards[getShardIndex(key)];
-    std::shared_lock lock(shard.mutex);
+    boost::upgrade_lock<boost::shared_mutex> lock(shard.mutex);
 
     auto it = shard.map.find(key);
     if (it == shard.map.end())
@@ -100,10 +99,7 @@ class LRUCache
       return std::nullopt;
     }
 
-    // Upgrade to a unique lock to modify the LRU list on last accessed elements
-    lock.unlock();
-
-    std::unique_lock unique_lock(shard.mutex);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> rw_lock(lock);
     stats.hits.fetch_add(1, std::memory_order_relaxed);
     shard.list.splice(shard.list.begin(), shard.list, it->second);
     return it->second->value;
