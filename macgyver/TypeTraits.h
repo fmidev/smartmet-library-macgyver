@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iterator>
 #include <type_traits>
 #include <boost/type_traits/make_void.hpp>
 
