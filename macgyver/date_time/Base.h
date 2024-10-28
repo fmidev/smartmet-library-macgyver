@@ -44,7 +44,7 @@ namespace Fmi
         using period_t = std::micro;
         using duration_t = std::chrono::duration<int64_t, std::micro>;
         using time_point_t = std::chrono::time_point<date::local_t, duration_t>;
-        using sys_time_t = std::chrono::time_point<std::chrono::system_clock>;
+        using sys_time_t = std::chrono::time_point<std::chrono::system_clock, duration_t>;
         using zoned_time_t = date::zoned_time<duration_t>;
         using microsec_t = std::chrono::duration<int64_t, std::micro>;
         using millisec_t = std::chrono::duration<int64_t, std::milli>;

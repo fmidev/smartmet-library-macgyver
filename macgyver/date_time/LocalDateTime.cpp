@@ -221,10 +221,8 @@ DateTime LocalDateTime::utc_time() const
 LocalDateTime LocalDateTime::to_tz(const TimeZonePtr& zone) const
 {
     check_no_special(BCP);
-    const auto& impl = get_impl();
-    const auto tmp = impl.get_time_zone()->to_sys(impl.get_local_time());
-    const auto new_local = zone.zone_ptr()->to_local(tmp);
-    return LocalDateTime(new_local, zone.zone_ptr());
+    const DateTime utc_time_ = this->utc_time();
+    return LocalDateTime(utc_time_, zone);
 }
 
 bool LocalDateTime::dst_on() const
@@ -272,11 +270,15 @@ LocalDateTime::get_dst_times() const
     {
         const auto next = info.end + std::chrono::seconds(2);
         info = get_impl().get_time_zone()->get_info(next);
-        result = std::make_pair(info.begin, info.end);
+        const detail::sys_time_t begin = info.begin;
+        const detail::sys_time_t end = info.end;
+        result = std::make_pair(begin, end);
     }
     else
     {
-        result = std::make_pair(info.begin, info.end);
+        const detail::sys_time_t begin = info.begin;
+        const detail::sys_time_t end = info.end;
+        result = std::make_pair(begin, end);
     }
     return result;
 }
