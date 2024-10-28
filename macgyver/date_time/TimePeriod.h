@@ -3,6 +3,7 @@
 #include <iostream>
 #include <type_traits>
 #include "../Exception.h"
+#include "Base.h"
 
 namespace Fmi
 {
