@@ -133,7 +133,7 @@ FMI MacGyver library development files
 - Fix Fmi::date_time::LocalDateTime::to_tz()
 
 * Tue Oct 15 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.10.15-1.fmi
-- Fix reace condition in LRUCache
+- Fix race condition in LRUCache
 
 * Fri Oct  4 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.10.4-1.fmi
 - Add static bool member Exception::global_enable_stack_trace
