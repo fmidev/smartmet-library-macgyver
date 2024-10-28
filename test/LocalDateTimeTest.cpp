@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(construct_and_extract_1)
 
 BOOST_AUTO_TEST_CASE(dst_test_1)
 {
-    BOOST_TEST_MESSAGE("Fmi::date_time::LocalDateTime: handling beging of DST)");
+    BOOST_TEST_MESSAGE("Fmi::date_time::LocalDateTime: handling begin of DST)");
     Fmi::date_time::TimeZonePtr tz("Europe/Helsinki");
 
     Fmi::date_time::Date date(2023, 3, 26);
@@ -464,12 +464,15 @@ BOOST_AUTO_TEST_CASE(to_wintertime_1)
 
     int num_err = 0;
     Fmi::date_time::Date date(2024, 10, 27);
+    TimeZonePtr tz_utc("UTC");
     TimeZonePtr tz1("Europe/Helsinki");
 
-    for (int seconds = -10; seconds < 7210; seconds += 10)
+    for (int seconds = -10; seconds < 10810; seconds += 10)
     {
         int expected_seconds = seconds + 3600 * (seconds < 3600 ? 3 : 2);
         Fmi::date_time::DateTime dt1 = Fmi::date_time::DateTime(date, Fmi::date_time::Seconds(seconds));
+        Fmi::date_time::LocalDateTime utc(dt1, tz_utc,
+            Fmi::date_time::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
         Fmi::date_time::LocalDateTime ldt1(dt1, tz1,
             Fmi::date_time::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
@@ -494,6 +497,27 @@ BOOST_AUTO_TEST_CASE(to_wintertime_1)
                 std::cout << "Error: " << dt1 << " --> " << ldt1 << std::endl;
             }
             num_err++;
+        }
+
+        Fmi::date_time::LocalDateTime ldt2;
+        try
+        {
+            ldt2 = utc.to_tz(tz1);
+            if (ldt2.is_special() or (ldt2 != ldt1))
+            {
+                if (num_err < 10)
+                {
+                    std::cout << "Error: " << utc << " --> " << ldt2 << " <=> " << ldt1 << std::endl;
+                }
+                num_err++;
+                continue;
+            }
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << "Error: " << utc << " --> " << ldt2 << " : exception: " << e.what() << std::endl;
+            num_err++;
+            continue;
         }
     }
 
