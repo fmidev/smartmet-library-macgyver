@@ -49,6 +49,9 @@ catch (...)
 {
     auto exception = Fmi::Exception::Trace(BCP, "Failed to map file");
     exception.addParameter("path", path);
+    exception.addParameter("mode", std::to_string(mode));
+    exception.addParameter("length", std::to_string(length));
+    exception.addParameter("offset", std::to_string(offset));
     throw exception;
 }
 
@@ -96,6 +99,9 @@ catch (...)
 {
     auto exception = Fmi::Exception::Trace(BCP, "Failed to open mapped file");
     exception.addParameter("path", path);
+    exception.addParameter("mode", std::to_string(mode));
+    exception.addParameter("length", std::to_string(length));
+    exception.addParameter("offset", std::to_string(offset));
     throw exception;
 }
 
@@ -115,6 +121,9 @@ catch (...)
 {
     auto exception = Fmi::Exception::Trace(BCP, "Failed to open mapped file");
     exception.addParameter("path", path);
+    exception.addParameter("mode", std::to_string(mode));
+    exception.addParameter("length", std::to_string(length));
+    exception.addParameter("offset", std::to_string(offset));
     throw exception;
 }
 
