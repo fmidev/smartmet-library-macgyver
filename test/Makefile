@@ -102,6 +102,8 @@ obj/%.o: %.cpp
 	@mkdir -p obj
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
+obj/CharsetToolTest.o: FLAGS += -Wno-invalid-source-encoding
+
 PostgreSQLConnectionTest: PostgreSQLConnectionTest.conf
 
 %.CompileOnly : %.cpp
