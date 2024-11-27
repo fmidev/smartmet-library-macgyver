@@ -52,7 +52,7 @@ numeric_cast(Source value)
         else if constexpr (std::is_signed<Source>::value && std::is_unsigned<Target>::value) {
             if (value < 0 || std::make_unsigned_t<type_t>(value) > target_max) {
                 throw Fmi::Exception(BCP,
-                    make_range_error(value, 0, target_max, "unsigned target type"));
+                    make_range_error(value, target_min, target_max, "unsigned target type"));
             }
         }
         // General case for other types
