@@ -1,33 +1,48 @@
 #pragma once
 
 #include <iterator>
+#include <limits>
 #include <type_traits>
-#include <boost/type_traits/make_void.hpp>
 
 namespace Fmi
 {
-
-//=============================================================================================
-// Detecting whether type is iterable
-//
-// Source: https://en.cppreference.com/w/cpp/types/void_t
-//
-// Variable template that checks if a type has begin() and end() member functions
-// std::void_t is replaced as it is available begining from C++17
-//
-
-template< typename... Ts >
-using void_t = typename boost::make_void<Ts...>::type;
 
 template <typename T, typename = void>
 struct is_iterable : std::false_type {};
 
 // this gets used only when we can call std::begin() and std::end() on that type
 template <typename T>
-struct is_iterable<T, void_t<decltype(std::begin(std::declval<T&>())),
-                             decltype(std::end(std::declval<T&>())) >
+struct is_iterable<T, std::void_t<decltype(std::begin(std::declval<T&>())),
+                                  decltype(std::end(std::declval<T&>())) >
                   > : std::true_type {};
 
 //=============================================================================================
 
+// Helper struct to check if T is a numeric type (integer or floating point)
+template <typename T>
+struct is_numeric : std::integral_constant<bool,
+    std::is_arithmetic<T>::value && !std::is_same<T, bool>::value> {};
+
+
+
+template <typename Source>
+constexpr typename std::enable_if<std::is_integral_v<Source> && !std::is_same_v<Source, bool>, Source>::type
+lower_limit()
+{
+    return std::numeric_limits<Source>::min();
 }
+
+template <typename Source>
+constexpr typename std::enable_if<std::is_floating_point_v<Source>, Source>::type
+lower_limit()
+{
+    return - std::numeric_limits<Source>::max();
+}
+
+template <typename Source>
+constexpr Source upper_limit()
+{
+    return std::numeric_limits<Source>::max();
+}
+
+}  // namespace Fmi
