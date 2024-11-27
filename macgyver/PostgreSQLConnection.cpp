@@ -1,9 +1,10 @@
 #include "PostgreSQLConnection.h"
 #include "AsyncTask.h"
 #include "Exception.h"
+#include "NumericCast.h"
+#include "StringConversion.h"
 #include "TypeName.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
 #include <algorithm>
@@ -74,7 +75,8 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
           // std::cout << METHOD_NAME << ": field '" << part << "' ignored" << std::endl;
           break;
         case 1:
-          this->*std::get<uint_member_ptr>(it->second) = boost::lexical_cast<unsigned int>(value);
+          this->*std::get<uint_member_ptr>(it->second) =
+            Fmi::numeric_cast<unsigned int>(Fmi::stoul(value));
           break;
         case 2:
           this->*std::get<string_member_ptr>(it->second) = value;
