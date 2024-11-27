@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.10.28
+Version: 24.11.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -129,6 +129,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Nov 27 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.11.27-1.fmi
+- New template method Fmi::numeric_cast<>. Also replace uses of boost::function<>
+
 * Mon Oct 28 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.10.28-1.fmi
 - Fix Fmi::date_time::LocalDateTime::to_tz()
 
