@@ -27,11 +27,9 @@ namespace
 using uint_member_ptr = unsigned int PostgreSQLConnectionOptions::*;
 using string_member_ptr = std::string PostgreSQLConnectionOptions::*;
 
-struct Ignore
-{
-} ignore;
+constexpr std::monostate ignore;
 
-const std::map<std::string, std::variant<Ignore, uint_member_ptr, string_member_ptr> > field_def = {
+const std::map<std::string, std::variant<std::monostate, uint_member_ptr, string_member_ptr> > field_def = {
     {"host", &PostgreSQLConnectionOptions::host},
     {"dbname", &PostgreSQLConnectionOptions::database},
     {"port", &PostgreSQLConnectionOptions::port},
