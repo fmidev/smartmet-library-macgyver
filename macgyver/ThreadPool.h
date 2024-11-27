@@ -7,9 +7,8 @@
 // ======================================================================
 
 #pragma once
-#include <boost/bind/bind.hpp>
-#include <boost/functional.hpp>
 #include <boost/thread.hpp>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <queue>
@@ -19,7 +18,7 @@ namespace Fmi
 {
 namespace ThreadPool
 {
-using Task = boost::function<void()>;
+using Task = std::function<void()>;
 using MutexType = boost::mutex;
 using Lock = boost::unique_lock<MutexType>;
 using ConditionVariableType = boost::condition_variable;
