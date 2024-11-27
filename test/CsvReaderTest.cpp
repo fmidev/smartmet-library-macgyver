@@ -1,10 +1,9 @@
 #include "CsvReader.h"
-#include <boost/bind/bind.hpp>
-#include <boost/lexical_cast.hpp>
+#include "StringConversion.h"
 #include <regression/tframe.h>
 
 using namespace std;
-using namespace boost::placeholders;
+using namespace std::placeholders;
 
 namespace CsvReaderTest
 {
@@ -35,7 +34,7 @@ ostream& operator<<(ostream& os, const TableBuilder& tb)
 template <typename T>
 string tostr(const T& tmp)
 {
-  return boost::lexical_cast<string>(tmp);
+  return Fmi::to_string(tmp);
 }
 
 // ----------------------------------------------------------------------
@@ -43,7 +42,7 @@ string tostr(const T& tmp)
 void trimming()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_01.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_01.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -70,7 +69,7 @@ void trimming()
 void emptyfields()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_02.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_02.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -97,7 +96,7 @@ void emptyfields()
 void quotes()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_03.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_03.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -120,7 +119,7 @@ void quotes()
 void newlines()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_04.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_04.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -137,7 +136,7 @@ void newlines()
 void doublequotes()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_05.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_05.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -166,7 +165,7 @@ void doublequotes()
 void notrimming()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_06.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_06.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -192,7 +191,7 @@ void trimerror1()
 
   try
   {
-    Fmi::CsvReader::read("data/test_07.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+    Fmi::CsvReader::read("data/test_07.csv", std::bind(&TableBuilder::addrow, &tb, _1));
     TEST_FAILED("Should have errored due to undoubled quotes");
   }
   catch (...)
@@ -210,7 +209,7 @@ void trimerror2()
 
   try
   {
-    Fmi::CsvReader::read("data/test_08.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+    Fmi::CsvReader::read("data/test_08.csv", std::bind(&TableBuilder::addrow, &tb, _1));
     TEST_FAILED("Should have errored due to undoubled quotes");
   }
   catch (...)
@@ -226,7 +225,7 @@ void emptyfile()
 {
   TableBuilder tb;
 
-  Fmi::CsvReader::read("data/test_09.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_09.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   if (tb.table.size() != 0)
     TEST_FAILED("File should contain 0 rows, not " + tostr(tb.table.size()));
@@ -239,7 +238,7 @@ void emptyfile()
 void onefield()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_10.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_10.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -258,7 +257,7 @@ void onefield()
 void fourfields()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_11.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_11.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -284,7 +283,7 @@ void emptyrows()
 {
   TableBuilder tb;
 
-  Fmi::CsvReader::read("data/test_12.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_12.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   if (tb.table.size() != 0)
     TEST_FAILED("File should contain 0 rows, not " + tostr(tb.table.size()));
@@ -297,7 +296,7 @@ void emptyrows()
 void onequote()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_13.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_13.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
@@ -316,7 +315,7 @@ void onequote()
 void semicolon()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_14.csv", boost::bind(&TableBuilder::addrow, &tb, _1), ';');
+  Fmi::CsvReader::read("data/test_14.csv", std::bind(&TableBuilder::addrow, &tb, _1), ';');
 
   // cout << tb;
 
@@ -343,7 +342,7 @@ void semicolon()
 void comments()
 {
   TableBuilder tb;
-  Fmi::CsvReader::read("data/test_15.csv", boost::bind(&TableBuilder::addrow, &tb, _1));
+  Fmi::CsvReader::read("data/test_15.csv", std::bind(&TableBuilder::addrow, &tb, _1));
 
   // cout << tb;
 
