@@ -46,19 +46,19 @@ BOOST_AUTO_TEST_CASE(test_with_std_function)
     BOOST_REQUIRE_NO_THROW(result = W("bar", "world"));
     BOOST_CHECK_EQUAL(result, std::string("bar: 'world'"));
 
-    // No function defined for contained type (should throw)
-    BOOST_REQUIRE_THROW(W("baz", "bad"), std::runtime_error);
+    // No function defined for name (should throw)
+    BOOST_REQUIRE_THROW(W("baz", "bad"), Fmi::Exception);
 }
 
 BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector)
 {
     BOOST_TEST_MESSAGE("Testing with std::function and vector");
-    const Fmi::FunctionMap<std::string, const std::string&> W =
-        {
-            {"foo", [](const std::string& x) -> std::string { return "foo: '" + x + "'"; }},
-            {"bar", [](const std::string& x) -> std::string { return "bar: '" + x + "'"; }},
-            {"baz", [](const std::string& x) -> std::string { return "baz: '" + x + "'"; }}
-        };
+    Fmi::FunctionMap<std::string, const std::string&> W;
+
+    W.add("foo", [](const std::string& x) -> std::string { return "foo: '" + x + "'"; })
+     .add("bar", [](const std::string& x) -> std::string { return "bar: '" + x + "'"; })
+     .add("baz", [](const std::string& x) -> std::string { return "baz: '" + x + "'"; });
+
     std::string result;
     BOOST_REQUIRE_NO_THROW(result = W("foo", "hello"));
     BOOST_CHECK_EQUAL(result, std::string("foo: 'hello'"));
@@ -69,10 +69,11 @@ BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector)
 BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector_of_names)
 {
     BOOST_TEST_MESSAGE("Testing with std::function and vector of names");
-    const Fmi::FunctionMap<std::string, const std::string&> W =
-        {
-            {{"foo", "bar", "baz"}, [](const std::string& x) -> std::string { return "foo: '" + x + "'"; }}
-        };
+    Fmi::FunctionMap<std::string, const std::string&> W;
+
+    W.add(
+        {"foo", "bar", "baz"},
+        [](const std::string& x) -> std::string { return "foo: '" + x + "'"; });
     std::string result;
     BOOST_REQUIRE_NO_THROW(result = W("foo", "hello"));
     BOOST_CHECK_EQUAL(result, std::string("foo: 'hello'"));
@@ -80,4 +81,29 @@ BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector_of_names)
     BOOST_CHECK_EQUAL(result, std::string("foo: 'world'"));
     BOOST_REQUIRE_NO_THROW(result = W("baz", "world"));
     BOOST_CHECK_EQUAL(result, std::string("foo: 'world'"));
+}
+
+BOOST_AUTO_TEST_CASE(test_regex_entry)
+{
+    BOOST_TEST_MESSAGE("Testing with std::function and regex");
+    Fmi::FunctionMap<std::string, const std::string&> W;
+
+    W.add("foo", [](const std::string& x) -> std::string { return "foo: '" + x + "'"; })
+     .add("bar", [](const std::string& x) -> std::string { return "bar: '" + x + "'"; })
+     .add("baz", [](const std::string& x) -> std::string { return "baz: '" + x + "'"; })
+     .add("Regex test", std::regex("FOO\\(([^\\)]+)\\)"),
+          [](const std::vector<std::string>& args, const std::string& x) -> std::string
+          {
+            return "regex: '" + args.at(0) + "'";
+          });
+
+    std::string result;
+    BOOST_REQUIRE_NO_THROW(result = W("foo", "hello"));
+    BOOST_CHECK_EQUAL(result, std::string("foo: 'hello'"));
+    BOOST_REQUIRE_NO_THROW(result = W("bar", "world"));
+    BOOST_CHECK_EQUAL(result, std::string("bar: 'world'"));
+    BOOST_REQUIRE_NO_THROW(result = W("baz", "world"));
+    BOOST_CHECK_EQUAL(result, std::string("baz: 'world'"));
+    BOOST_REQUIRE_NO_THROW(result = W("FOO(abc)", "ignored"));
+    BOOST_CHECK_EQUAL(result, std::string("regex: 'abc'"));
 }
