@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.11.27
+Version: 24.12.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -129,6 +129,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Dec  4 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.12.4-1.fmi
+- Add template class FuntionMap<>
+
 * Wed Nov 27 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.11.27-1.fmi
 - New template method Fmi::numeric_cast<>. Also replace uses of boost::function<>
 
