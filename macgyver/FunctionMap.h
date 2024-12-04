@@ -12,8 +12,10 @@ namespace Fmi
     /**
      *  @brief A template class to associate functions with specified names
      *
-     *  It is recommended to use exact match when possible for better performance
-     *  rather than regex matching.
+     *  There are two ways to add functions to the map:
+     *    - providing exact names (recommended if possible for better performance)
+     *    - providing regex patterns for matching names (in this case mached regex groups
+     *      ar passed to the function as argument (type std::vector<std::string>))
      */
     template <typename ValueType, class... ArgumentTypes>
     class FunctionMap
@@ -57,6 +59,11 @@ namespace Fmi
 
         FunctionMap& operator=(const FunctionMap&) = default;
 
+        /**
+         * @brief Add a function with a single name
+         *
+         * One may of course call it several times to add multiple identical functions.
+         */
         FunctionMap& add(
             const std::string& name,
             std::function<ValueType(ArgumentTypes...)> function,
@@ -70,6 +77,9 @@ namespace Fmi
             return *this;
         }
 
+        /**
+         * @brief Add a function with multiple names
+         */
         FunctionMap& add(
             const std::vector<std::string>& names,
             std::function<ValueType(ArgumentTypes...)> function,
@@ -87,6 +97,16 @@ namespace Fmi
             return *this;
         }
 
+        /**
+         * @brief Add a function with a regex pattern for matching names
+         *
+         * @param name The name of the function (used for descriptions only)
+         * @param regex The regex pattern to match against full function name
+         * @param function The function to be called when the regex matches (the first argument
+         *               is a vector of matched regex groups, arguments provided as template
+         *               parameters follow after that)
+         * @param description A description of the function (optional)
+         */
         FunctionMap& add(
             const std::string& name,
             const std::regex& regex,
@@ -164,7 +184,7 @@ namespace Fmi
             }
 
             // Nothing found: report error
-            throw Fmi::Exception(BCP, "No function named '" + name + "'");
+            throw Fmi::Exception(BCP, "'" + name + "'" + " not found in FunctionMap");
         }
         catch (...)
         {
