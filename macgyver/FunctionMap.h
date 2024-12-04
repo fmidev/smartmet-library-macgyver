@@ -2,9 +2,9 @@
 
 #include <functional>
 #include <map>
-#include <regex>
 #include <vector>
 #include <initializer_list>
+#include <boost/regex.hpp>
 #include "Exception.h"
 
 namespace Fmi
@@ -36,12 +36,12 @@ namespace Fmi
         struct RegexEntry
         {
             const std::string name;
-            std::regex regex;
+            boost::regex regex;
             std::function<ValueType(const std::vector<std::string>&, ArgumentTypes...)> function;
             std::string description;
             RegexEntry() = default;
             RegexEntry(const std::string& name,
-                       const std::regex& regex,
+                       const boost::regex& regex,
                        std::function<ValueType(std::vector<std::string>, ArgumentTypes...)> function,
                        const std::string& description)
                 : name(name), regex(regex), function(function), description(description)
@@ -109,7 +109,7 @@ namespace Fmi
          */
         FunctionMap& add(
             const std::string& name,
-            const std::regex& regex,
+            const boost::regex& regex,
             std::function<ValueType(const std::vector<std::string>&, ArgumentTypes...)> function,
             const std::string& description = "")
         {
@@ -153,7 +153,7 @@ namespace Fmi
 
             for (const auto& entry : m_regex_entries)
             {
-                if (std::regex_match(name, entry.regex))
+                if (boost::regex_match(name, entry.regex))
                     return true;
             }
 
@@ -171,8 +171,8 @@ namespace Fmi
             // Try provided regex (exact regex match, not substring match)
             for (const auto& entry : m_regex_entries)
             {
-                std::smatch pieces_match;
-                if (std::regex_match(name, pieces_match, entry.regex))
+                boost::smatch pieces_match;
+                if (boost::regex_match(name, pieces_match, entry.regex))
                 {
                     std::vector<std::string> r_args;
                     for (size_t i = 1; i < pieces_match.size(); ++i)

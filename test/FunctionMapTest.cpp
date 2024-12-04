@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_with_std_function)
 
 BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector)
 {
-    BOOST_TEST_MESSAGE("Testing with std::function and vector");
+    BOOST_TEST_MESSAGE("Testing with exact names");
     Fmi::FunctionMap<std::string, const std::string&> W;
 
     W.add("foo", [](const std::string& x) -> std::string { return "foo: '" + x + "'"; })
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector)
 
 BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector_of_names)
 {
-    BOOST_TEST_MESSAGE("Testing with std::function and vector of names");
+    BOOST_TEST_MESSAGE("Testing with vector of names");
     Fmi::FunctionMap<std::string, const std::string&> W;
 
     W.add(
@@ -85,13 +85,13 @@ BOOST_AUTO_TEST_CASE(test_with_std_function_and_vector_of_names)
 
 BOOST_AUTO_TEST_CASE(test_regex_entry)
 {
-    BOOST_TEST_MESSAGE("Testing with std::function and regex");
+    BOOST_TEST_MESSAGE("Testing with exact names and boost::regex");
     Fmi::FunctionMap<std::string, const std::string&> W;
 
     W.add("foo", [](const std::string& x) -> std::string { return "foo: '" + x + "'"; })
      .add("bar", [](const std::string& x) -> std::string { return "bar: '" + x + "'"; })
      .add("baz", [](const std::string& x) -> std::string { return "baz: '" + x + "'"; })
-     .add("Regex test", std::regex("FOO\\(([^\\)]+)\\)"),
+     .add("Regex test", boost::regex("FOO\\(([^\\)]+)\\)"),
           [](const std::vector<std::string>& args, const std::string& x) -> std::string
           {
             return "regex: '" + args.at(0) + "'";
