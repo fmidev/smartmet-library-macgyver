@@ -175,7 +175,7 @@ static void prepare_test_data()
                   Fmi::DateTime(Fmi::Date(2008, 5, 16), Fmi::TimeDuration(1, 35, 59)),
                   Fmi::DateTime(Fmi::Date(2008, 7, 29), Fmi::TimeDuration(0, 23, 43)),
                   Fmi::TimeDuration(13, 8, 15),
-                  Fmi::TimeDuration(22, 24, 1)));
+                  Fmi::TimeDuration(24, 0, 0)));
 
   // ... and sets in July
   test_data.push_back(
@@ -192,7 +192,7 @@ static void prepare_test_data()
                   Fmi::DateTime(Fmi::Date(2008, 7, 28), Fmi::TimeDuration(2, 0, 4)),
                   Fmi::DateTime(Fmi::Date(2008, 7, 29), Fmi::TimeDuration(0, 23, 43)),
                   Fmi::TimeDuration(13, 18, 24),
-                  Fmi::TimeDuration(21, 59, 56)));
+                  Fmi::TimeDuration(22, 23, 39)));
 
   // Sun sets for winter
   test_data.push_back(
