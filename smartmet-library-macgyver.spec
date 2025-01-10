@@ -14,8 +14,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 24.12.4
-Release: 2%{?dist}.fmi
+Version: 25.1.9
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -32,7 +32,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
 BuildRequires: smartmet-timezones >= 24.5.27
-BuildRequires: smartmet-utils-devel >= 24.8.7
+BuildRequires: smartmet-utils-devel >= 24.12.10
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -70,7 +70,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 24.5.27
-#TestRequires: smartmet-utils-devel >= 24.8.7
+#TestRequires: smartmet-utils-devel >= 24.12.10
 #TestRequires: smartmet-test-db
 
 %if 0%{?rhel} && 0%{rhel} >= 9
@@ -118,7 +118,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 24.8.7
+Requires: smartmet-utils-devel >= 24.12.10
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -129,6 +129,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jan  9 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.1.9-1.fmi
+- Revised daylength calculation to avoid timezone issues
+
 * Wed Dec  4 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.12.4-2.fmi
 - FunctionMap<>: use boost::regex instead of std::regex
 

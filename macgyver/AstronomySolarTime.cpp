@@ -526,25 +526,77 @@ namespace Astronomy
  * Calculate daylength. The code assumes that DST changes do not occur
  * at the given timezone during polar nights or midnight sun events
  * so that a day is either 0 or 24 hours long in local time.
+ *
+ * Possible cases with sunrise (R) and sunset (S) with respect to
+ * solar noon when divided into separate days from midnight are listed
+ * below. Solar noon is always in the current day, since by definition
+ * the sun may not be visible at solar noon. Adjacent sunrises and
+ * sunsets do not necessarily happen during the same day.
+ *
+ *  -N  -1  0  +1  +N days
+ *
+ *  R |   | NS|   |       ==> S - prev midnight        (2)
+ *  R |   | N |S  |       ==> 24
+ *  R |   | N |   |S      ==> 24
+ *    | R | NS|   |       ==> S - R                    (1)
+ *    | R | N |S  |       ==> 24
+ *    | R | N |   |S      ==> 24
+ *    |   |RNS|   |       ==> S - R                    (1)  <--- normal case
+ *    |   |RN |S  |       ==> S - R                    (1)
+ *    |   |RN |   |S      ==> next midnight - R        (3)
+ *
+ *  S |   | NR|   |       ==> next midnight - R        (b)
+ *  S |   | N |R  |       ==> 0                        (a)
+ *  S |   | N |   |R      ==> 0                        (a)
+ *    | S | NR|   |       ==> next midnight - R        (b)
+ *    | S | N |R  |       ==> 0                        (a)
+ *    | S | N |   |R      ==> 0                        (a)
+ *    |   |SNR|   |       ==> next midnight - R        (b)
+ *    |   |SN |R  |       ==> 0                        (a)
+ *    |   |SN |   |R      ==> 0                        (a)
+ *
  */
 
 Fmi::TimeDuration solar_time_t::daylength() const
 {
   try
   {
-    if (sunrise_today())
-    {
-      if (sunset_today())
-        return sunset - sunrise;
+    Fmi::TimeDuration td = sunset - sunrise;
+    auto diff = td.total_seconds();
 
-      return Fmi::Hours(24) - sunrise.local_time().time_of_day();
-    }
-    if (sunset_today())
-      return sunset.local_time().time_of_day();
-    if (polar_night())
+    if (diff < 0)
       return Fmi::Seconds(0);
 
+    if (diff > 24 * 3600)
+      return Fmi::Hours(24);
+
+    return Fmi::Seconds(diff);
+
+#if 0
+    if (diff < 0)  // just two possibilities in the table above
+    {
+      diff = (noon - sunrise + Fmi::Hours(12)).total_seconds();  // next midnight - sunrise
+      if (diff < 0)
+        return Fmi::Seconds(0);   // case (a)
+      return Fmi::Seconds(diff);  // case (b)
+    }
+
+    // 30 hours accounts for possible slightly longer day lengths than 24 hours
+    if (diff < 36 * 3600)
+      return Fmi::Seconds(diff);  // case (1)
+
+    // This logic does not really work since midnight and solar noon may differ more than one hour from respective local times due to DST changes.
+    
+    diff = (sunset - noon - Fmi::Hours(12)).total_seconds();  // sunset - prev midnight
+    if (diff < 24 * 3600)
+      return Fmi::Seconds(diff);  // case (2)
+
+    diff = (noon - sunrise).total_seconds();
+    if (diff < 12 * 3600)
+      return noon + Fmi::Hours(12) - sunrise;  // case (3) next midnight - sunrise
+
     return Fmi::Hours(24);
+#endif
   }
   catch (...)
   {
