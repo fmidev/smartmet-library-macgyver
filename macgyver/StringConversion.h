@@ -23,6 +23,8 @@ std::string to_string(unsigned int value);
 std::string to_string(unsigned long value);
 std::string to_string(float value);
 std::string to_string(double value);
+inline std::string to_string(const char* value) { return std::string(value); }
+inline std::string to_string(const unsigned char* value) { return std::string(reinterpret_cast<const char*>(value)); }
 #if defined(_WIN32) || defined(WIN32)
 std::string to_string(size_t value);
 std::string to_string(time_t value);
