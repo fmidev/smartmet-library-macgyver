@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.1.9
+Version: 25.2.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -129,6 +129,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Feb  5 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.2.5-1.fmi
+- Added Join.h to ease merging containers of objects into a string list
+
 * Thu Jan  9 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.1.9-1.fmi
 - Revised daylength calculation to avoid timezone issues
 
