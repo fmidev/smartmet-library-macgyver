@@ -30,6 +30,20 @@ BOOST_AUTO_TEST_CASE(join_vector_of_strings)
   BOOST_CHECK_EQUAL(Fmi::join(two_elements), "foo,bar");
 }
 
+BOOST_AUTO_TEST_CASE(join_vector_of_ints)
+{
+  BOOST_TEST_MESSAGE("Fmi::join std::vector<int>");
+
+  std::vector<int> empty_vector = {};
+  BOOST_CHECK_EQUAL(Fmi::join(empty_vector), "");
+
+  std::vector<int> one_element = {1};
+  BOOST_CHECK_EQUAL(Fmi::join(one_element), "1");
+
+  std::vector<int> two_elements = {2, 1};
+  BOOST_CHECK_EQUAL(Fmi::join(two_elements), "2,1");
+}
+
 BOOST_AUTO_TEST_CASE(join_with_separator)
 {
   BOOST_TEST_MESSAGE("Fmi::join std::vector<std::string> with '; '");
