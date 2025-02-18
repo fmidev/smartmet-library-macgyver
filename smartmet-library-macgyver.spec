@@ -32,7 +32,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
 BuildRequires: smartmet-timezones >= 24.5.27
-BuildRequires: smartmet-utils-devel >= 24.12.10
+BuildRequires: smartmet-utils-devel >= 25.2.18
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -70,7 +70,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 24.5.27
-#TestRequires: smartmet-utils-devel >= 24.12.10
+#TestRequires: smartmet-utils-devel >= 25.2.18
 #TestRequires: smartmet-test-db
 
 %if 0%{?rhel} && 0%{rhel} >= 9
@@ -118,7 +118,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 24.12.10
+Requires: smartmet-utils-devel >= 25.2.18
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
