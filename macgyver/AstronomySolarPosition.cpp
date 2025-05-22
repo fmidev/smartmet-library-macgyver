@@ -36,13 +36,19 @@ namespace Fmi
 {
 namespace Astronomy
 {
+
+bool solar_position_t::dark() const
+{
+  return (elevation < -0.0145386);
+}
+
 /*
  * Calculate position of Sun, as seen from a location on Earth
  *
  * 'utc':        Time in UTC
  * 'lat', 'lon_e': Position on Earth
  */
-    solar_position_t solar_position(const Fmi::DateTime& utc, double lon_e, double lat)
+solar_position_t solar_position(const Fmi::DateTime& utc, double lon_e, double lat)
 {
   try
   {

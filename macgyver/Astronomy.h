@@ -43,7 +43,7 @@ struct solar_position_t
   const double elevation;    // solar elevation
 
   solar_position_t(double a, double d, double e) : azimuth(a), declination(d), elevation(e) {}
-  bool dark() const { return (elevation < -0.0145386); }
+  bool dark() const;
 };
 
 /*
@@ -136,9 +136,7 @@ std::ostream& operator<<(std::ostream&, const lunar_time_t& lt);
 
 // Actual functions
 
-solar_position_t solar_position(const Fmi::LocalDateTime& ldt,
-                                double lon,
-                                double lat);
+solar_position_t solar_position(const Fmi::LocalDateTime& ldt, double lon, double lat);
 
 solar_position_t solar_position(const DateTime& utc, double lon, double lat);
 
