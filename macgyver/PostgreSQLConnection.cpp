@@ -29,17 +29,17 @@ using string_member_ptr = std::string PostgreSQLConnectionOptions::*;
 
 constexpr std::monostate ignore;
 
-const std::map<std::string, std::variant<std::monostate, uint_member_ptr, string_member_ptr> > field_def = {
-    {"host", &PostgreSQLConnectionOptions::host},
-    {"dbname", &PostgreSQLConnectionOptions::database},
-    {"port", &PostgreSQLConnectionOptions::port},
-    {"user", &PostgreSQLConnectionOptions::username},
-    {"password", &PostgreSQLConnectionOptions::password},
-    {"client_encoding", &PostgreSQLConnectionOptions::encoding},
-    {"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
-    // FIXME: add parameters we ignore
-    ,
-    {"options", ignore}};
+const std::map<std::string, std::variant<std::monostate, uint_member_ptr, string_member_ptr> >
+    field_def = {{"host", &PostgreSQLConnectionOptions::host},
+                 {"dbname", &PostgreSQLConnectionOptions::database},
+                 {"port", &PostgreSQLConnectionOptions::port},
+                 {"user", &PostgreSQLConnectionOptions::username},
+                 {"password", &PostgreSQLConnectionOptions::password},
+                 {"client_encoding", &PostgreSQLConnectionOptions::encoding},
+                 {"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
+                 // FIXME: add parameters we ignore
+                 ,
+                 {"options", ignore}};
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -74,7 +74,7 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
           break;
         case 1:
           this->*std::get<uint_member_ptr>(it->second) =
-            Fmi::numeric_cast<unsigned int>(Fmi::stoul(value));
+              Fmi::numeric_cast<unsigned int>(Fmi::stoul(value));
           break;
         case 2:
           this->*std::get<string_member_ptr>(it->second) = value;
@@ -444,8 +444,7 @@ class PostgreSQLConnection::Impl
         // Try reopening the connection only once not to flood the network
         if (conn->is_open())
         {
-          throw Fmi::Exception(BCP,
-                               std::string("Execution of SQL statement failed: ").append(e.what()));
+          throw Fmi::Exception(BCP, "Execution of SQL statement failed").addDetail(e.what());
         }
         else
         {
@@ -463,8 +462,7 @@ class PostgreSQLConnection::Impl
             }
             catch (const std::exception& e2)
             {
-              throw Fmi::Exception(
-                  BCP, std::string("Execution of SQL statement failed: ").append(e2.what()));
+              throw Fmi::Exception(BCP, "Execution of SQL statement failed").addDetail(e2.what());
             }
           }
           else
@@ -770,7 +768,7 @@ void PostgreSQLConnection::Transaction::commit()
       {
         // If we get here, Xaction has been rolled back
         conn.endTransaction();
-        throw Fmi::Exception(BCP, std::string("Commiting transaction failed: ").append(e.what()));
+        throw Fmi::Exception(BCP, "Commiting transaction failed").addDetail(e.what());
       }
     }
     else
