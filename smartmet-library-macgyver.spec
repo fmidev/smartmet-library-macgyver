@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.5.22
+Version: 25.5.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -129,6 +129,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri May 30 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.30-1.fmi
+- Modified database exception messages to be more secure
+
 * Thu May 22 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.22-1.fmi
 - Hide implementation of dark() to enable easier changes to the elevation angle
 
