@@ -26,7 +26,6 @@ BuildRequires: %{smartmet_boost}-devel
 BuildRequires: ctpp2-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: gcc-c++
-BuildRequires: imake
 BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
