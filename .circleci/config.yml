@@ -96,9 +96,9 @@ jobs:
       - store_artifacts:
           path: /dist
           destination: dist/
-  upload-rhel8:
+  upload-rhel10:
     docker:
-      # This job uploads the artifacts to S3
+      # No need to use smartmet-cibase-10
       - image: fmidev/smartmet-cibase-8:latest
     steps:
       - attach_workspace:
