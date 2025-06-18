@@ -14,7 +14,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.5.30
+Version: 25.6.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -128,6 +128,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jun 18 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.6.18-1.fmi
+- Report time of slow SQL queries
+
 * Fri May 30 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.30-1.fmi
 - Modified database exception messages to be more secure
 
