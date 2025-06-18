@@ -403,7 +403,8 @@ class PostgreSQLConnection::Impl
       {
         auto sql = theSQLStatement;
         std::replace(sql.begin(), sql.end(), '\n', ' ');
-        std::cerr << fmt::format("Slow {}:{} query took {} seconds, limit is {}. SQL: {}\n",
+        std::cerr << fmt::format("{} Slow {}:{} query took {} seconds, limit is {}. SQL: {}\n",
+                                 Fmi::to_simple_string(Fmi::SecondClock::local_time()),
                                  itsConnectionOptions.host,
                                  itsConnectionOptions.database,
                                  duration.count(),
