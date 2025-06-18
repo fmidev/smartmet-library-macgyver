@@ -9,8 +9,15 @@
 %define smartmet_boost boost
 %endif
 
+%if 0%{?rhel} && 0%{rhel} <= 9
 %define smartmet_fmt_min 11.0.1
 %define smartmet_fmt_max 12.0.0
+%define smartmet_fmt fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
+%define smartmet_fmt_devel fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
+%else
+%define smartmet_fmt fmt
+%define smartmet_fmt_devel fmt-devel
+%endif
 
 Summary: macgyver library
 Name: %{SPECNAME}
@@ -24,7 +31,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: ctpp2-devel
-BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
+BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: gcc-c++
 BuildRequires: libicu-devel
 BuildRequires: make
@@ -42,7 +49,7 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: double-conversion
 Requires: ctpp2
-Requires: fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
+Requires: %{smartmet_fmt_devel}
 Requires: libicu >= 50.2
 
 %if 0%{?rhel} && 0%{rhel} == 8
@@ -69,7 +76,7 @@ BuildRequires: libpqxx-devel
 
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: %{smartmet_boost}-filesystem
-#TestRequires: fmt-devel
+#TestRequires: %{smartmet_fmt_devel}
 #TestRequires: gcc-c++
 #TestRequires: make
 #TestRequires: postgresql15-libs
