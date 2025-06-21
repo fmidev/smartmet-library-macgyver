@@ -1,6 +1,6 @@
 #include "StringConversion.h"
 #include "Exception.h"
-#include <boost/numeric/conversion/cast.hpp>               // numeric_cast
+#include "NumericCast.h"
 #include <boost/spirit/include/qi.hpp>
 #include <fmt/format.h>
 #include <fmt/printf.h>
@@ -229,7 +229,7 @@ std::optional<int> stoi_opt(const std::string& str)
     auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
       if (begin == end)
-        return boost::numeric_cast<int>(result);
+        return Fmi::numeric_cast<int>(result);
     return {};
   }
   catch (...)
@@ -337,7 +337,7 @@ std::optional<float> stof_opt(const std::string& str)
       if (begin == end)
       {
         if (std::isfinite(result))
-          return boost::numeric_cast<float>(result);
+          return Fmi::numeric_cast<float>(result);
 
         throw Fmi::Exception(BCP, "Infinite numbers are not allowed: '" + str + "' in Fmi::stof");
       }
