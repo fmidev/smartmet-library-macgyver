@@ -151,4 +151,17 @@ std::size_t hash(const T& obj1, Ts &&... ts)
   return val;
 }
 
+template <typename... Ts>
+void hash_combine(std::size_t& hash, Ts &&... ts)
+{
+  ([&]{ hash_combine(hash, hash_value(ts)); }(), ...);
+}
+
+template <typename T>
+typename std::enable_if<std::is_same<std::size_t, decltype(std::declval<T>().HashValue())>::value, std::size_t>::type
+hash_value(const T& obj)
+{
+  return obj.HashValue();
+}
+
 }  // namespace Fmi
