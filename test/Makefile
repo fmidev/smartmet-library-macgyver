@@ -103,6 +103,7 @@ obj/%.o: %.cpp
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
 obj/CharsetToolTest.o: FLAGS += -Wno-invalid-source-encoding
+obj/StringConversionTest.o: FLAGS += -Wno-enum-constexpr-conversion
 
 PostgreSQLConnectionTest: PostgreSQLConnectionTest.conf
 
