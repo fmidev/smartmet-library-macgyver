@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(variadic_hash_template_3)
   Fmi::hash_combine(hash1, Fmi::hash_value(opt_i2));
 
   // Case when one of hashes is already calculated (e.g. returned of method call of some class)
-  Fmi::hash_combine(hash2, vec, i, opt_i1, opt_i2);
+  Fmi::hash_merge(hash2, vec, i, opt_i1, opt_i2);
   BOOST_CHECK_EQUAL(hash1, hash2);
 }
 

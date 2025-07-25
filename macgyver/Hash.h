@@ -152,7 +152,7 @@ std::size_t hash(const T& obj1, Ts &&... ts)
 }
 
 template <typename... Ts>
-void hash_combine(std::size_t& hash, Ts &&... ts)
+void hash_merge(std::size_t& hash, Ts &&... ts)
 {
   ([&]{ hash_combine(hash, hash_value(ts)); }(), ...);
 }
