@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.6.19
+Version: 25.7.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Jul 25 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.7.25-1.fmi
+- Hash value calculation improvements
+
 * Thu Jun 19 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.6.19-1.fmi
 - Add initial support for RHEL10
 
