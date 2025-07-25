@@ -103,14 +103,47 @@ BOOST_AUTO_TEST_CASE(variadic_hash_template_3)
 
 namespace
 {
-  struct TestHashable
+  struct TestHashable1
   {
     std::string name;
     int value;
 
-    TestHashable(const std::string& n, int v) : name(n), value(v) {}
+    TestHashable1(const std::string& n, int v) : name(n), value(v) {}
 
     std::size_t HashValue() const
+    {
+      return Fmi::hash(name, value);
+    }
+  };
+
+  struct TestHashable2
+  {
+    std::string name;
+    int value;
+
+    TestHashable2(const std::string& n, int v) : name(n), value(v) {}
+
+    std::size_t hashValue() const
+    {
+      return Fmi::hash(name, value);
+    }
+
+    std::size_t hash_value() const
+    {
+      abort();
+      // This method should not be called, it is here to test
+      // that hash_value() is not used and also does not cause ambiguity
+    }
+  };
+
+  struct TestHashable3
+  {
+    std::string name;
+    int value;
+
+    TestHashable3(const std::string& n, int v) : name(n), value(v) {}
+
+    std::size_t hash_value() const
     {
       return Fmi::hash(name, value);
     }
@@ -123,10 +156,16 @@ BOOST_AUTO_TEST_CASE(hashable)
 
   const std::string name1 = "Test";
   const int value1 = 42;
-  TestHashable obj1(name1, value1);
+  TestHashable1 obj1(name1, value1);
+  TestHashable2 obj2(name1, value1);
+  TestHashable3 obj3(name1, value1);
 
   std::size_t hash1 = Fmi::hash(name1, value1);
   std::size_t hash2 = Fmi::hash_value(obj1);
+  std::size_t hash3 = Fmi::hash_value(obj2);
+  std::size_t hash4 = Fmi::hash_value(obj3);
 
   BOOST_CHECK_EQUAL(hash1, hash2);
+  BOOST_CHECK_EQUAL(hash1, hash3);
+  BOOST_CHECK_EQUAL(hash1, hash4);
 }

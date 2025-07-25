@@ -158,30 +158,54 @@ void hash_merge(std::size_t& hash, Ts &&... ts)
 }
 
 // Objects in smartmet* packages may have methods for calculating hash values with names
-// HashValue, hashValue or hash_value. Implement Fmi::hash_value for these. Handle correctly
-// cases when more than one of these methods which all return std::size_t is available
-// (avoid ambiguity).
+// HashValue, hashValue or hash_value. Implement Fmi::hash_value for these. Presence of several
+// methods for calculating hash values will cause ambiguity when using Fmi::hash_value.
+
+namespace detail
+{
+  // Trait hashValue()
+  template <typename, typename = void>
+  struct has_hashValue : std::false_type {};
+
+  template <typename T>
+  struct has_hashValue<T, std::void_t<decltype(std::declval<const T&>().hashValue())>>
+    : std::is_same<decltype(std::declval<const T&>().hashValue()), std::size_t> {};
+
+  // Trait HashValue()
+  template <typename, typename = void>
+  struct has_HashValue : std::false_type {};
+
+  template <typename T>
+  struct has_HashValue<T, std::void_t<decltype(std::declval<const T&>().HashValue())>>
+    : std::is_same<decltype(std::declval<const T&>().HashValue()), std::size_t> {};
+
+  // Trait hash_value()
+  template <typename, typename = void>
+  struct has_hash_value : std::false_type {};
+
+  template <typename T>
+  struct has_hash_value<T, std::void_t<decltype(std::declval<const T&>().hash_value())>>
+    : std::is_same<decltype(std::declval<const T&>().hash_value()), std::size_t> {};
+}
+
 template <typename T>
-typename std::enable_if<std::is_same<std::size_t, decltype(std::declval<T>().HashValue())>::value, std::size_t>::type
+typename std::enable_if<detail::has_HashValue<T>::value, std::size_t>::type
 hash_value(const T& obj)
 {
   return obj.HashValue();
 }
 
 template <typename T>
-typename std::enable_if<std::is_same<std::size_t, decltype(std::declval<T>().hashValue())>::value
-                        && !std::is_same<std::size_t, decltype(std::declval<T>().HashValue())>::value,
-         std::size_t>::type
+typename std::enable_if<detail::has_hashValue<T>::value && !detail::has_HashValue<T>::value,
+           std::size_t>::type
 hash_value(const T& obj)
 {
   return obj.hashValue();
 }
 
 template <typename T>
-typename std::enable_if<std::is_same<std::size_t, decltype(std::declval<T>().hash_value())>::value
-                        && !std::is_same<std::size_t, decltype(std::declval<T>().HashValue())>::value
-                        && !std::is_same<std::size_t, decltype(std::declval<T>().hashValue())>::value,
-           std::size_t>::type
+typename std::enable_if<detail::has_hash_value<T>::value && !detail::has_HashValue<T>::value &&
+           !detail::has_hashValue<T>::value, std::size_t>::type
 hash_value(const T& obj)
 {
   return obj.hash_value();
