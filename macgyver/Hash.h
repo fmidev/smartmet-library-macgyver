@@ -168,9 +168,7 @@ void hash_merge(std::size_t& hash, Ts &&... ts)
 }
 
 // Objects in smartmet* packages may have methods for calculating hash values with names
-// HashValue, hashValue or hash_value. Implement Fmi::hash_value for these. Presence of several
-// methods for calculating hash values will not cause ambiguity when using Fmi::hash_value
-// (exactly one ofthem will be selected by SFINAE).
+// HashValue, hashValue or hash_value. Implement Fmi::hash_value for these.
 
 namespace detail
 {
