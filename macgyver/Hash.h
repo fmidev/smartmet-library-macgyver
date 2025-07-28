@@ -2,6 +2,7 @@
 #include "LocalDateTime.h"
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+#include <array>
 #include <functional>
 #include <list>
 #include <map>
@@ -140,6 +141,15 @@ inline std::size_t hash_value(const std::set<T>& objs)
   std::size_t hash = 9999999999;  // empty set value
   for (const auto& obj : objs)
     hash_combine(hash, hash_value(obj));
+  return hash;
+}
+
+template <typename T, std::size_t N>
+inline std::size_t hash_value(const std::array<T, N>& arr)
+{
+  std::size_t hash = 54241748134;
+  for (const auto& elem : arr)
+    hash_combine(hash, hash_value(elem));
   return hash;
 }
 

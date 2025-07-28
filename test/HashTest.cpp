@@ -33,6 +33,17 @@ BOOST_AUTO_TEST_CASE(hash_value)
   BOOST_CHECK_EQUAL(15516417016181236671UL, Fmi::hash_value(2));
 }
 
+BOOST_AUTO_TEST_CASE(array_hash)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::hash_value()");
+
+  std::array<int, 3> arr = {1, 2, 3};
+  std::size_t hash1 = 54241748134;
+  Fmi::hash_merge(hash1, arr[0], arr[1], arr[2]);
+  std::size_t hash2 = Fmi::hash_value(arr);
+  BOOST_CHECK_EQUAL(hash1, hash2);
+}
+
 BOOST_AUTO_TEST_CASE(hash_combine)
 {
   BOOST_TEST_MESSAGE(" + Fmi::hash_combine()");
