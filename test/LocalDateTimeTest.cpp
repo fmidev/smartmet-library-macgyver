@@ -574,6 +574,43 @@ BOOST_AUTO_TEST_CASE(to_wintertime_2)
     BOOST_REQUIRE_EQUAL(num_err, 0);
 }
 
+BOOST_AUTO_TEST_CASE(compare_1)
+{
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: compare (same time zone)");
+
+    Fmi::date_time::Date date(2024, 10, 27);
+    TimeZonePtr tz1("Europe/Helsinki");
+
+    Fmi::date_time::LocalDateTime ldt1(date, Fmi::date_time::seconds(3600), tz1);
+
+    BOOST_CHECK_EQUAL(ldt1, ldt1);
+    BOOST_CHECK_LT(ldt1, ldt1 + Fmi::date_time::seconds(1));
+    BOOST_CHECK_GT(ldt1 + Fmi::date_time::seconds(1), ldt1);
+}
+
+BOOST_AUTO_TEST_CASE(compare_2)
+{
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: compare (different time zones)");
+
+    Fmi::date_time::Date date(2024, 10, 27);
+    TimeZonePtr tz1("Europe/Helsinki");
+    TimeZonePtr tz2("Europe/Stockholm");
+
+    Fmi::date_time::LocalDateTime ldt1(date, Fmi::date_time::seconds(7200), tz1);
+    Fmi::date_time::LocalDateTime ldt2(date, Fmi::date_time::seconds(3600), tz2);
+
+    BOOST_CHECK_EQUAL(ldt1, ldt2);
+    BOOST_CHECK_LT(ldt1, ldt2 + Fmi::date_time::seconds(1));
+    BOOST_CHECK_GT(ldt2 + Fmi::date_time::seconds(1), ldt1);
+    BOOST_CHECK_LT(ldt2, ldt1 + Fmi::date_time::seconds(1));
+    BOOST_CHECK_GT(ldt1 + Fmi::date_time::seconds(1), ldt2);
+}
+
+
 BOOST_AUTO_TEST_CASE(utc_zone_detection)
 {
     using namespace Fmi::date_time;
