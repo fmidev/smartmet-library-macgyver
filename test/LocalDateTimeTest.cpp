@@ -11,6 +11,7 @@
 #include "DebugTools.h"
 #include <boost/test/included/unit_test.hpp>
 #include <algorithm>
+#include <random>
 
 #include <boost/date_time/local_time/local_time.hpp>
 
@@ -610,6 +611,59 @@ BOOST_AUTO_TEST_CASE(compare_2)
     BOOST_CHECK_GT(ldt1 + Fmi::date_time::seconds(1), ldt2);
 }
 
+BOOST_AUTO_TEST_CASE(timing_1)
+{
+    constexpr const std::size_t size = 1000000;
+
+    using namespace Fmi::date_time;
+
+    BOOST_TEST_MESSAGE("Fmi::date_time::LocalDateTime: timing test for effectiveness");
+    BOOST_CHECK(true);  // We are interested how long it takes
+
+    std::mt19937 rng;
+    std::uniform_int_distribution<int> dist(1, 1000);
+
+    TimeZonePtr tz1("Europe/Helsinki");
+    Date date(2024, 10, 27);
+    TimeDuration time(2, 59, 59);
+    DateTime dt1(date, time);                     // 02:59:59
+    LocalDateTime ldt1(dt1.date(), dt1.time_of_day(), tz1);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    std::vector<LocalDateTime> v1;
+    for (int i = 0; i < size; ++i)
+    {
+        ldt1.advance(seconds(1));
+        v1.push_back(ldt1);
+    }
+    std::shuffle(v1.begin(), v1.end(), rng);
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+    BOOST_TEST_MESSAGE("Test data created in " + std::to_string(duration) + " ms");
+
+    t1 = std::chrono::high_resolution_clock::now();
+    std::map<LocalDateTime, int> m1;
+    std::transform(v1.begin(), v1.end(), std::inserter(m1, m1.end()),
+        [](const LocalDateTime& ldt) { return std::make_pair(ldt, 0); });
+    t2 = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+    BOOST_TEST_MESSAGE("Copied to std::map in " + std::to_string(duration) + " ms");
+
+    std::shuffle(v1.begin(), v1.end(), rng);
+    for (int i = 0; i < 10; i++)
+    {
+        t1 = std::chrono::high_resolution_clock::now();
+        for (const auto& t : v1)
+        {
+            m1.at(t)++;
+        }
+        t2 = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        BOOST_TEST_MESSAGE("Map access time: " + std::to_string(duration) + " ms");
+    }
+}
 
 BOOST_AUTO_TEST_CASE(utc_zone_detection)
 {
