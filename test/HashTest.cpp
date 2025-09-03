@@ -25,12 +25,12 @@ BOOST_AUTO_TEST_CASE(hash_value)
 {
   BOOST_TEST_MESSAGE(" + Fmi::hash_value()");
 
-  // We excpect all results except zero to be roughly 64 bits in size and greatly different
-  BOOST_CHECK_EQUAL(0, Fmi::hash_value(false));
-  BOOST_CHECK_EQUAL(0, Fmi::hash_value(0));
-  BOOST_CHECK_EQUAL(12994781566227106604UL, Fmi::hash_value(true));
-  BOOST_CHECK_EQUAL(12994781566227106604UL, Fmi::hash_value(1));
-  BOOST_CHECK_EQUAL(4233148493373801447UL, Fmi::hash_value(2));
+  // We excpect all results to be roughly 64 bits in size and greatly different
+  BOOST_CHECK_EQUAL(5650585516096373764UL, Fmi::hash_value(false));
+  BOOST_CHECK_EQUAL(5650585516096373764UL, Fmi::hash_value(0));
+  BOOST_CHECK_EQUAL(11755695917061617349UL, Fmi::hash_value(true));
+  BOOST_CHECK_EQUAL(11755695917061617349UL, Fmi::hash_value(1));
+  BOOST_CHECK_EQUAL(14907161335529820101UL, Fmi::hash_value(2));
 }
 
 BOOST_AUTO_TEST_CASE(array_hash)
@@ -50,11 +50,11 @@ BOOST_AUTO_TEST_CASE(hash_combine)
 
   std::size_t hash = 0;
   Fmi::hash_combine(hash, Fmi::hash_value(false));
-  BOOST_CHECK_EQUAL(8769526909050562127UL, hash);
+  BOOST_CHECK_EQUAL(17566711995980968168UL, hash);
 
   hash = 0;
   Fmi::hash_combine(hash, Fmi::hash_value(true));
-  BOOST_CHECK_EQUAL(7735385641101645953UL, hash);
+  BOOST_CHECK_EQUAL(924864021926404432UL, hash);
 }
 
 BOOST_AUTO_TEST_CASE(hash_merge)
@@ -63,13 +63,12 @@ BOOST_AUTO_TEST_CASE(hash_merge)
 
   std::size_t hash = 0;
   Fmi::hash_merge(hash, false);
-  BOOST_CHECK_EQUAL(8769526909050562127UL, hash);
+  BOOST_CHECK_EQUAL(17566711995980968168UL, hash);
 
   hash = 0;
   Fmi::hash_merge(hash, true);
-  BOOST_CHECK_EQUAL(7735385641101645953UL, hash);
+  BOOST_CHECK_EQUAL(924864021926404432UL, hash);
 }
-
 
 BOOST_AUTO_TEST_CASE(variadic_hash_template_1)
 {
@@ -128,52 +127,43 @@ BOOST_AUTO_TEST_CASE(variadic_hash_template_3)
 
 namespace
 {
-  struct TestHashable1
+struct TestHashable1
+{
+  std::string name;
+  int value;
+
+  TestHashable1(const std::string& n, int v) : name(n), value(v) {}
+
+  std::size_t HashValue() const { return Fmi::hash(name, value); }
+};
+
+struct TestHashable2
+{
+  std::string name;
+  int value;
+
+  TestHashable2(const std::string& n, int v) : name(n), value(v) {}
+
+  std::size_t hashValue() const { return Fmi::hash(name, value); }
+
+  std::size_t hash_value() const
   {
-    std::string name;
-    int value;
+    abort();
+    // This method should not be called, it is here to test
+    // that hash_value() is not used and also does not cause ambiguity
+  }
+};
 
-    TestHashable1(const std::string& n, int v) : name(n), value(v) {}
+struct TestHashable3
+{
+  std::string name;
+  int value;
 
-    std::size_t HashValue() const
-    {
-      return Fmi::hash(name, value);
-    }
-  };
+  TestHashable3(const std::string& n, int v) : name(n), value(v) {}
 
-  struct TestHashable2
-  {
-    std::string name;
-    int value;
-
-    TestHashable2(const std::string& n, int v) : name(n), value(v) {}
-
-    std::size_t hashValue() const
-    {
-      return Fmi::hash(name, value);
-    }
-
-    std::size_t hash_value() const
-    {
-      abort();
-      // This method should not be called, it is here to test
-      // that hash_value() is not used and also does not cause ambiguity
-    }
-  };
-
-  struct TestHashable3
-  {
-    std::string name;
-    int value;
-
-    TestHashable3(const std::string& n, int v) : name(n), value(v) {}
-
-    std::size_t hash_value() const
-    {
-      return Fmi::hash(name, value);
-    }
-  };
-}
+  std::size_t hash_value() const { return Fmi::hash(name, value); }
+};
+}  // namespace
 
 BOOST_AUTO_TEST_CASE(hashable)
 {

@@ -1,115 +1,167 @@
 #include "Hash.h"
 #include "StringConversion.h"
+#include <cstdint>
+#include <cstring>
 #include <limits>
+#include <type_traits>
 
 namespace
 {
 
-// Based on Boost 1.81 code, our current production Boost is too old.
+// wyhash-style 128-bit multiply mixer (a.k.a. mum/wymix) customized with ChatGPT 5
 
-// MurmurHash finalization mix
-std::size_t hash_mix(std::size_t n)
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+inline uint64_t mulmix64(uint64_t a, uint64_t b) noexcept
 {
-  n ^= n >> 33;
-  n *= 0xff51afd7ed558ccd;
-  n ^= n >> 33;
-  n *= 0xc4ceb9fe1a85ec53;
-  n ^= n >> 33;
-  return n;
+  unsigned __int64 hi, lo = _umul128(a, b, &hi);
+  return lo ^ hi;
+}
+#elif defined(__SIZEOF_INT128__)
+inline uint64_t mulmix64(uint64_t a, uint64_t b) noexcept
+{
+  __uint128_t r = ((__uint128_t)a) * b;
+  return (uint64_t)r ^ (uint64_t)(r >> 64);
+}
+#else
+// Portable fallback if 128-bit is unavailable (still good in practice)
+inline uint64_t mulmix64(uint64_t a, uint64_t b) noexcept
+{
+  a ^= (a >> 23);
+  a *= 0x2127599bf4325c37ULL;
+  b ^= (b >> 23);
+  b *= 0x165667919e3779f9ULL;
+  uint64_t x = a ^ b;
+  x ^= x >> 27;
+  x *= 0x9fb21c651e98df25ULL;
+  x ^= x >> 25;
+  return x;
+}
+#endif
+
+// fixed constants for determinism
+constexpr uint64_t K0 = 0xa0761d6478bd642FULL;
+constexpr uint64_t K1 = 0xe7037ed1a0b428DBULL;
+constexpr uint64_t KF = 0x94d049bb133111ebULL;
+
+inline uint64_t avalanche64(uint64_t x) noexcept
+{
+  x ^= x >> 30;
+  x *= 0xbf58476d1ce4e5b9ULL;
+  x ^= x >> 27;
+  x *= KF;
+  x ^= x >> 31;
+  return x;
+}
+
+inline uint64_t mix2(uint64_t a, uint64_t b) noexcept
+{
+  return avalanche64(mulmix64(a ^ K0, b ^ K1));
+}
+
+// cast signed to its unsigned counterpart, then widen to u64
+template <class T>
+inline uint64_t to_u64_integral(T v) noexcept
+{
+  using U = typename std::make_unsigned<T>::type;
+  return static_cast<uint64_t>(static_cast<U>(v));
+}
+
+inline uint32_t bits_float(float v) noexcept
+{
+  uint32_t u;
+  std::memcpy(&u, &v, sizeof(u));
+  return u;
+}
+inline uint64_t bits_double(double v) noexcept
+{
+  uint64_t u;
+  std::memcpy(&u, &v, sizeof(u));
+  return u;
+}
+
+// load 8 bytes from a byte pointer as little-endian, independent of host
+inline uint64_t load_le64(const unsigned char* p) noexcept
+{
+  uint64_t x = 0;
+  for (unsigned i = 0; i < 8; ++i)
+    x |= (uint64_t)p[i] << (8u * i);
+  return x;
+}
+
+std::size_t hash_mix(std::size_t n) noexcept
+{
+  uint64_t x = static_cast<uint64_t>(n);
+  x = mulmix64(x ^ K0, x ^ K1);
+  x = avalanche64(x);
+  return static_cast<std::size_t>(x);
 }
 
 }  // namespace
 
 namespace Fmi
 {
-std::size_t hash_value(bool value)
-{
-  return hash_mix(static_cast<std::size_t>(value));
-}
 
-std::size_t hash_value(char value)
+// integers & chars
+std::size_t hash_value(bool v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(v ? 1u : 0u);
 }
-
-std::size_t hash_value(signed char value)
+std::size_t hash_value(char v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(unsigned char value)
+std::size_t hash_value(signed char v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(char16_t value)
+std::size_t hash_value(unsigned char v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(char32_t value)
+std::size_t hash_value(char16_t v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(static_cast<uint64_t>(v));
 }
-
-std::size_t hash_value(wchar_t value)
+std::size_t hash_value(char32_t v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(static_cast<uint64_t>(v));
 }
-
-std::size_t hash_value(short value)
+std::size_t hash_value(wchar_t v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(unsigned short value)
+std::size_t hash_value(short v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(int value)
+std::size_t hash_value(unsigned short v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(static_cast<uint64_t>(v));
 }
-
-std::size_t hash_value(unsigned int value)
+std::size_t hash_value(int v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(long value)
+std::size_t hash_value(unsigned int v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(static_cast<uint64_t>(v));
 }
-
-std::size_t hash_value(long long value)
+std::size_t hash_value(long v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(unsigned long value)
+std::size_t hash_value(unsigned long v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(static_cast<uint64_t>(v));
 }
-
-std::size_t hash_value(unsigned long long value)
+std::size_t hash_value(long long v)
 {
-  return hash_mix(static_cast<std::size_t>(value));
+  return hash_mix(to_u64_integral(v));
 }
-
-std::size_t hash_value(float value)
+std::size_t hash_value(unsigned long long v)
 {
-  return (value == 0.0f) ? 0 : hash_mix(static_cast<std::size_t>(*(unsigned int*)(&value)));
-}
-
-std::size_t hash_value(double value)
-{
-  return (value == 0.0) ? 0 : hash_mix(static_cast<std::size_t>(*(unsigned long long*)(&value)));
-}
-
-std::size_t hash_value(long double value)
-{
-  return (value == 0.0L) ? 0 : hash_mix(static_cast<std::size_t>(*(unsigned long long*)(&value)));
+  return hash_mix(static_cast<uint64_t>(v));
 }
 
 // This should probably be replaced by siphash for better collision protection
@@ -159,14 +211,60 @@ std::size_t hash_value(const Fmi::TimeZonePtr& zone)
   return Fmi::hash_value(zone->name());
 }
 
-// Boost 1.81 algorithm
+// floats
+std::size_t hash_value(float v)
+{
+  if (v == 0.0f)
+    return hash_mix(0);
+  return hash_mix(static_cast<std::size_t>(bits_float(v)));
+}
 
+std::size_t hash_value(double v)
+{
+  if (v == 0.0)
+    return hash_mix(0);
+  return hash_mix(static_cast<std::size_t>(bits_double(v)));
+}
+
+std::size_t hash_value(long double v)
+{
+  if constexpr (sizeof(long double) == 8)
+  {
+    return hash_value(static_cast<double>(v));
+  }
+  else
+  {
+    // Endian-stable hashing of the raw bytes (works for 80- and 128-bit)
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(&v);
+    size_t len = sizeof(long double);
+    uint64_t acc = 0x27d4eb2f165667c5ULL;
+    while (len >= 8)
+    {
+      uint64_t w = load_le64(p);
+      acc = mix2(acc, w);
+      p += 8;
+      len -= 8;
+    }
+    uint64_t tail = 0;
+    for (unsigned i = 0; i < len; ++i)
+      tail |= (uint64_t)p[i] << (8u * i);
+    acc = mix2(acc, tail ^ (uint64_t(sizeof(long double)) << 56));
+    return static_cast<std::size_t>(avalanche64(acc));
+  }
+}
+
+// combiner
 void hash_combine(std::size_t& seed, std::size_t value)
 {
   if (seed == bad_hash || value == bad_hash)
     seed = bad_hash;
   else
-    seed = hash_mix(seed + 0x9e3779b9 + value);
+  {
+    uint64_t s = static_cast<uint64_t>(seed);
+    uint64_t v = static_cast<uint64_t>(value);
+    s = mix2(s, v);
+    seed = static_cast<std::size_t>(s);
+  }
 }
 
 }  // namespace Fmi
