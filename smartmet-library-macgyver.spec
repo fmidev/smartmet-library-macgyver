@@ -22,7 +22,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 25.9.3
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Sep  3 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.9.3-2.fmi
+- Use wyhash algorithms instead of Boost 1.81 to avoid collisions better
+
 * Wed Sep  3 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> 25.9.3-1.fmi
 - Use Boost 1.81 hash algorithms to avoid collisions
 
