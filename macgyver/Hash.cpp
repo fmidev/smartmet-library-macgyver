@@ -4,29 +4,114 @@
 
 namespace
 {
-std::size_t xorshift(std::size_t n, int i)
-{
-  return n ^ (n >> i);
-}
 
-std::size_t hash_int(std::size_t n)
-{
-  std::size_t p = 0x5555555555555555;                // pattern of alternating 0 and 1
-  std::size_t c = 17316035218449499591ull;           // random uneven integer constant;
-  return c * xorshift(p * xorshift(n + p, 32), 32);  // added p to n to get nonzero result for zero
-}
+// Based on Boost 1.81 code, our current production Boost is too old.
 
-std::size_t rotl(std::size_t n, std::size_t i)
+// MurmurHash finalization mix
+std::size_t hash_mix(std::size_t n)
 {
-  const std::size_t m = (std::numeric_limits<std::size_t>::digits - 1);
-  const std::size_t c = i & m;
-  return (n << c) | (n >> ((std::size_t(0) - c) & m));
+  n ^= n >> 33;
+  n *= 0xff51afd7ed558ccd;
+  n ^= n >> 33;
+  n *= 0xc4ceb9fe1a85ec53;
+  n ^= n >> 33;
+  return n;
 }
 
 }  // namespace
 
 namespace Fmi
 {
+std::size_t hash_value(bool value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(char value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(signed char value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned char value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(char16_t value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(char32_t value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(wchar_t value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(short value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned short value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(int value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned int value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(long value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(long long value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned long value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(unsigned long long value)
+{
+  return hash_mix(static_cast<std::size_t>(value));
+}
+
+std::size_t hash_value(float value)
+{
+  return (value == 0.0f) ? 0 : hash_mix(static_cast<std::size_t>(*(unsigned int*)(&value)));
+}
+
+std::size_t hash_value(double value)
+{
+  return (value == 0.0) ? 0 : hash_mix(static_cast<std::size_t>(*(unsigned long long*)(&value)));
+}
+
+std::size_t hash_value(long double value)
+{
+  return (value == 0.0L) ? 0 : hash_mix(static_cast<std::size_t>(*(unsigned long long*)(&value)));
+}
+
 // This should probably be replaced by siphash for better collision protection
 std::size_t hash_value(const std::string& str)
 {
@@ -74,109 +159,14 @@ std::size_t hash_value(const Fmi::TimeZonePtr& zone)
   return Fmi::hash_value(zone->name());
 }
 
-std::size_t hash_value(bool value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(char value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(signed char value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(unsigned char value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(char16_t value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(char32_t value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(wchar_t value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(short value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(unsigned short value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(int value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(unsigned int value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(long value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(long long value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(unsigned long value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(unsigned long long value)
-{
-  return hash_int(static_cast<std::size_t>(value));
-}
-
-std::size_t hash_value(float value)
-{
-  return std::hash<float>{}(value);
-}
-
-std::size_t hash_value(double value)
-{
-  return std::hash<double>{}(value);
-}
-
-std::size_t hash_value(long double value)
-{
-  return std::hash<long double>{}(value);
-}
-
-/*
- * Boost hash_combine produces collisions too often.
- *
- * Ref:
- * https://stackoverflow.com/questions/35985960/c-why-is-boosthash-combine-the-best-way-to-combine-hash-values/50978188#50978188
- */
+// Boost 1.81 algorithm
 
 void hash_combine(std::size_t& seed, std::size_t value)
 {
   if (seed == bad_hash || value == bad_hash)
     seed = bad_hash;
   else
-    seed = rotl(seed, std::numeric_limits<size_t>::digits / 3) ^ hash_int(value);
+    seed = hash_mix(seed + 0x9e3779b9 + value);
 }
 
 }  // namespace Fmi
