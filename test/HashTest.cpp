@@ -25,12 +25,12 @@ BOOST_AUTO_TEST_CASE(hash_value)
 {
   BOOST_TEST_MESSAGE(" + Fmi::hash_value()");
 
-  // We excpect all results to be roughly 64 bits in size and greatly different
-  BOOST_CHECK_EQUAL(14906445106408106831UL, Fmi::hash_value(false));
-  BOOST_CHECK_EQUAL(11512047019328754865UL, Fmi::hash_value(true));
-  BOOST_CHECK_EQUAL(14906445106408106831UL, Fmi::hash_value(0));
-  BOOST_CHECK_EQUAL(11512047019328754865UL, Fmi::hash_value(1));
-  BOOST_CHECK_EQUAL(15516417016181236671UL, Fmi::hash_value(2));
+  // We excpect all results except zero to be roughly 64 bits in size and greatly different
+  BOOST_CHECK_EQUAL(0, Fmi::hash_value(false));
+  BOOST_CHECK_EQUAL(0, Fmi::hash_value(0));
+  BOOST_CHECK_EQUAL(12994781566227106604UL, Fmi::hash_value(true));
+  BOOST_CHECK_EQUAL(12994781566227106604UL, Fmi::hash_value(1));
+  BOOST_CHECK_EQUAL(4233148493373801447UL, Fmi::hash_value(2));
 }
 
 BOOST_AUTO_TEST_CASE(array_hash)
@@ -50,12 +50,26 @@ BOOST_AUTO_TEST_CASE(hash_combine)
 
   std::size_t hash = 0;
   Fmi::hash_combine(hash, Fmi::hash_value(false));
-  BOOST_CHECK_EQUAL(8596974638888830062UL, hash);
+  BOOST_CHECK_EQUAL(8769526909050562127UL, hash);
 
   hash = 0;
   Fmi::hash_combine(hash, Fmi::hash_value(true));
-  BOOST_CHECK_EQUAL(2432900628487897600UL, hash);
+  BOOST_CHECK_EQUAL(7735385641101645953UL, hash);
 }
+
+BOOST_AUTO_TEST_CASE(hash_merge)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::hash_merge()");
+
+  std::size_t hash = 0;
+  Fmi::hash_merge(hash, false);
+  BOOST_CHECK_EQUAL(8769526909050562127UL, hash);
+
+  hash = 0;
+  Fmi::hash_merge(hash, true);
+  BOOST_CHECK_EQUAL(7735385641101645953UL, hash);
+}
+
 
 BOOST_AUTO_TEST_CASE(variadic_hash_template_1)
 {
@@ -77,7 +91,7 @@ BOOST_AUTO_TEST_CASE(variadic_hash_template_1)
 
 BOOST_AUTO_TEST_CASE(variadic_hash_template_2)
 {
-  BOOST_TEST_MESSAGE(" + Fmi::hash variadic template function (2/3");
+  BOOST_TEST_MESSAGE(" + Fmi::hash variadic template function (2/3)");
   const std::string str = "Hello, World!";
   const std::vector<double> vec = {1.0, 2.0, 3.0};
   const int64_t i = 42;
