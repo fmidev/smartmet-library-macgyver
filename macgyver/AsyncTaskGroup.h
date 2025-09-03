@@ -102,7 +102,7 @@ class AsyncTaskGroup
       const std::function<void(const std::string&)>& callback);
 
   /**
-   *  @brief Specifies callback to be called when task has failed (threw as exception)
+   *  @brief Specifies callback to be called when task has failed (threw an exception)
    *
    *  Called from method wait() while handling the exception.
    */
