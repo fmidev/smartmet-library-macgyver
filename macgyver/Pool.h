@@ -152,6 +152,7 @@ namespace Fmi
         {
             const auto grow = [this]() {
                 std::unique_ptr<ItemType> new_item(createItemCb());
+                std::unique_lock<std::mutex> lock(mutex);
                 ItemRec& item_rec = pool_data.emplace_back(ItemRec(std::move(new_item)));
                 item_rec.next = top;
                 top = &item_rec;
