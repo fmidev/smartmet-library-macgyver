@@ -21,8 +21,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.9.3
-Release: 2%{?dist}.fmi
+Version: 25.9.4
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -141,6 +141,10 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Sep  4 2025 Andris Pavēnis <andris.pavenis@fmi.fi> - 25.9.4-1.fmi
+- Added Pool<> - new template class
+- Added PostgreSQLConnectionPool - connection pooling for PostgreSQL (uses Pool<>)
+
 * Wed Sep  3 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.9.3-2.fmi
 - Use wyhash algorithms instead of Boost 1.81 to avoid collisions better
 
