@@ -74,3 +74,32 @@ BOOST_AUTO_TEST_CASE(simple_test_3)
 
   //pool.dumpInfo(std::cout);
 }
+
+namespace
+{
+  struct TestObj1
+  {
+    TestObj1(const std::string&) {}
+    int value = 42;
+  };
+
+  struct TestObj2
+  {
+    TestObj2(const std::string&, int) {}
+    int value = 42;
+  };
+}
+
+BOOST_AUTO_TEST_CASE(constructor_with_1_argument)
+{
+  Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj1, std::string> pool(2, 4, "foobar"s);
+  decltype(pool.get()) ptr = pool.get();
+  BOOST_CHECK_EQUAL(ptr->value, 42);
+}
+
+BOOST_AUTO_TEST_CASE(constructor_with_2_arguments)
+{
+  Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj2, std::string, int> pool(2, 4, "foobar"s, 12);
+  decltype(pool.get()) ptr = pool.get();
+  BOOST_CHECK_EQUAL(ptr->value, 42);
+}
