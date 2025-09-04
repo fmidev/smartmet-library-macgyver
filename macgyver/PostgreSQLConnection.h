@@ -12,6 +12,7 @@
 #include <pqxx/pqxx>
 #include <string>
 #include "Exception.h"
+#include "Pool.h"
 #include "TypeTraits.h"
 
 namespace Fmi
@@ -269,6 +270,13 @@ PostgreSQLConnection::exec_params_p(
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+
+using PostgreSQLConnectionPool = Fmi::Pool
+<
+  Fmi::PoolInitType::Parallel,
+  PostgreSQLConnection,
+  PostgreSQLConnectionOptions
+>;
 
 }  // namespace Database
 }  // namespace Fmi

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <future>
 
 namespace utf = boost::unit_test;
 namespace db = Fmi::Database;
@@ -273,4 +274,42 @@ BOOST_AUTO_TEST_CASE(test_executeNonTransaction_with_active_transaction,
     // Now the transaction has ended
     BOOST_REQUIRE_NO_THROW(
         result = conn.executeNonTransaction("SELECT COUNT(*) FROM geonames"));
+}
+
+BOOST_AUTO_TEST_CASE(postgresql_connection_pool_test, * utf::depends_on("get_connection_options"))
+{
+    db::PostgreSQLConnectionPool conn_pool(2, 5, env::opts);
+
+    const auto do_test = [&conn_pool](const std::string& name) -> int {
+        pqxx::result result;
+        auto conn = conn_pool.get();
+        if (not conn->isConnected())
+            throw Fmi::Exception(BCP, "Database connection not open");
+        auto sql = SHOW_EXCEPTIONS(
+            std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
+                *conn.get(),
+                "test",
+                "SELECT id, lat, lon FROM geonames WHERE name=$1 ORDER BY id ASC"));
+
+        auto transaction = conn->transaction();
+
+        result = SHOW_EXCEPTIONS(sql->exec(name));
+        if (result.size() < 1)
+            throw Fmi::Exception(BCP, "No results found");
+        int id = result[0]["id"].as<int>();
+        return id;
+    };
+
+    int id1, id2, id3;
+    std::future<int> f1 = std::async(std::launch::async, do_test, "Riga");
+    std::future<int> f2 = std::async(std::launch::async, do_test, "Turku");
+    std::future<int> f3 = std::async(std::launch::async, do_test, "Tampere");
+
+    BOOST_REQUIRE_NO_THROW(id1 = f1.get());
+    BOOST_REQUIRE_NO_THROW(id2 = f2.get());
+    BOOST_REQUIRE_NO_THROW(id3 = f3.get());
+
+    BOOST_CHECK_EQUAL(id1, -16003156);
+    BOOST_CHECK_EQUAL(id2, -105198);
+    BOOST_CHECK_EQUAL(id3, 634963);
 }
