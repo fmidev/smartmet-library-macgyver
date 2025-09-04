@@ -55,13 +55,7 @@ BOOST_AUTO_TEST_CASE(simple_test_3)
   BOOST_CHECK_EQUAL(int(pool.in_use()), 0);
 
   std::vector<decltype(pool.get())> items;
-  std::generate_n(std::back_insert_iterator(items), 15,
-    [&pool]()
-    {
-      static int count = 0;
-      std::cout << ++count << "  " << pool.size()  << std::endl;
-      return pool.get();
-    });
+  std::generate_n(std::back_insert_iterator(items), 15, [&pool]() { return pool.get(); });
 
   BOOST_CHECK_EQUAL(int(pool.in_use()), 15);
   BOOST_CHECK_EQUAL(int(pool.size()), 15);
