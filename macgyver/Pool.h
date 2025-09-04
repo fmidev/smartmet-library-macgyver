@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PostgreSQLConnection.h"
 #include <atomic>
 #include <functional>
 #include <memory>
