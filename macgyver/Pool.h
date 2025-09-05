@@ -68,6 +68,11 @@ namespace Fmi
             inline void reset() { this->base::reset(); }
         };
 
+        Pool(const Pool&) = delete;
+        Pool& operator=(const Pool&) = delete;
+        Pool(Pool&&) = default;
+        Pool& operator=(Pool&&) = default;
+
         Pool(std::size_t start_size, std::size_t max_size, Args... args)
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
