@@ -81,7 +81,11 @@ void id_format()
 class tests : public tframe::tests
 {
   virtual const char* error_message_prefix() const { return "\n\t"; }
-  void test(void) { TEST(parse_options_1); }
+  void test(void)
+  {
+    TEST(parse_options_1);
+    TEST(id_format);
+  }
 };
 
 }  // namespace PostgreSQLConnectionOptionsTest
