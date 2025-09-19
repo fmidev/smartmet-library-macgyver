@@ -153,6 +153,8 @@ class PostgreSQLConnection::Impl
     return bool(reopen());
   }
 
+  PostgreSQLConnectionId getId() const { return itsConnectionOptions.getId(); }
+
   bool isTransaction() const { return !!itsTransaction; }
 
   void startTransaction()
@@ -578,6 +580,11 @@ void PostgreSQLConnection::close() const
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+PostgreSQLConnectionId PostgreSQLConnection::getId() const
+{
+  return impl->getId();
 }
 
 std::string PostgreSQLConnection::quote(const std::string& theString) const

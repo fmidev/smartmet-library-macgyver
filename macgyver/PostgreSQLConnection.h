@@ -19,6 +19,17 @@ namespace Fmi
 {
 namespace Database
 {
+
+/**
+ *  @brief Identifier for a PostgreSQL connection (useful for logging)
+ */
+struct PostgreSQLConnectionId
+{
+  std::string host;
+  unsigned int port;
+  std::string database;
+};
+
 struct PostgreSQLConnectionOptions
 {
   std::string host;
@@ -35,6 +46,8 @@ struct PostgreSQLConnectionOptions
   PostgreSQLConnectionOptions(const std::string& conn_str);
 
   operator std::string() const;
+
+  inline PostgreSQLConnectionId getId() const { return {host, port, database}; }
 };
 
 class PostgreSQLConnection
@@ -121,6 +134,7 @@ class PostgreSQLConnection
   bool reopen() const;
 
   void close() const;
+  PostgreSQLConnectionId getId() const;
   bool isConnected() const;
   void setClientEncoding(const std::string& theEncoding);
   bool isDebug() const;
