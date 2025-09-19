@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.9.4
+Version: 25.9.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Sep 19 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.9.19-1.fmi
+- PostgreSQLConnection: add method getId() (information for error logging purposes)
+
 * Thu Sep  4 2025 Andris Pavēnis <andris.pavenis@fmi.fi> - 25.9.4-1.fmi
 - Added Pool<> - new template class
 - Added PostgreSQLConnectionPool - connection pooling for PostgreSQL (uses Pool<>)
