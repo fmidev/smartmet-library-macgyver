@@ -57,6 +57,27 @@ void parse_options_1()
   TEST_PASSED();
 }
 
+void id_format()
+{
+  using Fmi::Database::PostgreSQLConnectionId;
+
+  PostgreSQLConnectionId id{"db.example.com", 5432, "example"};
+
+  if (fmt::format("{}", id) != "db.example.com:5432/example")
+    TEST_FAILED("fmt::format(\"{}\", id) failed");
+
+  if (fmt::format("{:h}", id) != "db.example.com")
+    TEST_FAILED("fmt::format(\"{:h}\", id) failed");
+
+  if (fmt::format("{:p}", id) != "5432")
+    TEST_FAILED("fmt::format(\"{:p}\", id) failed");
+
+  if (fmt::format("{:d}", id) != "example")
+    TEST_FAILED("fmt::format(\"{:d}\", id) failed");
+
+  TEST_PASSED();
+}
+
 class tests : public tframe::tests
 {
   virtual const char* error_message_prefix() const { return "\n\t"; }

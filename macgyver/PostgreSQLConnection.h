@@ -9,6 +9,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <fmt/format.h>
 #include <pqxx/pqxx>
 #include <string>
 #include "Exception.h"
@@ -294,5 +295,57 @@ using PostgreSQLConnectionPool = Fmi::Pool
 
 }  // namespace Database
 }  // namespace Fmi
+
+namespace fmt
+{
+  /**
+   * @brief Custom formatter for Fmi::Database::PostgreSQLConnectionId
+   *
+   * Usage:
+   *   PostgreSQLConnectionId id{"db.example.com", 5432, "example"};
+   *   fmt::format("{}", id)      -> "db.example.com:5432/example"
+   *   fmt::format("{:h}", id)    -> "db.example.com"
+   *   fmt::format("{:p}", id)    -> "5432"
+   *   fmt::format("{:d}", id)    -> "example"
+   *
+   * Based on verson suggested by ChatGPT 5 with some simplifications
+   */
+  template <>
+  struct formatter<Fmi::Database::PostgreSQLConnectionId>
+  {
+    enum class part { all, host, port, db } which = part::all;
+
+      // Parse "{:h}", "{:p}", "{:d}", or "{}"
+    constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
+      auto it = ctx.begin(), end = ctx.end();
+      if (it == end || *it == '}') return it;  // default: all
+
+      switch (*it) {
+        case 'h': which = part::host; break;
+        case 'p': which = part::port; break;
+        case 'd': which = part::db;   break;
+        default:  which = part::all;  break;   // anything else -> default
+      }
+      ++it;
+      // Ignore anything until '}' (we don't support other specs)
+      while (it != end && *it != '}') ++it;
+      return it;
+    }
+
+    template <class FormatContext>
+    auto format(const Fmi::Database::PostgreSQLConnectionId& v, FormatContext& ctx) const
+        -> decltype(ctx.out())
+    {
+      switch (which) {
+      case part::host: return fmt::format_to(ctx.out(), "{}", v.host);
+      case part::port: return fmt::format_to(ctx.out(), "{}", v.port);
+      case part::db:   return fmt::format_to(ctx.out(), "{}", v.database);
+      case part::all:
+      default:
+        return fmt::format_to(ctx.out(), "{}:{}/{}", v.host, v.port, v.database);
+      }
+    }
+  };
+}  // namespace fmt
 
 // ======================================================================
