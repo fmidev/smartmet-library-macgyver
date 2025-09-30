@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "Exception.h"
 #include "DateTime.h"
+#include "Exception.h"
 #include "LocalDateTime.h"
 #include <cmath>
 
@@ -139,11 +139,11 @@ inline double modifiedJulianDate(short month, short day, short year)
   double b = 0.0;
   if (a <= 15821004.1)
   {
-    b = -2 * (int)((year + 4716) / 4) - 1179;
+    b = -2 * ((year + 4716) / 4) - 1179;
   }
   else
   {
-    b = (int)(year / 400) - (int)(year / 100) + (int)(year / 4);
+    b = (year / 400) - (year / 100) + (int)(year / 4);
   }
 
   a = 365 * year - 679004;

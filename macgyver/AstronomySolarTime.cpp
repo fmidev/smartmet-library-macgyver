@@ -118,7 +118,7 @@ int calcDoyFromJD(JulianTime jd)
   int m = std::get<1>(date);
   int d = std::get<2>(date);
   int k = isLeapYear(y ? 1 : 2);
-  int doy = static_cast<int>((275 * m) / 9) - k * static_cast<int>((m + 9) / 12) + d - 30;
+  int doy = (275 * m) / 9 - k * (m + 9) / 12 + d - 30;
 
   return doy;
 }
@@ -294,7 +294,7 @@ JulianTime getJD(int year, int month, int day)
     year -= 1;
     month += 12;
   }
-  int A = static_cast<int>(year / 100);
+  int A = year / 100;
   int B = 2 - A + A / 4;
   double JD = static_cast<int>(365.25 * (year + 4716)) + static_cast<int>(30.6001 * (month + 1)) +
               day + B - 1524.5;

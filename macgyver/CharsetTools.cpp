@@ -612,7 +612,7 @@ static unsigned char UTF8_2_ISO_8859_1_mask[] = {0x3F, 0x7F, 0x1F, 0x0F, 0x07, 0
 
 unsigned char toupper(unsigned char theChar)
 {
-  return iso_8859_1_upper[static_cast<unsigned char>(theChar)];
+  return iso_8859_1_upper[theChar];
 }
 
 // ----------------------------------------------------------------------
@@ -623,7 +623,7 @@ unsigned char toupper(unsigned char theChar)
 
 unsigned char tolower(unsigned char theChar)
 {
-  return iso_8859_1_lower[static_cast<unsigned char>(theChar)];
+  return iso_8859_1_lower[theChar];
 }
 
 // ----------------------------------------------------------------------
@@ -634,7 +634,7 @@ unsigned char tolower(unsigned char theChar)
 
 unsigned char tonordic(unsigned char theChar)
 {
-  return iso_8859_1_nordic[static_cast<unsigned char>(theChar)];
+  return iso_8859_1_nordic[theChar];
 }
 
 // ----------------------------------------------------------------------
@@ -645,7 +645,7 @@ unsigned char tonordic(unsigned char theChar)
 
 unsigned char tolowernordic(unsigned char theChar)
 {
-  return iso_8859_1_nordic[iso_8859_1_lower[static_cast<unsigned char>(theChar)]];
+  return iso_8859_1_nordic[iso_8859_1_lower[theChar]];
 }
 
 // ----------------------------------------------------------------------

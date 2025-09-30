@@ -550,7 +550,7 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
 {
   try
   {
-    return bool(impl->open(theConnectionOptions));
+    return impl->open(theConnectionOptions);
   }
   catch (...)
   {
