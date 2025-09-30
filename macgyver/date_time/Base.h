@@ -156,7 +156,6 @@ namespace Fmi
             void assert_supported() const;
             void assert_supported(const Base& other) const;
 
-        private:
             Type m_type;
         };
 
