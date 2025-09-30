@@ -19,7 +19,7 @@
 namespace fs = std::filesystem;
 
 std::time_t
-Fmi::last_write_time(const fs::path& path, std::error_code& ec) throw()
+Fmi::last_write_time(const fs::path& path, std::error_code& ec)
 {
     const char* fn = path.c_str();
     struct stat st;
@@ -49,7 +49,7 @@ std::time_t Fmi::last_write_time(const fs::path& path)
     return t;
 }
 
-std::time_t Fmi::last_write_time_or(const fs::path& path, const std::time_t default_time) throw()
+std::time_t Fmi::last_write_time_or(const fs::path& path, const std::time_t default_time)
 {
     std::error_code ec;
     const std::time_t t = Fmi::last_write_time(path, ec);
