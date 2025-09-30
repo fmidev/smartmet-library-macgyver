@@ -353,8 +353,8 @@ std::string Exception::getTimeStampString() const
   // except for libstdc++ and libc
   struct std::tm tExpanded;
   char result[80];
-  localtime_r(&timestamp, &tExpanded);
-  std::strftime(result, sizeof(result), "%Y-%m-%dT%H:%M:%S", &tExpanded);
+  static_cast<void>(localtime_r(&timestamp, &tExpanded));
+  static_cast<void>(std::strftime(result, sizeof(result), "%Y-%m-%dT%H:%M:%S", &tExpanded));
   return result;
 }
 

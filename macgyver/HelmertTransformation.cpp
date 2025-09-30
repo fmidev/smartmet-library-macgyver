@@ -153,10 +153,10 @@ std::string Fmi::get_fmi_sphere_towgs84_proj4_string(
         r, lat, lon, Fmi::ReferenceEllipsoid::wgs84, scaling_type);
     char buffer[512];
 #ifndef _MSC_VER
-    snprintf(buffer,
+    static_cast<void>(snprintf(buffer,
              sizeof(buffer),
 #else
-    _snprintf(buffer,
+    static_cast<void>(_snprintf(buffer,
               sizeof(buffer),
 #endif
              "+towgs84=%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f ",
@@ -166,7 +166,7 @@ std::string Fmi::get_fmi_sphere_towgs84_proj4_string(
              AS * conv.ex,
              AS * conv.ey,
              AS * conv.ez,
-             1e6 * (conv.m - 1));
+             1e6 * (conv.m - 1)));
     buffer[sizeof(buffer) - 1] = 0;
     return buffer;
   }

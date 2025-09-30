@@ -701,7 +701,7 @@ std::string to_iso_string(const std::time_t time)
   try
   {
     struct tm tt;
-    gmtime_r(&time, &tt);
+    static_cast<void>(gmtime_r(&time, &tt));
 
     std::array<char, 16> buffer;
     char* ptr = buffer.data() + buffer.size();

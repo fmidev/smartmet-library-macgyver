@@ -176,7 +176,7 @@ Fmi::MappedFile::invoke_madvise(int adv)
         Fmi::Exception exception(BCP, "madvise() failed");
         exception.addParameter("errno", std::to_string(err));
         exception.addParameter("description", strerror_r(err, tmp, sizeof tmp));
-        snprintf(tmp, sizeof(tmp), "%p", (void*)address);
+        static_cast<void>(snprintf(tmp, sizeof(tmp), "%p", (void*)address));
         exception.addParameter("address", tmp);
         exception.addParameter("size", std::to_string(size()));
         throw exception;
