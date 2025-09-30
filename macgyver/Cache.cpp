@@ -295,8 +295,6 @@ void FileCache::update()
     fs::recursive_directory_iterator end;
     std::error_code err;
 
-    std::string current_subdir;
-
     for (; iter != end; iter++)
     {
       const auto& entry = *iter;
