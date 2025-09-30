@@ -148,7 +148,7 @@ Fmi::DateTime buildFromOffset(Fmi::TimeDuration offset)
 
     // Construct the shifted time
 
-    return Fmi::DateTime(now.date(), tnow + offset);
+    return {now.date(), tnow + offset};
   }
   catch (...)
   {
@@ -388,7 +388,7 @@ Fmi::TimeDuration try_parse_iso_duration(const std::string& str)
     }
 
     if (!boost::regex_search(str, match, iso8601_long))
-      return Fmi::TimeDuration();
+      return {};
 
     // years, months, days, tmp , hours, minutes, seconds
     std::vector<int> vec{0, 0, 0, -1, 0, 0, 0};
@@ -404,9 +404,9 @@ Fmi::TimeDuration try_parse_iso_duration(const std::string& str)
     }
 
     if (vec[1] < 0 || vec[1] > 12)
-      return Fmi::TimeDuration();
+      return {};
     if (vec[4] < 0 || vec[4] > 24)
-      return Fmi::TimeDuration();
+      return {};
 
     // Year length 365 and month length 30 are arbitrary choices here
 
@@ -457,14 +457,14 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     // Year
 
     if (!parse_ushort(&ptr, 4, &year))
-      return Fmi::DateTime();
+      return {};
 
     // Quick sanity check to prevent further useless parsing
     // - boost library version 1.34 or greater support dates
     //   at least in the range 1400-Jan-01 to 9999-Dec-31
     // - Dates prior to 1582 using the Julian Calendar
     if (year < 1582 || year > 5000)
-      return Fmi::DateTime();
+      return {};
 
     // Establish whether we have basic or extended format
 
@@ -473,27 +473,27 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     // Month
 
     if (!skip_separator(&ptr, '-', extended_format))
-      return Fmi::DateTime();  // should never happen though
+      return {};  // should never happen though
     if (!parse_ushort(&ptr, 2, &month))
-      return Fmi::DateTime();  // YYYY is not allowed
+      return {};  // YYYY is not allowed
     if (month == 0 || month > 12)
-      return Fmi::DateTime();
+      return {};
 
     if (*ptr == '\0')
     {
       if (!extended_format)
-        return Fmi::DateTime();  // YYYYMM is not allowed
+        return {};  // YYYYMM is not allowed
       goto build_iso;     // YYYY-MM is allowed
     }
 
     // Day
 
     if (!skip_separator(&ptr, '-', extended_format))
-      return Fmi::DateTime();
+      return {};
     if (!parse_ushort(&ptr, 2, &day))
-      return Fmi::DateTime();
+      return {};
     if (day == 0 || day > 31)
-      return Fmi::DateTime();
+      return {};
     if (*ptr == '\0')
       goto build_iso;  // YYYY-MM-DD is allowed
 
@@ -502,9 +502,9 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     if (*ptr == 'T')
       ++ptr;
     if (!parse_ushort(&ptr, 2, &hour))
-      return Fmi::DateTime();
+      return {};
     if (hour > 23)
-      return Fmi::DateTime();
+      return {};
     if (*ptr == '\0')
       goto build_iso;  // YYYY-MM-DDTHH is allowed
 
@@ -512,11 +512,11 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
       goto zone_began;
 
     if (!skip_separator(&ptr, ':', extended_format))
-      return Fmi::DateTime();
+      return {};
     if (!parse_ushort(&ptr, 2, &minute))
-      return Fmi::DateTime();
+      return {};
     if (minute > 59)
-      return Fmi::DateTime();
+      return {};
     if (*ptr == '\0')
       goto build_iso;  // YYYY-MM-DDTHH:MI is allowed
 
@@ -524,16 +524,16 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
       goto zone_began;
 
     if (!skip_separator(&ptr, ':', extended_format))
-      return Fmi::DateTime();
+      return {};
     if (!parse_ushort(&ptr, 2, &second))
-      return Fmi::DateTime();
+      return {};
     if (second > 59)
-      return Fmi::DateTime();
+      return {};
     if (*ptr == '\0')
       goto build_iso;  // YYYY-MM-DDTHH:MI:SS is allowed
 
     if (*ptr != 'Z' && *ptr != '+' && *ptr != '-')
-      return Fmi::DateTime();
+      return {};
 
   zone_began:
 
@@ -542,7 +542,7 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     {
       ++ptr;
       if (*ptr != '\0')
-        return Fmi::DateTime();
+        return {};
       goto build_iso;
     }
 
@@ -550,19 +550,19 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     ptr++;
 
     if (!parse_ushort(&ptr, 2, &houroffset))
-      return Fmi::DateTime();
+      return {};
     if (houroffset >= 14)
-      return Fmi::DateTime();  // some offsets are > 12
+      return {};  // some offsets are > 12
 
     if (*ptr == '\0')
       goto build_iso;
 
     if (!skip_separator(&ptr, ':', extended_format))
-      return Fmi::DateTime();
+      return {};
     if (!parse_ushort(&ptr, 2, &minuteoffset))
-      return Fmi::DateTime();
+      return {};
     if (*ptr != '\0')
-      return Fmi::DateTime();
+      return {};
 
   build_iso:
 
@@ -892,7 +892,7 @@ TimeDuration DateTimeParser::Impl::try_parse_duration(
   try
   {
     if (str.empty())
-      return Fmi::TimeDuration();
+      return {};
 
     if (str[0] == 'P')
       return try_parse_iso_duration(str);
@@ -909,7 +909,7 @@ TimeDuration DateTimeParser::Impl::try_parse_duration(
     bool success = qi::parse(start, finish, itsOffsetParser, target);
 
     if (!success)
-      return Fmi::TimeDuration();
+      return {};
 
     int offset_value;
 
@@ -943,7 +943,7 @@ TimeDuration DateTimeParser::Impl::try_parse_duration(
     if (theUnit == 'y' || theUnit == 'Y')
       return Fmi::Hours(offset_value * 24 * 365);
 
-    return Fmi::TimeDuration();
+    return {};
   }
   catch (...)
   {
@@ -1120,7 +1120,7 @@ Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
 
     // epoch is always in UTC
     if (format == "epoch")
-      return Fmi::LocalDateTime(t, tz);
+      return {t, tz};
 
     // timestamps are local
     return make_time(t.date(), t.time_of_day(), tz);
@@ -1148,7 +1148,7 @@ Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
 
     // epoch is always in UTC
     if (matched == EPOCH)
-      return Fmi::LocalDateTime(t, tz);
+      return {t, tz};
 
     // timestamps are local
     return make_time(t.date(), t.time_of_day(), tz);

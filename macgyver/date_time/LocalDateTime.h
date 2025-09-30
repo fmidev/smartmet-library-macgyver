@@ -197,9 +197,9 @@ namespace Fmi
         LocalDateTime operator - (const LocalDateTime& time, const TimeDuration& td);
         TimeDuration operator - (const LocalDateTime& to, const LocalDateTime& from);
 
-        inline TimeDuration seconds(int s) { return TimeDuration(detail::duration_t(std::chrono::seconds(s))); }
-        inline TimeDuration minutes(int m) { return TimeDuration(detail::duration_t(std::chrono::minutes(m))); }
-        inline TimeDuration hours(int h) { return TimeDuration(detail::duration_t(std::chrono::hours(h))); }
+        inline TimeDuration seconds(int s) { return {detail::duration_t(std::chrono::seconds(s))}; }
+        inline TimeDuration minutes(int m) { return {detail::duration_t(std::chrono::minutes(m))}; }
+        inline TimeDuration hours(int h) { return {detail::duration_t(std::chrono::hours(h))}; }
 
         /**
          *  Make a local date time from a date and time of day (preffers summer time in case of ambiguity)

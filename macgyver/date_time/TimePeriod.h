@@ -133,7 +133,7 @@ namespace Fmi
             TimeDuration length() const
             {
                 if (m_start.is_special() || m_end.is_special())
-                    return TimeDuration();
+                    return {};
                 return m_end - m_start;
             }
 

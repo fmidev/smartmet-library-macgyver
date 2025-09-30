@@ -92,7 +92,7 @@ fs::path Fmi::unique_path(const fs::path& model)
         }
     } while (fs::exists(result));
 
-    return fs::path(result);
+    return {result};
 }
 
 enum Fmi::Compression Fmi::guess_compression_type(const std::string& theFileName)
@@ -130,7 +130,7 @@ std::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
         };
 
     if (check_fn(theFileName))
-        return std::optional<std::string>(theFileName);
+        return {theFileName};
 
     if (Fmi::guess_compression_type(theFileName) == Fmi::Compression::NONE)
     {
@@ -147,11 +147,11 @@ std::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
         {
             const std::string zfn = theFileName + ext;
             if (check_fn(zfn))
-                return std::optional<std::string>(zfn);
+                return {zfn};
         }
     }
 
-    return std::optional<std::string>();
+    return {""};
 }
 
 Fmi::IStream::IStream(std::istream& raw_input, const std::string& name)

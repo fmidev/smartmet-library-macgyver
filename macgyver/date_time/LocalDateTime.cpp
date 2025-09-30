@@ -185,7 +185,7 @@ void LocalDateTime::check_no_special(
 Date LocalDateTime::date() const
 {
     if (is_special())
-        return Date(type());
+        return {type()};
 
     return utc_time().date();
 }
@@ -193,7 +193,7 @@ Date LocalDateTime::date() const
 DateTime LocalDateTime::local_time() const
 {
     if (is_special())
-        return DateTime(type());
+        return {type()};
 
     return DateTime(ldt.get_local_time());
 }
@@ -201,7 +201,7 @@ DateTime LocalDateTime::local_time() const
 TimeZonePtr LocalDateTime::zone() const
 {
     check_no_special(BCP);
-    return TimeZonePtr(ldt.get_time_zone());
+    return {ldt.get_time_zone()};
 }
 
 TimeDuration LocalDateTime::time_of_day() const
@@ -212,7 +212,7 @@ TimeDuration LocalDateTime::time_of_day() const
 DateTime LocalDateTime::utc_time() const
 {
     if (is_special())
-        return DateTime(type());
+        return {type()};
 
     TimeDuration diff(get_sys_info().offset);
     return local_time() - diff;
@@ -458,12 +458,12 @@ TimeDuration Fmi::date_time::operator - (const LocalDateTime& to, const LocalDat
 {
     if (from.is_special() || to.is_special())
     {
-        return TimeDuration();
+        return {};
     }
 
     const auto sys_from = from.get_impl().get_sys_time();
     const auto sys_to = to.get_impl().get_sys_time();
-    return Fmi::date_time::TimeDuration(sys_to - sys_from);
+    return {sys_to - sys_from};
 }
 
 
@@ -502,27 +502,27 @@ Fmi::date_time::LocalDateTime::make_zoned_time(
     switch (choose)
     {
         case Choose::EARLIEST:
-            return Fmi::detail::zoned_time_t(tz, time, date::choose::earliest);
+            return {tz, time, date::choose::earliest};
 
         case Choose::LATEST:
-            return detail::zoned_time_t(tz, time, date::choose::latest);
+            return {tz, time, date::choose::latest};
             break;
 
         case Choose::AUTO:
             try {
-                return detail::zoned_time_t(tz, time);
+                return {tz, time};
             }
             catch (const date::ambiguous_local_time&)
             {
-                return detail::zoned_time_t(tz, time, date::choose::latest);
+                return {tz, time, date::choose::latest};
             }
             catch (const date::nonexistent_local_time&)
             {
-                return detail::zoned_time_t(tz, time, date::choose::earliest);
+                return {tz, time, date::choose::earliest};
             }
 
         default:
-            return detail::zoned_time_t(tz, time);
+            return {tz, time};
     }
 }
 
@@ -566,9 +566,9 @@ Fmi::date_time::make_time(
     try
     {
 #if 1
-        return LocalDateTime(date, time, tz,
+        return {date, time, tz,
             LocalDateTime::NOT_DATE_TIME_ON_ERROR,
-            LocalDateTime::Choose::EARLIEST);
+            LocalDateTime::Choose::EARLIEST};
 #else
         detail::time_point_t tp = date.get_impl() + time.get_impl();
         try

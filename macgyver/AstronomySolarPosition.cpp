@@ -134,7 +134,7 @@ solar_position_t solar_position(const Fmi::DateTime& utc, double lon_e, double l
     double solarZen = zenith - refractionCorrection;
     double elevation = 90.0 - solarZen;
 
-    return solar_position_t(azimuth, declination, elevation);
+    return {azimuth, declination, elevation};
   }
   catch (...)
   {

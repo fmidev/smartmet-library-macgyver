@@ -58,7 +58,7 @@ Fmi::DateTime JulianTime::ptime_utc() const
   try
   {
     if (jd == 0.0)
-      return Fmi::DateTime();
+      return {};
 
     int z = lround(jd);
     double f = (jd + 0.5) - z;
@@ -87,7 +87,7 @@ Fmi::DateTime JulianTime::ptime_utc() const
 
     auto ss = (unsigned)floor(f * (24 * 60 * 60));  // f: [0,1)
 
-    return Fmi::DateTime(date, Fmi::Seconds(ss));
+    return {date, Fmi::Seconds(ss)};
   }
   catch (...)
   {
@@ -105,7 +105,7 @@ Fmi::LocalDateTime JulianTime::ldt(const Fmi::TimeZonePtr& tz) const
     /*
      * When constructed this way, Boost takes 'ptime' as UTC.
      */
-    return Fmi::LocalDateTime(ptime_utc(), tz);
+    return {ptime_utc(), tz};
   }
   catch (...)
   {
@@ -366,9 +366,9 @@ JulianTime SolNoon(const Fmi::LocalDateTime& ldt, double lon_e)
     //
 
     Fmi::LocalDateTime lnoon(ldt.local_time().date(),
-                          TimeDuration(12, 0, 0),
-                          ldt.zone(),
-                          Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+                             TimeDuration(12, 0, 0),
+                             ldt.zone(),
+                             Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
     Fmi::Date date_utc = lnoon.utc_time().date();
 
@@ -421,7 +421,7 @@ JulianTime Sunrise_or_set_UTC(const JulianTime& noon, double lon_e, double lat, 
     double solarDec = noon.SunDeclination();
     double hourAngle = HourAngleSunrise_or_set(lat, solarDec, rise);
     if (isnan(hourAngle))
-      return JulianTime();
+      return {};
 
     double delta = -lon_e - rad2deg(hourAngle);
     double timeDiff = 4 * delta;                   // minutes of time
@@ -458,7 +458,7 @@ JulianTime Sunrise_or_set_UTC(const JulianTime& noon, double lon_e, double lat, 
      */
     hourAngle = HourAngleSunrise_or_set(lat, solarDec, rise);
     if (isnan(hourAngle))
-      return JulianTime();
+      return {};
 
     assert(!isnan(hourAngle));
 

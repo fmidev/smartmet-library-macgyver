@@ -122,32 +122,32 @@ void Fmi::date_time::TimeDuration::assert_special() const
 
 Fmi::date_time::TimeDuration Fmi::date_time::Days(int days)
 {
-  return Fmi::date_time::TimeDuration(detail::days_t(days));
+  return {detail::days_t(days)};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::Hours(int hours)
 {
-  return Fmi::date_time::TimeDuration(detail::hours_t(hours));
+  return {detail::hours_t(hours)};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::Minutes(int minutes)
 {
-  return Fmi::date_time::TimeDuration(detail::minutes_t(minutes));
+  return {detail::minutes_t(minutes)};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::Seconds(int seconds)
 {
-  return Fmi::date_time::TimeDuration(detail::seconds_t(seconds));
+  return {detail::seconds_t(seconds)};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::Milliseconds(int milliseconds)
 {
-  return Fmi::date_time::TimeDuration(detail::millisec_t(milliseconds));
+  return {detail::millisec_t(milliseconds)};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::Microseconds(int microseconds)
 {
-  return Fmi::date_time::TimeDuration(detail::microsec_t(microseconds));
+  return {detail::microsec_t(microseconds)};
 }
 
 
@@ -228,17 +228,17 @@ Fmi::date_time::TimeDuration& Fmi::date_time::TimeDuration::operator-=(const Tim
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator+(const TimeDuration& other) const
 {
   if (is_special() && other.is_special())
-    return TimeDuration(NOT_A_DATE_TIME);
+    return {NOT_A_DATE_TIME};
 
-  return TimeDuration(m_duration + other.m_duration);
+  return {m_duration + other.m_duration};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator-(const TimeDuration& other) const
 {
   if (is_special() && other.is_special())
-    return TimeDuration(NOT_A_DATE_TIME);
+    return {NOT_A_DATE_TIME};
 
-  return TimeDuration(m_duration - other.m_duration);
+  return {m_duration - other.m_duration};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator*(int64_t factor) const
@@ -246,7 +246,7 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator*(int64_t fac
   if (is_special())
     return *this;
 
-  return TimeDuration(m_duration * factor);
+  return {m_duration * factor};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator/(int64_t factor) const
@@ -254,7 +254,7 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator/(int64_t fac
   if (is_special())
     return *this;
 
-  return TimeDuration(m_duration / factor);
+  return {m_duration / factor};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::operator++(int)
@@ -322,7 +322,7 @@ Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
 
 Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_tm(const std::tm& tm)
 {
-  return Fmi::date_time::TimeDuration(tm.tm_hour, tm.tm_min, tm.tm_sec, 0);
+  return {tm.tm_hour, tm.tm_min, tm.tm_sec, 0};
 }
 
 Fmi::date_time::TimeDuration
@@ -381,7 +381,7 @@ Fmi::date_time::TimeDuration Fmi::date_time::TimeDuration::from_iso_extended_str
   int minutes = members.get_minutes();
   int seconds = members.get_seconds();
   int microseconds = members.get_mks();
-  return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
+  return {hours, minutes, seconds, microseconds};
 }
 
 Fmi::date_time::TimeDuration
@@ -408,7 +408,7 @@ Fmi::date_time::TimeDuration::from_string(const std::string& str, bool supports_
   int minutes = members.get_minutes();
   int seconds = members.get_seconds();
   int microseconds = members.get_mks();
-  return Fmi::date_time::TimeDuration(hours, minutes, seconds, microseconds);
+  return {hours, minutes, seconds, microseconds};
 }
 
 struct std::tm Fmi::date_time::to_tm(const date_time::TimeDuration& t)

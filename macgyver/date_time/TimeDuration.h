@@ -73,7 +73,7 @@ namespace Fmi
             bool operator>=(const TimeDuration& other) const;
 
             TimeDuration& operator + () { return *this; }
-            TimeDuration operator - () const { return TimeDuration(-m_duration);}
+            TimeDuration operator - () const { return {-m_duration};}
 
             TimeDuration operator+(const TimeDuration& other) const;
             TimeDuration operator-(const TimeDuration& other) const;

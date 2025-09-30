@@ -17,7 +17,7 @@ std::string maybe_discard_seconds_part(std::string&& src)
   }
   else if (src[pos] == '.')
   {
-    return std::string(src.begin(), src.begin() + pos);
+    return {src.begin(), src.begin() + pos};
   }
   else
   {
@@ -272,10 +272,10 @@ try
 
   if (new_type != NORMAL)
   {
-    return DateTime(new_type);
+    return {new_type};
   }
 
-  return DateTime(m_time_point + duration.get_impl());
+  return {m_time_point + duration.get_impl()};
 }
 catch (...)
 {
@@ -292,10 +292,10 @@ try
 
   if (new_type != NORMAL)
   {
-    return DateTime(new_type);
+    return {new_type};
   }
 
-  return DateTime(m_time_point - duration.get_impl());
+  return {m_time_point - duration.get_impl()};
 }
 catch (...)
 {
@@ -312,10 +312,10 @@ try
 
   if (new_type != NORMAL)
   {
-    return TimeDuration(new_type);
+    return {new_type};
   }
 
-  return TimeDuration(m_time_point - other.m_time_point);
+  return {m_time_point - other.m_time_point};
 }
 catch (...)
 {
@@ -395,14 +395,14 @@ Fmi::date_time::Date Fmi::date_time::DateTime::date() const
 {
   if (is_special())
     throw Fmi::Exception(BCP, "Cannot get date from special DateTime");
-  return Date(date::floor<detail::days_t>(m_time_point));
+  return {date::floor<detail::days_t>(m_time_point)};
 }
 
 Fmi::date_time::TimeDuration Fmi::date_time::DateTime::time_of_day() const
 {
   if (is_special())
     throw Fmi::Exception(BCP, "Cannot get time of day from special DateTime");
-  return TimeDuration(m_time_point - date::floor<detail::days_t>(m_time_point));
+  return {m_time_point - date::floor<detail::days_t>(m_time_point)};
 }
 
 std::time_t Fmi::date_time::DateTime::as_time_t() const
@@ -456,7 +456,7 @@ std::string Fmi::date_time::DateTime::to_iso_extended_string() const
 
 Fmi::date_time::DateTime Fmi::date_time::DateTime::from_tm(const std::tm& tm)
 {
-  return DateTime(Date::from_tm(tm), TimeDuration::from_tm(tm));
+  return {Date::from_tm(tm), TimeDuration::from_tm(tm)};
 }
 
 namespace
@@ -716,6 +716,5 @@ Fmi::date_time::DateTime Fmi::date_time::parse_iso(const std::string& str)
 
 Fmi::date_time::DateTime Fmi::date_time::from_time_t(long time)
 {
-  return Fmi::date_time::DateTime(Fmi::date_time::Date::epoch.get_impl() +
-                                  Fmi::detail::seconds_t(time));
+  return {Fmi::date_time::Date::epoch.get_impl() + Fmi::detail::seconds_t(time)};
 }

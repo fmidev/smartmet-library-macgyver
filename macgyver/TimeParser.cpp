@@ -163,7 +163,7 @@ Fmi::DateTime buildFromOffset(Fmi::TimeDuration offset)
 
     // Construct the shifted time
 
-    return Fmi::DateTime(now.date(), tnow + offset);
+    return {now.date(), tnow + offset};
   }
   catch (...)
   {
@@ -1072,7 +1072,7 @@ Fmi::LocalDateTime parse(const std::string& str, const std::string& format, Fmi:
 
     // epoch is always in UTC
     if (format == "epoch")
-      return Fmi::LocalDateTime(t, tz);
+      return {t, tz};
 
     // timestamps are local
     return make_time(t.date(), t.time_of_day(), tz);
@@ -1099,7 +1099,7 @@ Fmi::LocalDateTime parse(const std::string& str, Fmi::TimeZonePtr tz)
 
     // epoch is always in UTC
     if (matched == EPOCH)
-      return Fmi::LocalDateTime(t, tz);
+      return {t, tz};
 
     // timestamps are local
     return make_time(t.date(), t.time_of_day(), tz);

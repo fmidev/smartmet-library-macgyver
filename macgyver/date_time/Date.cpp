@@ -146,7 +146,7 @@ Fmi::date_time::Date Fmi::date_time::Date::end_of_month() const
     date::year_month_day ymd(ym.year(), ym.month(), day_);
     date::local_days tmp(ymd);
     tmp -= date::days(1);
-    return Date(tmp);
+    return {tmp};
 }
 
 long Fmi::date_time::Date::modjulian_day() const
@@ -284,7 +284,7 @@ Fmi::date_time::Date Fmi::date_time::Date::operator+(int num_days) const
 
     date::local_days tmp(date);
     tmp += date::days(num_days);
-    return Date(tmp);
+    return {tmp};
 }
 
 Fmi::date_time::Date Fmi::date_time::Date::operator-(int num_days) const
@@ -294,7 +294,7 @@ Fmi::date_time::Date Fmi::date_time::Date::operator-(int num_days) const
 
     date::local_days tmp(date);
     tmp -= date::days(num_days);
-    return Date(tmp);
+    return {tmp};
 }
 
 int Fmi::date_time::Date::operator-(const Date& other) const
@@ -334,7 +334,7 @@ Fmi::date_time::Date Fmi::date_time::Date::operator ++ (int)
 
     date::local_days tmp(date);
     date += date::days(1);
-    return Date(tmp);
+    return {tmp};
 }
 
 Fmi::date_time::Date Fmi::date_time::Date::operator -- (int)
@@ -344,7 +344,7 @@ Fmi::date_time::Date Fmi::date_time::Date::operator -- (int)
 
     date::local_days tmp(date);
     date -= date::days(1);
-    return Date(tmp);
+    return {tmp};
 }
 
 Fmi::date_time::Date& Fmi::date_time::Date::operator ++ ()

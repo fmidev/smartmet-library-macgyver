@@ -96,7 +96,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
     if (it == itsContentMap.left.end())
     {
       ++itsMissCount;
-      return std::optional<std::string>();
+      return {""};
     }
 
     // Found in the map, but somebody may have cleaned the file
@@ -107,7 +107,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
     {
       // Should we remove the entry here? It will be re-inserted anyways eventually
       ++itsMissCount;
-      return std::optional<std::string>();
+      return {""};
     }
 
     std::size_t size = it->second.fileSize;
@@ -119,7 +119,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
     {
       // Report file opening error
       ++itsMissCount;
-      return std::optional<std::string>();
+      return {""};
     }
 
     std::string ret;
@@ -131,7 +131,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
     itsContentMap.right.relocate(itsContentMap.right.end(), itsContentMap.project_right(it));
 
     ++itsHitCount;
-    return std::optional<std::string>(std::move(ret));
+    return {std::move(ret)};
   }
   catch (...)
   {
@@ -225,7 +225,7 @@ std::vector<std::size_t> FileCache::getContent() const
 CacheStats FileCache::statistics() const
 {
   ReadLock lock(itsMutex);
-  return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount);
+  return {itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount};
 }
 
 std::size_t FileCache::getSize() const

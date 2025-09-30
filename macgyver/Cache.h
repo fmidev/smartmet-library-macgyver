@@ -892,7 +892,7 @@ class Cache
   CacheStats statistics() const
   {
     Lock lock(itsMutex);
-    return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount);
+    return {itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount};
   }
 
   // Insert with a list of tags

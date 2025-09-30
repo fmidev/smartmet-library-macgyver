@@ -96,6 +96,6 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
   }
   else
   {
-    return std::string(s_out, out_ptr);
+    return {s_out, out_ptr};
   }
 }

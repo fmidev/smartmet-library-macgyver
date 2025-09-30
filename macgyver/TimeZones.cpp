@@ -137,9 +137,9 @@ Fmi::TimeZonePtr TimeZones::time_zone_from_string(const string& desc) const
 
     // FIXME: POSIX TZ descriptions are not supported currently
     // Try POSIX TZ description (may throw) if region name is unknown
-    //return Fmi::TimeZonePtr(new boost::local_time::posix_time_zone(desc));
+    // return Fmi::TimeZonePtr(new boost::local_time::posix_time_zone(desc));
 
-    return Fmi::TimeZonePtr();
+    return {};
   }
   catch (...)
   {

@@ -559,7 +559,7 @@ std::string to_simple_string(const Fmi::Date& date)
     index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    return std::string(ptr);
+    return {ptr};
   }
   catch (...)
   {
@@ -592,7 +592,7 @@ std::string to_iso_string(const Fmi::Date& date)
     index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    return std::string(ptr);
+    return {ptr};
   }
   catch (...)
   {
@@ -627,7 +627,7 @@ std::string to_iso_extended_string(const Fmi::Date& date)
     index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    return std::string(ptr);
+    return {ptr};
   }
   catch (...)
   {
@@ -730,7 +730,7 @@ std::string to_iso_string(const std::time_t time)
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
 
-    return std::string(ptr);
+    return {ptr};
   }
   catch (...)
   {
@@ -779,7 +779,7 @@ std::string to_timestamp_string(const DateTime& time)
     index = (year / 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
-    return std::string(ptr);
+    return {ptr};
   }
   catch (...)
   {
@@ -913,7 +913,7 @@ std::string to_simple_string(const LocalDateTime& time)
       result += 'Z';
       return result;
     }
-     result += offset < 0 ? '-' : '+';
+    result += offset < 0 ? '-' : '+';
     const auto hours = std::abs(offset) / 3600;
     const auto minutes = (std::abs(offset) % 3600) / 60;
     result += fmt::sprintf("%02d%02d", hours, minutes);
@@ -999,8 +999,7 @@ std::string to_http_string(const Fmi::date_time::DateTime& time)
   try
   {
     if (time.is_special())
-      throw Fmi::Exception(
-          BCP, "Unable to format special DateTime objects for HTTP responses");
+      throw Fmi::Exception(BCP, "Unable to format special DateTime objects for HTTP responses");
 
     const auto& date = time.date();
     const auto& duration = time.time_of_day();
@@ -1055,7 +1054,7 @@ std::string to_http_string(const Fmi::date_time::DateTime& time)
     *--ptr = weekdays[index + 2];
     *--ptr = weekdays[index + 1];
     *--ptr = weekdays[index];
-    return std::string(ptr);
+    return {ptr};
   }
   catch (...)
   {

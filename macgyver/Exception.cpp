@@ -52,7 +52,7 @@ Exception Exception::Trace(const char* _filename,
                            const char* _function,
                            std::string _message)
 {
-  return Exception(_filename, _line, _function, std::move(_message), nullptr);
+  return {_filename, _line, _function, std::move(_message), nullptr};
 }
 
 Exception Exception::Trace(const char* _filename,
@@ -70,7 +70,7 @@ Exception Exception::Trace(const char* _filename,
   }
   catch (...)
   {
-    return Exception(_filename, _line, _function, std::move(_message), nullptr);
+    return {_filename, _line, _function, std::move(_message), nullptr};
   }
 }
 
