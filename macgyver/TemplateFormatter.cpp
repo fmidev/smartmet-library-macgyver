@@ -104,7 +104,7 @@ Fmi::TemplateFormatter::~TemplateFormatter()
   }
   catch (...)
   {
-    std::cout << Fmi::Exception(BCP, "ERROR: C++ EXCEPTION IN DESTRUCTOR") << std::endl;
+    std::cout << Fmi::Exception(BCP, "ERROR: C++ EXCEPTION IN DESTRUCTOR") << '\n';
   }
 }
 

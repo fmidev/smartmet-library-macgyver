@@ -107,7 +107,7 @@ namespace Fmi
                 // There are some items in use. This will cause std::terminate
                 // Unfortunately there is no way to recover from this without crashing
                 Fmi::Exception error(BCP, "Pool is being destroyed while items are in use");
-                std::cerr << error << std::endl;
+                std::cerr << error << '\n';
                 std::terminate();
             }
         }
@@ -139,14 +139,14 @@ namespace Fmi
         void dumpInfo(std::ostream& os)
         {
             int count = 0;
-            os << "Pool info for items of type " << Fmi::demangle_cpp_type_name(typeid(ItemType).name()) << std::endl;
-            os << "Total items: " << pool_data.size() << std::endl;
-            os << "In use items: " << in_use_count << std::endl;
-            os << "Top free item: " << (void*)top << std::endl;
+            os << "Pool info for items of type " << Fmi::demangle_cpp_type_name(typeid(ItemType).name()) << '\n';
+            os << "Total items: " << pool_data.size() << '\n';
+            os << "In use items: " << in_use_count << '\n';
+            os << "Top free item: " << (void*)top << '\n';
             for (const auto& item : pool_data)
             {
                 os << "Item[" << ++count << "]: " << (void*)&item
-                   << ", next: " << (void*)item.next << std::endl;
+                   << ", next: " << (void*)item.next << '\n';
             }
         }
 

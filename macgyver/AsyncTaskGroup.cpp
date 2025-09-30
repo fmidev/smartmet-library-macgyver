@@ -127,7 +127,7 @@ void Fmi::AsyncTaskGroup::dump_and_clear_exception_info(std::ostream& output_str
           << "' terminated by exception of type '"
           << Fmi::current_exception_type() << '\'';
       const auto e  = Fmi::Exception::Trace(BCP, msg.str());
-      output_stream << e << std::endl;
+      output_stream << e << '\n';
     }
   }
 }

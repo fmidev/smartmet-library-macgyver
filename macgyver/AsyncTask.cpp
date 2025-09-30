@@ -45,7 +45,7 @@ Fmi::AsyncTask::~AsyncTask()
       {
         std::cerr << '[' << METHOD_NAME << "] WARNING: Ignoring exception of type '"
                   << Fmi::current_exception_type() << "' from async task '" << name
-                  << "': " << e.what() << std::endl;
+                  << "': " << e.what() << '\n';
       }
     }
     catch (...)
@@ -53,7 +53,7 @@ Fmi::AsyncTask::~AsyncTask()
       if (!silent)
       {
         std::cerr << '[' << METHOD_NAME << "] WARNING: Ignoring exception of type '"
-                  << Fmi::current_exception_type() << "' from async task '" << name << std::endl;
+                  << Fmi::current_exception_type() << "' from async task '" << name << '\n';
       }
     }
     LOG_TIME("destructor done")
@@ -161,6 +161,6 @@ void Fmi::AsyncTask::log_event_time(const AsyncTask* task, const std::string& de
   std::cout << Fmi::MicrosecClock::local_time() << " [Fmi::AsyncTask]: ("
             << reinterpret_cast<const void*>(task) << ") '" << task->get_name()
             << "': " << desc
-            << std::endl;
+            << '\n';
 }
 

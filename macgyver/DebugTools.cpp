@@ -40,10 +40,10 @@ Fmi::ScopedTimer::~ScopedTimer()
   double dt = end - start;
 
   std::ostringstream msg;
-  msg << time_str << ": " << name << ": " << dt << " seconds" << std::endl;
+  msg << time_str << ": " << name << ": " << dt << " seconds\n";
   std::cout << msg.str() << std::flush;
 #else
-  std::cout << "Fmi::ScopedTimer not implemented with Visual C++" << std::flush;
+  std::cout << "Fmi::ScopedTimer not implemented with Visual C++";
 #endif
 }
 
