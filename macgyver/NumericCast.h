@@ -34,8 +34,8 @@ numeric_cast(Source value)
   const auto make_range_error =
       [&own_error](const auto& value, const auto& min, const auto& max, const char* type)
   {
-    const std::string msg = "Value " + Fmi::to_string(value) + " out of range for " + type + " [" +
-                            Fmi::to_string(min) + "..." + Fmi::to_string(max) + "]";
+    std::string msg = "Value " + Fmi::to_string(value) + " out of range for " + type + " [" +
+                      Fmi::to_string(min) + "..." + Fmi::to_string(max) + "]";
     own_error = true;
     return msg;
   };

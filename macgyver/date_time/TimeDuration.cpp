@@ -88,7 +88,7 @@ int64_t Fmi::date_time::TimeDuration::total_microseconds() const
 
 std::string Fmi::date_time::TimeDuration::to_simple_string() const
 {
-  const std::string str = format_time("%H:%M:%S", *this);
+  std::string str = format_time("%H:%M:%S", *this);
   const std::size_t pos = str.find_last_of(".,");
   if (pos != std::string::npos && str.substr(pos + 1) == "000000")
     return str.substr(0, pos);
@@ -98,7 +98,7 @@ std::string Fmi::date_time::TimeDuration::to_simple_string() const
 
 std::string Fmi::date_time::TimeDuration::to_iso_string() const
 {
-  const std::string str = format_time("%H%M%S", *this);
+  std::string str = format_time("%H%M%S", *this);
   const std::size_t pos = str.find_last_of(".,");
   if (pos != std::string::npos && str.substr(pos + 1) == "000000")
     return str.substr(0, pos);
@@ -107,7 +107,7 @@ std::string Fmi::date_time::TimeDuration::to_iso_string() const
 
 std::string Fmi::date_time::TimeDuration::to_iso_extended_string() const
 {
-  const std::string str = format_time("%H:%M:%S", *this);
+  std::string str = format_time("%H:%M:%S", *this);
   const std::size_t pos = str.find_last_of(".,");
   if (pos != std::string::npos && str.substr(pos + 1) == "000000")
     return str.substr(0, pos);

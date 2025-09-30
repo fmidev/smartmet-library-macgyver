@@ -551,7 +551,7 @@ std::optional<Fmi::date_time::DateTime> try_parse(
 
   try
   {
-    const auto result = as_date_time(filename, line, function, *members, true);
+    auto result = as_date_time(filename, line, function, *members, true);
     if (have_tz)
       *have_tz = bool(members->tz_offset);
     return result;
