@@ -8,6 +8,9 @@
 
 namespace Fmi
 {
+namespace
+{
+
 // CT++ may not be thread safe - but using a thread specific
 // storage for cached copies makes using it thread safe
 
@@ -20,7 +23,8 @@ struct TemplateInfo
 };
 
 using TemplateMap = std::map<std::filesystem::path, TemplateInfo>;
-thread_local TemplateMap itsTemplates{};
+thread_local TemplateMap itsTemplates;
+}  // namespace
 
 TemplateFactory::TemplateFactory() = default;
 

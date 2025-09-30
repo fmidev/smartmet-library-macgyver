@@ -14,11 +14,15 @@
 
 using namespace std;
 
-const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
-const char* default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
-
 namespace Fmi
 {
+
+namespace
+{
+const char* const default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
+const char* const default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
+}  // namespace
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Implementation hiding pimple
