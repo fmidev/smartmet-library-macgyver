@@ -351,7 +351,7 @@ class PostgreSQLConnection::Impl
           }
           catch (const std::exception& e)
           {
-            std::cout << "Failed to execute '" << sql << "':" << e.what() << std::endl;
+            std::cout << "Failed to execute '" << sql << "':" << e.what() << '\n';
             continue;
           }
 
@@ -372,7 +372,7 @@ class PostgreSQLConnection::Impl
             catch (const std::exception& e)
             {
               std::cout << "Error restoring prepared SQL statement: name=" << item.first << " sql='"
-                        << item.second << "': " << e.what() << std::endl;
+                        << item.second << "': " << e.what() << '\n';
             }
           }
 
@@ -424,7 +424,7 @@ class PostgreSQLConnection::Impl
       AsyncTask::interruption_point();
 
       if (itsDebug)
-        std::cout << "SQL: " << theSQLStatement << std::endl;
+        std::cout << "SQL: " << theSQLStatement << '\n';
 
       auto conn = check_connection();
       if (!conn)
@@ -746,7 +746,7 @@ pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQ
     {
       if (conn.isDebug())
       {
-        std::cout << "SQL: " << theSQLStatement << std::endl;
+        std::cout << "SQL: " << theSQLStatement << '\n';
       }
       return conn.execute(theSQLStatement);
     }

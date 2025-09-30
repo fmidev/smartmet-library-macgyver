@@ -88,7 +88,7 @@ std::map<std::string, TimeZonePtr> TimeZonePtr::get_region_map(bool debug)
         {
             result[name] = &r;
             if (debug)
-                std::cout << "TIME ZONE: " << name << std::endl;
+              std::cout << "TIME ZONE: " << name << '\n';
         }
     }
 
