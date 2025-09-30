@@ -620,10 +620,10 @@ namespace Fmi
 struct DateTimeParser::Impl
 {
   using const_iterator = std::string::const_iterator;
-  TimeParser::ISOParser<const_iterator> itsISOParser{};
-  TimeParser::FMIParser<const_iterator> itsFMIParser{};
-  TimeParser::SQLParser<const_iterator> itsSQLParser{};
-  TimeParser::OffsetParser<const_iterator> itsOffsetParser{};
+  TimeParser::ISOParser<const_iterator> itsISOParser;
+  TimeParser::FMIParser<const_iterator> itsFMIParser;
+  TimeParser::SQLParser<const_iterator> itsSQLParser;
+  TimeParser::OffsetParser<const_iterator> itsOffsetParser;
   TimeParser::EpochParser itsEpochParser{};
 
   DateTime parse(const std::string& str) const;
