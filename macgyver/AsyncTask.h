@@ -39,6 +39,11 @@ class AsyncTask
 
   virtual ~AsyncTask();
 
+  AsyncTask(const AsyncTask&) = delete;
+  AsyncTask(AsyncTask&&) = delete;
+  AsyncTask& operator = (const AsyncTask&) = delete;
+  AsyncTask& operator = (AsyncTask&&) = delete;
+
   void wait();
 
   /**
@@ -69,11 +74,6 @@ class AsyncTask
   const std::function<void()> notify;
   std::exception_ptr ex;
   boost::thread task_thread;
-
-  AsyncTask(const AsyncTask&) = delete;
-  AsyncTask(AsyncTask&&) = delete;
-  AsyncTask& operator = (const AsyncTask&) = delete;
-  AsyncTask& operator = (AsyncTask&&) = delete;
 
 public:
   static bool log_time;

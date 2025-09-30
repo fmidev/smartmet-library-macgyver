@@ -15,6 +15,11 @@ namespace Fmi
         using boost::iostreams::mapped_file::iterator;
         using boost::iostreams::mapped_file::const_iterator;
 
+        MappedFile(const MappedFile&) = delete;
+        MappedFile(MappedFile&&) = delete;
+        MappedFile& operator = (const MappedFile&) = delete;
+        MappedFile& operator = (MappedFile&&) = delete;
+
         explicit MappedFile() = default;
 
         explicit MappedFile(const Params& params);
@@ -75,9 +80,5 @@ namespace Fmi
         void madvise_default();
         void invoke_madvise(int adv);
 
-        MappedFile(const MappedFile&) = delete;
-        MappedFile(MappedFile&&) = delete;
-        MappedFile& operator = (const MappedFile&) = delete;
-        MappedFile& operator = (MappedFile&&) = delete;
     };
 }
