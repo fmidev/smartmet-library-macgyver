@@ -123,7 +123,7 @@ namespace Fmi
                 return m_type == NOT_A_DATE_TIME;
             }
 
-            inline Type type() const noexcept { return m_type; }
+            Type type() const noexcept { return m_type; }
 
             virtual std::string to_simple_string() const = 0;
 
@@ -140,7 +140,7 @@ namespace Fmi
 
             static Type sub_impl(Type a, Type b);
 
-            inline void set_type(Type type) noexcept
+            void set_type(Type type) noexcept
             {
                 m_type = type;
             }

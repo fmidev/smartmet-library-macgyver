@@ -43,7 +43,7 @@ namespace Fmi
 
             static const Date epoch;
 
-            inline bool is_not_a_date() const { return is_not_a_date_time(); }
+            bool is_not_a_date() const { return is_not_a_date_time(); }
 
             int year() const;
             unsigned month() const;

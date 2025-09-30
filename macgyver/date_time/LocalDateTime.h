@@ -120,7 +120,7 @@ namespace Fmi
             /**
              * Compatibility wrapper
             */
-           inline LocalDateTime local_time_in(const TimeZonePtr& zone) const
+           LocalDateTime local_time_in(const TimeZonePtr& zone) const
            {
                 return to_tz(zone);
            }
@@ -165,8 +165,8 @@ namespace Fmi
              */
             void advance(const TimeDuration& td);
 
-            inline LocalDateTime& operator += (const TimeDuration& td) { advance(td); return *this; }
-            inline LocalDateTime& operator -= (const TimeDuration& td) { advance(-td); return *this; }
+            LocalDateTime& operator += (const TimeDuration& td) { advance(td); return *this; }
+            LocalDateTime& operator -= (const TimeDuration& td) { advance(-td); return *this; }
 
             LocalDateTime operator ++ (int);
             LocalDateTime& operator ++ ();

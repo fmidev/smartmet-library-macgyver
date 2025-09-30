@@ -61,11 +61,11 @@ namespace Fmi
 
         public:
             // We do not want to expose all std::unique_ptr<> methods for example release()
-            inline operator ItemType*() const { return this->base::get(); }
-            inline operator bool() const { return this->base::get() != nullptr; }
-            inline ItemType* operator->() const { return this->base::get(); }
-            inline ItemType* get() const { return this->base::get(); }
-            inline void reset() { this->base::reset(); }
+            operator ItemType*() const { return this->base::get(); }
+            operator bool() const { return this->base::get() != nullptr; }
+            ItemType* operator->() const { return this->base::get(); }
+            ItemType* get() const { return this->base::get(); }
+            void reset() { this->base::reset(); }
         };
 
         Pool(const Pool&) = delete;

@@ -48,7 +48,7 @@ struct PostgreSQLConnectionOptions
 
   operator std::string() const;
 
-  inline PostgreSQLConnectionId getId() const { return {host, port, database}; }
+  PostgreSQLConnectionId getId() const { return {host, port, database}; }
 };
 
 class PostgreSQLConnection

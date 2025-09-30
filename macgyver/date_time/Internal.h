@@ -13,14 +13,14 @@ namespace internal
 
 struct StreamExceptionState final
 {
-  inline StreamExceptionState(std::istream& is, std::ios::iostate except)
+  StreamExceptionState(std::istream& is, std::ios::iostate except)
 
     : is(is), state(is.exceptions())
   {
     is.exceptions(except);
   }
 
-  inline ~StreamExceptionState()
+  ~StreamExceptionState()
   {
     try {
       is.exceptions(state);

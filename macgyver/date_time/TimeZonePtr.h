@@ -46,27 +46,27 @@ namespace Fmi
             /**
              * Check if time zone pointer is set. 
             */
-            inline operator bool () const noexcept { return bool(tz); }
+            operator bool () const noexcept { return bool(tz); }
 
             /**
              * Check if time zone pointer are identical
             */
-            inline bool operator == (const TimeZonePtr& other) const noexcept { return tz == other.tz; }
+            bool operator == (const TimeZonePtr& other) const noexcept { return tz == other.tz; }
 
             /**
              * Check if time zone pointer are different
             */
-            inline bool operator != (const TimeZonePtr& other) const noexcept { return tz != other.tz; }
+            bool operator != (const TimeZonePtr& other) const noexcept { return tz != other.tz; }
 
             /**
              * Get the emdeded date::time_zone pointer.
             */
-            inline operator const date::time_zone * () const { return zone_ptr(); }
+            operator const date::time_zone * () const { return zone_ptr(); }
 
             /**
              * Get the emdeded date::time_zone pointer.
             */
-            inline const date::time_zone * operator -> () const { return zone_ptr(); }
+            const date::time_zone * operator -> () const { return zone_ptr(); }
 
             /**
              * Get the emdeded date::time_zone pointer.
@@ -77,7 +77,7 @@ namespace Fmi
              * Get the time zone name.
             */
             std::string name() const { return tz->name(); }
-            //inline std::string get_abbrev(const LocalDateTime& time) { return time.get_sys_info().abbrev; }
+            //std::string get_abbrev(const LocalDateTime& time) { return time.get_sys_info().abbrev; }
 
             bool is_utc() const;
 
