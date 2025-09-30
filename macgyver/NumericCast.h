@@ -25,8 +25,8 @@ numeric_cast(Source value)
   using type_t = std::common_type_t<Target, Source>;
 
   // Get min and max values for the target type
-  constexpr type_t target_min = static_cast<type_t>(Fmi::lower_limit<Target>());
-  constexpr type_t target_max = static_cast<type_t>(Fmi::upper_limit<Target>());
+  constexpr auto target_min = static_cast<type_t>(Fmi::lower_limit<Target>());
+  constexpr auto target_max = static_cast<type_t>(Fmi::upper_limit<Target>());
 
   bool own_error = false;
 
