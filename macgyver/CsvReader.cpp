@@ -35,7 +35,7 @@ bool isnewline(int ch)
   return (ch == '\n' || ch == '\r');
 }
 // utility function for improved error messages
-void myerror(const string& prefix, const string& filename, ifstream& file)
+[[noreturn]] void myerror(const string& prefix, const string& filename, ifstream& file)
 {
   try
   {
