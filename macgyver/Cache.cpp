@@ -124,7 +124,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
 
     std::string ret;
     ret.resize(size);
-    file.read(&ret[0], size);  // Should work, c++11 guarantees strings to be contiguous
+    file.read(ret.data(), size);  // Should work, c++11 guarantees strings to be contiguous
 
     // This implements LRU eviction behaviour
     UpgradeWriteLock ugLock(theLock);
