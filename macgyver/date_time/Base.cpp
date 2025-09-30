@@ -3,6 +3,9 @@
 #include "../Exception.h"
 #include <cctype>
 
+// to avoid emitting vtable everywhere
+Fmi::date_time::Base::~Base() = default;
+
 std::string Fmi::date_time::Base::special_time_as_string() const
 {
     switch(m_type)

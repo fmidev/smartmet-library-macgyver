@@ -96,7 +96,7 @@ namespace Fmi
             }
 
         public:
-            virtual ~Base() = default;
+            virtual ~Base();
 
             bool is_special() const noexcept
             {
