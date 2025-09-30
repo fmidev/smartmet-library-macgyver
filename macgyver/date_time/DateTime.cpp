@@ -465,9 +465,9 @@ using namespace boost::spirit::qi;
 using iterator = std::string::const_iterator;
 
 std::optional<Fmi::date_time::parser::date_time_members_t> try_parse_impl(
-    const char* filename,  // We are not interested about this location
-    int line,              // in backtrace. Therefore
-    const char* function,
+    const char* /* filename */,  // Not interested in all values in backtraces
+    int /* line */,
+    const char* /* function */,
     const std::string& str,
     const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
     const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
@@ -509,11 +509,11 @@ std::optional<Fmi::date_time::parser::date_time_members_t> try_parse_impl(
 }
 
 Fmi::date_time::DateTime as_date_time(
-    const char* filename,  // We are not interested about this location
-    int line,              // in backtrace. Therefore
-    const char* function,
+    const char* /* filename */,  // We are not interested about this location
+    int /* line */,              // in backtrace. Therefore
+    const char* /* function */,
     const Fmi::date_time::parser::date_time_members_t& tmp,
-    bool throw_on_error)
+    bool /* throw_on_error */)
 {
   Fmi::date_time::Date date(tmp.date.year, tmp.date.month, tmp.date.mday);
 

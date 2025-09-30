@@ -111,7 +111,7 @@ namespace Fmi
         Date from_tm(const struct tm& tm);
 
         template <typename ArchiveType>
-        void Date::save(ArchiveType& archive, const unsigned int version) const
+        void Date::save(ArchiveType& archive, const unsigned int /* version */) const
         {
             const auto date_type = type();
             archive & BOOST_SERIALIZATION_NVP(date_type);
@@ -123,7 +123,7 @@ namespace Fmi
         }
 
         template <typename ArchiveType>
-        void Date::load(ArchiveType& archive, const unsigned int version)
+        void Date::load(ArchiveType& archive, const unsigned int /* version */)
         {
             Type date_type;
             archive & BOOST_SERIALIZATION_NVP(date_type);

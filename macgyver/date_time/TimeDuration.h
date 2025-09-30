@@ -125,7 +125,7 @@ namespace Fmi
         struct std::tm to_tm(const TimeDuration& td);
 
         template <typename ArchiveType>
-        void TimeDuration::save(ArchiveType& archive, const unsigned int version) const
+        void TimeDuration::save(ArchiveType& archive, const unsigned int /* version */) const
         {
             const auto duration_type = type();
             archive & BOOST_SERIALIZATION_NVP(duration_type);
@@ -137,7 +137,7 @@ namespace Fmi
         }
 
         template <typename ArchiveType>
-        void TimeDuration::load(ArchiveType& archive, const unsigned int version)
+        void TimeDuration::load(ArchiveType& archive, const unsigned int /* version */)
         {
             Type duration_type;
             archive & BOOST_SERIALIZATION_NVP(duration_type);

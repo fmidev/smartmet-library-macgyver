@@ -321,7 +321,7 @@ std::ostream& operator<<(std::ostream& ostream, const lunar_time_t& lt)
   }
 }
 
-bool dst_on(const DateTime& theTime, const Fmi::LocalDateTime& ldt)
+bool dst_on(const DateTime& /* theTime */, const Fmi::LocalDateTime& ldt)
 {
   try
   {
