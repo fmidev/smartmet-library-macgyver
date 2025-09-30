@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.9.19
+Version: 25.9.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Sep 30 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.9.30-1.fmi
+- Added missing <optional> include to Cache.h
+
 * Fri Sep 19 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.9.19-1.fmi
 - PostgreSQLConnection: add method getId() (information for error logging purposes)
 
