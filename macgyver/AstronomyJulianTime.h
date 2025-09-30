@@ -56,8 +56,8 @@ class JulianTime
       jd = other.jd;
     return *this;
   }
-  bool operator==(const JulianTime& other) { return jd == other.jd; }
-  bool operator!=(const JulianTime& other) { return jd != other.jd; }
+  bool operator==(const JulianTime& other) const { return jd == other.jd; }
+  bool operator!=(const JulianTime& other) const { return jd != other.jd; }
   /*
    * Construction from UTC date and time
    *
