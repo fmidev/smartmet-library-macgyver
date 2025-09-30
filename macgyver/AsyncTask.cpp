@@ -26,14 +26,14 @@ Fmi::AsyncTask::AsyncTask(const std::string& name,
       ex(nullptr),
       task_thread([this, task]() { run(task); })
 {
-    LOG_TIME("created");
+    LOG_TIME("created")
 }
 
 Fmi::AsyncTask::~AsyncTask()
 {
   if (task_thread.joinable())
   {
-    LOG_TIME("destructor entered");
+    LOG_TIME("destructor entered")
     try
     {
       cancel();
@@ -56,7 +56,7 @@ Fmi::AsyncTask::~AsyncTask()
                   << Fmi::current_exception_type() << "' from async task '" << name << std::endl;
       }
     }
-    LOG_TIME("destructor done");
+    LOG_TIME("destructor done")
   }
 }
 
@@ -64,9 +64,9 @@ void Fmi::AsyncTask::wait()
 {
   if (task_thread.joinable())
   {
-    LOG_TIME("join requested");
+    LOG_TIME("join requested")
     task_thread.join();
-    LOG_TIME("joined");
+    LOG_TIME("joined")
     std::exception_ptr exc = get_exception();
     if (exc)
     {
@@ -80,9 +80,9 @@ bool Fmi::AsyncTask::wait_for(double sec)
   if (task_thread.joinable())
   {
     auto mks = int64_t(std::ceil(1000000.0 * sec));
-    LOG_TIME(fmt::format("try_join for %.3 seconds requested", sec));
+    LOG_TIME(fmt::format("try_join for %.3 seconds requested", sec))
     bool is_done = task_thread.try_join_for(boost::chrono::microseconds(mks));
-    LOG_TIME("joined");
+    LOG_TIME("joined")
     if (is_done)
     {
       std::exception_ptr exc = get_exception();
@@ -104,7 +104,7 @@ void Fmi::AsyncTask::cancel()
   std::unique_lock<std::mutex> lock(m1);
   if (!done)
   {
-    LOG_TIME("cancel requested");
+    LOG_TIME("cancel requested")
     task_thread.interrupt();
   }
 }
@@ -124,19 +124,19 @@ void Fmi::AsyncTask::run(std::function<void()> task)
   try
   {
     status = active;
-    LOG_TIME("started");
+    LOG_TIME("started")
     task();
-    LOG_TIME("ended");
+    LOG_TIME("ended")
     handle_result(ok, nullptr);
   }
   catch (boost::thread_interrupted&)
   {
-    LOG_TIME("interrupted");
+    LOG_TIME("interrupted")
     handle_result(interrupted, nullptr);
   }
   catch (...)
   {
-    LOG_TIME(fmt::format("got interrupt {}", Fmi::current_exception_type()));
+    LOG_TIME(fmt::format("got interrupt {}", Fmi::current_exception_type()))
     handle_result(failed, std::current_exception());
   }
 }

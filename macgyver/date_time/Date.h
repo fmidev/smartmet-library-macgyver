@@ -91,7 +91,7 @@ namespace Fmi
             Date operator --(int);
             Date& operator--();
 
-            const date::local_days& get_impl() const { return date; };
+            const date::local_days& get_impl() const { return date; }
 
             template <typename ArchiveType> void save(ArchiveType& archive, const unsigned int version) const;
 
