@@ -98,7 +98,7 @@ Exception::Exception(const char* _filename,
   prevException = nullptr;
   if (_prevException != nullptr)
   {
-    prevException.reset(new Exception(*_prevException));
+    prevException = std::make_shared<Exception>(*_prevException);
   }
   else
   {
@@ -111,7 +111,7 @@ Exception::Exception(const char* _filename,
       }
       catch (Fmi::Exception& e)
       {
-        prevException.reset(new Exception(e));
+        prevException = std::make_shared<Exception>(e);
         // Propagate the flags to the top
         mStackTraceDisabled = e.mStackTraceDisabled;
         mLoggingDisabled = e.mLoggingDisabled;
@@ -125,13 +125,13 @@ Exception::Exception(const char* _filename,
         const std::string cxx_name = Fmi::get_type_name(&e);
         auto it = exception_name_map.find(cxx_name);
         const std::string print_name = it == exception_name_map.end() ? cxx_name : it->second;
-        prevException.reset(new Exception(
-            _filename, _line, _function, std::string("[") + print_name + "] " + e.what()));
+        prevException = std::make_shared<Exception>(
+            _filename, _line, _function, std::string("[") + print_name + "] " + e.what());
       }
       catch (...)
       {
-          prevException.reset(new Exception(
-            _filename, _line, _function, std::string("[") + Fmi::current_exception_type() + "]"));
+          prevException = std::make_shared<Exception>(
+            _filename, _line, _function, std::string("[") + Fmi::current_exception_type() + "]");
       }
     }
   }
