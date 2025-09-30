@@ -5,8 +5,6 @@
 #include "../StringConversion.h"
 #include <boost/regex.hpp>
 
-namespace internal = Fmi::date_time::internal;
-
 Fmi::date_time::TimeDuration::TimeDuration(const detail::duration_t& duration)
     : Fmi::date_time::Base(Fmi::date_time::Base::NORMAL)
     , m_duration(duration)
