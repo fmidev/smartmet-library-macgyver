@@ -117,7 +117,6 @@ class Exception : public std::exception
 
   void printOn(std::ostream& out) const;
 
- public:
   class ForceStackTrace final
   {
   public:

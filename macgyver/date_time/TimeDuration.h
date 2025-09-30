@@ -109,7 +109,6 @@ namespace Fmi
         private:
             void assert_special() const;
 
-        private:
             detail::duration_t m_duration;
         };
 

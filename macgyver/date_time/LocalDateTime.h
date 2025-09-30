@@ -190,7 +190,6 @@ namespace Fmi
                 const date::time_zone* tz,
                 enum Choose choose);
 
-        private:
             detail::zoned_time_t ldt;
         };
 

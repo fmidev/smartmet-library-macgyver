@@ -23,7 +23,6 @@ class AsyncTask
 
   static bool silent;
 
- public:
   /**
    *   @brief Constructor: creates AsyncTask object
    *
