@@ -8,7 +8,6 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/list_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
-#include <filesystem>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -16,17 +15,19 @@
 #include <boost/unordered_map.hpp>
 #include <cmath>
 #include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <limits>
 #include <map>
+#include <optional>
 #include <random>
 #include <set>
 #include <sstream>
 #include <utility>
 
-#include "DateTime.h"
 #include "CacheStats.h"
+#include "DateTime.h"
 
 namespace Fmi
 {
@@ -1446,7 +1447,8 @@ bool parse_size_t(const std::string& input, std::size_t& result);
 // ----------------------------------------------------------------------
 struct FileCacheStruct
 {
-  FileCacheStruct(const std::filesystem::path& thePath, std::size_t theSize) : path(thePath), fileSize(theSize)
+  FileCacheStruct(const std::filesystem::path& thePath, std::size_t theSize)
+      : path(thePath), fileSize(theSize)
   {
   }
 
@@ -1564,7 +1566,9 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  bool checkForDiskSpace(const std::filesystem::path& thePath, const std::string& theValue, bool doCleanup);
+  bool checkForDiskSpace(const std::filesystem::path& thePath,
+                         const std::string& theValue,
+                         bool doCleanup);
 
   // ----------------------------------------------------------------------
   /*!
