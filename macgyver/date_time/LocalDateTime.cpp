@@ -61,7 +61,7 @@ LocalDateTime::LocalDateTime(
             ldt = detail::zoned_time_t(tz.zone_ptr(), sys_time);
             set_type(NORMAL);
         }
-        catch(const std::exception& e)
+        catch(const std::exception&)
         {
             if (err_handling == EXCEPTION_ON_ERROR)
                 throw;
@@ -370,7 +370,7 @@ try
 {
     return compare_with(other) != 0;
 }
-catch (const std::exception& e)
+catch (const std::exception&)
 {
     throw Fmi::Exception::Trace(BCP, "Operation failed");
 }
@@ -380,7 +380,7 @@ try
 {
     return compare_with(other) < 0;
 }
-catch (const std::exception& e)
+catch (const std::exception&)
 {
     throw Fmi::Exception::Trace(BCP, "Operation failed");
 }
@@ -390,7 +390,7 @@ try
 {
     return compare_with(other) > 0;
 }
-catch (const std::exception& e)
+catch (const std::exception&)
 {
     throw Fmi::Exception::Trace(BCP, "Operation failed");
 }
@@ -400,7 +400,7 @@ try
 {
     return compare_with(other) <= 0;
 }
-catch (const std::exception& e)
+catch (const std::exception&)
 {
     throw Fmi::Exception::Trace(BCP, "Operation failed");
 }
@@ -410,7 +410,7 @@ try
 {
     return compare_with(other) >= 0;
 }
-catch (const std::exception& e)
+catch (const std::exception&)
 {
     throw Fmi::Exception::Trace(BCP, "Operation failed");
 }
