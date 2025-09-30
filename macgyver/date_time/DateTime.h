@@ -66,7 +66,7 @@ namespace Fmi
             */
             DateTime(const detail::time_point_t& time_point);
 
-            virtual ~DateTime();
+            ~DateTime() override;
 
             DateTime& operator = (const DateTime& other);
 

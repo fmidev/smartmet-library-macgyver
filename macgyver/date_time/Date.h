@@ -37,7 +37,7 @@ namespace Fmi
             Date(const date::local_days& date);
             Date(const Date& other);
             Date(int year, unsigned month, unsigned day);
-            virtual ~Date();
+            ~Date() override;
 
             Date& operator=(const Date& other);
 

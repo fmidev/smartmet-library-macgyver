@@ -23,7 +23,7 @@ namespace Fmi
             TimeDuration(const detail::duration_t& duration);
             TimeDuration(const TimeDuration& other) = default;
             TimeDuration(int hours, int minutes, int seconds, int microseconds = 0);
-            virtual ~TimeDuration() = default;
+            ~TimeDuration() override = default;
 
             TimeDuration& operator=(const TimeDuration& other) = default;
 

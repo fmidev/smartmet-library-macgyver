@@ -80,7 +80,7 @@ namespace Fmi
                 const date::time_zone* tz = TimeZonePtr(),
                 enum ErrorHandling err_handling = NOT_DATE_TIME_ON_ERROR);
 
-            virtual ~LocalDateTime();
+            ~LocalDateTime() override;
 
             LocalDateTime& operator = (const LocalDateTime& src);
 
