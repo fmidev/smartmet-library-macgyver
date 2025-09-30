@@ -428,9 +428,7 @@ class PostgreSQLConnection::Impl
 
       auto conn = check_connection();
       if (!conn)
-      {
         throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-      }
 
       try
       {
@@ -449,29 +447,23 @@ class PostgreSQLConnection::Impl
         {
           throw Fmi::Exception(BCP, "Execution of SQL statement failed").addDetail(e.what());
         }
-        else
+
+        conn = reopen();
+        if (!conn)
+          throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
+        
+        try
         {
-          conn = reopen();
-          if (conn)
-          {
-            try
-            {
-              pqxx::nontransaction nitsTransaction(*conn);
-              const auto start = std::chrono::high_resolution_clock::now();
-              auto result = nitsTransaction.exec(theSQLStatement);
-              const auto end = std::chrono::high_resolution_clock::now();
-              checkSlowQuery(theSQLStatement, start, end);
-              return result;
-            }
-            catch (const std::exception& e2)
-            {
-              throw Fmi::Exception(BCP, "Execution of SQL statement failed").addDetail(e2.what());
-            }
-          }
-          else
-          {
-            throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-          }
+          pqxx::nontransaction nitsTransaction(*conn);
+          const auto start = std::chrono::high_resolution_clock::now();
+          auto result = nitsTransaction.exec(theSQLStatement);
+          const auto end = std::chrono::high_resolution_clock::now();
+          checkSlowQuery(theSQLStatement, start, end);
+          return result;
+        }
+        catch (const std::exception& e2)
+        {
+          throw Fmi::Exception(BCP, "Execution of SQL statement failed").addDetail(e2.what());
         }
       }
     }

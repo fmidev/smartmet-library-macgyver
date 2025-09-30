@@ -1,7 +1,6 @@
 #include "DateTime.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
-#include "Internal.h"
 #include "ParserDefinitions.h"
 
 #define DEBUG_PARSER_DEFINITIONS 0
@@ -12,17 +11,12 @@ std::string maybe_discard_seconds_part(std::string&& src)
 {
   const std::size_t pos = src.find_last_not_of("0");
   if (pos == std::string::npos)
-  {
     return src;
-  }
-  else if (src[pos] == '.')
-  {
+
+  if (src[pos] == '.')
     return {src.begin(), src.begin() + pos};
-  }
-  else
-  {
-    return src;
-  }
+
+  return src;
 }
 }  // namespace
 

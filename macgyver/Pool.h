@@ -263,31 +263,29 @@ namespace Fmi
 
                 return fetch_top();
             }
+
+            if (timeout)
+            {
+              if (!cond_var.wait_for(lock, timeout->get_impl(), [this] { return in_use_count < current_size; }))
+              {
+                throw Fmi::Exception(BCP, "Timeout while waiting for pool item");
+              }
+            }
             else
             {
-                if (timeout)
-                {
-                    if (!cond_var.wait_for(lock, timeout->get_impl(), [this] { return in_use_count < current_size; }))
-                    {
-                        throw Fmi::Exception(BCP, "Timeout while waiting for pool item");
-                    }
-                }
-                else
-                {
-                    cond_var.wait(lock, [this] { return in_use_count < current_size; });
-                }
-
-                if (top)
-                {
-                    //-----------------------------------------------------------------
-                    // Item is available, use it
-                    //-----------------------------------------------------------------
-                    return fetch_top();
-                }
-
-                // Should not be here
-                throw Fmi::Exception(BCP, "Internal error");
+              cond_var.wait(lock, [this] { return in_use_count < current_size; });
             }
+            
+            if (top)
+            {
+              //-----------------------------------------------------------------
+              // Item is available, use it
+              //-----------------------------------------------------------------
+              return fetch_top();
+            }
+            
+            // Should not be here
+            throw Fmi::Exception(BCP, "Internal error");
         }
 
         void release(ItemRec* item)
