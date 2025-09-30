@@ -85,7 +85,7 @@ inline uint64_t load_le64(const unsigned char* p) noexcept
 {
   uint64_t x = 0;
   for (unsigned i = 0; i < 8; ++i)
-    x |= (uint64_t)p[i] << (8u * i);
+    x |= (uint64_t)p[i] << (8U * i);
   return x;
 }
 
@@ -105,7 +105,7 @@ namespace Fmi
 // integers & chars
 std::size_t hash_value(bool v)
 {
-  return hash_mix(v ? 1u : 0u);
+  return hash_mix(v ? 1U : 0U);
 }
 std::size_t hash_value(char v)
 {
@@ -214,7 +214,7 @@ std::size_t hash_value(const Fmi::TimeZonePtr& zone)
 // floats
 std::size_t hash_value(float v)
 {
-  if (v == 0.0f)
+  if (v == 0.0F)
     return hash_mix(0);
   return hash_mix(static_cast<std::size_t>(bits_float(v)));
 }
@@ -247,7 +247,7 @@ std::size_t hash_value(long double v)
     }
     uint64_t tail = 0;
     for (unsigned i = 0; i < len; ++i)
-      tail |= (uint64_t)p[i] << (8u * i);
+      tail |= (uint64_t)p[i] << (8U * i);
     acc = mix2(acc, tail ^ (uint64_t(sizeof(long double)) << 56));
     return static_cast<std::size_t>(avalanche64(acc));
   }

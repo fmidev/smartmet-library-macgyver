@@ -1,3 +1,4 @@
+
 /*
    base64.cpp and base64.h
 
@@ -88,7 +89,7 @@ std::string encode(const std::string& str)
             static_cast<char>((char_array_3[0] & 0x03U) << 4) + ((char_array_3[1] & 0xf0U) >> 4);
         char_array_4[2] =
             static_cast<char>((char_array_3[1] & 0x0fU) << 2) + ((char_array_3[2] & 0xc0U) >> 6);
-        char_array_4[3] = char_array_3[2] & 0x3fu;
+        char_array_4[3] = char_array_3[2] & 0x3fU;
 
         for (i = 0; (i < 4); i++)
           ret += base64_chars[static_cast<std::size_t>(char_array_4[i])];

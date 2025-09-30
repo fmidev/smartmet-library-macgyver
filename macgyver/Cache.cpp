@@ -114,7 +114,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
 
     // Read and return the file
 
-    std::ifstream file(fullPath, std::ios::in|std::ios::binary);
+    std::ifstream file(fullPath, std::ios::in | std::ios::binary);
     if (!file)
     {
       // Report file opening error
@@ -389,7 +389,7 @@ bool FileCache::writeFile(const fs::path& theDir,
     }
 
     fs::path fullPath = theDir / fileName;
-    std::ofstream file(fullPath, std::ios::out|std::ios::binary);
+    std::ofstream file(fullPath, std::ios::out | std::ios::binary);
     if (!file)
     {
 // Could not open file
@@ -478,13 +478,13 @@ std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t has
 
     out << std::hex;
 
-    out << (hashValue & 0xffu);
+    out << (hashValue & 0xffU);
 
     subDirectory = out.str();
 
     out.str("");
 
-    out << (hashValue >> 0x8u);
+    out << (hashValue >> 0x8U);
 
     fileName = out.str();
 
@@ -514,7 +514,7 @@ bool FileCache::getKey(const std::string& directory,
     if (!res)
       return false;
 
-    key = (second << 0x8u) | first;
+    key = (second << 0x8U) | first;
 
     return true;
   }

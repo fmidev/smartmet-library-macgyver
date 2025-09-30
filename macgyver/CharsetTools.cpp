@@ -731,7 +731,7 @@ string latin1_to_utf8(const string& in)
       else
       {
         out += static_cast<char>((0xC0U | (0x03U & (static_cast<unsigned char>(*mbstr) >> 6))));
-        out += static_cast<char>((0x80U | (0x3Fu & static_cast<unsigned char>(*mbstr))));
+        out += static_cast<char>((0x80U | (0x3FU & static_cast<unsigned char>(*mbstr))));
       }
     }
     return out;
