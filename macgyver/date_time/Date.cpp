@@ -190,12 +190,11 @@ int Fmi::date_time::Date::week_number() const
         {
             return static_cast<int>(week);
         }
-        else
-        {
-            return 1;
-        }
+
+        return 1;
     }
-    else if (week == 0)
+
+    if (week == 0)
     {
         const auto jBegin = Date(ymd.year - 1, 1, 1).julian_day();
         const auto jCurr = julian_day();
@@ -203,11 +202,9 @@ int Fmi::date_time::Date::week_number() const
         const unsigned long week = (jCurr + day -jBegin + 4) / 7;
         return static_cast<int>(week);
     }
-    else
-    {
-        throw Fmi::Exception(BCP, "INTERNAL ERROR: failed to get"
-            " week number for " + date::format("%Y-%m-%d", date));
-    }
+
+    throw Fmi::Exception(BCP, "INTERNAL ERROR: failed to get"
+                         " week number for " + date::format("%Y-%m-%d", date));
 }
 
 std::string Fmi::date_time::Date::to_simple_string() const

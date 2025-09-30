@@ -77,26 +77,22 @@ void Fmi::AsyncTask::wait()
 
 bool Fmi::AsyncTask::wait_for(double sec)
 {
-  if (task_thread.joinable())
+  if (!task_thread.joinable())
+     return false;
+     
+  auto mks = int64_t(std::ceil(1000000.0 * sec));
+  LOG_TIME(fmt::format("try_join for %.3 seconds requested", sec))
+  bool is_done = task_thread.try_join_for(boost::chrono::microseconds(mks));
+  LOG_TIME("joined")
+  if (is_done)
   {
-    auto mks = int64_t(std::ceil(1000000.0 * sec));
-    LOG_TIME(fmt::format("try_join for %.3 seconds requested", sec))
-    bool is_done = task_thread.try_join_for(boost::chrono::microseconds(mks));
-    LOG_TIME("joined")
-    if (is_done)
+    std::exception_ptr exc = get_exception();
+    if (exc)
     {
-      std::exception_ptr exc = get_exception();
-      if (exc)
-      {
-        std::rethrow_exception(exc);
-      }
+      std::rethrow_exception(exc);
     }
-    return is_done;
   }
-  else
-  {
-    return false;
-  }
+  return is_done;
 }
 
 void Fmi::AsyncTask::cancel()

@@ -28,11 +28,9 @@ Fmi::last_write_time(const fs::path& path, std::error_code& ec)
         ec = std::error_code();
         return st.st_mtime;
     }
-    else
-    {
-        ec = std::error_code(errno, std::system_category());
-        return 0;
-    }
+
+    ec = std::error_code(errno, std::system_category());
+    return 0;
 }
 
 std::time_t Fmi::last_write_time(const fs::path& path)

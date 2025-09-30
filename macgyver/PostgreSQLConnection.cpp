@@ -509,11 +509,9 @@ class PostgreSQLConnection::Impl
       {
         return itsTransaction;
       }
-      else
-      {
-        auto conn = check_connection();
-        return std::shared_ptr<pqxx::transaction_base>(new pqxx::nontransaction(*conn));
-      }
+
+      auto conn = check_connection();
+      return std::shared_ptr<pqxx::transaction_base>(new pqxx::nontransaction(*conn));
     }
     catch (...)
     {

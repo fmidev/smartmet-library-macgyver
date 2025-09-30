@@ -240,7 +240,8 @@ namespace Fmi
                 //---------------------------------------------------------------------
                 return fetch_top();
             }
-            else if (current_size < max_size)
+
+            if (current_size < max_size)
             {
                 //---------------------------------------------------------------------
                 // Item is not available, max limit not exceeded, create a new item

@@ -1316,10 +1316,8 @@ class Cache
       // Trying to expire nonexisting tag
       return;
     }
-    else
-    {
-      tagIt->second.first = expirationTime;
-    }
+
+    tagIt->second.first = expirationTime;
 
     // If tag map has grown large, clean it up
     if (itsTagMap.size() >= itsMaxSize)
