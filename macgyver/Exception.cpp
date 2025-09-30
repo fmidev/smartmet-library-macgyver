@@ -245,7 +245,7 @@ Exception& Exception::addDetails(const DetailList& _detailList)
 
 Exception& Exception::addParameter(const char* _name, std::string _value)
 {
-  parameterVector.push_back(std::make_pair(std::string(_name), _value));
+  parameterVector.emplace_back(std::string(_name), _value);
   return *this;
 }
 
