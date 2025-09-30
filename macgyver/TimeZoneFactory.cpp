@@ -16,7 +16,10 @@ using namespace std;
 
 namespace Fmi
 {
-static const char* default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
+namespace
+{
+const char* const default_coordinates = "/usr/share/smartmet/timezones/timezone.shz";
+}
 
 // ----------------------------------------------------------------------
 /*!
@@ -42,8 +45,7 @@ class TimeZoneFactory::Impl
  */
 // ----------------------------------------------------------------------
 
-TimeZoneFactory::Impl::Impl()
-    : m_Regions(date::get_tzdb())
+TimeZoneFactory::Impl::Impl() : m_Regions(date::get_tzdb())
 {
   try
   {
@@ -124,7 +126,7 @@ Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_region(const string& id)
     Fmi::TimeZonePtr ptr(date::locate_zone(id));
 
     if (!ptr)
-       throw Fmi::Exception(BCP, "TimeZoneFactory does not recognize region '" + id + "'");
+      throw Fmi::Exception(BCP, "TimeZoneFactory does not recognize region '" + id + "'");
 
     return ptr;
   }
@@ -148,11 +150,11 @@ Fmi::TimeZonePtr TimeZoneFactory::time_zone_from_string(const string& desc)
     Fmi::TimeZonePtr ptr(date::locate_zone(desc));
 
     // FIXME: POSIX TZ are currently not supported
-    //if (!ptr)
+    // if (!ptr)
     //{
     ////Region name not found: try POSIX TZ description (may throw exception)
-    //ptr.reset(new boost::local_time::posix_time_zone(desc));
-    //}
+    // ptr.reset(new boost::local_time::posix_time_zone(desc));
+    // }
 
     return ptr;
   }

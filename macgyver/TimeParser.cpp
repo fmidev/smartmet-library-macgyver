@@ -7,30 +7,27 @@
 #include "TimeParser.h"
 #include "Exception.h"
 #include "TimeParserDefinitions.h"
-
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/regex.hpp>
-
 #include <cctype>
-#include <stdexcept>
-
-static Fmi::DateTime bad_time;
-static Fmi::TimeDuration bad_duration;
 
 namespace
 {
-boost::regex iso8601_weeks{"^P(\\d+)W$"};
-boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
+const Fmi::DateTime bad_time;
+Fmi::TimeDuration bad_duration;  // const would require a user defined constructor!
+
+const boost::regex iso8601_weeks{"^P(\\d+)W$"};
+const boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
 #if 0
-boost::regex iso8601_long{
+const boost::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?$"};
 #endif
 
-boost::regex iso8601_long{
+const boost::regex iso8601_long{
     "^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?(T([[:d:]]+H)?([[:d:]]+M)?([[:d:]]+S|[[:d:]]+\\.[[:d:]]+"
     "S)?)?$"};
 
@@ -68,9 +65,7 @@ Fmi::DateTime buildFromSQL(const Fmi::TimeParser::TimeStamp& target)
     try
     {
       ret = Fmi::DateTime(Fmi::Date(target.year, target.month, target.day),
-                                     Fmi::Hours(hour) +
-                                         Fmi::Minutes(minute) +
-                                         Fmi::Seconds(second));
+                          Fmi::Hours(hour) + Fmi::Minutes(minute) + Fmi::Seconds(second));
     }
     catch (std::exception& err)
     {
@@ -109,9 +104,7 @@ Fmi::DateTime buildFromISO(const Fmi::TimeParser::TimeStamp& target)
     try
     {
       res = Fmi::DateTime(Fmi::Date(target.year, target.month, target.day),
-                                     Fmi::Hours(hour) +
-                                         Fmi::Minutes(minute) +
-                                         Fmi::Seconds(second));
+                          Fmi::Hours(hour) + Fmi::Minutes(minute) + Fmi::Seconds(second));
     }
     catch (std::exception& err)
     {
@@ -1071,9 +1064,7 @@ Fmi::DateTime parse(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-Fmi::LocalDateTime parse(const std::string& str,
-                                         const std::string& format,
-                                         Fmi::TimeZonePtr tz)
+Fmi::LocalDateTime parse(const std::string& str, const std::string& format, Fmi::TimeZonePtr tz)
 {
   try
   {
@@ -1098,8 +1089,7 @@ Fmi::LocalDateTime parse(const std::string& str,
  */
 // ----------------------------------------------------------------------
 
-Fmi::LocalDateTime parse(const std::string& str,
-                                         Fmi::TimeZonePtr tz)
+Fmi::LocalDateTime parse(const std::string& str, Fmi::TimeZonePtr tz)
 {
   try
   {
@@ -1215,9 +1205,7 @@ Fmi::DateTime parse_http(const std::string& str)
       mi = std::stoul(hms.substr(3, 2));
       ss = std::stoul(hms.substr(6, 2));
 
-      Fmi::DateTime t(Fmi::Date(yy, mm, dd),
-                                 Fmi::Hours(hh) + Fmi::Minutes(mi) +
-                                     Fmi::Seconds(ss));
+      Fmi::DateTime t(Fmi::Date(yy, mm, dd), Fmi::Hours(hh) + Fmi::Minutes(mi) + Fmi::Seconds(ss));
 
       if (t.is_not_a_date_time())
         throw Fmi::Exception(BCP, "");
