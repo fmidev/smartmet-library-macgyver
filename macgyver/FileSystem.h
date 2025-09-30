@@ -74,7 +74,7 @@ namespace Fmi
     public:
         IStream(std::istream& raw_input, const std::string& name);
         IStream(std::istream& raw_input, Compression compression);
-        virtual ~IStream() = default;
+        ~IStream() override = default;
 
     private:
         void init(std::istream& raw_input, Compression compression);
@@ -85,7 +85,7 @@ namespace Fmi
     public:
         OStream(std::ostream& raw_output, const std::string& name);
         OStream(std::ostream& raw_output, Compression compression);
-        virtual ~OStream() = default;
+        ~OStream() override = default;
 
     private:
         void init(std::ostream& raw_output, Compression compression);
