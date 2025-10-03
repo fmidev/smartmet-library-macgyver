@@ -202,7 +202,6 @@ void Fmi::IStream::init(std::istream& raw_input, Compression compression)
 Fmi::OStream::~OStream() = default;
 
 Fmi::OStream::OStream(std::ostream& raw_output, const std::string& name)
-    : boost::iostreams::filtering_stream<boost::iostreams::output>()
 {
   init(raw_output, guess_compression_type(name));
 }
