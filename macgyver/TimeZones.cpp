@@ -80,8 +80,8 @@ TimeZones::TimeZones() : itsPimple(new Pimple(default_regions, default_coordinat
  */
 // ----------------------------------------------------------------------
 
-TimeZones::TimeZones(const std::string& regionsFile, const std::string& coordinatesFile)
-    : itsPimple(new Pimple(regionsFile, coordinatesFile))
+TimeZones::TimeZones(const std::string& regionFile, const std::string& coordinatesFile)
+    : itsPimple(new Pimple(regionFile, coordinatesFile))
 {
 }
 

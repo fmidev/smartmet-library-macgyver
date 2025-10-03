@@ -6,15 +6,15 @@
 
 #pragma once
 
-#include <atomic>
-#include <functional>
-#include <memory>
-#include <fmt/format.h>
-#include <pqxx/pqxx>
-#include <string>
 #include "Exception.h"
 #include "Pool.h"
 #include "TypeTraits.h"
+#include <fmt/format.h>
+#include <atomic>
+#include <functional>
+#include <memory>
+#include <pqxx/pqxx>
+#include <string>
 
 namespace Fmi
 {
@@ -40,7 +40,7 @@ struct PostgreSQLConnectionOptions
   std::string password;
   std::string encoding = "UTF8";
   unsigned int connect_timeout = 0;
-  unsigned int slow_query_limit = 0; // seconds
+  unsigned int slow_query_limit = 0;  // seconds
   bool debug = false;
 
   PostgreSQLConnectionOptions() = default;
@@ -56,7 +56,7 @@ class PostgreSQLConnection
  public:
   class Transaction final
   {
-  public:
+   public:
     ~Transaction();
     Transaction(const PostgreSQLConnection& theConnection);
 
@@ -77,54 +77,57 @@ class PostgreSQLConnection
 
   class PreparedSQL final
   {
-      const PostgreSQLConnection& conn;
-      const std::string name;
-      const std::string sql;
+    const PostgreSQLConnection& conn;
+    const std::string name;
+    const std::string sql;
+
    public:
-      PreparedSQL(const PostgreSQLConnection& theConnection, const std::string& name, const std::string& sql);
-      ~PreparedSQL();
+    PreparedSQL(const PostgreSQLConnection& theConnection,
+                const std::string& name,
+                const std::string& theSQL);
+    ~PreparedSQL();
 
-      /**
-       *   @brief execute prepared SQL statement with parameters provided in a container
-       *         (eg. std::vector)
-       *
-       *   @param container container with parameters
-       *   @param requested_size requested row count in the response
-       *                         (default -1, negative value means no limits)
-       */
-      template <typename Container>
-       std::enable_if_t<is_iterable<Container>::value, pqxx::result>
-      exec_p(const Container& container, int requested_size = -1);
+    /**
+     *   @brief execute prepared SQL statement with parameters provided in a container
+     *         (eg. std::vector)
+     *
+     *   @param container container with parameters
+     *   @param requested_size requested row count in the response
+     *                         (default -1, negative value means no limits)
+     */
+    template <typename Container>
+    std::enable_if_t<is_iterable<Container>::value, pqxx::result> exec_p(const Container& container,
+                                                                         int requested_size = -1);
 
-      template <typename... Args>
-      pqxx::result exec(Args... args)
+    template <typename... Args>
+    pqxx::result exec(Args... args)
+    {
+      try
       {
-        try
-        {
-          auto transaction_ptr = conn.get_transaction_impl();
-          return transaction_ptr->exec_prepared(name, args...);
-        }
-        catch (...)
-        {
-          throw Fmi::Exception::Trace(BCP, "Operation failed!");
-        }
+        auto transaction_ptr = conn.get_transaction_impl();
+        return transaction_ptr->exec_prepared(name, args...);
       }
-
-      template <typename... Args>
-      pqxx::result exec_n(std::size_t num_rows, Args... args)
+      catch (...)
       {
-        try
-        {
-          auto transaction_ptr = conn.get_transaction_impl();
-          return transaction_ptr->exec_prepared_n(num_rows, name, args...);
-        }
-        catch (...)
-        {
-          throw Fmi::Exception::Trace(BCP, "Operation failed!");
-        }
+        throw Fmi::Exception::Trace(BCP, "Operation failed!");
       }
+    }
 
-      using Ptr = std::shared_ptr<PreparedSQL>;
+    template <typename... Args>
+    pqxx::result exec_n(std::size_t num_rows, Args... args)
+    {
+      try
+      {
+        auto transaction_ptr = conn.get_transaction_impl();
+        return transaction_ptr->exec_prepared_n(num_rows, name, args...);
+      }
+      catch (...)
+      {
+        throw Fmi::Exception::Trace(BCP, "Operation failed!");
+      }
+    }
+
+    using Ptr = std::shared_ptr<PreparedSQL>;
   };
 
   ~PostgreSQLConnection();
@@ -154,16 +157,17 @@ class PostgreSQLConnection
   template <typename... Args>
   pqxx::result exec_params(const std::string& theSQLStatement, Args... args) const
   {
-     auto transaction_ptr = get_transaction_impl();
-     return transaction_ptr->exec_params(theSQLStatement, args...);
+    auto transaction_ptr = get_transaction_impl();
+    return transaction_ptr->exec_params(theSQLStatement, args...);
   }
 
   template <typename... Args>
-  pqxx::result exec_params_n(std::size_t num_rows, const std::string& theSQLStatement,
-      Args... args) const
+  pqxx::result exec_params_n(std::size_t num_rows,
+                             const std::string& theSQLStatement,
+                             Args... args) const
   {
-     auto transaction_ptr = get_transaction_impl();
-     return transaction_ptr->exec_params_n(num_rows, theSQLStatement, args...);
+    auto transaction_ptr = get_transaction_impl();
+    return transaction_ptr->exec_params_n(num_rows, theSQLStatement, args...);
   }
 
   /**
@@ -175,11 +179,10 @@ class PostgreSQLConnection
    *                         (default -1, negative value means no limits)
    */
   template <typename Container>
-   std::enable_if_t<is_iterable<Container>::value, pqxx::result>
-  exec_params_p(
+  std::enable_if_t<is_iterable<Container>::value, pqxx::result> exec_params_p(
       const std::string& theSQLStatement,
       const Container& container,
-      int requested_size =  -1) const;
+      int requested_size = -1) const;
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
@@ -197,7 +200,7 @@ class PostgreSQLConnection
   /**
    *   @brief Disable reconnect attempts for all PostgreSQL objects (for use in tests)
    */
-    static void disableReconnect() { reconnectDisabled.store(true); }
+  static void disableReconnect() { reconnectDisabled.store(true); }
 
  private:
   bool isTransaction() const;
@@ -217,22 +220,22 @@ class PostgreSQLConnection
 
 };  // class PostgreSQLConnection
 
-
 namespace detail
 {
 
 #if PQXX_VERSION_MAJOR < 7
 
 template <typename Container>
-auto make_params(const Container& container) -> decltype(pqxx::prepare::make_dynamic_params(container))
+auto make_params(const Container& container)
+    -> decltype(pqxx::prepare::make_dynamic_params(container))
 {
   return pqxx::prepare::make_dynamic_params(container);
 }
 
-#else // PQXX_VERSION >= 7
+#else  // PQXX_VERSION >= 7
 
 template <typename Container>
-  auto make_params(const Container& container) -> pqxx::params
+auto make_params(const Container& container) -> pqxx::params
 {
   pqxx::params params;
   params.append_multi(container);
@@ -241,7 +244,7 @@ template <typename Container>
 
 #endif
 
-} // namespace detail
+}  // namespace detail
 
 template <typename Container>
 std::enable_if_t<is_iterable<Container>::value, pqxx::result>
@@ -251,9 +254,10 @@ PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int reques
   {
     auto transaction_ptr = conn.get_transaction_impl();
     const auto params = detail::make_params(container);
-    if (requested_size < 0) {
+    if (requested_size < 0)
+    {
       return transaction_ptr->exec_prepared(name, params);
-     }
+    }
     return transaction_ptr->exec_prepared_n(requested_size, name, params);
   }
   catch (...)
@@ -263,11 +267,8 @@ PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int reques
 }
 
 template <typename Container>
-std::enable_if_t<is_iterable<Container>::value, pqxx::result>
-PostgreSQLConnection::exec_params_p(
-    const std::string& theSQLStatement,
-    const Container& container,
-    int requested_size) const
+std::enable_if_t<is_iterable<Container>::value, pqxx::result> PostgreSQLConnection::exec_params_p(
+    const std::string& theSQLStatement, const Container& container, int requested_size) const
 {
   // No easy way to use the same method name as for Args... as we need to distinguish from
   // cases when std::string<something> is provided as the only argument
@@ -275,7 +276,8 @@ PostgreSQLConnection::exec_params_p(
   {
     auto transaction_ptr = get_transaction_impl();
     const auto params = detail::make_params(container);
-    if (requested_size < 0) {
+    if (requested_size < 0)
+    {
       return transaction_ptr->exec_params(theSQLStatement, params);
     }
     return transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
@@ -286,67 +288,85 @@ PostgreSQLConnection::exec_params_p(
   }
 }
 
-using PostgreSQLConnectionPool = Fmi::Pool
-<
-  Fmi::PoolInitType::Parallel,
-  PostgreSQLConnection,
-  PostgreSQLConnectionOptions
->;
+using PostgreSQLConnectionPool =
+    Fmi::Pool<Fmi::PoolInitType::Parallel, PostgreSQLConnection, PostgreSQLConnectionOptions>;
 
 }  // namespace Database
 }  // namespace Fmi
 
 namespace fmt
 {
-  /**
-   * @brief Custom formatter for Fmi::Database::PostgreSQLConnectionId
-   *
-   * Usage:
-   *   PostgreSQLConnectionId id{"db.example.com", 5432, "example"};
-   *   fmt::format("{}", id)      -> "db.example.com:5432/example"
-   *   fmt::format("{:h}", id)    -> "db.example.com"
-   *   fmt::format("{:p}", id)    -> "5432"
-   *   fmt::format("{:d}", id)    -> "example"
-   *
-   * Based on verson suggested by ChatGPT 5 with some simplifications
-   */
-  template <>
-  struct formatter<Fmi::Database::PostgreSQLConnectionId>
+/**
+ * @brief Custom formatter for Fmi::Database::PostgreSQLConnectionId
+ *
+ * Usage:
+ *   PostgreSQLConnectionId id{"db.example.com", 5432, "example"};
+ *   fmt::format("{}", id)      -> "db.example.com:5432/example"
+ *   fmt::format("{:h}", id)    -> "db.example.com"
+ *   fmt::format("{:p}", id)    -> "5432"
+ *   fmt::format("{:d}", id)    -> "example"
+ *
+ * Based on verson suggested by ChatGPT 5 with some simplifications
+ */
+template <>
+struct formatter<Fmi::Database::PostgreSQLConnectionId>
+{
+  enum class part
   {
-    enum class part { all, host, port, db } which = part::all;
+    all,
+    host,
+    port,
+    db
+  } which = part::all;
 
-      // Parse "{:h}", "{:p}", "{:d}", or "{}"
-      constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
-      const auto *it = ctx.begin();
-      const auto *end = ctx.end();
-      if (it == end || *it == '}') return it;  // default: all
+  // Parse "{:h}", "{:p}", "{:d}", or "{}"
+  constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator
+  {
+    const auto* it = ctx.begin();
+    const auto* end = ctx.end();
+    if (it == end || *it == '}')
+      return it;  // default: all
 
-      switch (*it) {
-        case 'h': which = part::host; break;
-        case 'p': which = part::port; break;
-        case 'd': which = part::db;   break;
-        default:  which = part::all;  break;   // anything else -> default
-      }
-      ++it;
-      // Ignore anything until '}' (we don't support other specs)
-      while (it != end && *it != '}') ++it;
-      return it;
-    }
-
-    template <class FormatContext>
-    auto format(const Fmi::Database::PostgreSQLConnectionId& v, FormatContext& ctx) const
-        -> decltype(ctx.out())
+    switch (*it)
     {
-      switch (which) {
-      case part::host: return fmt::format_to(ctx.out(), "{}", v.host);
-      case part::port: return fmt::format_to(ctx.out(), "{}", v.port);
-      case part::db:   return fmt::format_to(ctx.out(), "{}", v.database);
+      case 'h':
+        which = part::host;
+        break;
+      case 'p':
+        which = part::port;
+        break;
+      case 'd':
+        which = part::db;
+        break;
+      default:
+        which = part::all;
+        break;  // anything else -> default
+    }
+    ++it;
+    // Ignore anything until '}' (we don't support other specs)
+    while (it != end && *it != '}')
+      ++it;
+    return it;
+  }
+
+  template <class FormatContext>
+  auto format(const Fmi::Database::PostgreSQLConnectionId& v, FormatContext& ctx) const
+      -> decltype(ctx.out())
+  {
+    switch (which)
+    {
+      case part::host:
+        return fmt::format_to(ctx.out(), "{}", v.host);
+      case part::port:
+        return fmt::format_to(ctx.out(), "{}", v.port);
+      case part::db:
+        return fmt::format_to(ctx.out(), "{}", v.database);
       case part::all:
       default:
         return fmt::format_to(ctx.out(), "{}:{}/{}", v.host, v.port, v.database);
-      }
     }
-  };
+  }
+};
 }  // namespace fmt
 
 // ======================================================================

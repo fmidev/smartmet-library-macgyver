@@ -292,21 +292,21 @@ Fmi::date_time::TimeDuration& Fmi::date_time::TimeDuration::operator--()
 }
 
 Fmi::date_time::TimeDuration
-Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
+Fmi::date_time::TimeDuration::from_stream(std::istream& src, bool assume_eoi)
 {
   detail::duration_t td1;
   try
   {
-    const internal::StreamExceptionState save(is, std::ios::failbit | std::ios::badbit);
-    is >> date::parse("%H:%M", td1);
-    if (!is.eof() && is.peek() == ':')
+    const internal::StreamExceptionState save(src, std::ios::failbit | std::ios::badbit);
+    src >> date::parse("%H:%M", td1);
+    if (!src.eof() && src.peek() == ':')
     {
       detail::duration_t td2;
-      is >> date::parse(":%S", td2);
+      src >> date::parse(":%S", td2);
       td1 += td2;
       // Skip any remaining digits of second part if present
-      while (!is.eof() && std::isdigit(is.peek()))
-        is.get();
+      while (!src.eof() && std::isdigit(src.peek()))
+        src.get();
     }
   }
   catch (...)
@@ -315,7 +315,7 @@ Fmi::date_time::TimeDuration::from_stream(std::istream& is, bool assume_eoi)
     throw err;
   }
 
-  Fmi::date_time::internal::check_parse_status(is, assume_eoi, "time duration");
+  Fmi::date_time::internal::check_parse_status(src, assume_eoi, "time duration");
 
   return td1;
 }

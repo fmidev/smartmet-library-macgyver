@@ -451,7 +451,7 @@ class PostgreSQLConnection::Impl
         conn = reopen();
         if (!conn)
           throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-        
+
         try
         {
           pqxx::nontransaction nitsTransaction(*conn);
@@ -805,9 +805,9 @@ void PostgreSQLConnection::Transaction::rollback()
 
 PostgreSQLConnection::PreparedSQL::PreparedSQL(const PostgreSQLConnection& theConnection,
                                                const std::string& name,
-                                               const std::string& theSQLStatement)
+                                               const std::string& theSQL)
 
-    : conn(theConnection), name(name), sql(theSQLStatement)
+    : conn(theConnection), name(name), sql(theSQL)
 {
   try
   {
@@ -821,7 +821,7 @@ PostgreSQLConnection::PreparedSQL::PreparedSQL(const PostgreSQLConnection& theCo
 
     // FIXME: report conflicts (repeated sama name). Additionally one could ignore call
     //        if the new SQL statement is identical to the previous one
-    conn.impl->register_prepared_sql(name, theSQLStatement);
+    conn.impl->register_prepared_sql(name, theSQL);
   }
   catch (...)
   {
