@@ -14,7 +14,7 @@
 #include <sys/time.h>
 #endif
 
-Fmi::ScopedTimer::ScopedTimer(const std::string& theName) : name(theName)
+Fmi::ScopedTimer::ScopedTimer(std::string theName) : name(std::move(theName))
 {
 #ifndef _MSC_VER
   std::array<char, 80> buffer{};
@@ -25,7 +25,8 @@ Fmi::ScopedTimer::ScopedTimer(const std::string& theName) : name(theName)
   static_cast<void>(localtime_r(&tv.tv_sec, &t2));  // would just return &t2
   static_cast<void>(strftime(buffer.data(), buffer.size(), "%Y-%m-%d %H:%M:%S", &t2));
   time_str = buffer.data();
-  static_cast<void>(snprintf(buffer.data(), buffer.size(), ".%06u", static_cast<unsigned>(tv.tv_usec)));
+  static_cast<void>(
+      snprintf(buffer.data(), buffer.size(), ".%06u", static_cast<unsigned>(tv.tv_usec)));
   time_str += buffer.data();
 #else
 // VC++ toteutus

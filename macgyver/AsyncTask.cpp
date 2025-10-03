@@ -1,35 +1,32 @@
 #include "AsyncTask.h"
-
 #include "DateTime.h"
-#include "DebugTools.h"
 #include "TypeName.h"
-#include <chrono>
-#include <iostream>
-#include <fmt/format.h>
 #include <boost/chrono.hpp>
-
-
+#include <fmt/format.h>
+#include <iostream>
+#include <utility>
 
 bool Fmi::AsyncTask::silent = false;
 bool Fmi::AsyncTask::log_time = false;
 
-#define LOG_TIME(desc) if (Fmi::AsyncTask::log_time) { Fmi::AsyncTask::log_event_time(this, desc); }
+#define LOG_TIME(desc)                          \
+  if (Fmi::AsyncTask::log_time)                 \
+  {                                             \
+    Fmi::AsyncTask::log_event_time(this, desc); \
+  }
 
-Fmi::AsyncTask::AsyncTask(const std::string& name,
+Fmi::AsyncTask::AsyncTask(std::string name,
                           std::function<void()> task,
                           std::function<void()> notify)
 
-    : name(name),
+    : name(std::move(name)),
       status(none),
       done(false),
-      notify(notify),
+      notify(std::move(notify)),
       ex(nullptr),
-      task_thread([this, task]() { run(task); })
-{
-    LOG_TIME("created")
-}
+      task_thread([this, task]() { run(task); }){LOG_TIME("created")}
 
-Fmi::AsyncTask::~AsyncTask()
+      Fmi::AsyncTask::~AsyncTask()
 {
   if (task_thread.joinable())
   {
@@ -78,8 +75,8 @@ void Fmi::AsyncTask::wait()
 bool Fmi::AsyncTask::wait_for(double sec)
 {
   if (!task_thread.joinable())
-     return false;
-     
+    return false;
+
   auto mks = int64_t(std::ceil(1000000.0 * sec));
   LOG_TIME(fmt::format("try_join for %.3 seconds requested", sec))
   bool is_done = task_thread.try_join_for(boost::chrono::microseconds(mks));
@@ -115,7 +112,7 @@ void Fmi::AsyncTask::interruption_point()
   boost::this_thread::interruption_point();
 }
 
-void Fmi::AsyncTask::run(std::function<void()> task)
+void Fmi::AsyncTask::run(const std::function<void()>& task)
 {
   try
   {
@@ -159,8 +156,6 @@ std::exception_ptr Fmi::AsyncTask::get_exception() const
 void Fmi::AsyncTask::log_event_time(const AsyncTask* task, const std::string& desc)
 {
   std::cout << Fmi::MicrosecClock::local_time() << " [Fmi::AsyncTask]: ("
-            << reinterpret_cast<const void*>(task) << ") '" << task->get_name()
-            << "': " << desc
+            << reinterpret_cast<const void*>(task) << ") '" << task->get_name() << "': " << desc
             << '\n';
 }
-

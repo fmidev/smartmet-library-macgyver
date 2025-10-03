@@ -36,9 +36,8 @@ double round(double theValue, int thePrecision, const std::string& theMode)
 }  // namespace
 
 // c++14 would not need this
-ValueFormatterParam::ValueFormatterParam(const std::string& theMissingText,
-                                         const std::string& theFloatField)
-    : missingText(theMissingText), floatField(theFloatField)
+ValueFormatterParam::ValueFormatterParam(std::string theMissingText, std::string theFloatField)
+    : missingText(std::move(theMissingText)), floatField(std::move(theFloatField))
 {
 }
 

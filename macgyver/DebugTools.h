@@ -1,7 +1,7 @@
 #pragma once
 
-#include "TypeName.h"
 #include "Exception.h"
+#include "TypeName.h"
 #include <exception>
 #include <iostream>
 #include <string>
@@ -26,7 +26,7 @@ namespace Fmi
 class ScopedTimer
 {
  public:
-  ScopedTimer(const std::string& theName);
+  ScopedTimer(std::string theName);
   virtual ~ScopedTimer();
 
  private:
@@ -37,16 +37,16 @@ class ScopedTimer
 
 class Redirecter final
 {
-public:
-    Redirecter(std::ostream& dest, std::ostream& src);
-    virtual ~Redirecter();
+ public:
+  Redirecter(std::ostream& dest, std::ostream& src);
+  virtual ~Redirecter();
 
-    Redirecter(const Redirecter&) = delete;
-    Redirecter& operator = (const Redirecter&) = delete;
+  Redirecter(const Redirecter&) = delete;
+  Redirecter& operator=(const Redirecter&) = delete;
 
-private:
-    std::ostream& src;
-    std::streambuf* sbuf;
+ private:
+  std::ostream& src;
+  std::streambuf* sbuf;
 };
 
 /**
@@ -75,8 +75,7 @@ int tracerPid();
     catch (...)                                                                                   \
     {                                                                                             \
       Fmi::Exception::ForceStackTrace forceStackTrace;                                            \
-      const auto e = Fmi::Exception::Trace(BCP,                                                   \
-          "SHOW_EXCEPTIONS: Exception thrown by '"#x"'");                                         \
+      const auto e = Fmi::Exception::Trace(BCP, "SHOW_EXCEPTIONS: Exception thrown by '" #x "'"); \
       std::cout << e << std::endl;                                                                \
       throw; /* Rethrow the original exception. Newly created exception object is for  */         \
       /* output only   */                                                                         \

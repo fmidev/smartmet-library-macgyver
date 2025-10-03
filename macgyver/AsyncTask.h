@@ -33,7 +33,7 @@ class AsyncTask
    *
    *   Notification callback is called from task thread, so locking may be required
    */
-  AsyncTask(const std::string& name,
+  AsyncTask(std::string name,
             std::function<void()> task,
             std::function<void()> notify = std::function<void()>());
 
@@ -62,7 +62,7 @@ class AsyncTask
   static void interruption_point();
 
  private:
-  void run(std::function<void()> task);
+  void run(const std::function<void()>& task);
   void handle_result(Status stat, std::exception_ptr exc = nullptr);
   std::exception_ptr get_exception() const;
   static void log_event_time(const AsyncTask* task, const std::string& desc);

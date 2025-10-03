@@ -35,8 +35,8 @@ bool parse_size_t(const std::string& input, std::size_t& result)
   }
 }
 
-FileCache::FileCache(const fs::path& directory, std::size_t maxSize)
-    : itsMaxSize(maxSize), itsDirectory(directory)
+FileCache::FileCache(fs::path directory, std::size_t maxSize)
+    : itsMaxSize(maxSize), itsDirectory(std::move(directory))
 {
   try
   {
