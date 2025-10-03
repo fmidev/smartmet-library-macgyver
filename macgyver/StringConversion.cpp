@@ -1,3 +1,4 @@
+
 #include "StringConversion.h"
 #include "Exception.h"
 #include "NumericCast.h"
@@ -1212,9 +1213,9 @@ std::string xmlescape(const std::string& input)
 
     // https://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string
 
-    for (size_t pos = 0; pos != input.size(); ++pos)
+    for (char ch : input)
     {
-      switch (input[pos])
+      switch (ch)
       {
         case '&':
           output += "&amp;";
@@ -1232,15 +1233,15 @@ std::string xmlescape(const std::string& input)
           output += "&gt;";
           break;
         default:
-          if (input[pos] < 32 || input[pos] > 126)
+          if (ch < 32 || ch > 126)
           {
             // Numeric character reference for non-printable ASCII characters
             output += "&#";
-            output += Fmi::to_string(static_cast<int>(input[pos]));
+            output += Fmi::to_string(static_cast<int>(ch));
             output += ";";
           }
           else
-            output += input[pos];
+            output += ch;
           break;
       }
     }
