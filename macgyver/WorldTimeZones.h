@@ -21,7 +21,7 @@ class WorldTimeZones
   ~WorldTimeZones();
 
   const std::string& zone_name(float lon, float lat) const;
-  const std::vector<std::string> zones() const { return itsZones; }
+  std::vector<std::string> zones() const { return itsZones; }
 
  private:
   unsigned int itsWidth = 0;

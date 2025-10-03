@@ -117,9 +117,9 @@ namespace Fmi
 
             detail::time_point_t get_impl() const { return m_time_point; }
 
-            template <typename ArchiveType> void save(ArchiveType& archive, const unsigned int version) const;
+            template <typename ArchiveType> void save(ArchiveType& archive, unsigned int version) const;
 
-            template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
+            template <typename ArchiveType> void load(ArchiveType& archive, unsigned int version);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
 

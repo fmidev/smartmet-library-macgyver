@@ -23,8 +23,14 @@ std::string to_string(unsigned int value);
 std::string to_string(unsigned long value);
 std::string to_string(float value);
 std::string to_string(double value);
-inline std::string to_string(const char* value) { return value; }
-inline std::string to_string(const unsigned char* value) { return reinterpret_cast<const char*>(value); }
+inline std::string to_string(const char* value)
+{
+  return value;
+}
+inline std::string to_string(const unsigned char* value)
+{
+  return reinterpret_cast<const char*>(value);
+}
 #if defined(_WIN32) || defined(WIN32)
 std::string to_string(size_t value);
 std::string to_string(time_t value);
@@ -51,7 +57,7 @@ std::optional<double> stod_opt(const std::string& str);
 
 std::size_t stosz(const std::string& str);  // B,K,M,G,T,P suffixes allowed
 
-std::string to_iso_string(const std::time_t time);
+std::string to_iso_string(std::time_t time);
 std::string to_iso_string(const TimeDuration& duration);
 std::string to_iso_string(const Fmi::Date& date);
 std::string to_iso_string(const DateTime& time);

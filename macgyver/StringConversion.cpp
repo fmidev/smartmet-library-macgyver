@@ -696,7 +696,7 @@ std::string to_iso_string(const Fmi::DateTime& time)
 }
 
 // Convert to form YYYYMMDDTHHMMSS where T is the date-time separator
-std::string to_iso_string(const std::time_t time)
+std::string to_iso_string(std::time_t time)
 {
   try
   {

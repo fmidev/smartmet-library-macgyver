@@ -101,9 +101,9 @@ namespace Fmi
             */
             static TimeDuration from_stream(std::istream& src, bool assume_eoi = true);
 
-            template <typename ArchiveType> void save(ArchiveType& archive, const unsigned int version) const;
+            template <typename ArchiveType> void save(ArchiveType& archive, unsigned int version) const;
 
-            template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
+            template <typename ArchiveType> void load(ArchiveType& archive, unsigned int version);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
         private:

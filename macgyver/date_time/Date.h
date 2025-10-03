@@ -93,9 +93,9 @@ namespace Fmi
 
             const date::local_days& get_impl() const { return date; }
 
-            template <typename ArchiveType> void save(ArchiveType& archive, const unsigned int version) const;
+            template <typename ArchiveType> void save(ArchiveType& archive, unsigned int version) const;
 
-            template <typename ArchiveType> void load(ArchiveType& archive, const unsigned int version);
+            template <typename ArchiveType> void load(ArchiveType& archive, unsigned int version);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
 
