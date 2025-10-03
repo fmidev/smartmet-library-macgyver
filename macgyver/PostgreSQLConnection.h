@@ -316,9 +316,9 @@ namespace fmt
     enum class part { all, host, port, db } which = part::all;
 
       // Parse "{:h}", "{:p}", "{:d}", or "{}"
-    constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
-      auto it = ctx.begin();
-      auto end = ctx.end();
+      constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
+      const auto *it = ctx.begin();
+      const auto *end = ctx.end();
       if (it == end || *it == '}') return it;  // default: all
 
       switch (*it) {
