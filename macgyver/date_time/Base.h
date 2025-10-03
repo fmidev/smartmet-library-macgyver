@@ -162,8 +162,8 @@ namespace Fmi
         // FIXME: make mameber function of Base and use it in template functions below
         template <
             typename TimeType,
-            typename std::enable_if<!std::is_same<TimeType, Base>::value &&
-                                    std::is_base_of<Base, TimeType>::value, int>::type = 0
+             std::enable_if_t<!std::is_same_v<TimeType, Base> &&
+                                    std::is_base_of_v<Base, TimeType>, int> = 0
         >
         std::string format_time(const std::string& format, const TimeType& time)
         {
@@ -178,8 +178,8 @@ namespace Fmi
 
         template <
             typename TimeType,
-            typename std::enable_if<!std::is_same<TimeType, Base>::value &&
-                                    std::is_base_of<Base, TimeType>::value, int>::type = 0
+             std::enable_if_t<!std::is_same_v<TimeType, Base> &&
+                                    std::is_base_of_v<Base, TimeType>, int> = 0
         >
         std::string format_time(
             const std::locale& locale,

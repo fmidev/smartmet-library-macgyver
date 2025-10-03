@@ -93,7 +93,7 @@ class PostgreSQLConnection
        *                         (default -1, negative value means no limits)
        */
       template <typename Container>
-      typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+       std::enable_if_t<is_iterable<Container>::value, pqxx::result>
       exec_p(const Container& container, int requested_size = -1);
 
       template <typename... Args>
@@ -175,7 +175,7 @@ class PostgreSQLConnection
    *                         (default -1, negative value means no limits)
    */
   template <typename Container>
-  typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+   std::enable_if_t<is_iterable<Container>::value, pqxx::result>
   exec_params_p(
       const std::string& theSQLStatement,
       const Container& container,

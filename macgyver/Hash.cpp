@@ -1,3 +1,4 @@
+
 #include "Hash.h"
 #include "StringConversion.h"
 #include <cstdint>
@@ -63,7 +64,7 @@ inline uint64_t mix2(uint64_t a, uint64_t b) noexcept
 template <class T>
 inline uint64_t to_u64_integral(T v) noexcept
 {
-  using U = typename std::make_unsigned<T>::type;
+  using U = std::make_unsigned_t<T>;
   return static_cast<uint64_t>(static_cast<U>(v));
 }
 

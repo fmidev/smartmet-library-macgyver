@@ -43,7 +43,7 @@ numeric_cast(Source value)
   try
   {
     // Special handling when Source is unsigned and Target is signed
-    if constexpr (std::is_unsigned<Source>::value && std::is_signed<Target>::value)
+    if constexpr (std::is_unsigned_v<Source> && std::is_signed_v<Target>)
     {
       if (value > target_max)
       {
@@ -52,7 +52,7 @@ numeric_cast(Source value)
       }
     }
     // Special handling when Source is signed and Target is unsigned
-    else if constexpr (std::is_signed<Source>::value && std::is_unsigned<Target>::value)
+    else if constexpr (std::is_signed_v<Source> && std::is_unsigned_v<Target>)
     {
       if (value < 0 || std::make_unsigned_t<type_t>(value) > target_max)
       {
@@ -88,7 +88,7 @@ numeric_cast(Source value)
  * @brief Specialization for same-type casts (no-op)
  */
 template <typename T>
-typename std::enable_if<is_numeric<T>::value, T>::type numeric_cast(T value) noexcept
+ std::enable_if_t<is_numeric<T>::value, T> numeric_cast(T value) noexcept
 {
   return value;
 }

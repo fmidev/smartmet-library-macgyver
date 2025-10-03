@@ -198,23 +198,23 @@ namespace detail
 }
 
 template <typename T>
-typename std::enable_if<detail::has_HashValue<T>::value, std::size_t>::type
+ std::enable_if_t<detail::has_HashValue<T>::value, std::size_t>
 hash_value(const T& obj)
 {
   return obj.HashValue();
 }
 
 template <typename T>
-typename std::enable_if<detail::has_hashValue<T>::value && !detail::has_HashValue<T>::value,
-           std::size_t>::type
+ std::enable_if_t<detail::has_hashValue<T>::value && !detail::has_HashValue<T>::value,
+           std::size_t>
 hash_value(const T& obj)
 {
   return obj.hashValue();
 }
 
 template <typename T>
-typename std::enable_if<detail::has_hash_value<T>::value && !detail::has_HashValue<T>::value &&
-           !detail::has_hashValue<T>::value, std::size_t>::type
+ std::enable_if_t<detail::has_hash_value<T>::value && !detail::has_HashValue<T>::value &&
+           !detail::has_hashValue<T>::value, std::size_t>
 hash_value(const T& obj)
 {
   return obj.hash_value();
