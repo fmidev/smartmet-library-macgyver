@@ -132,7 +132,7 @@ struct lunar_time_t
   std::string as_string_long(SetAndRiseOccurence occ) const;  // date included
 };
 
-std::ostream& operator<<(std::ostream&, const lunar_time_t& lt);
+std::ostream& operator<<(std::ostream& /* *out */, const lunar_time_t& lt);
 
 // Actual functions
 

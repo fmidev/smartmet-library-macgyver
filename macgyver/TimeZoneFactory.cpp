@@ -79,7 +79,7 @@ TimeZoneFactory::~TimeZoneFactory() = default;
  */
 // ----------------------------------------------------------------------
 
-void TimeZoneFactory::set_coordinate_file(const string&)
+void TimeZoneFactory::set_coordinate_file(const string& /* tmp */)
 {
   std::cerr << "Warning: TimeZOneFactor::set_coordinate_file is deprecated\n" << std::flush;
 }
@@ -90,7 +90,7 @@ void TimeZoneFactory::set_coordinate_file(const string&)
  */
 // ----------------------------------------------------------------------
 
-void TimeZoneFactory::set_region_file(const string&)
+void TimeZoneFactory::set_region_file(const string& /* tmp */)
 {
   std::cerr << "Warning: TimeZoneFactory::set_region_file is deprecated\n" << std::flush;
 }
