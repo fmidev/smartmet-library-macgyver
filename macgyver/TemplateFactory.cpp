@@ -26,7 +26,8 @@ using TemplateMap = std::map<std::filesystem::path, TemplateInfo>;
 thread_local TemplateMap itsTemplates;
 }  // namespace
 
-TemplateFactory::TemplateFactory() = default;
+namespace TemplateFactory
+{
 
 // ----------------------------------------------------------------------
 /*!
@@ -34,7 +35,7 @@ TemplateFactory::TemplateFactory() = default;
  */
 // ----------------------------------------------------------------------
 
-SharedFormatter TemplateFactory::get(const std::filesystem::path& theFilename) const
+SharedFormatter get(const std::filesystem::path& theFilename)
 {
   try
   {
@@ -75,4 +76,5 @@ SharedFormatter TemplateFactory::get(const std::filesystem::path& theFilename) c
   }
 }
 
+}  // namespace TemplateFactory
 }  // namespace Fmi

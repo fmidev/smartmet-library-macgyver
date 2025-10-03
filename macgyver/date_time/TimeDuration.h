@@ -42,7 +42,7 @@ namespace Fmi
             int64_t total_microseconds() const;
             int64_t total_nanoseconds() const { return 1000L * total_microseconds(); }
 
-            constexpr int64_t ticks_per_second() const { return detail::period_t::den; }
+            static constexpr int64_t ticks_per_second() { return detail::period_t::den; }
 
             std::string to_simple_string() const override;
             std::string to_iso_string() const override;

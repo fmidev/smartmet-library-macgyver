@@ -7,25 +7,18 @@
 #pragma once
 
 #include "TemplateFormatter.h"
-#include <filesystem>
 #include <boost/shared_ptr.hpp>
+#include <filesystem>
 
 namespace Fmi
 {
 using SharedFormatter = std::shared_ptr<Fmi::TemplateFormatter>;
 
-class TemplateFactory
+namespace TemplateFactory
 {
- public:
-  SharedFormatter get(const std::filesystem::path& theFilename) const;
 
-  TemplateFactory();
+SharedFormatter get(const std::filesystem::path& theFilename);
 
-  TemplateFactory(const TemplateFactory& other) = delete;
-  TemplateFactory(TemplateFactory&& other) = delete;
-  TemplateFactory& operator=(const TemplateFactory& other) = delete;
-  TemplateFactory& operator=(TemplateFactory&& other) = delete;
-
-};  // class TemplateFactory
+}  // namespace TemplateFactory
 
 }  // namespace Fmi
