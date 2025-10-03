@@ -146,7 +146,7 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
  */
 // ----------------------------------------------------------------------
 
-WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData(nullptr)
+WorldTimeZones::WorldTimeZones(const std::string &theFile)
 {
   try
   {
