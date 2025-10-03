@@ -139,7 +139,7 @@ void Fmi::AsyncTask::handle_result(Status stat, std::exception_ptr exc)
   std::unique_lock<std::mutex> lock(m1);
   this->done = true;
   this->status = stat;
-  this->ex = exc;
+  this->ex = std::move(exc);
   lock.unlock();
   if (notify)
   {

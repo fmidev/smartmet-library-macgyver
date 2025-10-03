@@ -58,7 +58,7 @@ Exception Exception::Trace(const char* _filename,
 Exception Exception::Trace(const char* _filename,
                           int _line,
                           const char* _function,
-                          std::exception_ptr eptr,
+                          const std::exception_ptr& eptr,
                           std::string _message)
 {
   if (!eptr)
@@ -226,7 +226,7 @@ void Exception::setTimeStamp(ExceptionTimeStamp _timestamp)
   timestamp = _timestamp;
 }
 
-Exception& Exception::addDetail(std::string _detailStr)
+Exception& Exception::addDetail(const std::string& _detailStr)
 {
   detailVector.emplace_back(_detailStr);
   return *this;
@@ -243,7 +243,7 @@ Exception& Exception::addDetails(const DetailList& _detailList)
   return *this;
 }
 
-Exception& Exception::addParameter(const char* _name, std::string _value)
+Exception& Exception::addParameter(const char* _name, const std::string& _value)
 {
   parameterVector.emplace_back(std::string(_name), _value);
   return *this;

@@ -40,7 +40,7 @@ class Exception : public std::exception
   static Exception Trace(const char* _filename,
                         int _line,
                         const char* _function,
-                        std::exception_ptr eptr,
+                        const std::exception_ptr& eptr,
                         std::string _message);
 
   /**
@@ -68,7 +68,7 @@ class Exception : public std::exception
   // The following methods can be used for adding some additional information
   // related to the current exception.
 
-  Exception& addDetail(std::string _detailStr);
+  Exception& addDetail(const std::string& _detailStr);
   Exception& addDetails(const DetailList& _detailList);
 
   // This method can be used for adding named parameters into the exception.
@@ -76,7 +76,7 @@ class Exception : public std::exception
   // can be also used for delivering additional information to the exception
   // catchers ("preferred HTTP status code",etc.).
 
-  Exception& addParameter(const char* _name, std::string _value);
+  Exception& addParameter(const char* _name, const std::string& _value);
 
   const char* what() const noexcept(true) override;
   const char* getWhat() const noexcept(true);

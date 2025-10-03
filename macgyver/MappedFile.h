@@ -38,7 +38,7 @@ namespace Fmi
 
          virtual ~MappedFile();
 
-        void open(Params params);
+        void open(const Params& params);
 
         void open(
             const std::string& path,

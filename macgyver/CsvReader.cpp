@@ -60,7 +60,7 @@ bool isnewline(int ch)
  */
 // ----------------------------------------------------------------------
 
-void read(const string& filename, Callback callback, char delimiter)
+void read(const string& filename, const Callback& callback, char delimiter)
 {
   try
   {

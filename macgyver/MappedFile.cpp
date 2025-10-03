@@ -68,8 +68,7 @@ Fmi::MappedFile::~MappedFile()
     }
 }
 
-void
-Fmi::MappedFile::open(Params params)  try
+void Fmi::MappedFile::open(const Params& params)  try
 {
     madvise_default();
     m_path = params.path;
