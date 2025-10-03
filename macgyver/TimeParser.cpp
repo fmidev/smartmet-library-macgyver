@@ -14,6 +14,11 @@
 #include <boost/regex.hpp>
 #include <cctype>
 
+namespace Fmi
+{
+namespace TimeParser
+{
+
 namespace
 {
 const Fmi::DateTime bad_time;
@@ -171,12 +176,6 @@ Fmi::DateTime buildFromOffset(Fmi::TimeDuration offset)
   }
 }
 
-}  // namespace
-
-namespace Fmi
-{
-namespace TimeParser
-{
 std::uint16_t get_short_month(const std::string& str)
 {
   try
@@ -245,63 +244,6 @@ bool is_long_weekday(const std::string& str)
   {
     return (str == "Sunday" || str == "Monday" || str == "Tuesday" || str == "Wednesday" ||
             str == "Thursday" || str == "Friday" || str == "Saturday");
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Parse an unsigned integer from a C-string
- */
-// ----------------------------------------------------------------------
-
-bool parse_uint16(const char** str, unsigned int length, std::uint16_t* value)
-{
-  try
-  {
-    const char* ptr = *str;
-
-    std::uint16_t tmp = 0;
-    for (unsigned int i = 0; i < length; i++)
-    {
-      if (!isdigit(*ptr))
-        return false;
-
-      tmp *= 10;
-      tmp += static_cast<unsigned int>(*ptr - '0');
-      ++ptr;
-    }
-    *value = tmp;
-    *str = ptr;
-    return true;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief ISO 8601 dates use "-" as a date separator and ":" as a time separator
- */
-// ----------------------------------------------------------------------
-
-bool skip_separator(const char** str, char separator, bool extended_format)
-{
-  try
-  {
-    if (!extended_format)
-      return true;
-
-    if (**str != separator)
-      return false;
-
-    ++*str;
-    return true;
   }
   catch (...)
   {
@@ -410,6 +352,129 @@ bool looks_offset(const std::string& str)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Parse a time string and return the matched parser
+ */
+// ----------------------------------------------------------------------
+Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
+{
+  try
+  {
+    using iterator = std::string::const_iterator;
+
+    {
+      FMIParser<iterator> theParser;
+      TimeStamp target;
+
+      iterator start = str.begin();
+      iterator finish = str.end();
+      bool success = qi::parse(start, finish, theParser, target);
+      if (success)  // parse succesful, parsers check that entire input was consumed
+      {
+        try
+        {
+          Fmi::DateTime ret;
+          ret = buildFromISO(target);  // Similar building as with ISO parser
+          matchedParser = FMI;
+          return ret;
+        }
+        catch (...)
+        {
+          // Simply pass to the next parser
+        }
+      }
+    }
+
+    {
+      ISOParser<iterator> theParser;
+      TimeStamp target;
+
+      iterator start = str.begin();
+      iterator finish = str.end();
+      bool success = qi::parse(start, finish, theParser, target);
+      if (success)  // parse succesful, parsers check that entire input was consumed
+      {
+        try
+        {
+          Fmi::DateTime ret;
+          ret = buildFromISO(target);
+          matchedParser = ISO;
+          return ret;
+        }
+        catch (...)
+        {
+          // Simply pass to the next parser
+        }
+      }
+    }
+
+    {
+      SQLParser<iterator> theParser;
+      TimeStamp target;
+
+      iterator start = str.begin();
+      iterator finish = str.end();
+      bool success = qi::parse(start, finish, theParser, target);
+      if (success)  // parse succesful, parsers check that entire input was consumed
+      {
+        try
+        {
+          Fmi::DateTime ret;
+          ret = buildFromSQL(target);
+          matchedParser = SQL;
+          return ret;
+        }
+        catch (...)
+        {
+          // Simply pass to the next parser
+        }
+      }
+    }
+
+    {
+      auto ret = try_parse_offset(str);
+      if (!ret.is_not_a_date_time())
+      {
+        matchedParser = OFFSET;
+        return ret;
+      }
+    }
+
+    {
+      EpochParser theParser;
+      UnixTime target;
+
+      iterator start = str.begin();
+      iterator finish = str.end();
+      bool success = qi::parse(start, finish, theParser >> qi::eoi, target);
+      if (success)  // parse succesful, parsers check that entire input was consumed
+      {
+        try
+        {
+          Fmi::DateTime ret;
+          ret = buildFromEpoch(target);
+          matchedParser = EPOCH;
+          return ret;
+        }
+        catch (...)
+        {
+          // Simply pass to the next parser
+        }
+      }
+    }
+
+    // Control is here, no match
+    throw Fmi::Exception(BCP, "Unknown time string '" + str + "'");
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+}  // namespace
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Guess the input format
  */
 // ----------------------------------------------------------------------
@@ -485,7 +550,7 @@ Fmi::DateTime parse_epoch(const std::string& str)
     bool success = qi::parse(start, finish, theParser >> qi::eoi, target);
 
     if (success)  // parse succesful, parsers check that entire input was consumed
-      return ::buildFromEpoch(target);
+      return buildFromEpoch(target);
 
     throw Fmi::Exception(BCP, "Invalid epoch time: '" + str + "'");
   }
@@ -515,7 +580,7 @@ Fmi::DateTime try_parse_offset(const std::string& str)
     if (offset.is_not_a_date_time())
       return bad_time;
 
-    return ::buildFromOffset(offset);
+    return buildFromOffset(offset);
   }
   catch (...)
   {
@@ -597,7 +662,7 @@ Fmi::DateTime parse_iso(const std::string& str)
     bool success = qi::parse(start, finish, theParser, target);
 
     if (success)  // parse succesful, parsers check that entire input was consumed
-      return ::buildFromISO(target);
+      return buildFromISO(target);
 
     throw Fmi::Exception(BCP, "Invalid ISO-time: '" + str + "'");
   }
@@ -627,7 +692,7 @@ Fmi::DateTime parse_fmi(const std::string& str)
     bool success = qi::parse(start, finish, theParser, target);
 
     if (success)  // parse succesful, parsers check that entire input was consumed
-      return ::buildFromISO(target);
+      return buildFromISO(target);
 
     throw Fmi::Exception(BCP, "Invalid ISO-time: '" + str + "'");
   }
@@ -657,7 +722,7 @@ Fmi::DateTime parse_sql(const std::string& str)
     bool success = qi::parse(start, finish, theParser, target);
 
     if (success)  // parse succesful, parsers check that entire input was consumed
-      return ::buildFromSQL(target);
+      return buildFromSQL(target);
 
     throw Fmi::Exception(BCP, "Invalid SQL-time: '" + str + "'");
   }
@@ -682,7 +747,7 @@ Fmi::DateTime parse_offset(const std::string& str)
 
     TimeDuration offset = parse_duration(str);
 
-    return ::buildFromOffset(offset);
+    return buildFromOffset(offset);
   }
   catch (...)
   {
@@ -891,127 +956,6 @@ TimeDuration try_parse_iso_duration(const std::string& str)
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Parse a time string and return the matched parser
- */
-// ----------------------------------------------------------------------
-Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
-{
-  try
-  {
-    using iterator = std::string::const_iterator;
-
-    {
-      FMIParser<iterator> theParser;
-      TimeStamp target;
-
-      iterator start = str.begin();
-      iterator finish = str.end();
-      bool success = qi::parse(start, finish, theParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
-      {
-        try
-        {
-          Fmi::DateTime ret;
-          ret = ::buildFromISO(target);  // Similar building as with ISO parser
-          matchedParser = FMI;
-          return ret;
-        }
-        catch (...)
-        {
-          // Simply pass to the next parser
-        }
-      }
-    }
-
-    {
-      ISOParser<iterator> theParser;
-      TimeStamp target;
-
-      iterator start = str.begin();
-      iterator finish = str.end();
-      bool success = qi::parse(start, finish, theParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
-      {
-        try
-        {
-          Fmi::DateTime ret;
-          ret = ::buildFromISO(target);
-          matchedParser = ISO;
-          return ret;
-        }
-        catch (...)
-        {
-          // Simply pass to the next parser
-        }
-      }
-    }
-
-    {
-      SQLParser<iterator> theParser;
-      TimeStamp target;
-
-      iterator start = str.begin();
-      iterator finish = str.end();
-      bool success = qi::parse(start, finish, theParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
-      {
-        try
-        {
-          Fmi::DateTime ret;
-          ret = ::buildFromSQL(target);
-          matchedParser = SQL;
-          return ret;
-        }
-        catch (...)
-        {
-          // Simply pass to the next parser
-        }
-      }
-    }
-
-    {
-      auto ret = try_parse_offset(str);
-      if (!ret.is_not_a_date_time())
-      {
-        matchedParser = OFFSET;
-        return ret;
-      }
-    }
-
-    {
-      EpochParser theParser;
-      UnixTime target;
-
-      iterator start = str.begin();
-      iterator finish = str.end();
-      bool success = qi::parse(start, finish, theParser >> qi::eoi, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
-      {
-        try
-        {
-          Fmi::DateTime ret;
-          ret = ::buildFromEpoch(target);
-          matchedParser = EPOCH;
-          return ret;
-        }
-        catch (...)
-        {
-          // Simply pass to the next parser
-        }
-      }
-    }
-
-    // Control is here, no match
-    throw Fmi::Exception(BCP, "Unknown time string '" + str + "'");
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Parse a time in the given format
  */
 // ----------------------------------------------------------------------
@@ -1064,7 +1008,9 @@ Fmi::DateTime parse(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-Fmi::LocalDateTime parse(const std::string& str, const std::string& format, Fmi::TimeZonePtr tz)
+Fmi::LocalDateTime parse(const std::string& str,
+                         const std::string& format,
+                         const Fmi::TimeZonePtr& tz)
 {
   try
   {
@@ -1089,7 +1035,7 @@ Fmi::LocalDateTime parse(const std::string& str, const std::string& format, Fmi:
  */
 // ----------------------------------------------------------------------
 
-Fmi::LocalDateTime parse(const std::string& str, Fmi::TimeZonePtr tz)
+Fmi::LocalDateTime parse(const std::string& str, const Fmi::TimeZonePtr& tz)
 {
   try
   {
