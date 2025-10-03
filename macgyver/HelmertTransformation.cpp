@@ -9,7 +9,7 @@
 #define __PRETTY_FUNCTION__ BOOST_CURRENT_FUNCTION
 #endif
 
-Fmi::HelmertTransformation::HelmertTransformation() {}
+Fmi::HelmertTransformation::HelmertTransformation() = default;
 
 std::array<double, 3> Fmi::HelmertTransformation::operator()(
     const std::array<double, 3>& x) const

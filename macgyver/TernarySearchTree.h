@@ -101,9 +101,7 @@ inline TernarySearchTree<T>::~TernarySearchTree()
 // ----------------------------------------------------------------------
 
 template <typename T>
-inline TernarySearchTree<T>::TernarySearchTree() 
-{
-}
+inline TernarySearchTree<T>::TernarySearchTree() = default;
 
 // ----------------------------------------------------------------------
 /*!

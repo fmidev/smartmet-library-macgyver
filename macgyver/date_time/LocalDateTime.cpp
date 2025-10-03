@@ -11,9 +11,7 @@ using Fmi::date_time::LocalDateTime;
 
 namespace detail = Fmi::detail;
 
-LocalDateTime::LocalDateTime() noexcept
-{
-}
+LocalDateTime::LocalDateTime() noexcept = default;
 
 LocalDateTime::LocalDateTime(Type type) noexcept
     : Base(type)
