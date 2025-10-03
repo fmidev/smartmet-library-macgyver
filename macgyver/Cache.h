@@ -821,11 +821,7 @@ struct SigmoidTimeExpire
         1.0 /
         (1.0 + std::exp(-0.02 * static_cast<double>(tagAge) + static_cast<double>(timeConstant)));
     double chance = dist(generator);
-    if (chance < expirationProbability)
-    {
-      return true;
-    }
-    return false;
+    return (chance < expirationProbability);
   }
 
   // Expired tags are removed when their return probability is less than 1%
