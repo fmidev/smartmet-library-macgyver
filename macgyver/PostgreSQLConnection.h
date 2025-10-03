@@ -311,7 +311,7 @@ namespace fmt
 template <>
 struct formatter<Fmi::Database::PostgreSQLConnectionId>
 {
-  enum class part
+  enum class part : std::uint8_t
   {
     all,
     host,
