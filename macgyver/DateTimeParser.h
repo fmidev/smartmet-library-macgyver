@@ -36,10 +36,10 @@ class DateTimeParser
   DateTime parse(const std::string& str, const std::string& format) const;
   DateTime parse(const std::string& str) const;
 
-  DateTime parse_http(const std::string& str) const;
+  static DateTime parse_http(const std::string& str);
 
   TimeDuration parse_duration(const std::string& str) const;
-  TimeDuration parse_iso_duration(const std::string& str) const;
+  static TimeDuration parse_iso_duration(const std::string& str);
 
  private:
   struct Impl;

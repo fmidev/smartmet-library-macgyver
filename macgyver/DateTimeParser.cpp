@@ -632,8 +632,8 @@ struct DateTimeParser::Impl
   DateTime parse_fmi(const std::string& str) const;
   DateTime parse_offset(const std::string& str) const;
 
-  std::string looks(const std::string& str) const;
-  bool looks_utc(const std::string& str) const;
+  static std::string looks(const std::string& str);
+  static bool looks_utc(const std::string& str);
 
   DateTime try_parse_offset(const std::string& str) const;
 
@@ -793,7 +793,7 @@ DateTime DateTimeParser::Impl::try_parse_offset(const std::string& str) const
  */
 // ----------------------------------------------------------------------
 
-std::string DateTimeParser::Impl::looks(const std::string& str) const
+std::string DateTimeParser::Impl::looks(const std::string& str)
 {
   try
   {
@@ -820,7 +820,7 @@ std::string DateTimeParser::Impl::looks(const std::string& str) const
  */
 // ----------------------------------------------------------------------
 
-bool DateTimeParser::Impl::looks_utc(const std::string& str) const
+bool DateTimeParser::Impl::looks_utc(const std::string& str)
 {
   try
   {
@@ -1231,7 +1231,7 @@ DateTime DateTimeParser::parse(const std::string& str) const
  */
 // ----------------------------------------------------------------------
 
-DateTime DateTimeParser::parse_http(const std::string& str) const
+DateTime DateTimeParser::parse_http(const std::string& str)
 {
   try
   {
@@ -1367,7 +1367,7 @@ TimeDuration DateTimeParser::parse_duration(const std::string& str) const
  */
 //----------------------------------------------------------------------
 
-TimeDuration DateTimeParser::parse_iso_duration(const std::string& str) const
+TimeDuration DateTimeParser::parse_iso_duration(const std::string& str)
 {
   try
   {

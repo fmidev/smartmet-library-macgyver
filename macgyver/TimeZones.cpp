@@ -91,7 +91,7 @@ TimeZones::TimeZones(const std::string& regionsFile, const std::string& coordina
  */
 // ----------------------------------------------------------------------
 
-vector<string> TimeZones::region_list() const
+vector<string> TimeZones::region_list()
 {
   try
   {

@@ -348,7 +348,7 @@ void FileCache::update()
 
 bool FileCache::writeFile(const fs::path& theDir,
                           const std::string& fileName,
-                          const std::string& theValue) const
+                          const std::string& theValue)
 {
   try
   {
@@ -466,7 +466,7 @@ bool FileCache::checkForDiskSpace(const fs::path& thePath,
   }
 }
 
-std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t hashValue) const
+std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t hashValue)
 {
   try
   {
@@ -494,9 +494,7 @@ std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t has
   }
 }
 
-bool FileCache::getKey(const std::string& directory,
-                       const std::string& filename,
-                       std::size_t& key) const
+bool FileCache::getKey(const std::string& directory, const std::string& filename, std::size_t& key)
 {
   try
   {

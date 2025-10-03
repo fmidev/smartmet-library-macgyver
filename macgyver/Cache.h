@@ -1554,9 +1554,9 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  bool writeFile(const std::filesystem::path& theDir,
-                 const std::string& fileName,
-                 const std::string& theValue) const;
+  static bool writeFile(const std::filesystem::path& theDir,
+                        const std::string& fileName,
+                        const std::string& theValue);
 
   // ----------------------------------------------------------------------
   /*!
@@ -1574,7 +1574,7 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  std::pair<std::string, std::string> getFileDirAndName(std::size_t hashValue) const;
+  static std::pair<std::string, std::string> getFileDirAndName(std::size_t hashValue);
 
   // ----------------------------------------------------------------------
   /*!
@@ -1582,7 +1582,7 @@ class FileCache
    */
   // ----------------------------------------------------------------------
 
-  bool getKey(const std::string& directory, const std::string& filename, std::size_t& key) const;
+  static bool getKey(const std::string& directory, const std::string& filename, std::size_t& key);
 
   std::size_t itsSize = 0;
 

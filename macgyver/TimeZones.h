@@ -23,7 +23,7 @@ class TimeZones
   TimeZones& operator=(const TimeZones& other) = delete;
   TimeZones(const TimeZones& other) = delete;
 
-  std::vector<std::string> region_list() const;
+  static std::vector<std::string> region_list();
 
   Fmi::TimeZonePtr time_zone_from_string(const std::string& desc) const;
   Fmi::TimeZonePtr time_zone_from_region(const std::string& id) const;
