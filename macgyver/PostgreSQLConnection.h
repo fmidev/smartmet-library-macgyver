@@ -244,7 +244,7 @@ template <typename Container>
 } // namespace detail
 
 template <typename Container>
-typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+std::enable_if_t<is_iterable<Container>::value, pqxx::result>
 PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int requested_size)
 {
   try
@@ -263,7 +263,7 @@ PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int reques
 }
 
 template <typename Container>
-typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
+std::enable_if_t<is_iterable<Container>::value, pqxx::result>
 PostgreSQLConnection::exec_params_p(
     const std::string& theSQLStatement,
     const Container& container,

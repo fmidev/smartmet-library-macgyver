@@ -17,9 +17,9 @@ namespace Fmi
  * @throws Fmi::Exception if the value cannot be represented in the target type
  */
 template <typename Target, typename Source>
-typename std::enable_if<is_numeric<Target>::value && is_numeric<Source>::value &&
-                            !std::is_same<Target, Source>::value,
-                        Target>::type
+ std::enable_if_t<is_numeric<Target>::value && is_numeric<Source>::value &&
+                            !std::is_same_v<Target, Source>,
+                        Target>
 numeric_cast(Source value)
 {
   using type_t = std::common_type_t<Target, Source>;
