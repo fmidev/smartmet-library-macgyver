@@ -19,6 +19,11 @@ class AsyncTaskGroup
   explicit AsyncTaskGroup(std::size_t max_paralell_tasks = 30);
   virtual ~AsyncTaskGroup();
 
+  AsyncTaskGroup(const AsyncTaskGroup&) = delete;
+  AsyncTaskGroup(AsyncTaskGroup&&) = delete;
+  AsyncTaskGroup& operator=(const AsyncTaskGroup&) = delete;
+  AsyncTaskGroup& operator=(AsyncTaskGroup&&) = delete;
+
   /**
    *   @brief Add a new task
    *
@@ -138,10 +143,5 @@ class AsyncTaskGroup
   std::list<std::pair<std::string, std::exception_ptr> > exception_info;
 
   static constexpr std::size_t MAX_EXCEPTIONS = 100;
-
-  AsyncTaskGroup(const AsyncTaskGroup&) = delete;
-  AsyncTaskGroup(AsyncTaskGroup&&) = delete;
-  AsyncTaskGroup& operator=(const AsyncTaskGroup&) = delete;
-  AsyncTaskGroup& operator=(AsyncTaskGroup&&) = delete;
 };
 }  // namespace Fmi
