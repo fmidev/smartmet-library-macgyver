@@ -343,9 +343,9 @@ try
 }
 catch (...)
 {
-    throw std::move(Fmi::Exception::Trace(BCP, "Operation failed!")
+    throw Fmi::Exception::Trace(BCP, "Operation failed!")
         .addParameter("this", to_simple_string())
-        .addParameter("advance", td.to_simple_string()));
+        .addParameter("advance", td.to_simple_string());
 }
 
 bool LocalDateTime::operator == (const LocalDateTime& other) const
@@ -355,9 +355,9 @@ try
 }
 catch (const std::exception& e)
 {
-    throw std::move(Fmi::Exception::Trace(BCP, e.what())
+    throw Fmi::Exception::Trace(BCP, e.what())
         .addParameter("This", to_simple_string())
-        .addParameter("Other", other.to_simple_string()));
+        .addParameter("Other", other.to_simple_string());
 }
 
 bool LocalDateTime::operator != (const LocalDateTime& other) const
@@ -414,10 +414,9 @@ int LocalDateTime::compare_with(const LocalDateTime& other) const
 {
     if (is_not_a_date_time() || other.is_not_a_date_time())
         throw
-            std::move(
-                Fmi::Exception(BCP, "Operation not supported for NOT_A_DATE_TIME")
+            Fmi::Exception(BCP, "Operation not supported for NOT_A_DATE_TIME")
                 .addParameter("This", to_simple_string())
-                .addParameter("Other", other.to_simple_string()));
+                .addParameter("Other", other.to_simple_string());
 
     if (is_special() || other.is_special())
     {
