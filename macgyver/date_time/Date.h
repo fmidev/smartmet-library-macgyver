@@ -15,7 +15,7 @@ namespace Fmi
 
     namespace date_time
     {
-        enum Month
+        enum Month : std::uint8_t
         {
             Jan = 1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
         };

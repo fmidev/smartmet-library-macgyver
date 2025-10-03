@@ -15,7 +15,7 @@
 
 namespace Fmi
 {
-    enum class PoolInitType
+    enum class PoolInitType : std::uint8_t
     {
         Sequential,
         Parallel

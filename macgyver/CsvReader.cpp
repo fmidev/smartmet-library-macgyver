@@ -22,7 +22,7 @@ namespace CsvReader
 namespace
 {
 
-enum CsvState
+enum CsvState : std::uint8_t
 {
   ExpectingRecord,  // new row should be starting
   ExpectingField,   // new field should be starting

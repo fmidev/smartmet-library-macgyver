@@ -16,7 +16,7 @@ namespace Fmi
         class LocalDateTime : public Base
         {
         public:
-            enum ErrorHandling
+            enum ErrorHandling : std::uint8_t
             {
                 EXCEPTION_ON_ERROR,
                 NOT_DATE_TIME_ON_ERROR
@@ -29,7 +29,7 @@ namespace Fmi
              *  EARLIEST - choose the earliest time
              *  LATEST - choose the latest time
              */
-            enum class Choose
+            enum class Choose : std::uint8_t
             {
                 NONE,
                 EARLIEST,

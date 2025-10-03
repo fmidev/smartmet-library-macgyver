@@ -46,7 +46,7 @@ std::time_t last_write_time_or(const std::filesystem::path& path, const std::tim
  */
 std::filesystem::path unique_path(const std::filesystem::path& model = "%%%%-%%%%-%%%%-%%%%");
 
-enum Compression
+enum Compression : std::uint8_t
 {
   NONE,
   BZIP2,

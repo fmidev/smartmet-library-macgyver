@@ -80,7 +80,7 @@ namespace Fmi
         class Base
         {
         public:
-            enum Type
+            enum Type : std::int8_t
             {
                 NORMAL = 0,
                 POS_INFINITY = 2,

@@ -8,6 +8,7 @@
 
 #include "ReferenceEllipsoid.h"
 #include <array>
+#include <cstdint>
 #include <string>
 
 namespace Fmi
@@ -18,7 +19,7 @@ namespace Fmi
 class HelmertTransformation
 {
  public:
-  enum FmiSphereConvScalingType
+  enum FmiSphereConvScalingType : std::uint8_t
   {
     FMI_SPHERE_NO_SCALING,
     FMI_SPHERE_PRESERVE_EAST_WEST_SCALE,

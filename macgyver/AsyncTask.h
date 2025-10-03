@@ -10,7 +10,7 @@ namespace Fmi
 class AsyncTask
 {
  public:
-  enum Status
+  enum Status : std::uint8_t
   {
     none,
     active,
@@ -41,8 +41,8 @@ class AsyncTask
 
   AsyncTask(const AsyncTask&) = delete;
   AsyncTask(AsyncTask&&) = delete;
-  AsyncTask& operator = (const AsyncTask&) = delete;
-  AsyncTask& operator = (AsyncTask&&) = delete;
+  AsyncTask& operator=(const AsyncTask&) = delete;
+  AsyncTask& operator=(AsyncTask&&) = delete;
 
   void wait();
 
@@ -75,7 +75,7 @@ class AsyncTask
   std::exception_ptr ex;
   boost::thread task_thread;
 
-public:
+ public:
   static bool log_time;
 };
 }  // namespace Fmi

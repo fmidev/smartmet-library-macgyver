@@ -78,7 +78,7 @@ struct solar_time_t
   TimeDuration daylength() const;
 };
 
-enum SetAndRiseOccurence
+enum SetAndRiseOccurence : std::uint8_t
 {
   FIRST_RISE,
   SECOND_RISE,

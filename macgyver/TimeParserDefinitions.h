@@ -1,6 +1,6 @@
 #pragma once
 
-//#define MYDEBUG
+// #define MYDEBUG
 
 #ifdef MYDEBUG
 #define BOOST_SPIRIT_DEBUG
@@ -16,9 +16,8 @@ namespace Fmi
 {
 namespace TimeParser
 {
-enum ParserId
+enum ParserId : std::uint8_t
 {
-
   SQL,
   ISO,
   EPOCH,
@@ -81,14 +80,11 @@ BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeOffset,
                           (char, sign)(unsigned int, value)(Fmi::TimeParser::OptionalChar, unit))
 
 BOOST_FUSION_ADAPT_STRUCT(Fmi::TimeParser::TimeStamp,
-                          (unsigned short,
-                           year)(unsigned short,
-                                 month)(unsigned short,
-                                        day)(Fmi::TimeParser::OptionalInt,
-                                             hour)(Fmi::TimeParser::OptionalInt,
-                                                   minute)(Fmi::TimeParser::OptionalInt,
-                                                           second)(Fmi::TimeParser::TimeZoneOffset,
-                                                                   tz))
+                          (unsigned short, year)(unsigned short, month)(unsigned short, day)(
+                              Fmi::TimeParser::OptionalInt,
+                              hour)(Fmi::TimeParser::OptionalInt,
+                                    minute)(Fmi::TimeParser::OptionalInt,
+                                            second)(Fmi::TimeParser::TimeZoneOffset, tz))
 
 namespace Fmi
 {
@@ -97,9 +93,9 @@ namespace TimeParser
 namespace spirit = boost::spirit;
 namespace qi = boost::spirit::qi;
 
-//########################################################
-// Timezone parser
-//########################################################
+// ########################################################
+//  Timezone parser
+// ########################################################
 
 template <typename Iterator>
 struct TimeZoneParser : qi::grammar<Iterator, TimeZoneOffset()>
@@ -111,10 +107,10 @@ struct TimeZoneParser : qi::grammar<Iterator, TimeZoneOffset()>
     tz_utc = qi::lit('Z') >> qi::attr('+') >> qi::attr(0) >> qi::attr(0) >> qi::attr(true);
 
     tz_hhmm =
-      (qi::char_("+") | qi::char_("-")) >>
-      two_digits >>
-      (two_digits | ((qi::lit(':') >> two_digits) | qi::attr(0))) >>  // sign with hours followed by optional colon and minutes
-      qi::attr(true);
+        (qi::char_("+") | qi::char_("-")) >> two_digits >>
+        (two_digits | ((qi::lit(':') >> two_digits) |
+                       qi::attr(0))) >>  // sign with hours followed by optional colon and minutes
+        qi::attr(true);
 
     tz_missing = qi::eps >> qi::attr('+') >> qi::attr(0) >> qi::attr(0) >> qi::attr(false);
 
@@ -134,9 +130,9 @@ struct TimeZoneParser : qi::grammar<Iterator, TimeZoneOffset()>
   TwoDigitNumber two_digits;
 };
 
-//########################################################
-// SQL-style timestring parser
-//########################################################
+// ########################################################
+//  SQL-style timestring parser
+// ########################################################
 
 template <typename Iterator>
 struct SQLParser : qi::grammar<Iterator, TimeStamp()>
@@ -174,10 +170,10 @@ struct SQLParser : qi::grammar<Iterator, TimeStamp()>
   qi::rule<Iterator, TimeStamp()> fulltime;
 };
 
-//########################################################
-// FMI-style timestring parser
-// YYYYMMDDHHmm - all mandatory
-//########################################################
+// ########################################################
+//  FMI-style timestring parser
+//  YYYYMMDDHHmm - all mandatory
+// ########################################################
 
 template <typename Iterator>
 struct FMIParser : qi::grammar<Iterator, TimeStamp()>
@@ -209,15 +205,15 @@ struct FMIParser : qi::grammar<Iterator, TimeStamp()>
   qi::rule<Iterator, TimeStamp()> fmitime;
 };
 
-//########################################################
-// Epoch parser
-//########################################################
+// ########################################################
+//  Epoch parser
+// ########################################################
 
 using EpochParser = qi::uint_parser<UnixTime, 10, 5, 11>;  // Radix 10, min digits 5, max digits 11
 
-//########################################################
-// Offset-style timestring parser
-//########################################################
+// ########################################################
+//  Offset-style timestring parser
+// ########################################################
 
 template <typename Iterator>
 struct OffsetParser : qi::grammar<Iterator, TimeOffset()>
@@ -257,17 +253,17 @@ struct OffsetParser : qi::grammar<Iterator, TimeOffset()>
   qi::rule<Iterator, TimeOffset()> complete_offset;
 };
 
-//########################################################
-// ISO-style timestring parser
+// ########################################################
+//  ISO-style timestring parser
 //
-// This parses time strings in the form of:
-// YYYY(sep)MM(sep)DDTHH(sep)MMSS.sss<timezone>
+//  This parses time strings in the form of:
+//  YYYY(sep)MM(sep)DDTHH(sep)MMSS.sss<timezone>
 //
-// Separator T is mandatory if sub-daily precision is
-// required
+//  Separator T is mandatory if sub-daily precision is
+//  required
 //
-// Fractional seconds are parsed but ignored due to being irrelevant
-//########################################################
+//  Fractional seconds are parsed but ignored due to being irrelevant
+// ########################################################
 
 template <typename Iterator>
 struct ISOParser : qi::grammar<Iterator, TimeStamp()>
@@ -296,13 +292,13 @@ struct ISOParser : qi::grammar<Iterator, TimeStamp()>
         (qi::omit[qi::lit(':')] >> uint12 >> &qi::omit[(qi::lit('.') | qi::lit('Z') | qi::eoi)]) |
         (optional_colon >> uint2);
 
-    isostamp_ext = year >> optional_dash >> month >> optional_dash >> mday >> date_time_separator
-                        >> -hmin >> optional_colon >> -hmin >> -second >> optional_period >> -qi::omit[uint3]
-                        >> tz_parser >> qi::eoi;
+    isostamp_ext = year >> optional_dash >> month >> optional_dash >> mday >> date_time_separator >>
+                   -hmin >> optional_colon >> -hmin >> -second >> optional_period >>
+                   -qi::omit[uint3] >> tz_parser >> qi::eoi;
 
     // Support separately format YYYYMMDD[T]HHMM[SS] <tz>
-    isostamp_basic = uint4 >> uint2 >> uint2 >> qi::omit[-date_time_separator]
-                           >> uint2 >> uint2 >> -uint2 >> tz_parser >> qi::eoi;
+    isostamp_basic = uint4 >> uint2 >> uint2 >> qi::omit[-date_time_separator] >> uint2 >> uint2 >>
+                     -uint2 >> tz_parser >> qi::eoi;
 
     isostamp = isostamp_basic | isostamp_ext;
 
