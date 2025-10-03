@@ -157,9 +157,8 @@ std::string ValueFormatter::format_double_conversion_fixed(double theValue, int 
 
     using namespace double_conversion;
 
-    const int kBufferSize = 168;
-    char buffer[kBufferSize];
-    StringBuilder builder(buffer, kBufferSize);
+    std::array<char, 168> buffer{};
+    StringBuilder builder(buffer.data(), buffer.size());
     int flags = DoubleToStringConverter::UNIQUE_ZERO;
 
     DoubleToStringConverter dc(
@@ -182,7 +181,7 @@ std::string ValueFormatter::format_double_conversion_fixed(double theValue, int 
         --pos;
     }
 
-    return std::string(buffer, pos);
+    return std::string(buffer.data(), pos);
   }
   catch (...)
   {
