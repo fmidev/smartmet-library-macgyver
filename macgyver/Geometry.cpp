@@ -150,7 +150,7 @@ double DistanceFromLineSegment(
 
   // The special case when the line is a dot is handled quickly
   if (length <= 0)
-    return Distance(theX, theY, theX1, theY1);
+    return Distance(theX1, theY1, theX, theY);
 
   // Intersection point in units of 0-1
 
@@ -164,7 +164,7 @@ double DistanceFromLineSegment(
   // Otherwise the nearest point is the nearer end point
 
   if (u < 0)
-    return Distance(theX, theY, theX1, theY1);
+    return Distance(theX1, theY1, theX, theY);
 
   return Distance(theX, theY, theX2, theY2);
 }
