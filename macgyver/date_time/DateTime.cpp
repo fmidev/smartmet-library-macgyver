@@ -9,7 +9,7 @@ namespace
 {
 std::string maybe_discard_seconds_part(std::string&& src)
 {
-  const std::size_t pos = src.find_last_not_of("0");
+  const std::size_t pos = src.find_last_not_of('0');
   if (pos == std::string::npos)
     return src;
 
