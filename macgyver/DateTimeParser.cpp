@@ -42,7 +42,9 @@ Fmi::DateTime buildFromSQL(const TimeStamp& target)
 {
   try
   {
-    unsigned int hour = 0, minute = 0, second = 0;
+    unsigned int hour = 0;
+    unsigned int minute = 0;
+    unsigned int second = 0;
     if (target.hour)
       hour = *target.hour;
     if (target.minute)
@@ -75,7 +77,9 @@ Fmi::DateTime buildFromISO(const TimeStamp& target)
 {
   try
   {
-    unsigned int hour = 0, minute = 0, second = 0;
+    unsigned int hour = 0;
+    unsigned int minute = 0;
+    unsigned int second = 0;
 
     if (target.hour)
       hour = *target.hour;

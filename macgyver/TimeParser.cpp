@@ -1097,8 +1097,12 @@ Fmi::DateTime parse_http(const std::string& str)
       std::vector<std::string> parts;
       boost::algorithm::split(parts, s, boost::algorithm::is_any_of(" "));
 
-      std::uint16_t dd, yy, mm;
-      std::uint16_t hh, mi, ss;
+      std::uint16_t dd = 0;
+      std::uint16_t yy = 0;
+      std::uint16_t mm = 0;
+      std::uint16_t hh = 0;
+      std::uint16_t mi = 0;
+      std::uint16_t ss = 0;
       std::string hms;
 
       switch (parts.size())

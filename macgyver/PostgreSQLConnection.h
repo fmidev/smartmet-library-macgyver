@@ -317,7 +317,8 @@ namespace fmt
 
       // Parse "{:h}", "{:p}", "{:d}", or "{}"
     constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
-      auto it = ctx.begin(), end = ctx.end();
+      auto it = ctx.begin();
+      auto end = ctx.end();
       if (it == end || *it == '}') return it;  // default: all
 
       switch (*it) {
