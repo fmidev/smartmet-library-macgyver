@@ -202,137 +202,6 @@ double sinAlt(double mjd, double hour, double glon, double cglat, double sglat)
   }
 }
 
-}  // namespace
-
-const Fmi::LocalDateTime& lunar_time_t::risesettime(SetAndRiseOccurence occ) const
-{
-  try
-  {
-    if (occ == FIRST_RISE)
-      return moonrise;
-    if (occ == SECOND_RISE)
-      return moonrise2;
-    if (occ == FIRST_SET)
-      return moonset;
-
-    return moonset2;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
-{
-  try
-  {
-    std::stringstream ss;
-
-    bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
-
-    const Fmi::LocalDateTime& occ_ldt =
-        (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
-                        : (occ == FIRST_SET ? moonset : moonset2));
-
-    if (!occ_ldt.is_not_a_date_time())
-    {
-      ss << date::format("%H%M", occ_ldt.local_time().get_impl());
-    }
-
-    return ss.str();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-std::string lunar_time_t::as_string_long(SetAndRiseOccurence occ) const
-{
-  try
-  {
-    std::stringstream ss;
-
-    bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
-
-    const Fmi::LocalDateTime& occ_ldt =
-        (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
-                        : (occ == FIRST_SET ? moonset : moonset2));
-
-    std::cout << occ_ldt;
-
-    if (occ_ldt.is_not_a_date_time())
-      ss << occ_ldt;
-    else
-      ss << occ_ldt.date() << " " << as_string(occ);
-
-    return ss.str();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-std::ostream& operator<<(std::ostream& ostream, const lunar_time_t& lt)
-{
-  try
-  {
-    std::string risestr(lt.as_string(FIRST_RISE));
-    std::string setstr(lt.as_string(FIRST_SET));
-
-    if (risestr.empty())
-    {
-      if (!lt.moonset_today())
-      {
-        if (lt.above_hz_24h)
-          risestr = "****";
-        else
-          risestr = "----";
-      }
-      else
-      {
-        risestr = "    ";
-      }
-    }
-    if (setstr.empty())
-    {
-      if (!lt.moonrise_today())
-      {
-        if (lt.above_hz_24h)
-          setstr = "****";
-        else
-          setstr = "----";
-      }
-      else
-      {
-        setstr = "    ";
-      }
-    }
-
-    ostream << risestr << " " << setstr;
-
-    return ostream;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-bool dst_on(const DateTime& /* theTime */, const Fmi::LocalDateTime& ldt)
-{
-  try
-  {
-    return ldt.dst_on();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 double timezone_offset(const Fmi::LocalDateTime& ldt)
 {
   try
@@ -364,8 +233,7 @@ void get_hours_and_minutes(double hours, int& hr, int& min)
   }
 }
 
-Fmi::LocalDateTime parse_local_date_time(
-    const Fmi::LocalDateTime& ldt, double hours)
+Fmi::LocalDateTime parse_local_date_time(const Fmi::LocalDateTime& ldt, double hours)
 {
   try
   {
@@ -406,11 +274,10 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
     double utset2(0.0);
 
     // beginning of the day
-    Fmi::LocalDateTime ldt_beg(
-        ldt.local_time().date(),
-        TimeDuration(0, 0, 0, 0),
-        ldt.zone(),
-        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+    Fmi::LocalDateTime ldt_beg(ldt.local_time().date(),
+                               TimeDuration(0, 0, 0, 0),
+                               ldt.zone(),
+                               Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
     double date = ldt_beg.local_time().date().modjulian_day();
 
@@ -539,20 +406,19 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
     std::cout << "ldt_beg: " << ldt_beg << std::endl;
 #endif
 
-    lunar_time_t retval(
-        (rise ? parse_local_date_time(ldt_beg, utrise)
-              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
-        (set ? parse_local_date_time(ldt_beg, utset)
-             : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
-        (rise2 ? parse_local_date_time(ldt_beg, utrise2)
-              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),  
-        (set2 ? parse_local_date_time(ldt_beg, utset2)
-              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
-        rise,
-        set,
-        rise2,
-        set2,
-        (!rise && !set && above));
+    lunar_time_t retval((rise ? parse_local_date_time(ldt_beg, utrise)
+                              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
+                        (set ? parse_local_date_time(ldt_beg, utset)
+                             : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
+                        (rise2 ? parse_local_date_time(ldt_beg, utrise2)
+                               : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
+                        (set2 ? parse_local_date_time(ldt_beg, utset2)
+                              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
+                        rise,
+                        set,
+                        rise2,
+                        set2,
+                        (!rise && !set && above));
 
     return retval;
   }
@@ -566,19 +432,17 @@ lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
 {
   try
   {
-	  Fmi::TimeZonePtr tz_ptr = ldt.zone();
+    Fmi::TimeZonePtr tz_ptr = ldt.zone();
 
     // beginning of the day
-    Fmi::LocalDateTime ldt_beg(
-        ldt.local_time().date(),
-        TimeDuration(0, 0, 0, 0),
-        tz_ptr,
-        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
-    Fmi::LocalDateTime ldt_end(
-        ldt.local_time().date(),
-        TimeDuration(23, 59, 59, 0),
-        tz_ptr,
-        Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+    Fmi::LocalDateTime ldt_beg(ldt.local_time().date(),
+                               TimeDuration(0, 0, 0, 0),
+                               tz_ptr,
+                               Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
+    Fmi::LocalDateTime ldt_end(ldt.local_time().date(),
+                               TimeDuration(23, 59, 59, 0),
+                               tz_ptr,
+                               Fmi::LocalDateTime::NOT_DATE_TIME_ON_ERROR);
 
     bool dst_ends_today = ldt_beg.dst_on() && !ldt_end.dst_on();
 
@@ -626,6 +490,123 @@ lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
       retval = lunar_time_calculation(ldt_beg, offset_before_dst_ends, lon, lat);
     }
     return retval;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+}  // namespace
+
+const Fmi::LocalDateTime& lunar_time_t::risesettime(SetAndRiseOccurence occ) const
+{
+  try
+  {
+    if (occ == FIRST_RISE)
+      return moonrise;
+    if (occ == SECOND_RISE)
+      return moonrise2;
+    if (occ == FIRST_SET)
+      return moonset;
+
+    return moonset2;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
+{
+  try
+  {
+    std::stringstream ss;
+
+    bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
+
+    const Fmi::LocalDateTime& occ_ldt = (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
+                                                        : (occ == FIRST_SET ? moonset : moonset2));
+
+    if (!occ_ldt.is_not_a_date_time())
+    {
+      ss << date::format("%H%M", occ_ldt.local_time().get_impl());
+    }
+
+    return ss.str();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+std::string lunar_time_t::as_string_long(SetAndRiseOccurence occ) const
+{
+  try
+  {
+    std::stringstream ss;
+
+    bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
+
+    const Fmi::LocalDateTime& occ_ldt = (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
+                                                        : (occ == FIRST_SET ? moonset : moonset2));
+
+    std::cout << occ_ldt;
+
+    if (occ_ldt.is_not_a_date_time())
+      ss << occ_ldt;
+    else
+      ss << occ_ldt.date() << " " << as_string(occ);
+
+    return ss.str();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+std::ostream& operator<<(std::ostream& ostream, const lunar_time_t& lt)
+{
+  try
+  {
+    std::string risestr(lt.as_string(FIRST_RISE));
+    std::string setstr(lt.as_string(FIRST_SET));
+
+    if (risestr.empty())
+    {
+      if (!lt.moonset_today())
+      {
+        if (lt.above_hz_24h)
+          risestr = "****";
+        else
+          risestr = "----";
+      }
+      else
+      {
+        risestr = "    ";
+      }
+    }
+    if (setstr.empty())
+    {
+      if (!lt.moonrise_today())
+      {
+        if (lt.above_hz_24h)
+          setstr = "****";
+        else
+          setstr = "----";
+      }
+      else
+      {
+        setstr = "    ";
+      }
+    }
+
+    ostream << risestr << " " << setstr;
+
+    return ostream;
   }
   catch (...)
   {

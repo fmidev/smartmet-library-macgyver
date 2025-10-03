@@ -1,5 +1,6 @@
 #include "CharsetConverter.h"
 #include "Exception.h"
+#include <array>
 #include <cerrno>
 #include <cstring>
 #include <iconv.h>
@@ -40,7 +41,7 @@ Fmi::CharsetConverter::~CharsetConverter() = default;
 std::string Fmi::CharsetConverter::convert(const std::string& src) const
 {
   char* in = const_cast<char*>(src.c_str());
-  char s_out[1024];
+  std::array<char, 1024> s_out{};
   std::size_t i_len = src.length();
   if (max_len > 0U && i_len > max_len)
   {
@@ -49,7 +50,7 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
                              std::to_string(int(max_len)));
   }
   std::size_t o_len = 1024;
-  char* out_ptr = s_out;
+  char* out_ptr = s_out.data();
 
   errno = 0;
   std::unique_lock<std::mutex> lock(impl->m);
@@ -89,13 +90,15 @@ std::string Fmi::CharsetConverter::convert(const std::string& src) const
         throw Fmi::Exception(BCP,
                              "An incomplete multibyte sequence has been encountered in the input");
       default:
-        throw Fmi::Exception(BCP, std::string("Unexpected error: ") +
-            strerror_r(errno, s_out, sizeof(s_out))); // We can reuse the same buffer as
-                                                      // the exception is thrown anyway
+        throw Fmi::Exception(
+            BCP,
+            std::string("Unexpected error: ") +
+                strerror_r(errno, s_out.data(), sizeof(s_out)));  // We can reuse the same buffer as
+                                                                  // the exception is thrown anyway
     }
   }
   else
   {
-    return {s_out, out_ptr};
+    return {s_out.data(), out_ptr};
   }
 }

@@ -27,7 +27,6 @@ const char* const YARD = "yard";
 const char* const FOOT = "foot";
 const char* const INCH = "inch";
 const char* const NUMBER_SIGNS = "+-. 1234567890";
-}  // namespace
 
 double convert(double value, const std::string& unit, const std::string& format)
 {
@@ -210,6 +209,7 @@ double convert(double value, const std::string& unit, const std::string& format)
 
   return value;
 }
+}  // namespace
 
 double parse_kilometer(const std::string& str)
 {

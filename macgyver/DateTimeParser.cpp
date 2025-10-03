@@ -12,8 +12,8 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/regex.hpp>
 
 #include <cctype>
@@ -56,7 +56,7 @@ Fmi::DateTime buildFromSQL(const TimeStamp& target)
     try
     {
       ret = Fmi::DateTime(Fmi::Date(target.year, target.month, target.day),
-                                     Fmi::TimeDuration(hour, minute, second));
+                          Fmi::TimeDuration(hour, minute, second));
     }
     catch (const std::exception& err)
     {
@@ -89,7 +89,7 @@ Fmi::DateTime buildFromISO(const TimeStamp& target)
     try
     {
       res = Fmi::DateTime(Fmi::Date(target.year, target.month, target.day),
-                                     Fmi::TimeDuration(hour, minute, second));
+                          Fmi::TimeDuration(hour, minute, second));
     }
     catch (const std::exception& err)
     {
@@ -482,8 +482,8 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     if (*ptr == '\0')
     {
       if (!extended_format)
-        return {};  // YYYYMM is not allowed
-      goto build_iso;     // YYYY-MM is allowed
+        return {};     // YYYYMM is not allowed
+      goto build_iso;  // YYYY-MM is allowed
     }
 
     // Day
@@ -566,8 +566,7 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
 
   build_iso:
 
-    Fmi::DateTime t(Fmi::Date(year, month, day),
-                               Fmi::TimeDuration(hour, minute, second));
+    Fmi::DateTime t(Fmi::Date(year, month, day), Fmi::TimeDuration(hour, minute, second));
 
     // Adjust if necessary
 
@@ -886,8 +885,7 @@ DateTime DateTimeParser::Impl::parse_offset(const std::string& str) const
  */
 //----------------------------------------------------------------------
 
-TimeDuration DateTimeParser::Impl::try_parse_duration(
-    const std::string& str) const
+TimeDuration DateTimeParser::Impl::try_parse_duration(const std::string& str) const
 {
   try
   {
@@ -957,7 +955,7 @@ TimeDuration DateTimeParser::Impl::try_parse_duration(
  */
 // ----------------------------------------------------------------------
 DateTime DateTimeParser::Impl::match_and_parse(const std::string& str,
-                                                               ParserId& matchedParser) const
+                                               ParserId& matchedParser) const
 {
   try
   {
@@ -1111,8 +1109,8 @@ DateTimeParser::DateTimeParser() : impl(new DateTimeParser::Impl) {}
 // ----------------------------------------------------------------------
 
 Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
-                                                         const std::string& format,
-                                                         Fmi::TimeZonePtr tz) const
+                                         const std::string& format,
+                                         const Fmi::TimeZonePtr& tz) const
 {
   try
   {
@@ -1137,8 +1135,7 @@ Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
  */
 // ----------------------------------------------------------------------
 
-Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
-                                                         Fmi::TimeZonePtr tz) const
+Fmi::LocalDateTime DateTimeParser::parse(const std::string& str, const Fmi::TimeZonePtr& tz) const
 {
   try
   {
@@ -1165,8 +1162,7 @@ Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
  */
 // ----------------------------------------------------------------------
 
-DateTime DateTimeParser::parse(const std::string& str,
-                                               const std::string& format) const
+DateTime DateTimeParser::parse(const std::string& str, const std::string& format) const
 {
   try
   {
@@ -1307,9 +1303,7 @@ DateTime DateTimeParser::parse_http(const std::string& str) const
       mi = std::stoul(hms.substr(3, 2));
       ss = std::stoul(hms.substr(6, 2));
 
-      DateTime t(Fmi::Date(yy, mm, dd),
-                                 Fmi::Hours(hh) + Fmi::Minutes(mi) +
-                                     Fmi::Seconds(ss));
+      DateTime t(Fmi::Date(yy, mm, dd), Fmi::Hours(hh) + Fmi::Minutes(mi) + Fmi::Seconds(ss));
 
       if (t.is_not_a_date_time())
         throw Fmi::Exception(BCP, "");

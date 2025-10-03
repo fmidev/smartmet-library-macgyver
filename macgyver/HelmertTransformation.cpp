@@ -151,13 +151,11 @@ std::string Fmi::get_fmi_sphere_towgs84_proj4_string(
     Fmi::HelmertTransformation conv;
     conv.set_fmi_sphere_to_reference_ellipsoid_conv(
         r, lat, lon, Fmi::ReferenceEllipsoid::wgs84, scaling_type);
-    char buffer[512];
+    std::array<char,512> buffer{};
 #ifndef _MSC_VER
-    static_cast<void>(snprintf(buffer,
-             sizeof(buffer),
+    static_cast<void>(snprintf(buffer.data(), buffer.size(),
 #else
-    static_cast<void>(_snprintf(buffer,
-              sizeof(buffer),
+    static_cast<void>(_snprintf(buffer.data(), buffer.size(),
 #endif
              "+towgs84=%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f ",
              conv.tx,
@@ -168,7 +166,7 @@ std::string Fmi::get_fmi_sphere_towgs84_proj4_string(
              AS * conv.ez,
              1e6 * (conv.m - 1)));
     buffer[sizeof(buffer) - 1] = 0;
-    return buffer;
+    return buffer.data();
   }
   catch (...)
   {

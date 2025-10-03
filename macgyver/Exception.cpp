@@ -352,10 +352,10 @@ std::string Exception::getTimeStampString() const
   // Fmi::Exception must not depend on other macgyver parts or external libraries
   // except for libstdc++ and libc
   struct std::tm tExpanded;
-  char result[80];
+  std::array<char,80> result{};
   static_cast<void>(localtime_r(&timestamp, &tExpanded));
-  static_cast<void>(std::strftime(result, sizeof(result), "%Y-%m-%dT%H:%M:%S", &tExpanded));
-  return result;
+  static_cast<void>(std::strftime(result.data(), result.size(), "%Y-%m-%dT%H:%M:%S", &tExpanded));
+  return result.data();
 }
 
 std::string Exception::getStackTrace() const

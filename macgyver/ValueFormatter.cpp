@@ -7,16 +7,15 @@
 #include "ValueFormatter.h"
 #include "Exception.h"
 #include "StringConversion.h"
+#include <double-conversion/double-conversion.h>
 #include <fmt/format.h>
 #include <fmt/printf.h>
+#include <array>
 #include <cmath>
-#include <stdexcept>
-
-#include <double-conversion/double-conversion.h>
 
 namespace
 {
-const int powers_of_ten[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000};
+const std::array<int, 8> powers_of_ten{1, 10, 100, 1000, 10000, 100000, 1000000, 10000000};
 }
 
 namespace Fmi
@@ -95,9 +94,8 @@ std::string ValueFormatter::format_double_conversion_scientific(double theValue,
 
     using namespace double_conversion;
 
-    const int kBufferSize = 168;
-    char buffer[kBufferSize];
-    StringBuilder builder(buffer, kBufferSize);
+    std::array<char, 168> buffer{};
+    StringBuilder builder(buffer.data(), buffer.size());
     int flags = (DoubleToStringConverter::EMIT_POSITIVE_EXPONENT_SIGN |
                  DoubleToStringConverter::UNIQUE_ZERO);
 
@@ -119,7 +117,7 @@ std::string ValueFormatter::format_double_conversion_scientific(double theValue,
         --pos;
     }
 
-    return std::string(buffer, pos);
+    return std::string(buffer.data(), pos);
   }
   catch (...)
   {

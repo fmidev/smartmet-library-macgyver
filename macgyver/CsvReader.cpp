@@ -18,6 +18,10 @@ namespace Fmi
 {
 namespace CsvReader
 {
+
+namespace
+{
+
 enum CsvState
 {
   ExpectingRecord,  // new row should be starting
@@ -48,6 +52,7 @@ bool isnewline(int ch)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!

@@ -24,15 +24,14 @@ class DateTimeParser
   ~DateTimeParser();
   DateTimeParser();
   DateTimeParser(const DateTimeParser& other);
-  DateTimeParser(DateTimeParser&& other);
+  DateTimeParser(DateTimeParser&& other) noexcept;
   DateTimeParser& operator=(const DateTimeParser& other);
-  DateTimeParser& operator=(DateTimeParser&& other);
+  DateTimeParser& operator=(DateTimeParser&& other) noexcept;
 
   Fmi::LocalDateTime parse(const std::string& str,
-                                           const std::string& format,
-                                           Fmi::TimeZonePtr tz) const;
-  Fmi::LocalDateTime parse(const std::string& str,
-                                           Fmi::TimeZonePtr tz) const;
+                           const std::string& format,
+                           const Fmi::TimeZonePtr& tz) const;
+  Fmi::LocalDateTime parse(const std::string& str, const Fmi::TimeZonePtr& tz) const;
 
   DateTime parse(const std::string& str, const std::string& format) const;
   DateTime parse(const std::string& str) const;

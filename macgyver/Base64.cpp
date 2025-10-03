@@ -74,8 +74,8 @@ std::string encode(const std::string& str)
     std::size_t i = 0;
     std::size_t j = 0;
     std::size_t in_len = str.size();
-    unsigned char char_array_3[3];
-    unsigned char char_array_4[4];
+    std::array<unsigned char, 3> char_array_3{};
+    std::array<unsigned char, 4> char_array_4{};
 
     std::size_t pos = 0;
 

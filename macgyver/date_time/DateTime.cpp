@@ -465,7 +465,7 @@ std::optional<Fmi::date_time::parser::date_time_members_t> try_parse_impl(
     const std::string& str,
     const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
     const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
-    const rule<iterator> date_time_separator)
+    const rule<iterator>& date_time_separator)
 {
   namespace p = boost::phoenix;
   const std::string input = Fmi::trim_copy(str);
@@ -532,7 +532,7 @@ std::optional<Fmi::date_time::DateTime> try_parse(
     const std::string& str,
     const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
     const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
-    const rule<iterator> date_time_separator,
+    const rule<iterator>& date_time_separator,
     bool* have_tz)
 {
   const std::string input = Fmi::trim_copy(str);
@@ -563,7 +563,7 @@ Fmi::date_time::DateTime parse(
     const std::string& str,
     const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
     const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
-    const rule<iterator> date_time_separator)
+    const rule<iterator>& date_time_separator)
 {
   try
   {

@@ -34,7 +34,6 @@
 #include <atomic>
 #include <iostream>
 #include <optional>
-#include <stdexcept>
 
 // scoped read/write lock types
 
@@ -46,6 +45,10 @@ namespace fs = std::filesystem;
 
 namespace Fmi
 {
+
+namespace
+{
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Directory content with modification times
@@ -179,6 +182,7 @@ std::pair<DirectoryMonitor::Status, DirectoryMonitor::Change> directory_change(
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*
