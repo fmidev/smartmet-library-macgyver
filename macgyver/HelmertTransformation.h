@@ -72,7 +72,7 @@ class HelmertTransformation
       const ReferenceEllipsoid& ref,
       enum FmiSphereConvScalingType scaling_type = FMI_SPHERE_NO_SCALING);
 
-  double m = 0;
+  double m = 1;
   double ex = 0;
   double ey = 0;
   double ez = 0;

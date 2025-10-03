@@ -76,8 +76,6 @@ namespace Fmi
         Pool(std::size_t start_size, std::size_t max_size, Args... args)
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
-            , current_size(0)
-            , in_use_count(0)
             , createItemCb([=]() { return std::make_unique<ItemType>(args...); })
         {
             init(args...);
@@ -91,8 +89,6 @@ namespace Fmi
 
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
-            , current_size(0)
-            , in_use_count(0)
             , createItemCb(createItemCb)
         {
             init(args...);

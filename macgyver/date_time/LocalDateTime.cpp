@@ -12,7 +12,6 @@ using Fmi::date_time::LocalDateTime;
 namespace detail = Fmi::detail;
 
 LocalDateTime::LocalDateTime() noexcept
-    : Base()
 {
 }
 
@@ -84,8 +83,6 @@ LocalDateTime::LocalDateTime(
     const TimeZonePtr& tz,
     enum ErrorHandling err_handling,
     enum Choose choose)
-
-    : Base()
 {
     try
     {

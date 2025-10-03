@@ -161,7 +161,6 @@ std::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
 Fmi::IStream::~IStream() = default;
 
 Fmi::IStream::IStream(std::istream& raw_input, const std::string& name)
-    : boost::iostreams::filtering_stream<boost::iostreams::input>()
 {
   init(raw_input, guess_compression_type(name));
 }
