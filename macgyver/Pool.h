@@ -21,6 +21,24 @@ namespace Fmi
         Parallel
     };
 
+    /**
+     * @brief A thread-safe object pool implementation
+     *
+     * This class implements a thread-safe object pool for managing reusable objects.
+     * It allows pre-allocation of a specified number of objects and can grow
+     * dynamically up to a maximum limit.
+     *
+     * The pool can be initialized either sequentially or in parallel, depending on the
+     * parameters from Args are passed to the ItemType constructor when creating new items.
+     *
+     * As result related objects must exist during the whole pool lifetime in case when they are
+     * passed to constructor as references or pointers and max_size is larger than start_size.
+     *
+     * Template parameters:
+     * - InitType: Specifies the initialization type (sequential or parallel).
+     * - ItemType: The type of objects managed by the pool.
+     * - Args: Additional arguments passed to the ItemType constructor or factory method when creating new items.
+     */
     template <PoolInitType InitType, typename ItemType, typename... Args>
     class Pool
     {
@@ -73,6 +91,16 @@ namespace Fmi
         Pool(Pool&&) = default;
         Pool& operator=(Pool&&) = default;
 
+        /**
+         * @brief Constructs a Pool with specified start and maximum sizes
+         *
+         * @param start_size The initial number of items to pre-allocate in the pool (minimum 2)
+         * @param max_size The maximum number of items the pool can grow to (must be >= start_size)
+         * @param args Additional arguments passed to the ItemType constructor when creating new items
+         *
+         * Note that if max_size is larger than start_size, related objects must exist during the whole pool lifetime
+         * in case when they are passed to constructor as references or pointers.
+         */
         Pool(std::size_t start_size, std::size_t max_size, Args... args)
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
@@ -83,6 +111,17 @@ namespace Fmi
             init(args...);
         }
 
+        /**
+         * @brief Constructs a Pool with specified start and maximum sizes and a custom item creation callback
+         *
+         * @param createItemCb A callback function that creates and returns a unique_ptr to a new ItemType instance
+         * @param start_size The initial number of items to pre-allocate in the pool (minimum 2)
+         * @param max_size The maximum number of items the pool can grow to (must be >= start_size)
+         * @param args Additional arguments passed to the createItemCb when creating new items
+         *
+         * Note that if max_size is larger than start_size, related objects must exist during the whole pool lifetime
+         * in case when they are passed to factory method as references or pointers.
+         */
         Pool(
             std::function<std::unique_ptr<ItemType>(Args... args)> createItemCb,
             std::size_t start_size,
