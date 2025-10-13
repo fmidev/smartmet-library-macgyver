@@ -286,12 +286,38 @@ PostgreSQLConnection::exec_params_p(
   }
 }
 
-using PostgreSQLConnectionPool = Fmi::Pool
-<
-  Fmi::PoolInitType::Parallel,
-  PostgreSQLConnection,
-  PostgreSQLConnectionOptions
->;
+class PostgreSQLConnectionPool final
+{
+  // Wrapper class is used here to ensure that PostgreSQLConnectionOptions
+  // is always copied when creating the pool and will not go out of scope
+
+public:
+    using Ptr = Fmi::Pool<Fmi::PoolInitType::Parallel, PostgreSQLConnection, PostgreSQLConnectionOptions>::Ptr;
+
+    PostgreSQLConnectionPool(std::size_t start_size,
+                             std::size_t max_size,
+                            const PostgreSQLConnectionOptions& theConnectionOptions)
+        : options(theConnectionOptions)
+        , pool(start_size, max_size, options)
+    {
+    }
+
+    inline Ptr get() { return pool.get(); }
+    inline Ptr get(const Fmi::TimeDuration& timeout) { return pool.get(timeout); }
+    inline std::size_t size() const { return pool.size(); }
+    inline std::size_t in_use() const { return pool.in_use(); }
+    inline void dumpInfo(std::ostream& os) { pool.dumpInfo(os); }
+
+private:
+    PostgreSQLConnectionPool() = delete;
+    PostgreSQLConnectionPool(const PostgreSQLConnectionPool&) = delete;
+    PostgreSQLConnectionPool& operator=(const PostgreSQLConnectionPool&) = delete;
+    PostgreSQLConnectionPool(PostgreSQLConnectionPool&&) = delete;
+    PostgreSQLConnectionPool& operator=(PostgreSQLConnectionPool&&) = delete;
+
+    const PostgreSQLConnectionOptions options;
+    Pool<Fmi::PoolInitType::Parallel, PostgreSQLConnection, PostgreSQLConnectionOptions> pool;
+};
 
 }  // namespace Database
 }  // namespace Fmi
