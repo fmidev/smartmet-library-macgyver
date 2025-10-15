@@ -69,6 +69,24 @@ BOOST_AUTO_TEST_CASE(simple_test_3)
   //pool.dumpInfo(std::cout);
 }
 
+BOOST_AUTO_TEST_CASE(factory_method_test)
+{
+  Fmi::Pool<Fmi::PoolInitType::Sequential, std::string, std::string> pool(
+    [](const std::string& str) { return std::make_unique<std::string>(str); }, 2, 4, "hello"s);
+  BOOST_CHECK_EQUAL(int(pool.size()), 2);
+  BOOST_CHECK_EQUAL(int(pool.in_use()), 0);
+  auto ptr = pool.get();
+  BOOST_CHECK(ptr.get() != nullptr);
+  BOOST_CHECK_EQUAL(int(pool.in_use()), 1);
+  BOOST_CHECK_EQUAL(int(pool.size()), 2);
+  BOOST_CHECK_EQUAL(*ptr.get(), "hello"s);
+  ptr.reset();
+  BOOST_CHECK_EQUAL(int(pool.in_use()), 0);
+  BOOST_CHECK_EQUAL(int(pool.size()), 2);
+
+  //pool.dumpInfo(std::cout);
+}
+
 namespace
 {
   struct TestObj1

@@ -6,12 +6,14 @@
 #include <optional>
 #include <list>
 #include <mutex>
+#include <tuple>
 #include <condition_variable>
 #include <exception>
 #include "AsyncTaskGroup.h"
 #include "DateTime.h"
 #include "StringConversion.h"
 #include "TypeName.h"
+#include "TypeTraits.h"
 
 namespace Fmi
 {
@@ -31,8 +33,7 @@ namespace Fmi
      * The pool can be initialized either sequentially or in parallel, depending on the
      * parameters from Args are passed to the ItemType constructor when creating new items.
      *
-     * As result related objects must exist during the whole pool lifetime in case when they are
-     * passed to constructor as references or pointers and max_size is larger than start_size.
+     * All constructor arguments must be copy constructable.
      *
      * Template parameters:
      * - InitType: Specifies the initialization type (sequential or parallel).
@@ -42,6 +43,9 @@ namespace Fmi
     template <PoolInitType InitType, typename ItemType, typename... Args>
     class Pool
     {
+        static_assert(are_all_parameters_copyable<Args...>(),
+            "All Args parameters must be copyable");
+
         struct ItemRec
         {
             /**
@@ -104,9 +108,10 @@ namespace Fmi
         Pool(std::size_t start_size, std::size_t max_size, Args... args)
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
+            , constructor_args(args...)
             , current_size(0)
             , in_use_count(0)
-            , createItemCb([=]() { return std::make_unique<ItemType>(args...); })
+            , createItemCb([this]() { return std::make_unique<ItemType>(std::get<Args>(constructor_args)...); })
         {
             init(args...);
         }
@@ -123,16 +128,18 @@ namespace Fmi
          * in case when they are passed to factory method as references or pointers.
          */
         Pool(
-            std::function<std::unique_ptr<ItemType>(Args... args)> createItemCb,
+            std::function<std::unique_ptr<ItemType>(Args... args)> createItemCb_,
             std::size_t start_size,
             std::size_t max_size,
             Args... args)
 
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
+            , constructor_args(args...)
             , current_size(0)
             , in_use_count(0)
-            , createItemCb(createItemCb)
+            , createItemCb([this, createItemCb_]() { return createItemCb_(std::get<Args>(constructor_args)...);
+            })
         {
             init(args...);
         }
@@ -145,7 +152,7 @@ namespace Fmi
 
                 // There are some items in use. This will cause std::terminate
                 // Unfortunately there is no way to recover from this without crashing
-                Fmi::Exception error(BCP, "Pool is being destroyed while items are in use");
+                Fmi::Exception error(BCP, "Pool is being destroyed while " + Fmi::to_string(in_use_count) + " items are still in use");
                 std::cerr << error << std::endl;
                 std::terminate();
             }
@@ -337,9 +344,10 @@ namespace Fmi
             cond_var.notify_one();
         }
 
-
         const std::size_t start_size;
         const std::size_t max_size;
+        const std::tuple<std::remove_reference_t<Args>...> constructor_args;
+
         std::size_t current_size = 0;
         std::size_t in_use_count = 0;
 

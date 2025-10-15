@@ -45,4 +45,16 @@ constexpr Source upper_limit()
     return std::numeric_limits<Source>::max();
 }
 
+template <typename... Args>
+constexpr bool are_all_parameters_copyable()
+{
+    return (std::is_copy_constructible<Args>::value && ...);
+}
+
+template <typename... Args>
+constexpr bool are_all_parameters_assignable()
+{
+    return (std::is_copy_assignable<Args>::value && ...);
+}
+
 }  // namespace Fmi
