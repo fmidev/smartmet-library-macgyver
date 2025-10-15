@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.9.30
+Version: 25.10.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Oct 15 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.10.15-1.fmi
+- Fmi::Pool<> improvements
+
 * Tue Sep 30 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.9.30-1.fmi
 - Added missing <optional> include to Cache.h
 
