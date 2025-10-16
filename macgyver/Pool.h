@@ -5,10 +5,11 @@
 #include <memory>
 #include <optional>
 #include <list>
-#include <mutex>
 #include <tuple>
-#include <condition_variable>
 #include <exception>
+#include <boost/chrono.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition_variable.hpp>
 #include "AsyncTaskGroup.h"
 #include "DateTime.h"
 #include "StringConversion.h"
@@ -172,13 +173,13 @@ namespace Fmi
 
         std::size_t size() const
         {
-            std::unique_lock<std::mutex> lock(mutex);
+            boost::unique_lock<boost::mutex> lock(mutex);
             return current_size;
         }
 
         std::size_t in_use() const
         {
-            std::unique_lock<std::mutex> lock(mutex);
+            boost::unique_lock<boost::mutex> lock(mutex);
             return in_use_count;
         }
 
@@ -202,7 +203,7 @@ namespace Fmi
         {
             const auto grow = [this]() {
                 std::unique_ptr<ItemType> new_item(createItemCb());
-                std::unique_lock<std::mutex> lock(mutex);
+                boost::unique_lock<boost::mutex> lock(mutex);
                 ItemRec& item_rec = pool_data.emplace_back(ItemRec(std::move(new_item)));
                 item_rec.next = top;
                 top = &item_rec;
@@ -278,7 +279,7 @@ namespace Fmi
                 return item_rec;
             };
 
-            std::unique_lock<std::mutex> lock(mutex);
+            boost::unique_lock<boost::mutex> lock(mutex);
             if (top)
             {
                 //---------------------------------------------------------------------
@@ -312,7 +313,8 @@ namespace Fmi
             {
                 if (timeout)
                 {
-                    if (!cond_var.wait_for(lock, timeout->get_impl(), [this] { return in_use_count < current_size; }))
+                    int ms = static_cast<int>(timeout->total_milliseconds());
+                    if (!cond_var.wait_for(lock, boost::chrono::milliseconds(ms), [this] { return in_use_count < current_size; }))
                     {
                         throw Fmi::Exception(BCP, "Timeout while waiting for pool item");
                     }
@@ -337,7 +339,7 @@ namespace Fmi
 
         void release(ItemRec* item)
         {
-            std::unique_lock<std::mutex> lock(mutex);
+            boost::unique_lock<boost::mutex> lock(mutex);
             item->next = top;
             top = item;
             in_use_count--;
@@ -351,8 +353,8 @@ namespace Fmi
         std::size_t current_size = 0;
         std::size_t in_use_count = 0;
 
-        mutable std::mutex mutex;
-        std::condition_variable cond_var;
+        mutable boost::mutex mutex;
+        boost::condition_variable cond_var;
 
         std::function<std::unique_ptr<ItemType>()> createItemCb;
 
