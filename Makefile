@@ -45,7 +45,6 @@ LIBS += \
 	-lboost_chrono \
 	-lboost_iostreams \
 	-lboost_thread \
-	-lboost_system \
 	-ldouble-conversion \
 	$(REQUIRED_LIBS) \
 	$(EXTRA_TZDB_LIBS) \

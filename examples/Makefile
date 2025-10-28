@@ -11,7 +11,6 @@ LIBS += -L.. -lsmartmet-macgyver \
         -lboost_system \
         -lboost_iostreams \
 	-lboost_thread \
-	-lboost_system \
 	-lpthread
 
 all: $(PROG) examples
