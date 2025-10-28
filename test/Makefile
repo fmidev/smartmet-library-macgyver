@@ -42,7 +42,6 @@ LIBS += $(PREFIX_LDFLAGS) \
 	-lboost_iostreams \
 	-lboost_thread \
 	-lboost_chrono \
-	-lboost_system \
 	-lpthread
 
 DateTest LocalDateTimeTest TimeDurationTest: EXTRA_LIBS += -lboost_date_time
