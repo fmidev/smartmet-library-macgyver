@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(timing_1)
 
     auto t1 = std::chrono::high_resolution_clock::now();
     std::vector<DateTime> v1;
-    for (int i = 0; i < size; ++i)
+    for (std::size_t i = 0; i < size; ++i)
     {
         dt1 += Seconds(1);
         v1.push_back(dt1);
