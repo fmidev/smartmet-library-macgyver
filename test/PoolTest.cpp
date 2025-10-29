@@ -1,6 +1,8 @@
 #include "Pool.h"
 #include <boost/test/included/unit_test.hpp>
 #include <iostream>
+#include <thread>
+#include <future>
 
 using namespace boost::unit_test;
 using namespace std::string_literals;
@@ -100,6 +102,13 @@ namespace
     TestObj2(const std::string&, int) {}
     int value = 42;
   };
+
+  struct TestObj3
+  {
+    TestObj3() = default;
+
+    void test() { std::this_thread::sleep_for(std::chrono::milliseconds(5)); }
+  };
 }
 
 BOOST_AUTO_TEST_CASE(constructor_with_1_argument)
@@ -114,4 +123,42 @@ BOOST_AUTO_TEST_CASE(constructor_with_2_arguments)
   Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj2, std::string, int> pool(2, 4, "foobar"s, 12);
   decltype(pool.get()) ptr = pool.get();
   BOOST_CHECK_EQUAL(ptr->value, 42);
+}
+
+BOOST_AUTO_TEST_CASE(parallel_use)
+{
+  Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj3> pool(5, 10);
+
+  const int num_tasks = 50;
+  const int iterations_per_task = 100;
+  std::atomic<int> pass = 0;
+  std::atomic<int> fail = 0;
+
+  std::vector<std::shared_future<void>> tasks;
+  for (int i = 0; i < num_tasks; i++)
+  {
+    tasks.emplace_back(std::async(std::launch::async, [&pool, &pass, &fail, iterations_per_task]() {
+      for (int j = 0; j < iterations_per_task; j++)
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        try
+        {
+          auto ptr = pool.get();
+          ptr->test();
+          pass++;
+        }
+        catch(...)
+        {
+          if (++fail == 1) // Report only first error
+            std::cerr << Fmi::Exception::Trace(BCP, "Operation failed") << std::endl;
+        }
+      }
+    }));
+  }
+
+  for (auto& task : tasks)
+    task.wait();
+
+  BOOST_REQUIRE_EQUAL(fail.load(), 0);
+  BOOST_CHECK_EQUAL(pass.load(), num_tasks * iterations_per_task);
 }
