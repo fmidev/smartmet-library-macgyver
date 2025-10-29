@@ -321,7 +321,7 @@ namespace Fmi
                 }
                 else
                 {
-                    cond_var.wait(lock, [this] { return in_use_count < current_size; });
+                    cond_var.wait(lock, [this] { return top != nullptr; });
                 }
 
                 if (top)
