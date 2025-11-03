@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_1, * utf::depends_on("get_connection_opti
     auto sql = SHOW_EXCEPTIONS(
         std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
             conn,
-            "test",
+            "test1",
             "SELECT id, lat, lon FROM geonames WHERE name=$1"));
 
     pqxx::result result= SHOW_EXCEPTIONS(sql->exec("Valassaaret"));
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_2, * utf::depends_on("get_connection_opti
     auto sql = SHOW_EXCEPTIONS(
         std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
             conn,
-            "test",
+            "test2",
             "SELECT id, lat, lon FROM geonames WHERE name=$1 AND countries_iso2=$2"));
 
     const std::vector<std::string> params = { "Riga", "LV" };
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_reuse_no_transaction, * utf::depends_on("
     auto sql = SHOW_EXCEPTIONS(
         std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
             conn,
-            "test",
+            "test3",
             "SELECT id, lat, lon FROM geonames WHERE name=$1 ORDER BY id ASC"));
 
     result = SHOW_EXCEPTIONS(sql->exec("Riga"));
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_prepared_sql_reuse_in_transaction, * utf::depends_on("
     auto sql = SHOW_EXCEPTIONS(
         std::make_shared<db::PostgreSQLConnection::PreparedSQL>(
             conn,
-            "test",
+            "test4",
             "SELECT id, lat, lon FROM geonames WHERE name=$1 ORDER BY id ASC"));
 
     auto transaction = conn.transaction();

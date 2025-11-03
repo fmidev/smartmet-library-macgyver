@@ -1,4 +1,5 @@
 #include "PostgreSQLConnection.h"
+#include "PostgreSQLConnectionImpl.h"
 #include "AsyncTask.h"
 #include "Exception.h"
 #include "NumericCast.h"
@@ -46,6 +47,7 @@ const std::map<std::string, std::variant<std::monostate, uint_member_ptr, string
 
 std::atomic<bool> PostgreSQLConnection::shuttingDown(false);
 std::atomic<bool> PostgreSQLConnection::reconnectDisabled(false);
+std::size_t PostgreSQLConnection::queryRetryLimit(2);
 
 PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn_str)
 {
@@ -115,6 +117,8 @@ PostgreSQLConnectionOptions::operator std::string() const
 
 // ----------------------------------------------------------------------
 
+
+#if 0
 class PostgreSQLConnection::Impl
 {
  private:
@@ -539,6 +543,8 @@ class PostgreSQLConnection::Impl
   Impl& operator=(Impl&&) = delete;
 };
 
+#endif
+
 // ----------------------------------------------------------------------
 
 PostgreSQLConnection::PostgreSQLConnection(const PostgreSQLConnectionOptions& theConnectionOptions)
@@ -603,7 +609,7 @@ pqxx::result PostgreSQLConnection::executeNonTransaction(const std::string& theS
 {
   try
   {
-    return impl->executeNonTransaction(theSQLStatement);
+    return impl->executeNonTransaction(theSQLStatement, pqxx::params{});
   }
   catch (...)
   {
@@ -615,7 +621,7 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
 {
   try
   {
-    return impl->execute(theSQLStatement);
+    return impl->execute(false, theSQLStatement, pqxx::params{});
   }
   catch (...)
   {
@@ -623,11 +629,61 @@ pqxx::result PostgreSQLConnection::execute(const std::string& theSQLStatement) c
   }
 }
 
+
+pqxx::result PostgreSQLConnection::exec_params_impl(const std::string& theSQLStatement, const pqxx::params& params) const
+try
+{
+  AsyncTask::interruption_point();
+  return impl->exec_params(false, theSQLStatement, params);
+}
+catch (...)
+{
+  auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+  error.addParameter("SQL statement", theSQLStatement);
+  error.addParameter("Database address", fmt::format("{}", getId()));
+  throw error;
+}
+
+
+template <>
+pqxx::result PostgreSQLConnection::exec_params(
+    const std::string& theSQLStatement,
+    const pqxx::params& params) const
+try
+{
+  AsyncTask::interruption_point();
+  return impl->exec_params(false, theSQLStatement, params);
+}
+catch (...)
+{
+  auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+  error.addParameter("SQL statement", theSQLStatement);
+  error.addParameter("Database address", fmt::format("{}", getId()));
+  throw error;
+}
+
+
+
 PostgreSQLConnection::PreparedSQL::Ptr PostgreSQLConnection::prepare(
     const std::string& name, const std::string& theSQLStatement) const
 {
   return std::make_shared<PreparedSQL>(*this, name, theSQLStatement);
 }
+
+
+pqxx::result PostgreSQLConnection::exec_prepared(const std::string& name, pqxx::params params) const
+try
+{
+  return impl->exec_prepared(false, name, params);
+}
+catch(...)
+{
+  auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+  error.addParameter("Prepared SQL statement name", name);
+  error.addParameter("Database address", fmt::format("{}", getId()));
+  throw error;
+}
+
 
 void PostgreSQLConnection::cancel()
 {
@@ -761,6 +817,43 @@ pqxx::result PostgreSQLConnection::Transaction::execute(const std::string& theSQ
   }
 }
 
+template <>
+pqxx::result PostgreSQLConnection::Transaction::exec_params(
+      const std::string& theSQLStatement,
+      const pqxx::params& params) const
+try
+{
+  return conn.exec_params(theSQLStatement, params);
+}
+catch (...)
+{
+  auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+  error.addParameter("SQL statement", theSQLStatement);
+  error.addParameter("Database address", fmt::format("{}", conn.getId()));
+  throw error;
+}
+
+
+template <>
+pqxx::result PostgreSQLConnection::Transaction::exec_prepared(
+    const std::string& name,
+    const pqxx::params& params) const
+{
+  try
+  {
+    return conn.impl->exec_prepared(true, name, params);
+  }
+  catch (...)
+  {
+    auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+    error.addParameter("Prepared SQL statement name", name);
+    error.addParameter("Database address", fmt::format("{}", conn.getId()));
+    throw error;
+  }
+}
+
+
+
 void PostgreSQLConnection::Transaction::commit()
 {
   try
@@ -774,7 +867,7 @@ void PostgreSQLConnection::Transaction::commit()
       }
       catch (const std::exception& e)
       {
-        // If we get here, Xaction has been rolled back
+        // If we get here, transaction has been rolled back
         conn.endTransaction();
         throw Fmi::Exception(BCP, "Commiting transaction failed").addDetail(e.what());
       }
@@ -821,17 +914,7 @@ PostgreSQLConnection::PreparedSQL::PreparedSQL(const PostgreSQLConnection& theCo
 {
   try
   {
-    auto c = conn.impl->check_connection();
-    if (!c)
-    {
-      throw Fmi::Exception(BCP, "Execution of SQL statement failed: not connected");
-    }
-
-    c->prepare(name, sql);
-
-    // FIXME: report conflicts (repeated sama name). Additionally one could ignore call
-    //        if the new SQL statement is identical to the previous one
-    conn.impl->register_prepared_sql(name, theSQLStatement);
+    conn.impl->register_prepared_statement(name, theSQLStatement);
   }
   catch (...)
   {
@@ -843,15 +926,28 @@ PostgreSQLConnection::PreparedSQL::~PreparedSQL()
 {
   try
   {
-    // We do not to unprepare if connection is lost and not restored
-    auto c = conn.impl->get_connection();
-    conn.impl->unregister_prepared_sql(name);
-    if (c)
-      c->unprepare(name);
+    conn.impl->unregister_prepared_statement(name);
   }
   catch (...)
   {
     // We are not interested about errors when unpreparing SQL (eg. not found)
+  }
+}
+
+
+template <>
+pqxx::result PostgreSQLConnection::PreparedSQL::exec(pqxx::params params) const
+{
+  try
+  {
+    return conn.impl->exec_prepared(false, name, params);
+  }
+  catch (...)
+  {
+    auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+    error.addParameter("Prepared SQL statement name", name);
+    error.addParameter("Database address", fmt::format("{}", conn.getId()));
+    throw error;
   }
 }
 
