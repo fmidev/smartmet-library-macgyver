@@ -1,10 +1,16 @@
+// This header file is not intended to be self sufficient and requires inclusion
+// of PostgreSQLConnection.h beforehand. It is also not intended to be included
+// directly by user code.
 #pragma once
 
 #include "PostgreSQLConnection.h"
 #include <algorithm>
-
 #include <iostream>
-
+#include <memory>
+#include <map>
+#include <optional>
+#include <boost/thread.hpp>
+#include <fmt/format.h>
 
 namespace Fmi
 {
@@ -168,6 +174,8 @@ namespace Database
 
                 if (!has_connection)
                     itsConnection = open_internal(0);
+
+                boost::this_thread::interruption_point();
 
                 return (this->*method)(args...);
             }

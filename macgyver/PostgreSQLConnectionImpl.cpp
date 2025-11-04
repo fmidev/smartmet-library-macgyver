@@ -279,6 +279,7 @@ std::shared_ptr<pqxx::connection> PostgreSQLConnection::Impl::open_internal(std:
 
     for (std::size_t attempt = 0; attempt <= numReconnectAttempts; ++attempt)
     {
+        boost::this_thread::interruption_point();
         try
         {
             if (itsConnection)
@@ -340,9 +341,9 @@ void PostgreSQLConnection::Impl::finalize_connection(pqxx::connection& connectio
         itsDataTypes.insert(std::make_pair(oid, datatype));
     }
 
-    boost::unique_lock<boost::mutex> lock(m);
     for (const auto& item : prepared_sqls)
     {
+        boost::this_thread::interruption_point();
         try
         {
             connection.prepare(item.first, item.second);
