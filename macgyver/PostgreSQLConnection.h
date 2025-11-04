@@ -16,6 +16,7 @@
 #include "Pool.h"
 #include "TypeTraits.h"
 
+
 namespace Fmi
 {
 namespace Database
@@ -68,6 +69,25 @@ class PostgreSQLConnection
 
     pqxx::result execute(const std::string& theSQLStatement) const;
 
+    template <typename... Args>
+    pqxx::result exec_params(const std::string& theSQLStatement, Args... args) const
+    {
+      pqxx::params params(std::forward<Args>(args)...);
+      return conn.exec_params(theSQLStatement, params);
+    }
+
+    template <typename... Args>
+    pqxx::result exec_prepared(const std::string& name, Args... args) const
+    try
+    {
+      pqxx::params params(std::forward<Args>(args)...);
+      return exec_prepared(name, params);
+    }
+    catch (...)
+    {
+      throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    }
+
     void commit();
     void rollback();
 
@@ -89,40 +109,23 @@ class PostgreSQLConnection
        *         (eg. std::vector)
        *
        *   @param container container with parameters
-       *   @param requested_size requested row count in the response
-       *                         (default -1, negative value means no limits)
+       *   @param requested_size optional requested row count in the response (default unlimited)
        */
       template <typename Container>
       typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
-      exec_p(const Container& container, int requested_size = -1);
+      exec_p(const Container& container, std::optional<unsigned> requested_size = std::nullopt) const;
 
-      template <typename... Args>
-      pqxx::result exec(Args... args)
-      {
-        try
-        {
-          auto transaction_ptr = conn.get_transaction_impl();
-          return transaction_ptr->exec_prepared(name, args...);
-        }
-        catch (...)
-        {
-          throw Fmi::Exception::Trace(BCP, "Operation failed!");
-        }
-      }
 
-      template <typename... Args>
-      pqxx::result exec_n(std::size_t num_rows, Args... args)
-      {
-        try
-        {
-          auto transaction_ptr = conn.get_transaction_impl();
-          return transaction_ptr->exec_prepared_n(num_rows, name, args...);
-        }
-        catch (...)
-        {
-          throw Fmi::Exception::Trace(BCP, "Operation failed!");
-        }
-      }
+      /**
+       *  @brief Execute prepared SQL statement with parameters provided in a container
+       *         and expect certain number of rows in the response
+       */
+      template <typename... Args> pqxx::result exec_n(unsigned nRows, Args... args) const;
+
+      /**
+       *  @brief Execute prepared SQL statement with parameters provided in a container
+       */
+      template <typename... Args> pqxx::result exec(Args... args) const;
 
       using Ptr = std::shared_ptr<PreparedSQL>;
   };
@@ -154,16 +157,16 @@ class PostgreSQLConnection
   template <typename... Args>
   pqxx::result exec_params(const std::string& theSQLStatement, Args... args) const
   {
-     auto transaction_ptr = get_transaction_impl();
-     return transaction_ptr->exec_params(theSQLStatement, args...);
+     pqxx::params params(std::forward<Args>(args)...);
+     return exec_params_impl(theSQLStatement, params);
   }
 
   template <typename... Args>
   pqxx::result exec_params_n(std::size_t num_rows, const std::string& theSQLStatement,
       Args... args) const
   {
-     auto transaction_ptr = get_transaction_impl();
-     return transaction_ptr->exec_params_n(num_rows, theSQLStatement, args...);
+     pqxx::params params(std::forward<Args>(args)...);
+     return exec_params_n(num_rows, theSQLStatement, params);
   }
 
   /**
@@ -180,6 +183,8 @@ class PostgreSQLConnection
       const std::string& theSQLStatement,
       const Container& container,
       int requested_size =  -1) const;
+
+  pqxx::result exec_prepared(const std::string& name, pqxx::params params) const;
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
@@ -205,6 +210,10 @@ class PostgreSQLConnection
   void endTransaction() const;
   void commitTransaction() const;
 
+  pqxx::result exec_params_impl(
+      const std::string& theSQLStatement,
+      const pqxx::params& params) const;
+
   std::shared_ptr<pqxx::transaction_base> get_transaction_impl() const;
 
   pqxx::work get_work() const;
@@ -214,55 +223,77 @@ class PostgreSQLConnection
 
   static std::atomic<bool> shuttingDown;
   static std::atomic<bool> reconnectDisabled;
-
+  static std::size_t queryRetryLimit;
 };  // class PostgreSQLConnection
 
 
-namespace detail
-{
 
-#if PQXX_VERSION_MAJOR < 7
+template <>
+pqxx::result PostgreSQLConnection::Transaction::exec_prepared(
+  const std::string& name,
+  const pqxx::params& params) const;
 
-template <typename Container>
-auto make_params(const Container& container) -> decltype(pqxx::prepare::make_dynamic_params(container))
-{
-  return pqxx::prepare::make_dynamic_params(container);
-}
-
-#else // PQXX_VERSION >= 7
-
-template <typename Container>
-  auto make_params(const Container& container) -> pqxx::params
-{
-  pqxx::params params;
-  params.append_multi(container);
-  return params;
-}
-
-#endif
-
-} // namespace detail
 
 template <typename Container>
 typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
-PostgreSQLConnection::PreparedSQL::exec_p(const Container& container, int requested_size)
+PostgreSQLConnection::PreparedSQL::exec_p(
+  const Container& container,
+  std::optional<unsigned> requested_size) const
 {
   try
   {
-    auto transaction_ptr = conn.get_transaction_impl();
-    const auto params = detail::make_params(container);
-    if (requested_size < 0) {
-      return transaction_ptr->exec_prepared(name, params);
-     }
-    return transaction_ptr->exec_prepared_n(requested_size, name, params);
+    pqxx::params params;
+    params.append_multi(container);
+    pqxx::result result = conn.exec_prepared(name, params);
+    if (requested_size && result.size() != *requested_size)
+    {
+      throw Fmi::Exception(BCP,
+          fmt::format("Expected {} rows but got {} rows", *requested_size, result.size()));
+    }
+    return result;
   }
   catch (...)
   {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+    auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+    error.addParameter("Prepared SQL statement name", name);
+    error.addParameter("Database address", fmt::format("{}", conn.getId()));
+    throw error;
   }
 }
 
-template <typename Container>
+
+template <typename... Args>
+pqxx::result PostgreSQLConnection::PreparedSQL::exec_n(unsigned nRows, Args... args) const
+try
+{
+  auto result = exec(std::forward<Args>(args)...);
+  result.expect_size(nRows);
+  return result;
+}
+catch (...)
+{
+  throw Fmi::Exception::Trace(BCP, "Operation failed!");
+}
+
+
+template <typename... Args>
+pqxx::result PostgreSQLConnection::PreparedSQL::exec(Args... args) const
+try
+{
+  auto transaction_ptr = conn.get_transaction_impl();
+  return transaction_ptr->exec_prepared(name, args...);
+}
+catch (...)
+{
+  throw Fmi::Exception::Trace(BCP, "Operation failed!");
+}
+
+
+template <>
+pqxx::result PostgreSQLConnection::exec_params(const std::string& theSQLStatement, const pqxx::params& params) const;
+
+
+template < typename Container>
 typename std::enable_if<is_iterable<Container>::value, pqxx::result>::type
 PostgreSQLConnection::exec_params_p(
     const std::string& theSQLStatement,
@@ -273,12 +304,15 @@ PostgreSQLConnection::exec_params_p(
   // cases when std::string<something> is provided as the only argument
   try
   {
-    auto transaction_ptr = get_transaction_impl();
-    const auto params = detail::make_params(container);
-    if (requested_size < 0) {
-      return transaction_ptr->exec_params(theSQLStatement, params);
+    pqxx::params params;
+    params.append_multi(container);
+    pqxx::result result = exec_params(theSQLStatement, params);
+    if (requested_size >= 0 && requested_size != static_cast<int>(result.size()))
+    {
+      throw Fmi::Exception(BCP,
+          fmt::format("Expected {} rows but got {} rows", requested_size, result.size()));
     }
-    return transaction_ptr->exec_params_n(requested_size, theSQLStatement, params);
+    return result;
   }
   catch (...)
   {

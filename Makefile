@@ -107,6 +107,7 @@ INTERNAL_HDRS = \
 	date_time/Internal.h \
 	date_time/ParserDefinitions.h \
 	date_time/date/tz_private.h \
+	PostgreSQLConnectionImpl.h \
 	TimeParserDefinitions.h
 
 SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
