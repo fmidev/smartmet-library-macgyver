@@ -16,6 +16,7 @@
 #include "Pool.h"
 #include "TypeTraits.h"
 
+
 namespace Fmi
 {
 namespace Database
@@ -244,8 +245,10 @@ PostgreSQLConnection::PreparedSQL::exec_p(
     pqxx::params params;
     params.append_multi(container);
     pqxx::result result = conn.exec_prepared(name, params);
-    if (requested_size) {
-      result.expect_rows(*requested_size);
+    if (requested_size && result.size() != *requested_size)
+    {
+      throw Fmi::Exception(BCP,
+          fmt::format("Expected {} rows but got {} rows", *requested_size, result.size()));
     }
     return result;
   }
@@ -304,8 +307,10 @@ PostgreSQLConnection::exec_params_p(
     pqxx::params params;
     params.append_multi(container);
     pqxx::result result = exec_params(theSQLStatement, params);
-    if (requested_size >= 0) {
-      result.expect_rows(requested_size);
+    if (requested_size >= 0 && requested_size != static_cast<int>(result.size()))
+    {
+      throw Fmi::Exception(BCP,
+          fmt::format("Expected {} rows but got {} rows", requested_size, result.size()));
     }
     return result;
   }

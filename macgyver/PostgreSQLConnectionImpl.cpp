@@ -8,6 +8,35 @@
 
 using Fmi::Database::PostgreSQLConnection;
 
+static_assert(PQXX_VERSION_MAJOR >= 7, "pqxx version 7 or higher is required");
+
+namespace
+{
+    pqxx::result transaction_exec_params(
+        pqxx::transaction_base& transaction,
+        const std::string& sql,
+        pqxx::params params)
+    {
+        #if PQXX_VERSION_MAJOR >= 8 || PQXX_VERSION_MINOR >= 10
+            return transaction.exec(sql, params);
+        #else
+            return transaction.exec_params(sql, params);
+        #endif
+    }
+
+    pqxx::result transaction_exec_prepared(
+        pqxx::transaction_base& transaction,
+        const std::string& name,
+        pqxx::params params)
+    {
+        #if PQXX_VERSION_MAJOR >= 8 || PQXX_VERSION_MINOR >= 10
+            return transaction.exec(pqxx::prepped(name), params);
+        #else
+            return transaction.exec_prepared(name, params);
+        #endif
+    }
+}  // namespace
+
 PostgreSQLConnection::Impl::Impl(const PostgreSQLConnectionOptions& theConnectionOptions)
     : itsDebug(theConnectionOptions.debug),
       itsCanceled(false),
@@ -376,7 +405,7 @@ pqxx::result PostgreSQLConnection::Impl::try_execute(
     if (itsTransaction)
     {
         const auto start = std::chrono::high_resolution_clock::now();
-        pqxx::result result = itsTransaction->exec(sql, params);
+        pqxx::result result = transaction_exec_params(*itsTransaction, sql, params);
         const auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
         checkSlowQuery(sql, start, end);
@@ -387,7 +416,7 @@ pqxx::result PostgreSQLConnection::Impl::try_execute(
 
     pqxx::nontransaction nitsTransaction(*itsConnection);
     const auto start = std::chrono::high_resolution_clock::now();
-    pqxx::result result = nitsTransaction.exec(sql, params);
+    pqxx::result result = transaction_exec_params(nitsTransaction, sql, params);
     const auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
     checkSlowQuery(sql, start, end);
@@ -399,7 +428,7 @@ pqxx::result PostgreSQLConnection::Impl::try_execute_non_transaction(const std::
 {
     pqxx::nontransaction nitsTransaction(*itsConnection);
     const auto start = std::chrono::high_resolution_clock::now();
-    pqxx::result result = nitsTransaction.exec(sql, params);
+    pqxx::result result = transaction_exec_params(nitsTransaction, sql, params);
     const auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
     checkSlowQuery(sql, start, end);
@@ -460,7 +489,7 @@ pqxx::result PostgreSQLConnection::Impl::try_exec_prepared(
     if (itsTransaction)
     {
         const auto start = std::chrono::high_resolution_clock::now();
-        const pqxx::result result = itsTransaction->exec(pqxx::prepped(name), params);
+        const pqxx::result result = transaction_exec_prepared(*itsTransaction, name, params);
         const auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
         checkSlowQuery(prepared_sql, start, end);
@@ -471,7 +500,7 @@ pqxx::result PostgreSQLConnection::Impl::try_exec_prepared(
 
     const auto start = std::chrono::high_resolution_clock::now();
     pqxx::nontransaction nitsTransaction(*itsConnection);
-    const pqxx::result result = nitsTransaction.exec(pqxx::prepped(name), params);
+    const pqxx::result result = transaction_exec_prepared(nitsTransaction, name, params);
     const auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
     checkSlowQuery(prepared_sql, start, end);
