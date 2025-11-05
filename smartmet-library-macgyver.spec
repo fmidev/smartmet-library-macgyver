@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.10.30
+Version: 25.11.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Nov  5 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.11.5-1.fmi
+- Reimplement Fmi::PostgreSQLConnection
+
 * Thu Oct 30 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.10.30-1.fmi
 - Fix error in Fmi::Pool<>
 
