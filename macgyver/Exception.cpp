@@ -68,6 +68,11 @@ Exception Exception::Trace(const char* _filename,
   {
     std::rethrow_exception(eptr);
   }
+  catch (boost::thread_interrupted&)
+  {
+    // Let thread interruption exceptions pass through
+    throw;
+  }
   catch (...)
   {
     return Exception(_filename, _line, _function, std::move(_message), nullptr);
@@ -118,6 +123,7 @@ Exception::Exception(const char* _filename,
       }
       catch (const boost::thread_interrupted&)
       {
+        // Let thread interruption exceptions pass through by simply rethrowing them
         throw;
       }
       catch (std::exception& e)

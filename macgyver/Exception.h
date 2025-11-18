@@ -31,12 +31,17 @@ class Exception : public std::exception
   // (i.e when you are in a "catch" block. If '_prevExeption' parameter is nullptr then
   // the constructor automatically detects the content of the previous exception.
 
+  // NOTE: boost::thread_interrupted exceptions are rethrown by this method to allow proper
+  //       handling of thread interruptions.
   static Exception Trace(const char* _filename,
                          int _line,
                          const char* _function,
                          std::string _message);
 
   // Convert std::exception_ptr to Fmi::Exception
+  //
+  // NOTE: boost::thread_interrupted exceptions are rethrown by this method to allow proper
+  //       handling of thread interruptions.
   static Exception Trace(const char* _filename,
                         int _line,
                         const char* _function,
@@ -49,6 +54,9 @@ class Exception : public std::exception
    *  Useful when one is not interested in intermediate back-trace levels, but only in
    *  initial exception. One can for example add details and/or parameters to the copy of
    *  initial exception and rethrow it or use for generating error message
+   *
+   *  NOTE: boost::thread_interrupted exceptions are rethrown by this method to allow proper
+   *        handling of thread interruptions.
    */
   static Exception SquashTrace(const char* _filename,
                                int _line,
@@ -56,6 +64,9 @@ class Exception : public std::exception
                                std::string _message);
 
   // TODO: Make this private to enforce using Exception::Trace
+  //
+  // NOTE: boost::thread_interrupted exceptions are rethrown by this method to allow proper
+  //       handling of thread interruptions.
   Exception(const char* _filename,
             int _line,
             const char* _function,
