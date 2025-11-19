@@ -21,8 +21,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.11.5
-Release: 2%{?dist}.fmi
+Version: 25.11.19
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Nov 19 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.11.19-1.fmi
+- Exception: thread interruption related bugfix
+
 * Wed Nov  5 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.11.5-2.fmi
 - Reimplement Fmi::PostgreSQLConnection
 
