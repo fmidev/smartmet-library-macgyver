@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.11.19
+Version: 25.11.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Nov 20 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.11.20-1.fmi
+- Require 11.2.0 <= fmt < 12.0.0
+
 * Wed Nov 19 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.11.19-1.fmi
 - Exception: thread interruption related bugfix
 
