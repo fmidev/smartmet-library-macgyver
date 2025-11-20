@@ -10,7 +10,7 @@
 %endif
 
 %if 0%{?rhel} && 0%{rhel} <= 9
-%define smartmet_fmt_min 11.0.1
+%define smartmet_fmt_min 11.2.0
 %define smartmet_fmt_max 12.0.0
 %define smartmet_fmt fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 %define smartmet_fmt_devel fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
