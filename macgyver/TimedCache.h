@@ -63,7 +63,7 @@ class CacheStatistics
   while inserting them into the cache.
  */
 template <typename KeyType, typename ValueType>
-class Cache
+class [[deprecated]] Cache
 {
   using SizeType = std::size_t;
   using DurationType = std::chrono::seconds;
