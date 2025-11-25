@@ -55,7 +55,11 @@ namespace Fmi
             std::unique_ptr<ItemType> data;
 
             /**
-             * @brief Pointer to the next free item record in the pool (nullptr if in use)
+             * @brief Pointer to the next free item record in the pool.
+             *
+             * Value is nullptr when one of following is true:
+             * - Item is currently in use
+             * - Item is the last item in the free item chain
              */
             ItemRec* next;
 
@@ -204,10 +208,12 @@ namespace Fmi
             const auto grow = [this]() {
                 std::unique_ptr<ItemType> new_item(createItemCb());
                 boost::unique_lock<boost::mutex> lock(mutex);
+                // Add new item to the pool. List iterators are not invalidated by growing list
                 ItemRec& item_rec = pool_data.emplace_back(ItemRec(std::move(new_item)));
                 item_rec.next = top;
                 top = &item_rec;
                 current_size++;
+                next_current_size++;
             };
 
             if constexpr (InitType == PoolInitType::Sequential)
@@ -242,10 +248,12 @@ namespace Fmi
                     }
                     catch(...)
                     {
-                        std::cout << Fmi::Exception(BCP,
-                            "Error initializing pool item of type " +
-                            Fmi::demangle_cpp_type_name(typeid(ItemType).name()));
-                        }
+                        std::cout
+                            << Fmi::Exception::Trace(BCP, "Error initializing pool item of type " +
+                                    Fmi::demangle_cpp_type_name(typeid(ItemType).name()))
+                                .addParameter("Task name", name)
+                            << std::endl;
+                    }
                 };
 
                 AsyncTaskGroup task_group;
@@ -287,26 +295,28 @@ namespace Fmi
                 //---------------------------------------------------------------------
                 return fetch_top();
             }
-            else if (current_size < max_size)
+            else if (next_current_size < max_size)
             {
                 //---------------------------------------------------------------------
                 // Item is not available, max limit not exceeded, create a new item
                 //---------------------------------------------------------------------
                 // Update count while mutex is still locked to avoid growing over
                 // max_size also in case of concurrent calls
-                current_size++;
+                next_current_size++;
                 // Unlock mutex while creating new item (it may take some time for example
                 // of database connection)
                 lock.unlock();
                 std::unique_ptr<ItemType> new_item(createItemCb());
                 // Update top and in_use_count while mutex is locked
                 lock.lock();
+                // Add new item to the pool. List iterators are not invalidated growing list
                 ItemRec& item_rec = pool_data.emplace_back(ItemRec(std::move(new_item)));
                 // One could optimize this part by avoiding putting new item in free
                 // item chain, but it would complicate the logic
+                current_size++;
                 item_rec.next = top;
                 top = &item_rec;
-
+                // No need to notify waiting threads as we are going to use the new item directly
                 return fetch_top();
             }
             else
@@ -314,7 +324,7 @@ namespace Fmi
                 if (timeout)
                 {
                     int ms = static_cast<int>(timeout->total_milliseconds());
-                    if (!cond_var.wait_for(lock, boost::chrono::milliseconds(ms), [this] { return in_use_count < current_size; }))
+                    if (!cond_var.wait_for(lock, boost::chrono::milliseconds(ms), [this] { return top != nullptr; }))
                     {
                         throw Fmi::Exception(BCP, "Timeout while waiting for pool item");
                     }
@@ -350,7 +360,17 @@ namespace Fmi
         const std::size_t max_size;
         const std::tuple<std::remove_reference_t<Args>...> constructor_args;
 
+        /**
+         * @brief Current number of items in the pool
+         */
         std::size_t current_size = 0;
+
+        /**
+         * @brief Next size of the pool when growing (used to control max_size limit)
+         *
+         * Intended to avoid growing over max_size in case of concurrent calls to acquire()
+         */
+        std::size_t next_current_size = 0;
         std::size_t in_use_count = 0;
 
         mutable boost::mutex mutex;
