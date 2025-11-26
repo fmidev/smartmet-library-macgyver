@@ -63,11 +63,17 @@ namespace Fmi
              * - Item is currently in use
              * - Item is the last item in the free item chain
              */
-            ItemRec* next;
+            ItemRec* next = nullptr;
+
+            /**
+            *  @brief Indicates whether the item is currently in use
+            *
+            *  nextptr is not sufficient as it is nullptr also for the last free item
+            */
+            bool in_use = false;
 
             ItemRec(std::unique_ptr<ItemType>&& item)
                 : data(std::move(item))
-                , next(nullptr)
             {
             }
 
@@ -81,21 +87,53 @@ namespace Fmi
         class Ptr : private std::unique_ptr<ItemType, std::function<void(ItemType*)>>
         {
             friend class Pool;
+            using base = std::unique_ptr<ItemType, std::function<void(ItemType*)>>;
 
-            Ptr(ItemType* ptr, std::function<void(ItemType*)> release)
+            std::weak_ptr<bool> alive_flag;
+            Ptr& self;
+
+            Ptr(ItemType* ptr, std::function<void(ItemType*)> release, std::shared_ptr<bool>& alive_flag)
                 : std::unique_ptr<ItemType, std::function<void(ItemType*)>>(ptr, release)
+                , alive_flag(alive_flag)
+                , self(*this)
             {
             }
 
-            using base = std::unique_ptr<ItemType, std::function<void(ItemType*)>>;
-
         public:
+            Ptr(Ptr&& other)
+                : base(std::move(other))
+                , alive_flag(std::move(other.alive_flag))
+                , self(*this)
+            {
+            }
+
+            virtual ~Ptr()
+            {
+                if (!this->base::get())
+                    return;
+
+                // Release is called automatically by unique_ptr destructor
+                // We need however handle case when pool is already destroyed
+                if (alive_flag.expired())
+                {
+                    // Pool is already destroyed, do not put item back to pool
+                    // but delete the item to avoid memory leak
+
+                    std::cerr << "Warning: Pool is already destroyed, deleting item of type "
+                               << Fmi::demangle_cpp_type_name(typeid(ItemType).name())
+                               << " at " << (void*)this->base::get()
+                               << std::endl;
+                    auto* ptr = this->release();
+                    delete ptr;
+                }
+            }
+
             // We do not want to expose all std::unique_ptr<> methods for example release()
             inline operator ItemType*() const { return this->base::get(); }
             inline operator bool() const { return this->base::get() != nullptr; }
             inline ItemType* operator->() const { return this->base::get(); }
             inline ItemType* get() const { return this->base::get(); }
-            inline void reset() { this->base::reset(); }
+            inline void reset() { if (this->base::get() && !alive_flag.expired()) this->base::reset(); }
         };
 
         Pool(const Pool&) = delete;
@@ -117,6 +155,7 @@ namespace Fmi
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
+            , alive_flag(std::make_shared<bool>(true))
             , current_size(0)
             , in_use_count(0)
             , createItemCb([this]()
@@ -145,6 +184,7 @@ namespace Fmi
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
+            , alive_flag(std::make_shared<bool>(true))
             , current_size(0)
             , in_use_count(0)
             , createItemCb([this, createItemCb_]()
@@ -155,28 +195,46 @@ namespace Fmi
 
         virtual ~Pool()
         {
+            alive_flag.reset();
+
+            std::size_t count = 0;
+            for (auto& item_rec : pool_data)
+            {
+                if (item_rec.in_use)
+                {
+                    // Drop the item data that is still in use. Ownership is transferred to the Pool<>::Ptr instance
+                    // As result, the item will not be returned to the pool but deleted when Ptr is destroyed
+                    // See Ptr::~Ptr() for details
+                    item_rec.data.release();
+                    count++;
+                }
+            }
+
             if (in_use_count)
             {
-                // FIXME: add waiting for pool items to be freed (with timeout)
-
-                // There are some items in use. This will cause std::terminate
-                // Unfortunately there is no way to recover from this without crashing
-                Fmi::Exception error(BCP, "Pool is being destroyed while " + Fmi::to_string(in_use_count) + " items are still in use");
-                std::cerr << error << std::endl;
-                std::terminate();
+                // There are some items in use. Output message about it to stderr
+                std::cerr << "Pool of " << Fmi::demangle_cpp_type_name(typeid(ItemType).name()) << " is being destroyed while items are still in use" << std::endl;
+                std::cerr << "Items in use: " << in_use_count << " (counted: " << count << ")"  << std::endl;
+                std::cerr << "Total pool size: " << current_size << std::endl;
             }
         }
 
         Ptr get()
         {
             ItemRec* rec = acquire(std::nullopt);
-            return Ptr(rec->data.get(), [this, rec](ItemType* ptr) { release(rec); });
+            return Ptr(
+                rec->data.get(),
+                [this, rec](ItemType* ptr) { this->release(rec->data.get(), rec); },
+                alive_flag);
         }
 
         Ptr get(const Fmi::TimeDuration& timeout)
         {
             ItemRec* rec = acquire(timeout);
-            return Ptr(rec->data.get(), [this, rec](ItemType* ptr) { release(rec); });
+            return Ptr(
+                rec->data.get(),
+                [this, rec](ItemType* ptr) { this->release(rec->data.get(), rec); },
+                alive_flag);
         }
 
         std::size_t size() const
@@ -288,6 +346,7 @@ namespace Fmi
                 ItemRec* item_rec = top;
                 top = top->next;
                 item_rec->next = nullptr;
+                item_rec->in_use = true;
                 in_use_count++;
                 return item_rec;
             };
@@ -352,11 +411,17 @@ namespace Fmi
             }
         }
 
-        void release(ItemRec* item)
+        void release(ItemType* item, ItemRec* item_rec)
         {
+            if (!item)
+                return;
+
+            // Cannot use Pool members directly as this is a static method
+            // Can potentially cause race condition when pool is being destroyed
             boost::unique_lock<boost::mutex> lock(mutex);
-            item->next = top;
-            top = item;
+            item_rec->next = top;
+            item_rec->in_use = false;
+            top = item_rec;
             in_use_count--;
             cond_var.notify_one();
         }
@@ -364,6 +429,8 @@ namespace Fmi
         const std::size_t start_size;
         const std::size_t max_size;
         const std::tuple<typename std::decay<Args>::type...> constructor_args;
+
+        std::shared_ptr<bool> alive_flag;
 
         /**
          * @brief Current number of items in the pool
