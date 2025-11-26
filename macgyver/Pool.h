@@ -34,7 +34,9 @@ namespace Fmi
      * The pool can be initialized either sequentially or in parallel, depending on the
      * parameters from Args are passed to the ItemType constructor when creating new items.
      *
-     * All constructor arguments must be copy constructable.
+     * All constructor arguments must be copy constructable as they are stored in the pool instance.
+     * Note that if reference of type is provided, argument itself must be copyable as well
+     * (as references are removed when storing in tuple).
      *
      * Template parameters:
      * - InitType: Specifies the initialization type (sequential or parallel).
@@ -113,7 +115,7 @@ namespace Fmi
         Pool(std::size_t start_size, std::size_t max_size, Args... args)
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
-            , constructor_args(args...)
+            , constructor_args(typename std::decay<Args>::type(args)...)
             , current_size(0)
             , in_use_count(0)
             , createItemCb([this]() { return std::make_unique<ItemType>(std::get<Args>(constructor_args)...); })
@@ -140,7 +142,7 @@ namespace Fmi
 
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
-            , constructor_args(args...)
+            , constructor_args(typename std::decay<Args>::type(args)...)
             , current_size(0)
             , in_use_count(0)
             , createItemCb([this, createItemCb_]() { return createItemCb_(std::get<Args>(constructor_args)...);
@@ -177,14 +179,12 @@ namespace Fmi
 
         std::size_t size() const
         {
-            boost::unique_lock<boost::mutex> lock(mutex);
-            return current_size;
+            return current_size.load();
         }
 
         std::size_t in_use() const
         {
-            boost::unique_lock<boost::mutex> lock(mutex);
-            return in_use_count;
+            return in_use_count.load();
         }
 
         void dumpInfo(std::ostream& os)
@@ -358,20 +358,20 @@ namespace Fmi
 
         const std::size_t start_size;
         const std::size_t max_size;
-        const std::tuple<std::remove_reference_t<Args>...> constructor_args;
+        const std::tuple<typename std::decay<Args>::type...> constructor_args;
 
         /**
          * @brief Current number of items in the pool
          */
-        std::size_t current_size = 0;
+        std::atomic<std::size_t> current_size = 0;
 
         /**
          * @brief Next size of the pool when growing (used to control max_size limit)
          *
          * Intended to avoid growing over max_size in case of concurrent calls to acquire()
          */
-        std::size_t next_current_size = 0;
-        std::size_t in_use_count = 0;
+        std::atomic<std::size_t> next_current_size = 0;
+        std::atomic<std::size_t> in_use_count = 0;
 
         mutable boost::mutex mutex;
         boost::condition_variable cond_var;
