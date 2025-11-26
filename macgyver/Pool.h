@@ -76,6 +76,7 @@ namespace Fmi
             ItemRec(ItemRec&&) = default;
             ItemRec& operator=(ItemRec&&) = default;
         };
+
     public:
         class Ptr : private std::unique_ptr<ItemType, std::function<void(ItemType*)>>
         {
@@ -118,7 +119,8 @@ namespace Fmi
             , constructor_args(typename std::decay<Args>::type(args)...)
             , current_size(0)
             , in_use_count(0)
-            , createItemCb([this]() { return std::make_unique<ItemType>(std::get<Args>(constructor_args)...); })
+            , createItemCb([this]()
+              { return std::make_unique<ItemType>(std::get<typename std::decay<Args>::type>(constructor_args)...); })
         {
             init(args...);
         }
@@ -145,8 +147,8 @@ namespace Fmi
             , constructor_args(typename std::decay<Args>::type(args)...)
             , current_size(0)
             , in_use_count(0)
-            , createItemCb([this, createItemCb_]() { return createItemCb_(std::get<Args>(constructor_args)...);
-            })
+            , createItemCb([this, createItemCb_]()
+              { return createItemCb_(std::get<typename std::decay<Args>::type>(constructor_args)...); })
         {
             init(args...);
         }
@@ -179,17 +181,20 @@ namespace Fmi
 
         std::size_t size() const
         {
-            return current_size.load();
+            boost::unique_lock<boost::mutex> lock(mutex);
+            return current_size;
         }
 
         std::size_t in_use() const
         {
-            return in_use_count.load();
+            boost::unique_lock<boost::mutex> lock(mutex);
+            return in_use_count;
         }
 
         void dumpInfo(std::ostream& os)
         {
             int count = 0;
+            boost::unique_lock<boost::mutex> lock(mutex);
             os << "Pool info for items of type " << Fmi::demangle_cpp_type_name(typeid(ItemType).name()) << std::endl;
             os << "Total items: " << pool_data.size() << std::endl;
             os << "In use items: " << in_use_count << std::endl;
@@ -309,7 +314,7 @@ namespace Fmi
                 std::unique_ptr<ItemType> new_item(createItemCb());
                 // Update top and in_use_count while mutex is locked
                 lock.lock();
-                // Add new item to the pool. List iterators are not invalidated growing list
+                // Add new item to the pool. List iterators are not invalidated by growing list
                 ItemRec& item_rec = pool_data.emplace_back(ItemRec(std::move(new_item)));
                 // One could optimize this part by avoiding putting new item in free
                 // item chain, but it would complicate the logic
@@ -363,15 +368,15 @@ namespace Fmi
         /**
          * @brief Current number of items in the pool
          */
-        std::atomic<std::size_t> current_size = 0;
+        std::size_t current_size = 0;
 
         /**
          * @brief Next size of the pool when growing (used to control max_size limit)
          *
          * Intended to avoid growing over max_size in case of concurrent calls to acquire()
          */
-        std::atomic<std::size_t> next_current_size = 0;
-        std::atomic<std::size_t> in_use_count = 0;
+        std::size_t next_current_size = 0;
+        std::size_t in_use_count = 0;
 
         mutable boost::mutex mutex;
         boost::condition_variable cond_var;
