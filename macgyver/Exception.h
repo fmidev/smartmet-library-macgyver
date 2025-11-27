@@ -134,7 +134,7 @@ class Exception : public std::exception
   public:
       ForceStackTrace();
       ForceStackTrace(const ForceStackTrace&) = delete;
-      virtual ~ForceStackTrace();
+      ~ForceStackTrace();
       ForceStackTrace& operator = (const ForceStackTrace&) = delete;
   private:
       bool prev;

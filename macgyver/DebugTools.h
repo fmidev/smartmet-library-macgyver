@@ -39,7 +39,7 @@ class Redirecter final
 {
 public:
     Redirecter(std::ostream& dest, std::ostream& src);
-    virtual ~Redirecter();
+    ~Redirecter();
 
     Redirecter(const Redirecter&) = delete;
     Redirecter& operator = (const Redirecter&) = delete;
