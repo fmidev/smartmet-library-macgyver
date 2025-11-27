@@ -168,3 +168,46 @@ BOOST_AUTO_TEST_CASE(used_items_after_pool_destruction)
   auto ptr1 = getItem(); // We hav now one item taken from pool but pool is gone
   ptr1.reset();
 }
+
+namespace
+{
+  struct TestObjThrow
+  {
+    TestObjThrow()
+    {
+      static std::atomic<int> count = 0;
+      if ((++count % 5) == 0)
+        throw Fmi::Exception(BCP, "TestObjThrow constructor exception");
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+  };
+}
+
+BOOST_AUTO_TEST_CASE(parallel_initialization_with_exceptions)
+{
+  BOOST_TEST_MESSAGE("Parallel initialization with exceptions test");
+  BOOST_CHECK(true); // To avoid "no checks" warning
+  try
+  {
+    Fmi::Pool<Fmi::PoolInitType::Parallel, TestObjThrow> pool(10, 20);
+    BOOST_FAIL("Exception expected but not thrown");
+  }
+  catch (const Fmi::Exception& e)
+  {
+    BOOST_TEST_MESSAGE("Caught expected exception: "s + e.what());
+  }
+}
+
+BOOST_AUTO_TEST_CASE(sequential_initialization_with_exceptions)
+{
+  BOOST_TEST_MESSAGE("Sequential initialization with exceptions test");
+  try
+  {
+    Fmi::Pool<Fmi::PoolInitType::Sequential, TestObjThrow> pool(10, 20);
+    BOOST_FAIL("Exception expected but not thrown");
+  }
+  catch (const Fmi::Exception& e)
+  {
+    BOOST_CHECK(true);
+  }
+}

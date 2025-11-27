@@ -46,7 +46,7 @@ namespace Fmi
     template <PoolInitType InitType, typename ItemType, typename... Args>
     class Pool
     {
-        static_assert(are_all_parameters_copyable<Args...>(),
+        static_assert(are_all_parameters_copyable<typename std::decay<Args>::type...>(),
             "All Args parameters must be copyable");
 
         struct ItemRec
@@ -152,6 +152,7 @@ namespace Fmi
          * in case when they are passed to constructor as references or pointers.
          */
         Pool(std::size_t start_size, std::size_t max_size, Args... args)
+        try
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
@@ -162,6 +163,11 @@ namespace Fmi
               { return std::make_unique<ItemType>(std::get<typename std::decay<Args>::type>(constructor_args)...); })
         {
             init(args...);
+        }
+        catch (...)
+        {
+            throw Fmi::Exception::Trace(BCP, "Error initializing Pool of type " +
+                Fmi::demangle_cpp_type_name(typeid(ItemType).name()));
         }
 
         /**
@@ -180,7 +186,7 @@ namespace Fmi
             std::size_t start_size,
             std::size_t max_size,
             Args... args)
-
+        try
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
@@ -191,6 +197,11 @@ namespace Fmi
               { return createItemCb_(std::get<typename std::decay<Args>::type>(constructor_args)...); })
         {
             init(args...);
+        }
+        catch (...)
+        {
+            throw Fmi::Exception::Trace(BCP, "Error initializing Pool of type " +
+                Fmi::demangle_cpp_type_name(typeid(ItemType).name()));
         }
 
         virtual ~Pool()
@@ -311,15 +322,17 @@ namespace Fmi
                     }
                     catch(...)
                     {
-                        std::cout
-                            << Fmi::Exception::Trace(BCP, "Error initializing pool item of type " +
-                                    Fmi::demangle_cpp_type_name(typeid(ItemType).name()))
-                                .addParameter("Task name", name)
-                            << std::endl;
+                        auto error = Fmi::Exception::Trace(BCP, "Error initializing pool item of type " +
+                                Fmi::demangle_cpp_type_name(typeid(ItemType).name()))
+                            .addParameter("Task name", name);
+                        //std::cout << error << std::endl;
+                        throw error;
                     }
                 };
 
                 AsyncTaskGroup task_group;
+                task_group.stop_on_error(true);
+
                 for (std::size_t i = 0; i < start_size; ++i)
                 {
                     task_group.add("pool_item_init[" + Fmi::to_string(i+1) + "]", grow);
@@ -327,11 +340,10 @@ namespace Fmi
 
                 task_group.on_task_error(init_task_error);
                 task_group.wait();
-                if (num_errors > 0)
-                {
-                    throw Fmi::Exception(BCP, Fmi::to_string(num_errors) +
-                        " errors occurred while initializing pool");
-                }
+            }
+            else
+            {
+                throw Fmi::Exception(BCP, "Unsupported PoolInitType value");
             }
         }
 
