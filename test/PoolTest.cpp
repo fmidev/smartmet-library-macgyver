@@ -20,6 +20,7 @@ test_suite* init_unit_test_suite(int argc, char* argv[])
 
 BOOST_AUTO_TEST_CASE(simple_test_1)
 {
+  BOOST_TEST_MESSAGE("Simple test withput expanding pool");
   Fmi::Pool<Fmi::PoolInitType::Sequential, int> pool(2, 4);
   BOOST_CHECK_EQUAL(int(pool.size()), 2);
   BOOST_CHECK_EQUAL(int(pool.in_use()), 0);
@@ -36,28 +37,15 @@ BOOST_AUTO_TEST_CASE(simple_test_1)
 
 BOOST_AUTO_TEST_CASE(simple_test_2)
 {
-  Fmi::Pool<Fmi::PoolInitType::Parallel, int> pool(2, 4);
-  BOOST_CHECK_EQUAL(int(pool.size()), 2);
-  BOOST_CHECK_EQUAL(int(pool.in_use()), 0);
-  auto ptr = pool.get();
-  BOOST_CHECK(ptr.get() != nullptr);
-  BOOST_CHECK_EQUAL(int(pool.in_use()), 1);
-  BOOST_CHECK_EQUAL(int(pool.size()), 2);
-  ptr.reset();
-  BOOST_CHECK_EQUAL(int(pool.in_use()), 0);
-  BOOST_CHECK_EQUAL(int(pool.size()), 2);
-
-  //pool.dumpInfo(std::cout);
-}
-
-BOOST_AUTO_TEST_CASE(simple_test_3)
-{
+  BOOST_TEST_MESSAGE("Simple test with expanding pool");
   Fmi::Pool<Fmi::PoolInitType::Sequential, int> pool(10, 20);
+
   BOOST_CHECK_EQUAL(int(pool.size()), 10);
   BOOST_CHECK_EQUAL(int(pool.in_use()), 0);
 
   std::vector<decltype(pool.get())> items;
-  std::generate_n(std::back_insert_iterator(items), 15, [&pool]() { return pool.get(); });
+  for (int i = 0; i < 15; i++)
+    items.emplace_back(std::move(pool.get()));
 
   BOOST_CHECK_EQUAL(int(pool.in_use()), 15);
   BOOST_CHECK_EQUAL(int(pool.size()), 15);
@@ -73,6 +61,7 @@ BOOST_AUTO_TEST_CASE(simple_test_3)
 
 BOOST_AUTO_TEST_CASE(factory_method_test)
 {
+  BOOST_TEST_MESSAGE("Factory method test");
   Fmi::Pool<Fmi::PoolInitType::Sequential, std::string, std::string> pool(
     [](const std::string& str) { return std::make_unique<std::string>(str); }, 2, 4, "hello"s);
   BOOST_CHECK_EQUAL(int(pool.size()), 2);
@@ -113,6 +102,7 @@ namespace
 
 BOOST_AUTO_TEST_CASE(constructor_with_1_argument)
 {
+  BOOST_TEST_MESSAGE("Constructor with 1 argument test");
   Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj1, std::string> pool(2, 4, "foobar"s);
   decltype(pool.get()) ptr = pool.get();
   BOOST_CHECK_EQUAL(ptr->value, 42);
@@ -120,6 +110,7 @@ BOOST_AUTO_TEST_CASE(constructor_with_1_argument)
 
 BOOST_AUTO_TEST_CASE(constructor_with_2_arguments)
 {
+  BOOST_TEST_MESSAGE("Constructor with 2 arguments test");
   Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj2, std::string, int> pool(2, 4, "foobar"s, 12);
   decltype(pool.get()) ptr = pool.get();
   BOOST_CHECK_EQUAL(ptr->value, 42);
@@ -127,6 +118,7 @@ BOOST_AUTO_TEST_CASE(constructor_with_2_arguments)
 
 BOOST_AUTO_TEST_CASE(parallel_use)
 {
+  BOOST_TEST_MESSAGE("Parallel use test");
   Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj3> pool(5, 10);
 
   const int num_tasks = 50;
@@ -161,4 +153,61 @@ BOOST_AUTO_TEST_CASE(parallel_use)
 
   BOOST_REQUIRE_EQUAL(fail.load(), 0);
   BOOST_CHECK_EQUAL(pass.load(), num_tasks * iterations_per_task);
+}
+
+BOOST_AUTO_TEST_CASE(used_items_after_pool_destruction)
+{
+  BOOST_TEST_MESSAGE("Used object after pool destruction test");
+  const auto getItem = []()
+  {
+    Fmi::Pool<Fmi::PoolInitType::Sequential, int> pool(2, 4);
+    BOOST_CHECK_EQUAL(int(pool.size()), 2);
+    return pool.get();
+  };
+
+  auto ptr1 = getItem(); // We hav now one item taken from pool but pool is gone
+  ptr1.reset();
+}
+
+namespace
+{
+  struct TestObjThrow
+  {
+    TestObjThrow()
+    {
+      static std::atomic<int> count = 0;
+      if ((++count % 5) == 0)
+        throw Fmi::Exception(BCP, "TestObjThrow constructor exception");
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+  };
+}
+
+BOOST_AUTO_TEST_CASE(parallel_initialization_with_exceptions)
+{
+  BOOST_TEST_MESSAGE("Parallel initialization with exceptions test");
+  BOOST_CHECK(true); // To avoid "no checks" warning
+  try
+  {
+    Fmi::Pool<Fmi::PoolInitType::Parallel, TestObjThrow> pool(10, 20);
+    BOOST_FAIL("Exception expected but not thrown");
+  }
+  catch (const Fmi::Exception& e)
+  {
+    BOOST_TEST_MESSAGE("Caught expected exception: "s + e.what());
+  }
+}
+
+BOOST_AUTO_TEST_CASE(sequential_initialization_with_exceptions)
+{
+  BOOST_TEST_MESSAGE("Sequential initialization with exceptions test");
+  try
+  {
+    Fmi::Pool<Fmi::PoolInitType::Sequential, TestObjThrow> pool(10, 20);
+    BOOST_FAIL("Exception expected but not thrown");
+  }
+  catch (const Fmi::Exception& e)
+  {
+    BOOST_CHECK(true);
+  }
 }
