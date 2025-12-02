@@ -8,7 +8,6 @@ INCLUDES += -I../macgyver \
 LIBS += -L.. -lsmartmet-macgyver \
 	-lboost_regex \
         -lboost_filesystem \
-        -lboost_system \
         -lboost_iostreams \
 	-lboost_thread \
 	-lpthread
