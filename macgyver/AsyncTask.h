@@ -27,7 +27,9 @@ class AsyncTask
   /**
    *   @brief Constructor: creates AsyncTask object
    *
-   *   @param name Name of task for logging purpose
+   *   @param name Name of task for logging purposes. Make is also to set thread name
+   *               on platforms that support it. For this reason it is remmended to keep
+   *               name length short (max 15 characters on Linux) to avoid truncation.
    *   @param task function to perform in the task
    *   @param notify function to call when requested function has ended (any reason - success,
    * interrupted, exception thrown)

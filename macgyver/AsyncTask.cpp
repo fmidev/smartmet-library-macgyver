@@ -124,6 +124,9 @@ void Fmi::AsyncTask::run(std::function<void()> task)
   try
   {
     status = active;
+#ifdef BOOST_THREAD_PLATFORM_PTHREAD
+    pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
+#endif
     LOG_TIME("started");
     task();
     LOG_TIME("ended");
