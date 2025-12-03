@@ -245,7 +245,7 @@ PostgreSQLConnection::PreparedSQL::exec_p(
     pqxx::params params;
     params.append_multi(container);
     pqxx::result result = conn.exec_prepared(name, params);
-    if (requested_size && result.size() != *requested_size)
+    if (requested_size && unsigned(result.size()) != *requested_size)
     {
       throw Fmi::Exception(BCP,
           fmt::format("Expected {} rows but got {} rows", *requested_size, result.size()));
