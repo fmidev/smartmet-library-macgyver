@@ -245,7 +245,7 @@ namespace fmt
  * Based on verson suggested by ChatGPT 5 with some simplifications
  */
 template <>
-struct ::fmt::formatter<Fmi::Database::PostgreSQLConnectionId>
+struct formatter<Fmi::Database::PostgreSQLConnectionId>
 {
   enum class part { all, host, port, db } which = part::all;
 
