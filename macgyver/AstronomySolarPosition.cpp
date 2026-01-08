@@ -39,7 +39,8 @@ namespace Astronomy
 
 bool solar_position_t::dark() const
 {
-  return (elevation < -0.0145386);
+  // elevation is in degrees. -0.833 degrees is the standard value used for sunrise/sunset
+  return (elevation < -0.833);
 }
 
 /*
