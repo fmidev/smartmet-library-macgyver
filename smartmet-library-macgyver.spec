@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 25.12.2
+Version: 26.1.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -38,7 +38,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
 BuildRequires: smartmet-timezones >= 24.5.27
-BuildRequires: smartmet-utils-devel >= 25.8.19
+BuildRequires: smartmet-utils-devel >= 25.11.27
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -82,7 +82,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 24.5.27
-#TestRequires: smartmet-utils-devel >= 25.8.19
+#TestRequires: smartmet-utils-devel >= 25.11.27
 #TestRequires: smartmet-test-db
 
 %if 0%{?rhel} && 0%{rhel} >= 9
@@ -130,7 +130,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 25.8.19
+Requires: smartmet-utils-devel >= 25.11.27
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jan  8 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.1.8-1.fmi
+- Fixed dark() to use elevation in degrees, code assumed radians
+
 * Tue Dec  2 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.12.2-1.fmi
 - Fmi::Pool<> update
 
