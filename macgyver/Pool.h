@@ -211,11 +211,11 @@ namespace Fmi
             std::size_t count = 0;
             std::size_t items_in_use = 0;
             std::size_t total_size = 0;
-            
+
             {
                 boost::unique_lock<boost::mutex> lock(mutex);
                 alive_flag.reset();
-                
+
                 for (auto& item_rec : pool_data)
                 {
                     if (item_rec.in_use)
@@ -227,7 +227,7 @@ namespace Fmi
                         count++;
                     }
                 }
-                
+
                 items_in_use = in_use_count;
                 total_size = current_size;
             }
@@ -375,7 +375,7 @@ namespace Fmi
             };
 
             boost::unique_lock<boost::mutex> lock(mutex);
-            
+
             // Check if pool is being destroyed after acquiring mutex
             // to prevent use after destruction
             if (!alive_flag)
@@ -468,11 +468,11 @@ namespace Fmi
             // Cannot use Pool members directly as this is a static method
             // Can potentially cause race condition when pool is being destroyed
             boost::unique_lock<boost::mutex> lock(mutex);
-            
+
             // Double-check after acquiring lock
             if (!alive_flag)
                 return;
-                
+
             item_rec->next = top;
             item_rec->in_use = false;
             top = item_rec;
