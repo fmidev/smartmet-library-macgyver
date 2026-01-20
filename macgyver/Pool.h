@@ -401,7 +401,20 @@ namespace Fmi
                 // Unlock mutex while creating new item (it may take some time for example
                 // of database connection)
                 lock.unlock();
-                std::unique_ptr<ItemType> new_item(createItemCb());
+                std::unique_ptr<ItemType> new_item;
+                try
+                {
+                    new_item = createItemCb();
+                }
+                catch (...)
+                {
+                    // Creating new item failed. Decrement count and rethrow
+                    // the exception. This really only matters when pool expansion
+                    // is attempted.
+                    lock.lock();
+                    next_current_size--;
+                    throw;
+                }
                 // Update top and in_use_count while mutex is locked
                 lock.lock();
                 // Add new item to the pool. List iterators are not invalidated by growing list
