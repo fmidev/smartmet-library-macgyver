@@ -206,27 +206,38 @@ namespace Fmi
 
         virtual ~Pool()
         {
-            alive_flag.reset();
-
+            // Hold mutex while resetting alive_flag to prevent race condition
+            // with get() and Ptr constructor accessing alive_flag
             std::size_t count = 0;
-            for (auto& item_rec : pool_data)
+            std::size_t items_in_use = 0;
+            std::size_t total_size = 0;
+
             {
-                if (item_rec.in_use)
+                boost::unique_lock<boost::mutex> lock(mutex);
+                alive_flag.reset();
+
+                for (auto& item_rec : pool_data)
                 {
-                    // Drop the item data that is still in use. Ownership is transferred to the Pool<>::Ptr instance
-                    // As result, the item will not be returned to the pool but deleted when Ptr is destroyed
-                    // See Ptr::~Ptr() for details
-                    item_rec.data.release();
-                    count++;
+                    if (item_rec.in_use)
+                    {
+                        // Drop the item data that is still in use. Ownership is transferred to the Pool<>::Ptr instance
+                        // As result, the item will not be returned to the pool but deleted when Ptr is destroyed
+                        // See Ptr::~Ptr() for details
+                        item_rec.data.release();
+                        count++;
+                    }
                 }
+
+                items_in_use = in_use_count;
+                total_size = current_size;
             }
 
-            if (in_use_count)
+            if (items_in_use)
             {
                 // There are some items in use. Output message about it to stderr
                 std::cerr << "Pool of " << Fmi::demangle_cpp_type_name(typeid(ItemType).name()) << " is being destroyed while items are still in use" << std::endl;
-                std::cerr << "Items in use: " << in_use_count << " (counted: " << count << ")"  << std::endl;
-                std::cerr << "Total pool size: " << current_size << std::endl;
+                std::cerr << "Items in use: " << items_in_use << " (counted: " << count << ")"  << std::endl;
+                std::cerr << "Total pool size: " << total_size << std::endl;
             }
         }
 
@@ -364,6 +375,14 @@ namespace Fmi
             };
 
             boost::unique_lock<boost::mutex> lock(mutex);
+
+            // Check if pool is being destroyed after acquiring mutex
+            // to prevent use after destruction
+            if (!alive_flag)
+            {
+                throw Fmi::Exception(BCP, "Pool is being destroyed");
+            }
+
             if (top)
             {
                 //---------------------------------------------------------------------
@@ -382,7 +401,20 @@ namespace Fmi
                 // Unlock mutex while creating new item (it may take some time for example
                 // of database connection)
                 lock.unlock();
-                std::unique_ptr<ItemType> new_item(createItemCb());
+                std::unique_ptr<ItemType> new_item;
+                try
+                {
+                    new_item = createItemCb();
+                }
+                catch (...)
+                {
+                    // Creating new item failed. Decrement count and rethrow
+                    // the exception. This really only matters when pool expansion
+                    // is attempted.
+                    lock.lock();
+                    next_current_size--;
+                    throw;
+                }
                 // Update top and in_use_count while mutex is locked
                 lock.lock();
                 // Add new item to the pool. List iterators are not invalidated by growing list
@@ -428,9 +460,19 @@ namespace Fmi
             if (!item)
                 return;
 
+            // Check if pool is still alive before accessing members
+            // If pool is destroyed, the item will be deleted by Ptr destructor
+            if (!alive_flag)
+                return;
+
             // Cannot use Pool members directly as this is a static method
             // Can potentially cause race condition when pool is being destroyed
             boost::unique_lock<boost::mutex> lock(mutex);
+
+            // Double-check after acquiring lock
+            if (!alive_flag)
+                return;
+
             item_rec->next = top;
             item_rec->in_use = false;
             top = item_rec;
