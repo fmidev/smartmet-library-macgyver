@@ -21,7 +21,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.1.8
+Version: 26.1.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -141,6 +141,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Jan 26 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.1.26-1.fmi
+- Pool<>: thread safety fixes. Addes related test
+
 * Thu Jan  8 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.1.8-1.fmi
 - Fixed dark() to use elevation in degrees, code assumed radians
 
