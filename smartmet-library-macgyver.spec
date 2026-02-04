@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.1.26
+Version: 26.2.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -136,6 +136,9 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Feb  4 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.2.4-1.fmi
+- Update to proj-9.7, gdal-3.12, fmt-12
+
 * Mon Jan 26 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.1.26-1.fmi
 - Pool<>: thread safety fixes. Addes related test
 
