@@ -9,15 +9,10 @@
 %define smartmet_boost boost
 %endif
 
-%if 0%{?rhel} && 0%{rhel} <= 9
-%define smartmet_fmt_min 11.2.0
-%define smartmet_fmt_max 12.0.0
+%define smartmet_fmt_min 12.0.0
+%define smartmet_fmt_max 13.0.0
 %define smartmet_fmt fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 %define smartmet_fmt_devel fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-%else
-%define smartmet_fmt fmt
-%define smartmet_fmt_devel fmt-devel
-%endif
 
 Summary: macgyver library
 Name: %{SPECNAME}
@@ -38,7 +33,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
 BuildRequires: smartmet-timezones >= 24.5.27
-BuildRequires: smartmet-utils-devel >= 25.11.27
+BuildRequires: smartmet-utils-devel >= 26.2.4
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -82,7 +77,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 24.5.27
-#TestRequires: smartmet-utils-devel >= 25.11.27
+#TestRequires: smartmet-utils-devel >= 26.2.4
 #TestRequires: smartmet-test-db
 
 %if 0%{?rhel} && 0%{rhel} >= 9
@@ -130,7 +125,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 25.11.27
+Requires: smartmet-utils-devel >= 26.2.4
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
