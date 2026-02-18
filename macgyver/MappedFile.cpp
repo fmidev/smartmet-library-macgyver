@@ -1,15 +1,17 @@
 #include "MappedFile.h"
 #include "Exception.h"
+#include <iostream>
 
 #ifndef _MSC_VER
 #include <sys/mman.h>
+#include <unistd.h>
 #endif
 
 Fmi::MappedFile::MappedFile(const MappedFile::Params& params)
     : boost::iostreams::mapped_file(params)
     , m_path(params.path)
 {
-    madvise_nodump();
+    madvise_nodump(params.offset);
 }
 
 Fmi::MappedFile::MappedFile(
@@ -23,7 +25,7 @@ Fmi::MappedFile::MappedFile(
     : boost::iostreams::mapped_file(path, mode, length, offset)
     , m_path(path)
 {
-    madvise_nodump();
+    madvise_nodump(offset);
 }
 catch (...)
 {
@@ -43,7 +45,7 @@ Fmi::MappedFile::MappedFile(
       : boost::iostreams::mapped_file(path, mode, length, offset)
       , m_path(path)
 {
-    madvise_nodump();
+    madvise_nodump(offset);
 }
 catch (...)
 {
@@ -55,26 +57,14 @@ catch (...)
     throw exception;
 }
 
-Fmi::MappedFile::~MappedFile()
-{
-    try
-    {
-        madvise_default();
-    }
-    catch (...)
-    {
-        // Ignore exceptions in destructor
-        return;
-    }
-}
+Fmi::MappedFile::~MappedFile() = default;
 
 void
 Fmi::MappedFile::open(Params params)  try
 {
-    madvise_default();
     m_path = params.path;
     boost::iostreams::mapped_file::open(params);
-    madvise_nodump();
+    madvise_nodump(params.offset);
 }
 catch (...)
 {
@@ -90,10 +80,9 @@ Fmi::MappedFile::open(
     size_type length,
     boost::intmax_t offset ) try
 {
-    madvise_default();
     m_path = path;
     boost::iostreams::mapped_file::open(path, mode, length, offset);
-    madvise_nodump();
+    madvise_nodump(offset);
 }
 catch (...)
 {
@@ -112,10 +101,9 @@ Fmi::MappedFile::open(
     size_type length,
     boost::intmax_t offset) try
 {
-    madvise_default();
     m_path = path;
     boost::iostreams::mapped_file::open(path, mode, length, offset);
-    madvise_nodump();
+    madvise_nodump(offset);
 }
 catch (...)
 {
@@ -130,7 +118,6 @@ catch (...)
 void
 Fmi::MappedFile::close() try
 {
-    madvise_default();
     boost::iostreams::mapped_file::close();
 }
 catch (...)
@@ -141,48 +128,52 @@ catch (...)
 }
 
 void
-Fmi::MappedFile::madvise_nodump()
+Fmi::MappedFile::madvise_nodump(boost::intmax_t offset)
 {
     if (boost::iostreams::mapped_file::is_open())
     {
-        invoke_madvise(MADV_DONTDUMP);
+        invoke_madvise(MADV_DONTDUMP, offset);
     }
 }
 
 void
-Fmi::MappedFile::madvise_default()
-{
-    if (boost::iostreams::mapped_file::is_open())
-    {
-        invoke_madvise(MADV_NORMAL);
-    }
-}
-
-void
-Fmi::MappedFile::invoke_madvise(int adv)
+Fmi::MappedFile::invoke_madvise(int adv, boost::intmax_t offset)
 {
 #ifndef _MSC_VER
-    char *address = boost::iostreams::mapped_file::data()
+    char *data_ptr = boost::iostreams::mapped_file::data()
         ? boost::iostreams::mapped_file::data()
         : const_cast<char*>(boost::iostreams::mapped_file::const_data());
 
-    int ret_val = madvise(address, size(), adv);
+    // madvise requires page-aligned address and size
+    // When offset is non-zero, data() points to offset within the mapping
+    const long page_size = sysconf(_SC_PAGESIZE);
+    const boost::intmax_t offset_in_page = offset % page_size;
+    
+    // Calculate page-aligned base address
+    char *aligned_address = data_ptr - offset_in_page;
+    
+    // Calculate actual mapped size (includes offset alignment padding)
+    size_type aligned_size = size() + offset_in_page;
+    
+    int ret_val = madvise(aligned_address, aligned_size, adv);
     if (ret_val < 0)
     {
-        // FIXME: do we want to throw exception here?
-        //        Maybe we should simply ignore the error.
         const int err = errno;
         char tmp[80];
         Fmi::Exception exception(BCP, "madvise() failed");
+        exception.addParameter("path", m_path);
         exception.addParameter("errno", std::to_string(err));
         exception.addParameter("description", strerror_r(err, tmp, sizeof tmp));
-        snprintf(tmp, sizeof(tmp), "%p", (void*)address);
+        snprintf(tmp, sizeof(tmp), "%p", (void*)aligned_address);
         exception.addParameter("address", tmp);
-        exception.addParameter("size", std::to_string(size()));
-        throw exception;
+        exception.addParameter("size", std::to_string(aligned_size));
+        exception.addParameter("offset", std::to_string(offset));
+        exception.addParameter("page_size", std::to_string(page_size));
+        std::cerr << exception << std::endl;
     }
 #else
     (void)adv;
+    (void)offset;
 #endif
 }
 

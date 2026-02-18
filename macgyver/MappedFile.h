@@ -71,9 +71,8 @@ namespace Fmi
 
     private:
         std::string m_path;
-        void madvise_nodump();
-        void madvise_default();
-        void invoke_madvise(int adv);
+        void madvise_nodump(boost::intmax_t offset);
+        void invoke_madvise(int adv, boost::intmax_t offset);
 
         MappedFile(const MappedFile&) = delete;
         MappedFile(MappedFile&&) = delete;
