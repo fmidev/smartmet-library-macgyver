@@ -1,6 +1,6 @@
 // ======================================================================
 /*!
- * \brief Tagged multi-strategy caching in multithreaded environment
+ * \brief LRU caching with optional custom size function and cache striping
  */
 // ======================================================================
 #pragma once
@@ -12,17 +12,11 @@
 #include <boost/functional/hash.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/thread.hpp>
-#include <boost/unordered_map.hpp>
-#include <cmath>
-#include <ctime>
+#include <array>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <limits>
-#include <map>
 #include <optional>
-#include <random>
-#include <set>
 #include <sstream>
 #include <utility>
 
@@ -40,59 +34,7 @@ const CacheStats EMPTY_CACHE_STATS;
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Object which is stored in the cache
- */
-// ----------------------------------------------------------------------
-
-template <class KeyType, class ValueType, class TagSetType>
-struct CacheObject
-{
-  CacheObject(const KeyType& theKey,
-              const ValueType& theValue,
-              const TagSetType& theSet,
-              std::size_t theSize)
-      : itsKey(theKey), itsValue(theValue), itsTagSet(theSet), itsSize(theSize)
-  {
-  }
-
-  KeyType itsKey;
-
-  ValueType itsValue;
-
-  TagSetType itsTagSet;
-
-  std::size_t itsHits = 0;
-
-  std::size_t itsSize = 0;
-};
-
-template <class KeyType, class ValueType, class TagSetType>
-struct CacheReportingObject
-{
-  CacheReportingObject(const KeyType& theKey,
-                       const ValueType& theValue,
-                       const TagSetType& theSet,
-                       std::size_t theHits,
-                       std::size_t theSize)
-      : itsKey(theKey), itsValue(theValue), itsTagSet(theSet), itsHits(theHits), itsSize(theSize)
-  {
-  }
-
-  KeyType itsKey;
-
-  ValueType itsValue;
-
-  TagSetType itsTagSet;
-
-  std::size_t itsHits = 0;
-
-  std::size_t itsSize = 0;
-};
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Eviction types which determine how cache is evicted. Eviction
- * can be either object or size based.
+ * \brief Size function for trivial (count-based) cache capacity
  */
 // ----------------------------------------------------------------------
 
@@ -102,772 +44,68 @@ struct TrivialSizeFunction
   static std::size_t getSize(const ValueType& /* theValue */) { return 1; }
 };
 
-template <class TagSetType, class TagMapType>
-void perform_tag_eviction(const TagSetType& tags, TagMapType& inputTagMap)
-{
-  for (auto tagit = tags.begin(); tagit != tags.end(); ++tagit)
-  {
-    auto mapit = inputTagMap.find(*tagit);
-
-    if (mapit != inputTagMap.end())
-    {
-      // Decrease ownership count
-      mapit->second.second--;
-
-      if (mapit->second.second == 0)
-      {
-        inputTagMap.erase(mapit);
-      }
-    }
-  }
-}
-
 // ----------------------------------------------------------------------
 /*!
- * \brief Eviction policies determine how cache is cleaned upon reaching the maximum size.
+ * \brief Object stored in the cache
  */
 // ----------------------------------------------------------------------
 
-// Remove the least used object from the cache
-template <class MapType,
-          class TagMapType,
-          class KeyType,
-          class ValueType,
-          class TagSetType,
-          class SizeFunction>
-struct LRUEviction
+template <class KeyType, class ValueType>
+struct CacheObject
 {
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize)
+  CacheObject(const KeyType& theKey, const ValueType& theValue, std::size_t theSize)
+      : itsKey(theKey), itsValue(theValue), itsSize(theSize)
   {
-    while (currentSize > maxSize)
-    {
-      std::size_t valueSize = inputMap.right.front().first.itsSize;
-      TagSetType valueTags = inputMap.right.front().first.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      inputMap.right.pop_front();
-      currentSize -= valueSize;
-    }
   }
 
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize,
-                      std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    while (currentSize > maxSize)
-    {
-      auto& item = inputMap.right.front().first;
-      std::size_t valueSize = item.itsSize;
-      TagSetType valueTags = item.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      evictedItems.push_back(std::make_pair(item.itsKey, item.itsValue));
-
-      inputMap.right.pop_front();
-      currentSize -= valueSize;
-    }
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize,
-                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize, evictedItems);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
-  {
-    inputMap.right.relocate(inputMap.right.end(), inputMap.project_right(it));
-  }
+  KeyType itsKey;
+  ValueType itsValue;
+  std::size_t itsHits = 0;
+  std::size_t itsSize = 0;
 };
 
-// Remove the most used object from the cache
-template <class MapType,
-          class TagMapType,
-          class KeyType,
-          class ValueType,
-          class TagSetType,
-          class SizeFunction>
-struct MRUEviction
+template <class KeyType, class ValueType>
+struct CacheReportingObject
 {
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize)
+  CacheReportingObject(const KeyType& theKey,
+                       const ValueType& theValue,
+                       std::size_t theHits,
+                       std::size_t theSize)
+      : itsKey(theKey), itsValue(theValue), itsHits(theHits), itsSize(theSize)
   {
-    while (currentSize > maxSize)
-    {
-      std::size_t valueSize = inputMap.right.back().first.itsSize;
-      TagSetType valueTags = inputMap.right.back().first.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      inputMap.right.pop_back();
-      currentSize -= valueSize;
-    }
   }
 
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize,
-                      std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    while (currentSize > maxSize)
-    {
-      auto& item = inputMap.right.back().first;
-      std::size_t valueSize = item.itsSize;
-      TagSetType valueTags = item.itsTagSet;
-
-      evictedItems.push_back(std::make_pair(item.itsKey, item.itsValue));
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      inputMap.right.pop_back();
-      currentSize -= valueSize;
-    }
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    onEvict(inputMap, inputTagMap, currentSize, maxSize);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize,
-                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    onEvict(inputMap, inputTagMap, currentSize, maxSize, evictedItems);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static void onAccess(MapType& inputMap, typename MapType::left_iterator& it)
-  {
-    inputMap.right.relocate(inputMap.right.end(), inputMap.project_right(it));
-  }
-};
-
-// Remove randomly chosen object from the cache
-template <class MapType,
-          class TagMapType,
-          class KeyType,
-          class ValueType,
-          class TagSetType,
-          class SizeFunction>
-struct RandomEviction
-{
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize)
-  {
-    static std::random_device dev;
-    static std::mt19937 generator(dev());
-
-    while (currentSize > maxSize)
-    {
-      std::size_t mapSize = inputMap.size();
-      std::uniform_int_distribution<> dist(0, mapSize - 1);
-      std::size_t randomInteger = dist(generator);
-      auto iterator = inputMap.right.begin();
-      std::advance(iterator, randomInteger);
-
-      std::size_t valueSize = iterator->first.itsSize;
-      TagSetType valueTags = iterator->first.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      inputMap.right.erase(iterator);
-      currentSize -= valueSize;
-    }
-  }
-
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize,
-                      std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    static std::random_device dev;
-    static std::mt19937 generator(dev());
-
-    while (currentSize > maxSize)
-    {
-      std::size_t mapSize = inputMap.size();
-      std::uniform_int_distribution<> dist(0, mapSize - 1);
-      std::size_t randomInteger = dist(generator);
-      auto iterator = inputMap.right.begin();
-      std::advance(iterator, randomInteger);
-
-      auto& item = iterator->first;
-      std::size_t valueSize = item.itsSize;
-      TagSetType valueTags = item.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      evictedItems.push_back(std::make_pair(item.itsKey, item.itsValue));
-
-      inputMap.right.erase(iterator);
-      currentSize -= valueSize;
-    }
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize,
-                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize, evictedItems);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
-  {
-    // No-op
-  }
-};
-
-// First in first out removal policy
-template <class MapType,
-          class TagMapType,
-          class KeyType,
-          class ValueType,
-          class TagSetType,
-          class SizeFunction>
-struct FIFOEviction
-{
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize)
-  {
-    while (currentSize > maxSize)
-    {
-      std::size_t valueSize = inputMap.right.front().first.itsSize;
-      TagSetType valueTags = inputMap.right.front().first.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      inputMap.right.pop_front();
-      currentSize -= valueSize;
-    }
-  }
-
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize,
-                      std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    while (currentSize > maxSize)
-    {
-      auto& item = inputMap.right.front().first;
-      std::size_t valueSize = item.itsSize;
-      TagSetType valueTags = item.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      evictedItems.push_back(std::make_pair(item.itsKey, item.itsValue));
-
-      inputMap.right.pop_front();
-      currentSize -= valueSize;
-    }
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize,
-                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize, evictedItems);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
-  {
-    // No-op
-  }
-};
-
-// First in last out removal policy
-template <class MapType,
-          class TagMapType,
-          class KeyType,
-          class ValueType,
-          class TagSetType,
-          class SizeFunction>
-struct FILOEviction
-{
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize)
-  {
-    while (currentSize > maxSize)
-    {
-      std::size_t valueSize = inputMap.right.back().first.itsSize;
-      TagSetType valueTags = inputMap.right.back().first.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      inputMap.right.pop_back();
-      currentSize -= valueSize;
-    }
-  }
-
-  static void onEvict(MapType& inputMap,
-                      TagMapType& inputTagMap,
-                      std::size_t& currentSize,
-                      std::size_t maxSize,
-                      std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    while (currentSize > maxSize)
-    {
-      auto& item = inputMap.right.back().first;
-      std::size_t valueSize = item.itsSize;
-      TagSetType valueTags = item.itsTagSet;
-
-      perform_tag_eviction<TagSetType, TagMapType>(valueTags, inputTagMap);
-
-      evictedItems.push_back(std::make_pair(item.itsKey, item.itsValue));
-
-      inputMap.right.pop_back();
-      currentSize -= valueSize;
-    }
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static bool onInsert(MapType& inputMap,
-                       TagMapType& inputTagMap,
-                       const KeyType& key,
-                       const ValueType& value,
-                       const TagSetType& tags,
-                       std::size_t& currentSize,
-                       std::size_t maxSize,
-                       std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    std::size_t amountToInsert = SizeFunction::getSize(value);
-
-    if (amountToInsert >= maxSize)
-    {
-      // User attempted to insert something that is bigger than the entire cache, return fail
-      return false;
-    }
-
-    currentSize += amountToInsert;
-
-    // Evict until within the maxSize limit
-    onEvict(inputMap, inputTagMap, currentSize, maxSize, evictedItems);
-
-    inputMap.insert(typename MapType::value_type(
-        key, CacheObject<KeyType, ValueType, TagSetType>(key, value, tags, amountToInsert)));
-
-    return true;
-  }
-
-  static void onAccess(MapType& /* inputMap */, typename MapType::left_iterator& /* it */)
-  {
-    // No-op
-  }
+  KeyType itsKey;
+  ValueType itsValue;
+  std::size_t itsHits = 0;
+  std::size_t itsSize = 0;
 };
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Tag expiration policies. theTagTime is expiration time stamp for the given tag
- */
-// ----------------------------------------------------------------------
-
-// Tag expiration does not depend on expiration age
-struct StaticExpire
-{
-  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
-  {
-    (void)timeConstant;
-    // Max value means tag is valid
-    return (theTagTime != std::numeric_limits<std::time_t>::max());
-  }
-
-  // All expired tags are deleted
-  static bool toDelete(const std::time_t& theTagTime, long timeConstant)
-  {
-    (void)timeConstant;
-    return (theTagTime != std::numeric_limits<std::time_t>::max());
-  }
-};
-
-// Tag expires instantly after expiration age is reached
-struct InstantExpire
-{
-  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
-  {
-    // Max value means tag is valid
-    if (theTagTime == std::numeric_limits<std::time_t>::max())
-    {
-      return false;
-    }
-
-    std::time_t now = std::time(nullptr);
-
-    return ((now - theTagTime) > timeConstant);
-  }
-
-  // Expired tags older than timeConstant are deleted
-  static bool toDelete(const std::time_t& theTagTime, long timeConstant)
-  {
-    std::time_t now = std::time(nullptr);
-
-    return ((now - theTagTime) > timeConstant);
-  }
-};
-
-struct CoinFlipExpire
-{
-  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
-  {
-    static std::random_device dev;
-    static std::mt19937 generator(dev());
-    static std::uniform_int_distribution<> dist(0, 1);
-
-    // Max value means tag is valid
-    if (theTagTime == std::numeric_limits<std::time_t>::max())
-    {
-      return false;
-    }
-
-    std::time_t now = std::time(nullptr);
-
-    if ((now - theTagTime) > timeConstant)
-    {
-      int chance = dist(generator);
-      return (chance == 0);
-    }
-    return false;
-  }
-
-  // Expired tags older than 2*timeConstant are deleted
-  static bool toDelete(const std::time_t& theTagTime, long timeConstant)
-  {
-    std::time_t now = std::time(nullptr);
-
-    return ((now - theTagTime) > 2 * timeConstant);
-  }
-};
-
-// Linearly time-dependent expiration
-struct LinearTimeExpire
-{
-  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
-  {
-    static std::random_device dev;
-    static std::mt19937 generator(dev());
-    static std::uniform_real_distribution<> dist(0.0, 1.0);
-
-    // Max value means tag is valid
-    if (theTagTime == std::numeric_limits<std::time_t>::max())
-    {
-      return false;
-    }
-
-    std::time_t now = std::time(nullptr);
-    long tagAge = now - theTagTime;
-
-    assert(timeConstant != 0);
-
-    double expirationProbability = double(tagAge) / double(timeConstant);
-    double chance = dist(generator);
-    return (chance < expirationProbability);
-  }
-
-  // Expired tags with >100% removal probability are deleted
-  static bool toDelete(const std::time_t& theTagTime, long timeConstant)
-  {
-    std::time_t now = std::time(nullptr);
-
-    return ((now - theTagTime) > timeConstant);
-  }
-};
-
-// Sigmoidal time-dependent expiration
-struct SigmoidTimeExpire
-{
-  static bool isExpired(const std::time_t& theTagTime, long timeConstant)
-  {
-    static std::random_device dev;
-    static std::mt19937 generator(dev());
-    static std::uniform_real_distribution<> dist(0.0, 1.0);
-    // Max value means tag is valid
-    if (theTagTime == std::numeric_limits<std::time_t>::max())
-    {
-      return false;
-    }
-
-    std::time_t now = std::time(nullptr);
-    long tagAge = now - theTagTime;
-
-    double expirationProbability =
-        1.0 /
-        (1.0 + std::exp(-0.02 * static_cast<double>(tagAge) + static_cast<double>(timeConstant)));
-    double chance = dist(generator);
-    if (chance < expirationProbability)
-    {
-      return true;
-    }
-    return false;
-  }
-
-  // Expired tags are removed when their return probability is less than 1%
-  static bool toDelete(const std::time_t& theTagTime, long timeConstant)
-  {
-    static double eliminationProbability = 0.99;
-    static double eliminationAge =
-        (std::log(eliminationProbability / (1.0 - eliminationProbability)) + 0.02) /
-        double(timeConstant);
-    std::time_t now = std::time(nullptr);
-
-    return (static_cast<double>((now - theTagTime)) > eliminationAge);
-  }
-};
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Cache object supporting tags and various eviction and expiration policies
+ * \brief LRU cache with cache striping to reduce lock contention
+ *
+ * Keys are distributed across NumShards independent sub-caches, each with
+ * its own mutex. Concurrent operations on different keys only contend when
+ * they hash to the same shard.
  */
 // ----------------------------------------------------------------------
 
 template <class KeyType,
           class ValueType,
-          template <class, class, class, class, class, class> class EvictionPolicy = LRUEviction,
-          class TagType = int,
-          class ExpirationPolicy = StaticExpire,
-          class SizeFunc = TrivialSizeFunction<ValueType> >
+          class SizeFunc = TrivialSizeFunction<ValueType>,
+          std::size_t NumShards = 16>
 class Cache
 {
  public:
-  using TagSetType = std::set<TagType>;
-  using CacheObjectType = CacheObject<KeyType, ValueType, TagSetType>;
-  using CacheReportingObjectType = CacheReportingObject<KeyType, ValueType, TagSetType>;
+  using CacheObjectType = CacheObject<KeyType, ValueType>;
+  using CacheReportingObjectType = CacheReportingObject<KeyType, ValueType>;
 
   using MapType = boost::bimaps::bimap<
       boost::bimaps::unordered_set_of<KeyType, boost::hash<KeyType>, std::equal_to<KeyType> >,
       boost::bimaps::list_of<CacheObjectType> >;
 
   using LeftIteratorType = typename MapType::left_iterator;
-  using RightIteratorType = typename MapType::right_iterator;
-
-  using TagMapType = std::map<TagType, std::pair<std::time_t, std::size_t> >;
   using ItemVector = std::vector<std::pair<KeyType, ValueType> >;
 
   // Default constructor eases the use as data member
@@ -878,10 +116,10 @@ class Cache
   Cache& operator=(const Cache& other) = delete;
   Cache& operator=(Cache&& other) = delete;
 
-  Cache(std::size_t maxSize, long timeConstant = 0)
-      : itsMaxSize(maxSize), itsTimeConstant(timeConstant)
+  explicit Cache(std::size_t maxSize)
+      : itsMaxSizePerShard((maxSize + NumShards - 1) / NumShards)
   {
-    //		itsMap.bucket_size(itsMaxSize);
+    static_assert(NumShards > 0, "NumShards must be greater than 0");
   }
 
   // ----------------------------------------------------------------------
@@ -891,514 +129,171 @@ class Cache
   // ----------------------------------------------------------------------
   CacheStats statistics() const
   {
-    Lock lock(itsMutex);
-    return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount, itsEvictionCount);
+    std::size_t totalSize = 0, totalInserts = 0, totalHits = 0, totalMisses = 0,
+                totalEvictions = 0;
+    for (const auto& shard : itsShards)
+    {
+      Lock lock(shard.mutex);
+      totalSize += shard.size;
+      totalInserts += shard.insertCount;
+      totalHits += shard.hitCount;
+      totalMisses += shard.missCount;
+      totalEvictions += shard.evictionCount;
+    }
+    return CacheStats(itsStartTime,
+                      itsMaxSizePerShard * NumShards,
+                      totalSize,
+                      totalInserts,
+                      totalHits,
+                      totalMisses,
+                      totalEvictions);
   }
 
-  // Insert with a list of tags
-  template <class ListType>
-  bool insert(const KeyType& key, const ValueType& value, const ListType& tags)
-  {
-    Lock wlock(itsMutex);
-
-    bool result;
-
-    LeftIteratorType it = itsMap.left.find(key);
-
-    if (it == itsMap.left.end())
-    {
-      // Value not in cache
-
-      // Make tagSet
-      TagSetType tagSet;
-      for (const auto& tag : tags)
-        tagSet.insert(tag);
-
-      // Perform insertion
-      std::size_t sizeBefore = itsMap.size();
-      result =
-          EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
-              itsMap, itsTagMap, key, value, tagSet, itsSize, itsMaxSize);
-
-      if (result)
-      {
-        ++itsInsertCount;
-        itsEvictionCount += sizeBefore + 1 - itsMap.size();
-
-        // Successful insertion
-        for (const auto& tag : tags)
-        {
-          // Check and update tags
-          // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(tag);
-          if (tagIt == itsTagMap.end())
-          {
-            itsTagMap.insert(typename TagMapType::value_type(
-                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
-          }
-          else
-          {
-            // Check if user is reusing an expired tag. If so, update the tag
-            if (ExpirationPolicy::toDelete(tagIt->second.first, itsTimeConstant))
-            {
-              tagIt->second.first = std::numeric_limits<std::time_t>::max();
-            }
-
-            // Increase the usage counter
-            tagIt->second.second++;
-          }
-        }
-      }
-    }
-
-    else
-    {
-      // Value already in cache, not inserted
-      result = false;
-    }
-
-    return result;
-  }
-
-  // Insert with a list of tags, return evicted items
-  template <class ListType>
-  bool insert(const KeyType& key,
-              const ValueType& value,
-              const ListType& tags,
-              std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    evictedItems.clear();
-
-    Lock wlock(itsMutex);
-
-    bool result;
-
-    LeftIteratorType it = itsMap.left.find(key);
-
-    if (it == itsMap.left.end())
-    {
-      // Value not in cache
-
-      // Make tagSet
-      TagSetType tagSet;
-      for (const auto& tag : tags)
-        tagSet.insert(tag);
-
-      // Perform insertion
-      result =
-          EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
-              itsMap, itsTagMap, key, value, tagSet, itsSize, itsMaxSize, evictedItems);
-
-      if (result)
-      {
-        // Successful insertion
-
-        ++itsInsertCount;
-        itsEvictionCount += evictedItems.size();
-
-        for (const auto& tag : tags)
-        {
-          // Check and update tags
-          // Check if tag exists in tag map, if not, insert default  value
-          auto tagIt = itsTagMap.find(tag);
-          if (tagIt == itsTagMap.end())
-          {
-            itsTagMap.insert(typename TagMapType::value_type(
-                tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
-          }
-          else
-          {
-            // Check if user is reusing an expired tag. If so, update the tag
-            if (ExpirationPolicy::toDelete(tagIt->second.first, itsTimeConstant))
-            {
-              tagIt->second.first = std::numeric_limits<std::time_t>::max();
-            }
-
-            // Increase the usage counter
-            tagIt->second.second++;
-          }
-        }
-      }
-    }
-
-    else
-    {
-      // Value already in cache, not inserted
-      result = false;
-    }
-
-    return result;
-  }
-
-  // Insert with a single tag
-  bool insert(const KeyType& key, const ValueType& value, const TagType& tag)
-  {
-    Lock wlock(itsMutex);
-
-    bool result;
-
-    LeftIteratorType it = itsMap.left.find(key);
-
-    if (it == itsMap.left.end())
-    {
-      // Value not in cache
-
-      TagSetType tagSet;
-      tagSet.insert(tag);
-
-      // Perform insertion
-      std::size_t sizeBefore = itsMap.size();
-      result =
-          EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
-              itsMap, itsTagMap, key, value, tagSet, itsSize, itsMaxSize);
-
-      if (result)
-      {
-        // Successful insertion
-
-        ++itsInsertCount;
-        itsEvictionCount += sizeBefore + 1 - itsMap.size();
-
-        // Check if tag exists in tag map, if not, insert default  value
-        auto tagIt = itsTagMap.find(tag);
-        if (tagIt == itsTagMap.end())
-        {
-          itsTagMap.insert(typename TagMapType::value_type(
-              tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
-        }
-        else
-        {
-          // Check if user is reusing an expired tag. If so, update the tag
-          if (ExpirationPolicy::toDelete(tagIt->second.first, itsTimeConstant))
-          {
-            tagIt->second.first = std::numeric_limits<std::time_t>::max();
-          }
-
-          // Increase the usage counter
-          tagIt->second.second++;
-        }
-      }
-    }
-
-    else
-    {
-      // Value already in cache, not inserted
-      result = false;
-    }
-
-    return result;
-  }
-
-  // Insert with a single tag, returns evicted items
-  bool insert(const KeyType& key,
-              const ValueType& value,
-              const TagType& tag,
-              std::vector<std::pair<KeyType, ValueType> >& evictedItems)
-  {
-    evictedItems.clear();
-
-    Lock wlock(itsMutex);
-
-    bool result;
-
-    LeftIteratorType it = itsMap.left.find(key);
-
-    if (it == itsMap.left.end())
-    {
-      // Value not in cache
-
-      TagSetType tagSet;
-      tagSet.insert(tag);
-
-      // Perform insertion
-      result =
-          EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
-              itsMap, itsTagMap, key, value, tagSet, itsSize, itsMaxSize, evictedItems);
-
-      if (result)
-      {
-        // Successful insertion
-
-        ++itsInsertCount;
-        itsEvictionCount += evictedItems.size();
-
-        // Check if tag exists in tag map, if not, insert default  value
-        auto tagIt = itsTagMap.find(tag);
-        if (tagIt == itsTagMap.end())
-        {
-          itsTagMap.insert(typename TagMapType::value_type(
-              tag, std::make_pair(std::numeric_limits<std::time_t>::max(), 1)));
-        }
-        else
-        {
-          // Check if user is reusing an expired tag. If so, update the tag
-          if (ExpirationPolicy::toDelete(tagIt->second.first, itsTimeConstant))
-          {
-            tagIt->second.first = std::numeric_limits<std::time_t>::max();
-          }
-
-          // Increase the usage counter
-          tagIt->second.second++;
-        }
-      }
-    }
-
-    else
-    {
-      // Value already in cache, not inserted
-      result = false;
-    }
-
-    return result;
-  }
-
-  // Tagless insert for simple use
+  // Insert value, returns true on success (false if already present or too large)
   bool insert(const KeyType& key, const ValueType& value)
   {
-    Lock lock(itsMutex);
+    auto& shard = itsShards[getShardIndex(key)];
+    Lock lock(shard.mutex);
 
-    bool result;
+    if (shard.map.left.find(key) != shard.map.left.end())
+      return false;
 
-    LeftIteratorType it = itsMap.left.find(key);
+    std::size_t valueSize = SizeFunc::getSize(value);
+    if (valueSize > itsMaxSizePerShard)
+      return false;
 
-    if (it == itsMap.left.end())
-    {
-      // Value not in cache
-      // Perform insertion
-      std::size_t sizeBefore = itsMap.size();
-      result =
-          EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
-              itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize);
+    std::size_t sizeBefore = shard.map.size();
+    shard.size += valueSize;
+    evictLRU(shard);
 
-      if (result)
-      {
-        ++itsInsertCount;
-        itsEvictionCount += sizeBefore + 1 - itsMap.size();
-      }
-    }
-
-    else
-    {
-      // Value already in cache, not inserted
-      result = false;
-    }
-
-    return result;
+    shard.map.insert(typename MapType::value_type(key, CacheObjectType(key, value, valueSize)));
+    ++shard.insertCount;
+    shard.evictionCount += sizeBefore + 1 - shard.map.size();
+    return true;
   }
 
-  // Tagless insert for simple use, returns evicted items
-  bool insert(const KeyType& key,
-              const ValueType& value,
-              std::vector<std::pair<KeyType, ValueType> >& evictedItems)
+  // Insert value, returns true on success; fills evictedItems with any evicted entries
+  bool insert(const KeyType& key, const ValueType& value, ItemVector& evictedItems)
   {
     evictedItems.clear();
 
-    Lock lock(itsMutex);
+    auto& shard = itsShards[getShardIndex(key)];
+    Lock lock(shard.mutex);
 
-    bool result;
+    if (shard.map.left.find(key) != shard.map.left.end())
+      return false;
 
-    LeftIteratorType it = itsMap.left.find(key);
+    std::size_t valueSize = SizeFunc::getSize(value);
+    if (valueSize > itsMaxSizePerShard)
+      return false;
 
-    if (it == itsMap.left.end())
-    {
-      // Value not in cache
-      // Perform insertion
-      result =
-          EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
-              itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize, evictedItems);
-      if (result)
-      {
-        ++itsInsertCount;
-        itsEvictionCount += evictedItems.size();
-      }
-    }
+    shard.size += valueSize;
+    evictLRU(shard, evictedItems);
 
-    else
-    {
-      // Value already in cache, not inserted
-      result = false;
-    }
-
-    return result;
+    shard.map.insert(typename MapType::value_type(key, CacheObjectType(key, value, valueSize)));
+    ++shard.insertCount;
+    shard.evictionCount += evictedItems.size();
+    return true;
   }
 
-  // Find value from cache
+  // Find value; returns empty optional on miss
   std::optional<ValueType> find(const KeyType& key)
   {
-    Lock lock(itsMutex);
-    LeftIteratorType it = itsMap.left.find(key);
+    auto& shard = itsShards[getShardIndex(key)];
+    Lock lock(shard.mutex);
 
-    if (it != itsMap.left.end())
+    LeftIteratorType it = shard.map.left.find(key);
+    if (it == shard.map.left.end())
     {
-      // Check if any of the tags in the requested key have been phased out
-      auto& tagSet = it->second.itsTagSet;
-      for (auto tagIt = tagSet.begin(); tagIt != tagSet.end(); ++tagIt)
-      {
-        auto tagMapIt = itsTagMap.find(*tagIt);
-
-        if (tagMapIt == itsTagMap.end())
-        {
-          // Tag has expired and tag map has been cleaned. Remove from cache
-          itsMap.left.erase(it);
-          ++itsMissCount;
-          return {};
-        }
-
-        // If one of the tags is expired, remove object from cache
-        if (ExpirationPolicy::isExpired(tagMapIt->second.first, itsTimeConstant))
-        {
-          // This tag expired, erase the object from cache and return empty
-          itsMap.left.erase(it);
-          ++itsMissCount;
-          return {};
-        }
-      }
-
-      EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onAccess(
-          itsMap, it);
-
-      ++itsHitCount;
-
-      // Update hit count for this entry
-      ++it->second.itsHits;
-
-      return it->second.itsValue;
+      ++shard.missCount;
+      return {};
     }
 
-    ++itsMissCount;
-
-    return {};
+    // Move to MRU position
+    shard.map.right.relocate(shard.map.right.end(), shard.map.project_right(it));
+    ++shard.hitCount;
+    ++it->second.itsHits;
+    return it->second.itsValue;
   }
 
-  // Find value from cache and return also its hits
+  // Find value and also return its hit count
   std::optional<ValueType> find(const KeyType& key, std::size_t& hits)
   {
-    Lock mapLock(itsMutex);
-    LeftIteratorType it = itsMap.left.find(key);
+    auto& shard = itsShards[getShardIndex(key)];
+    Lock lock(shard.mutex);
 
-    if (it != itsMap.left.end())
+    LeftIteratorType it = shard.map.left.find(key);
+    if (it == shard.map.left.end())
     {
-      // Check if any of the tags in the requested key have been phased out
-      auto& tagSet = it->second.itsTagSet;
-      for (auto tagIt = tagSet.begin(); tagIt != tagSet.end(); ++tagIt)
-      {
-        auto tagMapIt = itsTagMap.find(*tagIt);
-
-        if (tagMapIt == itsTagMap.end())
-        {
-          // Tag has expired and tag map has been cleaned. Remove from cache
-          itsMap.left.erase(it);
-          ++itsMissCount;
-          return {};
-        }
-
-        // If one of the tags is expired, remove object from cache
-
-        if (ExpirationPolicy::isExpired(tagMapIt->second.first, itsTimeConstant))
-        {
-          // This tag expired, erase the object from cache and return empty
-          itsMap.left.erase(it);
-          ++itsMissCount;
-          return {};
-        }
-      }
-
-      EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onAccess(
-          itsMap, it);
-
-      ++itsHitCount;
-
-      // Update hit count for this entry
-
-      hits = ++it->second.itsHits;
-
-      return it->second.itsValue;
+      ++shard.missCount;
+      return {};
     }
 
-    ++itsMissCount;
-    return {};
-  }
-
-  void expire(const TagType& tagToExpire, const std::time_t& expirationTime = std::time(nullptr))
-  {
-    Lock wlock(itsMutex);
-    // Set data containing the given tag as expired
-    auto tagIt = itsTagMap.find(tagToExpire);
-    if (tagIt == itsTagMap.end())
-    {
-      // Trying to expire nonexisting tag
-      return;
-    }
-    else
-    {
-      tagIt->second.first = expirationTime;
-    }
-
-    // If tag map has grown large, clean it up
-    if (itsTagMap.size() >= itsMaxSize)
-    {
-      clearExpiredTags();
-    }
+    shard.map.right.relocate(shard.map.right.end(), shard.map.project_right(it));
+    ++shard.hitCount;
+    hits = ++it->second.itsHits;
+    return it->second.itsValue;
   }
 
   void clear()
   {
-    Lock lock(itsMutex);
-    itsMap.clear();
-    itsTagMap.clear();
-    itsSize = 0;
+    for (auto& shard : itsShards)
+    {
+      Lock lock(shard.mutex);
+      shard.map.clear();
+      shard.size = 0;
+    }
   }
 
-  // Resize cache
   void resize(std::size_t newMaxSize)
   {
-    Lock lock(itsMutex);
-
-    // Evict until the cache fits into new size
-    itsMaxSize = newMaxSize;
-    std::size_t sizeBefore = itsMap.size();
-    EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onEvict(
-        itsMap, itsTagMap, itsSize, itsMaxSize);
-    itsEvictionCount += sizeBefore - itsMap.size();
+    itsMaxSizePerShard = (newMaxSize + NumShards - 1) / NumShards;
+    for (auto& shard : itsShards)
+    {
+      Lock lock(shard.mutex);
+      std::size_t sizeBefore = shard.map.size();
+      evictLRU(shard);
+      shard.evictionCount += sizeBefore - shard.map.size();
+    }
   }
 
-  // Resize cache, return evicted items
-  void resize(std::size_t newMaxSize, std::vector<std::pair<KeyType, ValueType> >& evictedItems)
+  void resize(std::size_t newMaxSize, ItemVector& evictedItems)
   {
     evictedItems.clear();
-
-    Lock lock(itsMutex);
-
-    // Evict until the cache fits into new size
-    itsMaxSize = newMaxSize;
-    EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onEvict(
-        itsMap, itsTagMap, itsSize, itsMaxSize, evictedItems);
-    itsEvictionCount += evictedItems.size();
+    itsMaxSizePerShard = (newMaxSize + NumShards - 1) / NumShards;
+    for (auto& shard : itsShards)
+    {
+      ItemVector shardEvicted;
+      Lock lock(shard.mutex);
+      evictLRU(shard, shardEvicted);
+      shard.evictionCount += shardEvicted.size();
+      for (auto& item : shardEvicted)
+        evictedItems.push_back(std::move(item));
+    }
   }
 
   std::size_t size() const
   {
-    Lock lock(itsMutex);
-    return itsSize;
+    std::size_t total = 0;
+    for (const auto& shard : itsShards)
+    {
+      Lock lock(shard.mutex);
+      total += shard.size;
+    }
+    return total;
   }
 
-  std::size_t maxSize() const
-  {
-    Lock lock(itsMutex);
-    return itsMaxSize;
-  }
+  std::size_t maxSize() const { return itsMaxSizePerShard * NumShards; }
 
   std::list<CacheReportingObjectType> getContent() const
   {
-    Lock lock(itsMutex);
     std::list<CacheReportingObjectType> result;
-    for (auto it = itsMap.right.begin(); it != itsMap.right.end(); ++it)
+    for (const auto& shard : itsShards)
     {
-      result.push_back(CacheReportingObjectType(it->second,
-                                                it->first.itsValue,
-                                                it->first.itsTagSet,
-                                                it->first.itsHits,
-                                                it->first.itsSize));
+      Lock lock(shard.mutex);
+      for (auto it = shard.map.right.begin(); it != shard.map.right.end(); ++it)
+        result.push_back(CacheReportingObjectType(
+            it->second, it->first.itsValue, it->first.itsHits, it->first.itsSize));
     }
     return result;
   }
@@ -1406,52 +301,63 @@ class Cache
   std::string getTextContent() const
   {
     std::stringstream output;
-    Lock lock(itsMutex);
-    auto n = 0UL;
-
-    for (auto it = itsMap.right.begin(); it != itsMap.right.end(); ++it, ++n)
+    bool first = true;
+    for (const auto& shard : itsShards)
     {
-      if (n > 0)
-        output << ',';
-      output << it->first.itsValue;
+      Lock lock(shard.mutex);
+      for (auto it = shard.map.right.begin(); it != shard.map.right.end(); ++it)
+      {
+        if (!first)
+          output << ',';
+        first = false;
+        output << it->first.itsValue;
+      }
     }
-
     return output.str();
   }
 
  private:
-  // Clear expired tags from the tag map
-  void clearExpiredTags()
+  struct Shard
   {
-    for (auto tagIt = itsTagMap.begin(); tagIt != itsTagMap.end();)
+    MapType map;
+    mutable MutexType mutex;
+    std::size_t size = 0;
+    std::size_t insertCount = 0;
+    std::size_t missCount = 0;
+    std::size_t hitCount = 0;
+    std::size_t evictionCount = 0;
+  };
+
+  std::size_t getShardIndex(const KeyType& key) const
+  {
+    constexpr std::size_t prime = 2654435761ULL;
+    return (boost::hash<KeyType>{}(key) * prime) % NumShards;
+  }
+
+  // Evict LRU entries until shard is within capacity (caller holds shard lock)
+  void evictLRU(Shard& shard)
+  {
+    while (shard.size > itsMaxSizePerShard && !shard.map.empty())
     {
-      if (ExpirationPolicy::toDelete(tagIt->second.first, itsTimeConstant))
-      {
-        itsTagMap.erase(tagIt++);
-      }
-      else
-      {
-        ++tagIt;
-      }
+      shard.size -= shard.map.right.front().first.itsSize;
+      shard.map.right.pop_front();
     }
   }
 
-  MapType itsMap;
-  TagMapType itsTagMap;
+  void evictLRU(Shard& shard, ItemVector& evicted)
+  {
+    while (shard.size > itsMaxSizePerShard && !shard.map.empty())
+    {
+      auto& item = shard.map.right.front().first;
+      evicted.emplace_back(item.itsKey, item.itsValue);
+      shard.size -= item.itsSize;
+      shard.map.right.pop_front();
+    }
+  }
 
-  mutable MutexType itsMutex;
-
-  std::size_t itsSize = 0;
-  std::size_t itsMaxSize = 0;
-
-  std::size_t itsInsertCount = 0;
-  std::size_t itsMissCount = 0;
-  std::size_t itsHitCount = 0;
-  std::size_t itsEvictionCount = 0;
-
+  std::array<Shard, NumShards> itsShards;
+  std::size_t itsMaxSizePerShard = 0;
   const DateTime itsStartTime = Fmi::SecondClock::universal_time();
-
-  long itsTimeConstant = 0;
 };
 
 // Size_t parser for the FileCache
@@ -1622,5 +528,4 @@ class FileCache
 };
 
 }  // namespace Cache
-
 }  // namespace Fmi

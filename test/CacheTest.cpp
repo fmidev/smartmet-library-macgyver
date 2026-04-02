@@ -23,15 +23,6 @@ static std::filesystem::path* testpaths[3] = {nullptr};
 
 namespace CacheTest
 {
-namespace
-{
-template <class T, class U, class V>
-void insert_and_expire(T& theMap, U&& theKey, V&& theValue)
-{
-  theMap.insert(theKey, theValue, theKey);
-  theMap.expire(theKey);
-}
-}  // namespace
 
 struct custom_type
 {
@@ -175,7 +166,7 @@ void testfilecachesize()
 
 void testcustomtype()
 {
-  Cache<int, custom_type, LRUEviction, int, StaticExpire, custom_comparator> thisCache(115);
+  Cache<int, custom_type, custom_comparator, 1> thisCache(115);
 
   custom_type toInsert, toInsert2, toInsert3;
   toInsert.number = 10;
@@ -206,110 +197,23 @@ void testcustomtype()
   TEST_PASSED();
 }
 
-void testinstantexpire()
-{
-  Cache<int, string, LRUEviction, int, InstantExpire> thisCache(10, 1);
-
-  std::list<int> onesTags = {1, 2};
-
-  std::vector<int> twosTags = {2, 3};
-
-  thisCache.insert(1, "moi", onesTags);
-  thisCache.insert(2, "hei", onesTags);
-  thisCache.insert(3, "heippa", twosTags);
-  thisCache.insert(4, "terve", twosTags);
-  thisCache.insert(5, "heihei", twosTags);
-
-  thisCache.expire(1);
-  boost::this_thread::sleep_for(boost::chrono::seconds(2));
-
-  auto value1 = thisCache.find(1);
-  auto value2 = thisCache.find(2);
-  auto value3 = thisCache.find(3);
-
-  if (value1)
-    TEST_FAILED("Entry " + *thisCache.find(1) + " found in cache");
-
-  if (value2)
-    TEST_FAILED("Entry " + *thisCache.find(2) + " found in cache");
-
-  if (!value3)
-    TEST_FAILED("Entry 3 was not found in cache");
-
-  TEST_PASSED();
-}
-
-void testtagless()
-{
-  Cache<int, string, FIFOEviction> thisCache(4);
-
-  thisCache.insert(1, "moi");
-  thisCache.insert(2, "hei");
-  thisCache.insert(3, "heippa");
-  thisCache.insert(4, "terve");
-  thisCache.insert(5, "heihei");
-
-  auto value1 = thisCache.find(1);
-
-  if (value1)
-    TEST_FAILED("Entry " + *thisCache.find(1) + " found in cache");
-
-  TEST_PASSED();
-}
-
-void teststaticexpire()
-{
-  Cache<int, string, LRUEviction, int, StaticExpire> thisCache(10);
-
-  int oneTag = 1;
-
-  std::vector<int> twosTags = {2, 3};
-
-  thisCache.insert(1, "moi", oneTag);
-  thisCache.insert(2, "hei", oneTag);
-  thisCache.insert(3, "heippa", twosTags);
-  thisCache.insert(4, "terve", twosTags);
-  thisCache.insert(5, "heihei", twosTags);
-
-  thisCache.expire(2);
-
-  auto value1 = thisCache.find(1);
-  auto value2 = thisCache.find(2);
-  auto value3 = thisCache.find(3);
-
-  if (!value1)
-    TEST_FAILED("Entry 1 not found in cache");
-
-  if (!value2)
-    TEST_FAILED("Entry 2 not found in cache");
-
-  if (value3)
-    TEST_FAILED("Entry 3 was found in cache");
-
-  TEST_PASSED();
-}
-
 void testlru()
 {
-  Cache<int, string> thisCache(5);
+  Cache<int, string, TrivialSizeFunction<string>, 1> thisCache(5);
 
-  int oneTag = 1;
-
-  std::vector<int> twosTags = {2};
-
-  thisCache.insert(1, "eka", oneTag);
-  thisCache.insert(2, "toka", oneTag);
-  thisCache.insert(3, "kolmas", oneTag);
-  thisCache.insert(4, "neljas", twosTags);
-  thisCache.insert(5, "viides", twosTags);
+  thisCache.insert(1, "eka");
+  thisCache.insert(2, "toka");
+  thisCache.insert(3, "kolmas");
+  thisCache.insert(4, "neljas");
+  thisCache.insert(5, "viides");
 
   auto value = thisCache.find(4);
   value = thisCache.find(3);
   value = thisCache.find(2);
   value = thisCache.find(1);
 
-  // This must remove the "5" entry from the cache since it is the last used
-  thisCache.insert(6, "kuudes", twosTags);
+  // This must remove the "5" entry from the cache since it is the least recently used
+  thisCache.insert(6, "kuudes");
 
   std::string expected = "neljas,kolmas,toka,eka,kuudes";
 
@@ -320,46 +224,15 @@ void testlru()
               "\"");
 }
 
-void testmru()
-{
-  Cache<int, string, MRUEviction, int> thisCache(5, 10000);
-
-  int oneTag = 1;
-
-  std::vector<int> twosTags = {2};
-
-  thisCache.insert(1, "eka", oneTag);
-  thisCache.insert(2, "toka", oneTag);
-  thisCache.insert(3, "kolmas", oneTag);
-  thisCache.insert(4, "neljas", twosTags);
-  thisCache.insert(5, "viides", twosTags);
-
-  //"4" is most recently used
-  auto value = thisCache.find(4);
-
-  // This must remove the "4" entry from the cache since it is the last used
-  thisCache.insert(6, "kuudes", twosTags);
-
-  auto return_value = thisCache.find(4);
-  if (!return_value)
-    TEST_PASSED();
-
-  TEST_FAILED("Entry \"4\" is still in the cache");
-}
-
 void testsize()
 {
-  Cache<int, string> thisCache(3, 10000);
+  Cache<int, string, TrivialSizeFunction<string>, 1> thisCache(3);
 
-  int oneTag = 1;
-
-  std::vector<int> twosTags = {2};
-
-  thisCache.insert(1, "moi", oneTag);
-  thisCache.insert(2, "hei", oneTag);
-  thisCache.insert(3, "heippa", oneTag);
-  thisCache.insert(4, "terve", twosTags);
-  thisCache.insert(5, "heihei", twosTags);
+  thisCache.insert(1, "moi");
+  thisCache.insert(2, "hei");
+  thisCache.insert(3, "heippa");
+  thisCache.insert(4, "terve");
+  thisCache.insert(5, "heihei");
 
   if (thisCache.size() != 3)
     TEST_FAILED("Wrong cache size: " + boost::lexical_cast<string>(thisCache.size()) +
@@ -368,101 +241,27 @@ void testsize()
   TEST_PASSED();
 }
 
-void testregularexpiringcache()
+void testtagless()
 {
-  Cache<int, string, LRUEviction, int, InstantExpire> thisCache(10, 2);  // Expire in two second
+  Cache<int, string, TrivialSizeFunction<string>, 1> thisCache(4);
 
-  insert_and_expire(thisCache, 1, "moi");
-  insert_and_expire(thisCache, 2, "hei");
-  insert_and_expire(thisCache, 3, "heippa");
-  insert_and_expire(thisCache, 4, "terve");
-  insert_and_expire(thisCache, 5, "moikka");
+  thisCache.insert(1, "moi");
+  thisCache.insert(2, "hei");
+  thisCache.insert(3, "heippa");
+  thisCache.insert(4, "terve");
+  thisCache.insert(5, "heihei");
 
-  boost::this_thread::sleep_for(boost::chrono::seconds(3));
+  auto value1 = thisCache.find(1);
 
-  insert_and_expire(thisCache, 6, "terve");
-  insert_and_expire(thisCache, 7, "moikka");
-
-  auto value = thisCache.find(1);
-  value = thisCache.find(2);
-  value = thisCache.find(3);
-  value = thisCache.find(4);
-  value = thisCache.find(5);
-
-  std::string expected = "terve,moikka";
-
-  if (expected == thisCache.getTextContent())
-    TEST_PASSED();
-
-  TEST_FAILED("Wrong cache content:\"" + thisCache.getTextContent() + "\", expected \"" + expected +
-              "\"");
-}
-
-void testtwocaches()
-{
-  Cache<int, string, LRUEviction, int> thisCache(3, 10000);
-
-  Cache<int, string, RandomEviction, int> anotherCache(5, 10000);
-
-  int oneTag = 1;
-
-  std::vector<int> twosTags = {2};
-
-  thisCache.insert(1, "moi", oneTag);
-  thisCache.insert(2, "hei", oneTag);
-  thisCache.insert(3, "heippa", oneTag);
-  thisCache.insert(4, "terve", twosTags);
-  thisCache.insert(5, "heihei", twosTags);
-
-  anotherCache.insert(1, "moi", oneTag);
-  anotherCache.insert(2, "hei", oneTag);
-  anotherCache.insert(3, "heippa", oneTag);
-  anotherCache.insert(4, "terve", twosTags);
-  anotherCache.insert(5, "heihei", twosTags);
-  anotherCache.insert(6, "heihei", twosTags);
-
-  if (thisCache.size() == 3 && anotherCache.size() == 5)
-  {
-    TEST_PASSED();
-  }
-  else
-  {
-    TEST_FAILED("Wrong cache sizes: " + boost::lexical_cast<string>(thisCache.size()) + ", " +
-                boost::lexical_cast<string>(anotherCache.size()) + " should be 3 and 5");
-  }
-}
-
-void testfifo()
-{
-  Cache<int, string, FIFOEviction, int> thisCache(5, 10000);
-
-  std::list<int> onesTags = {1, 2};
-
-  std::list<int> twosTags = {2, 3};
-
-  thisCache.insert(1, "moi", onesTags);
-  thisCache.insert(2, "hei", onesTags);
-  thisCache.insert(3, "last", onesTags);
-  thisCache.insert(4, "terve", twosTags);
-  thisCache.insert(5, "heihei", twosTags);
-  thisCache.insert(6, "heihei", twosTags);
-  thisCache.insert(7, "heihei", twosTags);
-
-  auto first_value = thisCache.find(1);
-  auto second_value = thisCache.find(2);
-
-  if (first_value)
-    TEST_FAILED(*thisCache.find(1) + " should not have been found.");
-
-  if (second_value)
-    TEST_FAILED(*thisCache.find(2) + " should not have been found.");
+  if (value1)
+    TEST_FAILED("Entry 1 should not be in cache after eviction");
 
   TEST_PASSED();
 }
 
 void testevictionvector()
 {
-  Cache<int, string, FIFOEviction> thisCache(3);
+  Cache<int, string, TrivialSizeFunction<string>, 1> thisCache(3);
 
   std::vector<std::pair<int, string> > evictedItems;
 
@@ -500,7 +299,7 @@ void testevictionvector()
 
 void testcounters()
 {
-  Cache<int, string> thisCache(5);
+  Cache<int, string, TrivialSizeFunction<string>, 1> thisCache(5);
 
   auto stats = thisCache.statistics();
   if (stats.size != 0)
@@ -559,14 +358,8 @@ class tests : public tframe::tests
     TEST(testfilecachesize);
     TEST(testcustomtype);
     TEST(testsize);
-    TEST(testinstantexpire);
-    TEST(teststaticexpire);
-    TEST(testmru);
     TEST(testlru);
-    TEST(testtwocaches);
-    TEST(testfifo);
     TEST(testtagless);
-    TEST(testregularexpiringcache);
     TEST(testevictionvector);
     TEST(testcounters);
   }
