@@ -105,20 +105,22 @@ class LRUCache
     return it->second->value;
   }
 
-  struct CacheStats
+  Fmi::Cache::CacheStats getStats() const
   {
-    uint64_t hits;
-    uint64_t misses;
-    uint64_t inserts;
-    uint64_t evictions;
-  };
-
-  CacheStats getStats() const
-  {
-    return {stats.hits.load(std::memory_order_relaxed),
-            stats.misses.load(std::memory_order_relaxed),
-            stats.inserts.load(std::memory_order_relaxed),
-            stats.evictions.load(std::memory_order_relaxed)};
+    Fmi::Cache::CacheStats s;
+    s.hits = stats.hits.load(std::memory_order_relaxed);
+    s.misses = stats.misses.load(std::memory_order_relaxed);
+    s.inserts = stats.inserts.load(std::memory_order_relaxed);
+    s.evictions = stats.evictions.load(std::memory_order_relaxed);
+    s.maxsize = capacity_per_shard * NumShards;
+    std::size_t total = 0;
+    for (const auto& shard : shards)
+    {
+      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
+      total += shard.map.size();
+    }
+    s.size = total;
+    return s;
   }
 
   std::size_t getTotalCapacity() const { return capacity_per_shard * NumShards; }

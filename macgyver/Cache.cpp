@@ -225,7 +225,7 @@ std::vector<std::size_t> FileCache::getContent() const
 CacheStats FileCache::statistics() const
 {
   ReadLock lock(itsMutex);
-  return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount);
+  return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount, itsEvictionCount);
 }
 
 std::size_t FileCache::getSize() const
@@ -277,6 +277,7 @@ bool FileCache::performCleanup(std::size_t space_needed)
       }
       itsContentMap.right.pop_front();
       itsSize -= fileSize;
+      ++itsEvictionCount;
     }
 
     return true;

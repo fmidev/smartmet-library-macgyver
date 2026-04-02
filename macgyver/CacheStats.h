@@ -22,13 +22,15 @@ struct CacheStats
              std::size_t size_,
              std::size_t inserts_,
              std::size_t hits_,
-             std::size_t misses_)
+             std::size_t misses_,
+             std::size_t evictions_ = 0)
       : starttime(t),
         maxsize(maxsize_),
         size(size_),
         inserts(inserts_),
         hits(hits_),
-        misses(misses_)
+        misses(misses_),
+        evictions(evictions_)
   {
   }
 
@@ -38,6 +40,7 @@ struct CacheStats
   std::size_t inserts = 0;
   std::size_t hits = 0;
   std::size_t misses = 0;
+  std::size_t evictions = 0;
 };
 
 using CacheStatistics = std::map<std::string, CacheStats>;

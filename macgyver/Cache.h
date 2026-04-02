@@ -892,7 +892,7 @@ class Cache
   CacheStats statistics() const
   {
     Lock lock(itsMutex);
-    return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount);
+    return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount, itsEvictionCount);
   }
 
   // Insert with a list of tags
@@ -915,6 +915,7 @@ class Cache
         tagSet.insert(tag);
 
       // Perform insertion
+      std::size_t sizeBefore = itsMap.size();
       result =
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, tagSet, itsSize, itsMaxSize);
@@ -922,6 +923,7 @@ class Cache
       if (result)
       {
         ++itsInsertCount;
+        itsEvictionCount += sizeBefore + 1 - itsMap.size();
 
         // Successful insertion
         for (const auto& tag : tags)
@@ -992,6 +994,7 @@ class Cache
         // Successful insertion
 
         ++itsInsertCount;
+        itsEvictionCount += evictedItems.size();
 
         for (const auto& tag : tags)
         {
@@ -1044,6 +1047,7 @@ class Cache
       tagSet.insert(tag);
 
       // Perform insertion
+      std::size_t sizeBefore = itsMap.size();
       result =
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, tagSet, itsSize, itsMaxSize);
@@ -1053,6 +1057,7 @@ class Cache
         // Successful insertion
 
         ++itsInsertCount;
+        itsEvictionCount += sizeBefore + 1 - itsMap.size();
 
         // Check if tag exists in tag map, if not, insert default  value
         auto tagIt = itsTagMap.find(tag);
@@ -1115,6 +1120,7 @@ class Cache
         // Successful insertion
 
         ++itsInsertCount;
+        itsEvictionCount += evictedItems.size();
 
         // Check if tag exists in tag map, if not, insert default  value
         auto tagIt = itsTagMap.find(tag);
@@ -1159,12 +1165,16 @@ class Cache
     {
       // Value not in cache
       // Perform insertion
+      std::size_t sizeBefore = itsMap.size();
       result =
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize);
 
       if (result)
+      {
         ++itsInsertCount;
+        itsEvictionCount += sizeBefore + 1 - itsMap.size();
+      }
     }
 
     else
@@ -1197,7 +1207,10 @@ class Cache
           EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onInsert(
               itsMap, itsTagMap, key, value, TagSetType(), itsSize, itsMaxSize, evictedItems);
       if (result)
+      {
         ++itsInsertCount;
+        itsEvictionCount += evictedItems.size();
+      }
     }
 
     else
@@ -1343,8 +1356,10 @@ class Cache
 
     // Evict until the cache fits into new size
     itsMaxSize = newMaxSize;
+    std::size_t sizeBefore = itsMap.size();
     EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onEvict(
         itsMap, itsTagMap, itsSize, itsMaxSize);
+    itsEvictionCount += sizeBefore - itsMap.size();
   }
 
   // Resize cache, return evicted items
@@ -1358,6 +1373,7 @@ class Cache
     itsMaxSize = newMaxSize;
     EvictionPolicy<MapType, TagMapType, KeyType, ValueType, TagSetType, SizeFunc>::onEvict(
         itsMap, itsTagMap, itsSize, itsMaxSize, evictedItems);
+    itsEvictionCount += evictedItems.size();
   }
 
   std::size_t size() const
@@ -1431,6 +1447,7 @@ class Cache
   std::size_t itsInsertCount = 0;
   std::size_t itsMissCount = 0;
   std::size_t itsHitCount = 0;
+  std::size_t itsEvictionCount = 0;
 
   const DateTime itsStartTime = Fmi::SecondClock::universal_time();
 
@@ -1593,6 +1610,7 @@ class FileCache
   std::size_t itsInsertCount = 0;
   std::size_t itsMissCount = 0;
   std::size_t itsHitCount = 0;
+  std::size_t itsEvictionCount = 0;
 
   const DateTime itsStartTime = Fmi::SecondClock::universal_time();
 
