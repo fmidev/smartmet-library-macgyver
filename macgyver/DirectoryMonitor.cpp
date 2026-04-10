@@ -480,9 +480,14 @@ void DirectoryMonitor::run()
 
                 boost::tie(newstatus, changes) = directory_change(mon.contents, newcontents);
 
-                // possible callback
+                // Report all detected changes when a scan was triggered by a
+                // directory modification time change. The mask controls when to
+                // scan (the optimization at line 468), not what to report. This
+                // ensures that file modifications (MODIFY) are reported even when
+                // MODIFY is not in the mask, as long as the directory timestamp
+                // triggered the scan.
 
-                if ((changes & mon.mask) != 0)
+                if (changes != NONE)
                 {
                   mon.callback(mon.id, mon.path, mon.pattern, newstatus);
                 }
