@@ -150,7 +150,7 @@ class Cache
     evictLRU(shard);
     shard.evictionCount += mapSizeBefore - shard.map.size();
 
-    shard.list.emplace_back(Entry{key, value, 0, valueSize});
+    shard.list.emplace_back(key, value, valueSize);
     shard.map.emplace(key, std::prev(shard.list.end()));
     ++shard.insertCount;
     return true;
@@ -175,7 +175,7 @@ class Cache
     evictLRU(shard, evictedItems);
     shard.evictionCount += evictedItems.size();
 
-    shard.list.emplace_back(Entry{key, value, 0, valueSize});
+    shard.list.emplace_back(key, value, valueSize);
     shard.map.emplace(key, std::prev(shard.list.end()));
     ++shard.insertCount;
     return true;
@@ -206,14 +206,17 @@ class Cache
     evictLRU(shard);
     shard.evictionCount += mapSizeBefore - shard.map.size();
 
-    shard.list.emplace_back(Entry{key, value, 0, valueSize});
+    shard.list.emplace_back(key, value, valueSize);
     shard.map.emplace(key, std::prev(shard.list.end()));
     ++shard.insertCount;
     return true;
   }
 
-  // Find value; returns empty optional on miss. Upgrades to exclusive lock
-  // only on hit (to update LRU order).
+  // Find value; returns empty optional on miss. When the entry is already the
+  // most-recently-used element no exclusive lock is needed — only the shared
+  // (upgrade) lock is held.  This matters when the same key is looked up
+  // repeatedly (e.g. 1000 Finnish stations all in Europe/Helsinki): only the
+  // first hit splices the LRU list; the rest stay in shared mode.
   std::optional<ValueType> find(const KeyType& key)
   {
     auto& shard = itsShards[getShardIndex(key)];
@@ -226,9 +229,18 @@ class Cache
       return {};
     }
 
+    // If already at the back of the LRU list (MRU position), skip the
+    // exclusive lock — the splice would be a no-op anyway.
+    if (std::next(mapIt->second) == shard.list.end())
+    {
+      mapIt->second->hits.fetch_add(1, std::memory_order_relaxed);
+      shard.hitCount.fetch_add(1, std::memory_order_relaxed);
+      return mapIt->second->value;
+    }
+
     boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(lock);
     shard.list.splice(shard.list.end(), shard.list, mapIt->second);
-    ++mapIt->second->hits;
+    mapIt->second->hits.fetch_add(1, std::memory_order_relaxed);
     shard.hitCount.fetch_add(1, std::memory_order_relaxed);
     return mapIt->second->value;
   }
@@ -246,9 +258,16 @@ class Cache
       return {};
     }
 
+    if (std::next(mapIt->second) == shard.list.end())
+    {
+      hits = mapIt->second->hits.fetch_add(1, std::memory_order_relaxed) + 1;
+      shard.hitCount.fetch_add(1, std::memory_order_relaxed);
+      return mapIt->second->value;
+    }
+
     boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(lock);
     shard.list.splice(shard.list.end(), shard.list, mapIt->second);
-    hits = ++mapIt->second->hits;
+    hits = mapIt->second->hits.fetch_add(1, std::memory_order_relaxed) + 1;
     shard.hitCount.fetch_add(1, std::memory_order_relaxed);
     return mapIt->second->value;
   }
@@ -337,9 +356,14 @@ class Cache
  private:
   struct Entry
   {
+    Entry(KeyType k, ValueType v, std::size_t s)
+        : key(std::move(k)), value(std::move(v)), size(s)
+    {
+    }
+
     KeyType key;
     ValueType value;
-    std::size_t hits = 0;
+    std::atomic<std::size_t> hits{0};
     std::size_t size = 0;
   };
 
