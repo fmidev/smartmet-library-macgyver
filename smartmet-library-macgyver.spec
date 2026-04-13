@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.2.4
+Version: 26.4.13
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -136,6 +136,13 @@ FMI MacGyver library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Apr 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.4.13-1.fmi
+- Code simplicity: Simplify Cache: drop tags/eviction-policy templates, add cache striping
+- Code simplicity: Merge Cache and LRUCache into a single implementation
+- Code simplicity: Unify cache statistics: add evictions to CacheStats, remove TimedCache for being unused
+- Speed improvement: skip exclusive lock in Cache::find() when entry is already MRU
+- Improvement: Fix DirectoryMonitor to detect overwritten files once the directory timestamp has changed
+
 * Wed Feb  4 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.2.4-1.fmi
 - Update to proj-9.7, gdal-3.12, fmt-12
 
