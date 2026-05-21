@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.4.13
+Version: 26.5.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Thu May 21 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.5.21-1.fmi
+- Build also static library
+
 * Mon Apr 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.4.13-1.fmi
 - Code simplicity: Simplify Cache: drop tags/eviction-policy templates, add cache striping
 - Code simplicity: Merge Cache and LRUCache into a single implementation
