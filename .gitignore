@@ -2,7 +2,8 @@
 .#*
 doc/
 obj/
-lib*.so
+/libsmartmet-macgyver.so
+/libsmartmet-macgyver.a
 compile_commands.json
 .gdb_history
 /.cproject

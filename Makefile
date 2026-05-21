@@ -92,6 +92,7 @@ endif
 # What to install
 
 LIBFILE = libsmartmet-$(SUBNAME).so
+ALIBFILE = libsmartmet-$(SUBNAME).a
 
 # Compilation directories
 
@@ -143,7 +144,7 @@ endif
 
 # The rules
 
-all: objdir $(LIBFILE)
+all: objdir $(LIBFILE) $(ALIBFILE) examples
 debug: all
 release: all
 profile: all
@@ -156,6 +157,9 @@ $(LIBFILE): $(OBJS)
 		then rm -v $(LIBFILE); \
 		exit 1; \
 	fi
+
+$(ALIBFILE): $(OBJS)
+	$(AR) rcs $@ $^
 
 clean:  $(CLEAN_TARGETS)
 	rm -f $(LIBFILE) *~ $(SUBNAME)/*~
@@ -180,6 +184,7 @@ install:
 	set +x; done
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
+	$(INSTALL_PROG) $(ALIBFILE) $(libdir)/$(ALIBFILE)
 
 test test-installed:
 	$(MAKE) -C test $@

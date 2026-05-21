@@ -120,6 +120,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(0775,root,root,0775)
 %{_libdir}/libsmartmet-%{DIRNAME}.so
 
+# Development package
+
 %package -n %{SPECNAME}-devel
 Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
@@ -134,6 +136,20 @@ FMI MacGyver library development files
 %files -n %{SPECNAME}-devel
 %defattr(0664,root,root,0775)
 %{_includedir}/smartmet/%{DIRNAME}
+
+# Static library package
+
+%package static
+Summary: FMI MacGyver library static files
+Provides: %{SPECNAME}-static
+Requires: %{SPECNAME}-devel = %{version}-%{release}
+
+%description static
+FMI MacGyver library static files
+
+%files static
+%defattr(0664,root,root,0775)
+%{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
 * Mon Apr 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.4.13-1.fmi
