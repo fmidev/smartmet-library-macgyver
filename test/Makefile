@@ -54,13 +54,8 @@ ifdef CI
 DATABASE_HOST = "$(TEST_DB_DIR)"
 DATABASE_PORT = 5444
 else
-ifdef LOCAL_ONLY
-DATABASE_HOST = 127.0.0.1
-DATABASE_PORT = 5444
-else
 DATABASE_HOST = "smartmet-test"
 DATABASE_PORT = 5444
-endif
 endif
 
 
