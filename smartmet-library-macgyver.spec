@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.5.21
+Version: 26.6.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Tue Jun  2 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.6.2-1.fmi
+- Fix possible double free when using Fmi::StaticCleanup
+
 * Thu May 21 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.5.21-1.fmi
 - Build also static library
 
