@@ -43,11 +43,26 @@ class StaticCleanup final
   StaticCleanup(std::function<void()> cleanup_function);
   ~StaticCleanup();
 
+  // Each instance registers exactly one cleanup function; copying or moving
+  // would not register anything but could still be misused, so disallow it.
+  StaticCleanup(const StaticCleanup&) = delete;
+  StaticCleanup(StaticCleanup&&) = delete;
+  StaticCleanup& operator=(const StaticCleanup&) = delete;
+  StaticCleanup& operator=(StaticCleanup&&) = delete;
+
   class AtExit final
   {
    public:
     AtExit();
     ~AtExit();
+
+    // The instance count is balanced by ctor/dtor pairs. A copy or move would
+    // run an extra destructor without a matching constructor, corrupting the
+    // count and triggering (or suppressing) cleanup at the wrong time.
+    AtExit(const AtExit&) = delete;
+    AtExit(AtExit&&) = delete;
+    AtExit& operator=(const AtExit&) = delete;
+    AtExit& operator=(AtExit&&) = delete;
   };
 };
 }  // namespace Fmi

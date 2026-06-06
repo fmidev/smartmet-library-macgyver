@@ -155,6 +155,8 @@ FMI MacGyver library static files
 * Sat Jun 06 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.6.6-1.fmi
 - Improvement: Fix FileCache::getSize() to use a read lock instead of a write lock
 - Code simplicity: Drop heavy FileCache-only includes (Boost.Spirit, Boost.Filesystem) from Cache.h
+- Robustness: Disallow copy and move of StaticCleanup and StaticCleanup::AtExit to protect the registry invariants
+- Tests: Add StaticCleanupTest
 
 * Tue Jun  2 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.6.2-1.fmi
 - Fix possible double free when using Fmi::StaticCleanup
