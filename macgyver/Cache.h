@@ -9,14 +9,11 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/list_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/spirit/include/qi.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <array>
 #include <atomic>
 #include <filesystem>
-#include <fstream>
 #include <list>
 #include <optional>
 #include <sstream>
@@ -30,8 +27,6 @@ namespace Fmi
 {
 namespace Cache
 {
-
-const CacheStats EMPTY_CACHE_STATS;
 
 // ----------------------------------------------------------------------
 /*!

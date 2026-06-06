@@ -1,5 +1,6 @@
 #include "Cache.h"
 #include "Exception.h"
+#include <boost/spirit/include/qi.hpp>
 #include <fstream>
 
 namespace Fmi
@@ -232,7 +233,7 @@ std::size_t FileCache::getSize() const
 {
   try
   {
-    WriteLock theLock(itsMutex);
+    ReadLock theLock(itsMutex);
     return itsSize;
   }
   catch (...)

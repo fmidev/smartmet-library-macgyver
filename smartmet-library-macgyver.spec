@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.6.2
+Version: 26.6.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,10 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Jun 06 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.6.6-1.fmi
+- Improvement: Fix FileCache::getSize() to use a read lock instead of a write lock
+- Code simplicity: Drop heavy FileCache-only includes (Boost.Spirit, Boost.Filesystem) from Cache.h
+
 * Tue Jun  2 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.6.2-1.fmi
 - Fix possible double free when using Fmi::StaticCleanup
 
