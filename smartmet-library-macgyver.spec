@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.6.6
+Version: 26.6.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -33,7 +33,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
 BuildRequires: smartmet-timezones >= 24.5.27
-BuildRequires: smartmet-utils-devel >= 26.2.4
+BuildRequires: smartmet-utils-devel >= 26.5.22
 %if %{with tests}
 BuildRequires: smartmet-library-regression
 %endif
@@ -77,7 +77,7 @@ BuildRequires: libpqxx-devel
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-timezones >= 24.5.27
-#TestRequires: smartmet-utils-devel >= 26.2.4
+#TestRequires: smartmet-utils-devel >= 26.5.22
 #TestRequires: smartmet-test-db
 
 %if 0%{?rhel} && 0%{rhel} >= 9
@@ -127,7 +127,7 @@ Summary: FMI MacGyver library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 Requires: ctpp2-devel
-Requires: smartmet-utils-devel >= 26.2.4
+Requires: smartmet-utils-devel >= 26.5.22
 Obsoletes: libsmartmet_macgyver-devel < 16.12.20
 
 %description -n %{SPECNAME}-devel
@@ -152,6 +152,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Mon Jun 15 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.15-1.fmi
+- Repackaged to resolve ABI issues
+
 * Sat Jun 06 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.6.6-1.fmi
 - Improvement: Fix FileCache::getSize() to use a read lock instead of a write lock
 - Code simplicity: Drop heavy FileCache-only includes (Boost.Spirit, Boost.Filesystem) from Cache.h
