@@ -57,6 +57,43 @@ void parse_options_1()
   TEST_PASSED();
 }
 
+void hide_password()
+{
+  const std::map<std::string, std::string> testcases{
+    // password at the beginning
+    {"password=mypassword host=db.example.com dbname=example port=fail user=foo",
+     "Failed to parse connection string 'password=*** host=db.example.com dbname=example port=fail user=foo'"},
+    // password at the end
+    {"host=db.example.com dbname=example port=fail user=foo password=mypassword",
+     "Failed to parse connection string 'host=db.example.com dbname=example port=fail user=foo password=***'"},
+    // password in the middle
+    {"host=db.example.com dbname=example port=fail  password=mypassword\tuser=foo",
+     "Failed to parse connection string 'host=db.example.com dbname=example port=fail  password=***\tuser=foo'"},
+    // password-like username, should be left as is
+    {"host=db.example.com dbname=example port=fail user=foopassword=mypassword",
+     "Failed to parse connection string 'host=db.example.com dbname=example port=fail user=foopassword=mypassword'"}
+  };
+
+  for (const auto& [input, expected] : testcases)
+  {
+    try
+    {
+      Fmi::Database::PostgreSQLConnectionOptions opt(input);
+    }
+    catch (const Fmi::Exception& t)
+    {
+      const std::string what{t.getWhat()};
+      if (what != expected)
+      {
+        TEST_FAILED("'" + what + "' <=> '" + expected + "'");
+      }
+      else continue;
+    }
+    TEST_FAILED("expected exception");
+  }
+  TEST_PASSED();
+}
+
 void id_format()
 {
   using Fmi::Database::PostgreSQLConnectionId;
@@ -84,6 +121,7 @@ class tests : public tframe::tests
   void test(void)
   {
     TEST(parse_options_1);
+    TEST(hide_password);
     TEST(id_format);
   }
 };
