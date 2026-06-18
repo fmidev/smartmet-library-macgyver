@@ -13,6 +13,7 @@
 #include <chrono>
 #include <iostream>
 #include <optional>
+#include <regex>
 #include <sstream>
 #include <variant>
 #include <vector>
@@ -89,7 +90,9 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
   }
   catch (...)
   {
-    throw Fmi::Exception::Trace(BCP, "Failed to parse connection string '" + conn_str + "'");
+    std::regex pwmask{R"(\bpassword=\S+)"};
+    const auto cstr{std::regex_replace(conn_str, pwmask, "password=***")};
+    throw Fmi::Exception::Trace(BCP, "Failed to parse connection string '" + cstr + "'");
   }
 }
 
