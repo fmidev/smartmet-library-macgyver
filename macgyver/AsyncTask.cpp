@@ -2,6 +2,7 @@
 
 #include "DateTime.h"
 #include "DebugTools.h"
+#include "ThreadName.h"
 #include "TypeName.h"
 #include <chrono>
 #include <iostream>
@@ -124,9 +125,7 @@ void Fmi::AsyncTask::run(std::function<void()> task)
   try
   {
     status = active;
-#ifdef BOOST_THREAD_PLATFORM_PTHREAD
-    pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
-#endif
+    Fmi::set_thread_name(name);
     LOG_TIME("started");
     task();
     LOG_TIME("ended");

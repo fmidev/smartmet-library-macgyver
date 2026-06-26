@@ -7,12 +7,15 @@
 // ======================================================================
 
 #pragma once
+#include "ThreadName.h"
 #include <boost/thread.hpp>
+#include <fmt/format.h>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <queue>
 #include <stdexcept>
+#include <string>
 
 namespace Fmi
 {
@@ -49,18 +52,22 @@ class Worker : public std::enable_shared_from_this<Worker<Executor> >
    */
   // ======================================================================
 
-  Worker(Private, ParentPtr theParentPool) : itsParent(theParentPool), itsThread() {}
+  Worker(Private, ParentPtr theParentPool, std::string theName)
+      : itsParent(theParentPool), itsThread(), itsName(std::move(theName))
+  {
+  }
 
   // ======================================================================
   /*!
    * \brief Worker factory method
    *
-   * Factory method to create a new Worker
+   * Factory method to create a new Worker. theName, if non-empty, becomes the
+   * OS thread name (see Fmi::set_thread_name).
    */
   // ======================================================================
-  static Ptr create(ParentPtr theParentPool)
+  static Ptr create(ParentPtr theParentPool, std::string theName = "")
   {
-    return std::make_shared<Worker<Executor> >(Private(), theParentPool);
+    return std::make_shared<Worker<Executor> >(Private(), theParentPool, std::move(theName));
   }
 
   ~Worker() {}
@@ -74,6 +81,8 @@ class Worker : public std::enable_shared_from_this<Worker<Executor> >
 
   void run()
   {
+    if (!itsName.empty())
+      Fmi::set_thread_name(itsName);
     bool success = true;
     while (success)
     {
@@ -122,6 +131,8 @@ class Worker : public std::enable_shared_from_this<Worker<Executor> >
   std::shared_ptr<boost::thread> itsThread;
 
   IteratorType itsLocation;
+
+  std::string itsName;
 };
 
 // ======================================================================
@@ -223,7 +234,8 @@ class ThreadPool
   // ======================================================================
 
   ThreadPool(std::size_t poolSize,
-             std::size_t schedulerSize = std::numeric_limits<std::size_t>::max())
+             std::size_t schedulerSize = std::numeric_limits<std::size_t>::max(),
+             std::string name = "")
       : itsIsRunning(false),
         itsWorkerCount(0),
         itsTargetWorkerCount(poolSize),
@@ -233,7 +245,8 @@ class ThreadPool
         itsWorkerDeathEvent(),
         itsAllIdleEvent(),
         itsMutex(),
-        itsScheduler(schedulerSize)
+        itsScheduler(schedulerSize),
+        itsName(std::move(name))
   {
   }
 
@@ -515,7 +528,13 @@ class ThreadPool
   void addWorker()
   {
     // The calling function must lock the mutex!
-    std::shared_ptr<Worker<PoolType> > newWorker = Worker<PoolType>::create(this);
+    // Give each worker a stable name "<prefix>-<n>" (e.g. "trax-1") when the
+    // pool was constructed with a name. Serial is monotonic so identities stay
+    // stable even when workers are replaced after dying.
+    std::string workerName;
+    if (!itsName.empty())
+      workerName = fmt::format("{}-{}", itsName, ++itsWorkerSerial);
+    std::shared_ptr<Worker<PoolType> > newWorker = Worker<PoolType>::create(this, workerName);
     itsWorkers.push_back(newWorker);
     auto thisIterator = --itsWorkers.end();
     newWorker->setLocation(thisIterator);
@@ -577,6 +596,10 @@ class ThreadPool
   MutexType itsMutex;
 
   SchedulingPolicy itsScheduler;
+
+  std::string itsName;
+
+  unsigned itsWorkerSerial{0};
 
   std::list<std::shared_ptr<Worker<PoolType> > > itsWorkers;
 };

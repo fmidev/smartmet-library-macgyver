@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.6.15
+Version: 26.6.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Fri Jun 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.6.26-1.fmi
+- Thread naming: Added Fmi::set_thread_name helper, optional ThreadPool worker names, and an AsyncTask warning when a thread name exceeds the 15 character limit
+
 * Mon Jun 15 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.15-1.fmi
 - Repackaged to resolve ABI issues
 
