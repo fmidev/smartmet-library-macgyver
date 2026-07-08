@@ -57,7 +57,7 @@ void parse_options_1()
   TEST_PASSED();
 }
 
-void hide_password()
+void hide_password_in_exception()
 {
   const std::map<std::string, std::string> testcases{
     // password at the beginning
@@ -94,6 +94,29 @@ void hide_password()
   TEST_PASSED();
 }
 
+void hide_password_in_toString()
+{
+  const std::string input{"password=mypassword host=db.example.com dbname=example port=1234 user=foo"};
+  Fmi::Database::PostgreSQLConnectionOptions opts{input};
+  {
+    const auto str{opts.toString(true)};
+    const std::string expected_without_pw{"host=db.example.com dbname=example port=1234 user=foo password=***"};    
+    if (str != expected_without_pw)
+    {
+      TEST_FAILED("'" + str + "' <=> '" + expected_without_pw + "'");
+    }
+  }
+  {
+    const auto str{opts.toString(false)};
+    const std::string expected_with_pw{"host=db.example.com dbname=example port=1234 user=foo password=mypassword"};
+    if (str != expected_with_pw)
+    {
+      TEST_FAILED("'" + str + "' <=> '" + expected_with_pw + "'");
+    }
+  }
+  TEST_PASSED();
+}
+
 void id_format()
 {
   using Fmi::Database::PostgreSQLConnectionId;
@@ -121,7 +144,8 @@ class tests : public tframe::tests
   void test(void)
   {
     TEST(parse_options_1);
-    TEST(hide_password);
+    TEST(hide_password_in_exception);
+    TEST(hide_password_in_toString);
     TEST(id_format);
   }
 };

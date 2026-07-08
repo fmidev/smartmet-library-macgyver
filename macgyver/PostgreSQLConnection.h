@@ -48,6 +48,7 @@ struct PostgreSQLConnectionOptions
   PostgreSQLConnectionOptions(const std::string& conn_str);
 
   operator std::string() const;
+  std::string toString(bool hidePassword = true) const;
 
   inline PostgreSQLConnectionId getId() const { return {host, port, database}; }
 };
