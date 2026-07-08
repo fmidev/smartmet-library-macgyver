@@ -346,7 +346,7 @@ namespace Fmi
 
                 for (std::size_t i = 0; i < start_size; ++i)
                 {
-                    task_group.add("pool_item_init[" + Fmi::to_string(i+1) + "]", grow);
+                    task_group.add("ini-pool-" + Fmi::to_string(i+1), grow);
                 }
 
                 task_group.on_task_error(init_task_error);
