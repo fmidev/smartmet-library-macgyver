@@ -118,6 +118,36 @@ PostgreSQLConnectionOptions::operator std::string() const
   return ss.str();
 }
 
+std::string PostgreSQLConnectionOptions::toString(bool hidePassword) const
+{
+  std::ostringstream ss;
+
+  // clang-format off
+  ss << "host="      << host
+     << " dbname="   << database
+     << " port="     << port
+     << " user="     << username;
+
+  if (hidePassword)
+  {
+    ss << " password=***";
+  }
+  else
+  {
+    ss << " password=" << password;
+  }
+#if 0
+  ss << " client_encoding=" << encoding
+#endif
+       ;
+  // clang-format on
+
+  if (connect_timeout > 0)
+    ss << " connect_timeout=" << connect_timeout;
+
+  return ss.str();
+}
+
 
 // ----------------------------------------------------------------------
 

@@ -273,7 +273,7 @@ std::shared_ptr<pqxx::connection> PostgreSQLConnection::Impl::open_internal(std:
 
     std::shared_ptr<pqxx::connection> connection;
 
-    std::string conn_str = static_cast<std::string>(itsConnectionOptions);
+    const auto conn_str{itsConnectionOptions.toString(false)};
 
     std::exception_ptr last_exception;
 
