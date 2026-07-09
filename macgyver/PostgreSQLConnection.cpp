@@ -98,24 +98,7 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
 
 PostgreSQLConnectionOptions::operator std::string() const
 {
-  std::ostringstream ss;
-
-  // clang-format off
-  ss << "host="      << host
-     << " dbname="   << database
-     << " port="    << port
-     << " user="     << username
-     << " password=" << password
-#if 0
-     << " client_encoding=" << encoding
-#endif
-       ;
-  // clang-format on
-
-  if (connect_timeout > 0)
-    ss << " connect_timeout=" << connect_timeout;
-
-  return ss.str();
+  return toString(false);
 }
 
 std::string PostgreSQLConnectionOptions::toString(bool hidePassword) const

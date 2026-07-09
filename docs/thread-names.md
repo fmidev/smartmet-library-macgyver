@@ -65,6 +65,7 @@ value substituted at runtime.
 
 | Name | Module | Purpose |
 |---|---|---|
+| `ini-pool-N` | macgyver | `Fmi::Pool` item initialization workers |
 | `ini-reactor` | server | `Reactor::init` |
 | `ini-dem` | engines/geonames | DEM init |
 | `ini-landcover` | engines/geonames | land-cover init |
