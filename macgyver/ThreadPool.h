@@ -8,6 +8,7 @@
 
 #pragma once
 #include "ThreadName.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
 #include <functional>
@@ -261,25 +262,47 @@ class ThreadPool
    * \brief Stops ThreadPool activity
    *
    * Stops the ThreadPool activity. Use this to shutdown the pool.
-   * If itsShutdownGracefully is true, waits for
-   * active threads to finish executing the current task. If not, terminates
-   * all threads "immediately" (as quickly as they can be interrupted).
+   * If itsShutdownGracefully is true, waits for active threads to finish
+   * executing the current task. If not, terminates all threads "immediately"
+   * (as quickly as they can be interrupted).
+   *
+   * \param theTimeoutSeconds When > 0 and shutting down gracefully, wait at
+   *        most this long for active tasks to finish; if the timeout elapses,
+   *        fall back to interrupting the workers so shutdown cannot hang on a
+   *        stuck task. A value <= 0 waits indefinitely (the historical
+   *        behaviour). Pending queued tasks are never run in either case.
    */
   // ======================================================================
 
-  void shutdown()
+  void shutdown(double theTimeoutSeconds = 0.0)
   {
     Lock lock(itsMutex);
     itsTargetWorkerCount = 0;
     itsDataEvent.notify_all();
+
+    bool timedOut = false;
     if (itsShutdownGracefully)
     {
-      while (itsWorkerCount > 0)
+      if (theTimeoutSeconds > 0.0)
       {
-        itsWorkerDeathEvent.wait(lock);
+        const int stepMillis = 50;
+        long stepsLeft = static_cast<long>((theTimeoutSeconds * 1000.0) / stepMillis) + 1;
+        while (itsWorkerCount > 0 && stepsLeft-- > 0)
+        {
+          itsWorkerDeathEvent.timed_wait(lock, boost::posix_time::milliseconds(stepMillis));
+        }
+        timedOut = (itsWorkerCount > 0);
+      }
+      else
+      {
+        while (itsWorkerCount > 0)
+        {
+          itsWorkerDeathEvent.wait(lock);
+        }
       }
     }
-    else
+
+    if (!itsShutdownGracefully || timedOut)
     {
       for (auto it = itsWorkers.begin(); it != itsWorkers.end(); ++it)
       {
@@ -290,6 +313,7 @@ class ThreadPool
       {
         (*it)->join();
       }
+      lock.lock();
     }
 
     itsAllIdleEvent.notify_one();
