@@ -18,6 +18,7 @@
 #include <queue>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace Fmi
 {
@@ -307,14 +308,22 @@ class ThreadPool
 
     if (!itsShutdownGracefully || timedOut)
     {
-      for (auto it = itsWorkers.begin(); it != itsWorkers.end(); ++it)
-      {
-        (*it)->interrupt();
-      }
+      // Snapshot the live workers while holding the lock, then interrupt and join them
+      // without it. We must not hold the lock across join() (a dying worker needs it in
+      // workerDied()), and we must not iterate itsWorkers while joining, because each
+      // worker erases itself from itsWorkers as it dies - which would invalidate the
+      // iterator. Holding the shared_ptrs also keeps every Worker (and its thread object)
+      // alive until after its join(), so none is destroyed while still joinable.
+      std::vector<std::shared_ptr<Worker<PoolType> > > workers(itsWorkers.begin(),
+                                                               itsWorkers.end());
       lock.unlock();
-      for (auto it = itsWorkers.begin(); it != itsWorkers.end(); ++it)
+      for (auto& worker : workers)
       {
-        (*it)->join();
+        worker->interrupt();
+      }
+      for (auto& worker : workers)
+      {
+        worker->join();
       }
       lock.lock();
     }
