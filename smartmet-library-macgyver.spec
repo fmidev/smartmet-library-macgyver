@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.7.9
+Version: 26.7.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Wed Jul 29 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.7.29-1.fmi
+- ThreadPool<>: support graceful-shutdown timeout
+
 * Thu Jul  9 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.9-1.fmi
 - PostgreSQLConnectionOptions: hide plain text passwords from exceptions and added toString(hidePassword) to prevent password leaks in logs
 - Shortened the pool item initialization thread name to ini-pool-N to fit the 15 character limit, and documented it in docs/thread-names.md
