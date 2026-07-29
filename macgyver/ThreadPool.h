@@ -8,6 +8,8 @@
 
 #pragma once
 #include "ThreadName.h"
+#include <boost/chrono/duration.hpp>
+#include <boost/chrono/system_clocks.hpp>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
 #include <functional>
@@ -16,6 +18,7 @@
 #include <queue>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace Fmi
 {
@@ -261,35 +264,68 @@ class ThreadPool
    * \brief Stops ThreadPool activity
    *
    * Stops the ThreadPool activity. Use this to shutdown the pool.
-   * If itsShutdownGracefully is true, waits for
-   * active threads to finish executing the current task. If not, terminates
-   * all threads "immediately" (as quickly as they can be interrupted).
+   * If itsShutdownGracefully is true, waits for active threads to finish
+   * executing the current task. If not, terminates all threads "immediately"
+   * (as quickly as they can be interrupted).
+   *
+   * \param theTimeoutSeconds When > 0 and shutting down gracefully, wait at
+   *        most this long for active tasks to finish; if the timeout elapses,
+   *        fall back to interrupting the workers (best effort; tasks must reach
+   *        a Boost interruption point for interruption to take effect). A value
+   *        <= 0 waits indefinitely (the historical behaviour). Pending queued tasks are never run.
    */
   // ======================================================================
 
-  void shutdown()
+  void shutdown(double theTimeoutSeconds = 0.0)
   {
     Lock lock(itsMutex);
     itsTargetWorkerCount = 0;
     itsDataEvent.notify_all();
+
+    bool timedOut = false;
     if (itsShutdownGracefully)
     {
-      while (itsWorkerCount > 0)
+      if (theTimeoutSeconds > 0.0)
       {
-        itsWorkerDeathEvent.wait(lock);
+        const auto deadline =
+            boost::chrono::steady_clock::now() +
+            boost::chrono::milliseconds(static_cast<long long>(theTimeoutSeconds * 1000.0));
+        while (itsWorkerCount > 0)
+        {
+          if (itsWorkerDeathEvent.wait_until(lock, deadline) == boost::cv_status::timeout)
+            break;
+        }
+        timedOut = (itsWorkerCount > 0);
+      }
+      else
+      {
+        while (itsWorkerCount > 0)
+        {
+          itsWorkerDeathEvent.wait(lock);
+        }
       }
     }
-    else
+
+    if (!itsShutdownGracefully || timedOut)
     {
-      for (auto it = itsWorkers.begin(); it != itsWorkers.end(); ++it)
-      {
-        (*it)->interrupt();
-      }
+      // Snapshot the live workers while holding the lock, then interrupt and join them
+      // without it. We must not hold the lock across join() (a dying worker needs it in
+      // workerDied()), and we must not iterate itsWorkers while joining, because each
+      // worker erases itself from itsWorkers as it dies - which would invalidate the
+      // iterator. Holding the shared_ptrs also keeps every Worker (and its thread object)
+      // alive until after its join(), so none is destroyed while still joinable.
+      std::vector<std::shared_ptr<Worker<PoolType> > > workers(itsWorkers.begin(),
+                                                               itsWorkers.end());
       lock.unlock();
-      for (auto it = itsWorkers.begin(); it != itsWorkers.end(); ++it)
+      for (auto& worker : workers)
       {
-        (*it)->join();
+        worker->interrupt();
       }
+      for (auto& worker : workers)
+      {
+        worker->join();
+      }
+      lock.lock();
     }
 
     itsAllIdleEvent.notify_one();
