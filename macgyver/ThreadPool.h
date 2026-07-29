@@ -270,9 +270,9 @@ class ThreadPool
    *
    * \param theTimeoutSeconds When > 0 and shutting down gracefully, wait at
    *        most this long for active tasks to finish; if the timeout elapses,
-   *        fall back to interrupting the workers so shutdown cannot hang on a
-   *        stuck task. A value <= 0 waits indefinitely (the historical
-   *        behaviour). Pending queued tasks are never run in either case.
+   *        fall back to interrupting the workers (best effort; tasks must reach
+   *        a Boost interruption point for interruption to take effect). A value
+   *        <= 0 waits indefinitely (the historical behaviour). Pending queued tasks are never run.
    */
   // ======================================================================
 
