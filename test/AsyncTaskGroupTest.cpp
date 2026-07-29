@@ -27,7 +27,7 @@ void not_waiting_for_result()
 {
   std::unique_ptr<std::string> test(new std::string);
   std::unique_ptr<Fmi::AsyncTaskGroup> tg(new Fmi::AsyncTaskGroup);
-  tg->add("not waiting for result",
+  tg->add("result_nowait",
           [&]()
           {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));

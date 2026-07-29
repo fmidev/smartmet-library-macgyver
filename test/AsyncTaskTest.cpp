@@ -33,7 +33,7 @@ void not_waiting_for_result()
   std::atomic<int> test(0);
 
   std::unique_ptr<Fmi::AsyncTask>
-    task(new Fmi::AsyncTask("not waiting for result",
+    task(new Fmi::AsyncTask("result_nowait",
 			    [&]()
 			    {
 			      boost::this_thread::sleep_for(boost::chrono::seconds(5));
@@ -58,7 +58,7 @@ void not_waiting_for_result()
 void not_waiting_for_result_2()
 {
   std::unique_ptr<Fmi::AsyncTask> task(
-      new Fmi::AsyncTask("not waiting for result", [&]() { throw TestException(); }));
+      new Fmi::AsyncTask("result_nowait", [&]() { throw TestException(); }));
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   task.reset();
   TEST_PASSED();
