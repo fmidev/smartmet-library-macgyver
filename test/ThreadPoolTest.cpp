@@ -109,8 +109,10 @@ BOOST_AUTO_TEST_CASE(shutdown_timeout_allows_task_to_finish)
       });
   BOOST_REQUIRE(inserted);
 
-  while (!started)
+  const auto start_deadline = boost::chrono::steady_clock::now() + boost::chrono::seconds(2);
+  while (!started && boost::chrono::steady_clock::now() < start_deadline)
     boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+  BOOST_REQUIRE_MESSAGE(started, "worker did not start task within 2 seconds");
 
   const auto t0 = boost::chrono::steady_clock::now();
   pool.shutdown(5.0);  // generous timeout: the 200 ms task finishes before it elapses
