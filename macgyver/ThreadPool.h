@@ -8,7 +8,8 @@
 
 #pragma once
 #include "ThreadName.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/chrono/duration.hpp>
+#include <boost/chrono/system_clocks.hpp>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
 #include <functional>
@@ -285,11 +286,13 @@ class ThreadPool
     {
       if (theTimeoutSeconds > 0.0)
       {
-        const int stepMillis = 50;
-        long stepsLeft = static_cast<long>((theTimeoutSeconds * 1000.0) / stepMillis) + 1;
-        while (itsWorkerCount > 0 && stepsLeft-- > 0)
+        const auto deadline =
+            boost::chrono::steady_clock::now() +
+            boost::chrono::milliseconds(static_cast<long long>(theTimeoutSeconds * 1000.0));
+        while (itsWorkerCount > 0)
         {
-          itsWorkerDeathEvent.timed_wait(lock, boost::posix_time::milliseconds(stepMillis));
+          if (itsWorkerDeathEvent.wait_until(lock, deadline) == boost::cv_status::timeout)
+            break;
         }
         timedOut = (itsWorkerCount > 0);
       }
