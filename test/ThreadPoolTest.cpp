@@ -73,9 +73,10 @@ BOOST_AUTO_TEST_CASE(shutdown_timeout_interrupts_stuck_task)
   BOOST_REQUIRE(inserted);
 
   // Make sure a worker has actually picked up the task and is sleeping inside it.
-  while (!started)
+  const auto start_deadline = boost::chrono::steady_clock::now() + boost::chrono::seconds(2);
+  while (!started && boost::chrono::steady_clock::now() < start_deadline)
     boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
-
+  BOOST_REQUIRE_MESSAGE(started, "worker did not start task within 2 seconds");
   const auto t0 = boost::chrono::steady_clock::now();
   pool.shutdown(0.5);  // graceful, but bail out after 0.5 s and interrupt
   const auto elapsed_ms = boost::chrono::duration_cast<boost::chrono::milliseconds>(
