@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.7.29
+Version: 26.8.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,14 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Wed Aug 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.19-1.fmi
+- Fmi::stosz() now accepts sizes in a far more readable form. The unit is optional
+  and case insensitive, B/K/M/G/T/P are accepted both alone and followed by "B" or
+  "iB", a trailing 'L' from libconfig style long integers is allowed, whitespace is
+  ignored, and fractions are rounded to the nearest byte. So "34359738368",
+  "34359738368L", "32G", "32GB", "32 GiB" and "1.5G" are all understood. Previously
+  only strings with a mandatory single uppercase unit letter such as "32G" were accepted
+
 * Wed Jul 29 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.7.29-1.fmi
 - ThreadPool<>: support graceful-shutdown timeout
 

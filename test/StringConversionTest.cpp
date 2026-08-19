@@ -434,6 +434,53 @@ BOOST_AUTO_TEST_CASE(stdsz)
   BOOST_CHECK_EQUAL(123UL << 30, Fmi::stosz("123G"));
   BOOST_CHECK_EQUAL(123UL << 40, Fmi::stosz("123T"));
   BOOST_CHECK_EQUAL(123UL << 50, Fmi::stosz("123P"));
+
+  // Plain numbers are bytes
+  BOOST_CHECK_EQUAL(0UL, Fmi::stosz("0"));
+  BOOST_CHECK_EQUAL(123UL, Fmi::stosz("123"));
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("34359738368"));
+
+  // Libconfig style long integers
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("34359738368L"));
+  BOOST_CHECK_EQUAL(123UL, Fmi::stosz("123l"));
+
+  // "B" and "iB" suffixes
+  BOOST_CHECK_EQUAL(123UL << 10, Fmi::stosz("123KB"));
+  BOOST_CHECK_EQUAL(123UL << 10, Fmi::stosz("123KiB"));
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("32GB"));
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("32GiB"));
+  BOOST_CHECK_EQUAL(123UL << 50, Fmi::stosz("123PiB"));
+
+  // Units are case insensitive
+  BOOST_CHECK_EQUAL(123UL, Fmi::stosz("123b"));
+  BOOST_CHECK_EQUAL(123UL << 10, Fmi::stosz("123k"));
+  BOOST_CHECK_EQUAL(123UL << 20, Fmi::stosz("123m"));
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("32g"));
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("32gb"));
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("32Gib"));
+
+  // Whitespace is ignored
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("32 G"));
+  BOOST_CHECK_EQUAL(32UL << 30, Fmi::stosz("  32 GiB  "));
+  BOOST_CHECK_EQUAL(512UL << 20, Fmi::stosz("512\tMB"));
+
+  // Fractions are rounded to the nearest byte
+  BOOST_CHECK_EQUAL(3UL << 29, Fmi::stosz("1.5G"));
+  BOOST_CHECK_EQUAL(512UL, Fmi::stosz("0.5K"));
+  BOOST_CHECK_EQUAL(1UL, Fmi::stosz("1.4"));
+
+  // Errors
+  BOOST_CHECK_THROW(Fmi::stosz(""), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("  "), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("K"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("L"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("-1"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("-1G"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("32X"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("32GBB"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("32 giga"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("32G junk"), Fmi::Exception);
+  BOOST_CHECK_THROW(Fmi::stosz("1000000P"), Fmi::Exception);  // overflow
 }
 
 // ======================================================================

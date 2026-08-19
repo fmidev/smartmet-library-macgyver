@@ -5,7 +5,9 @@
 #include <fmt/format.h>
 #include <fmt/printf.h>
 #include <array>
+#include <cctype>
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 
 namespace
@@ -1304,34 +1306,114 @@ std::string safexmlescape(const std::string& input)
   }
 }
 
+namespace
+{
+// ----------------------------------------------------------------------
+/*!
+ * \brief Convert a size unit to the number of bytes it stands for
+ *
+ * All units are binary multiples, so both "1KB" and "1KiB" mean 1024 bytes.
+ * An empty unit means plain bytes.
+ */
+// ----------------------------------------------------------------------
+
+std::size_t size_multiplier(const std::string& theUnit)
+{
+  auto unit = Fmi::ascii_toupper_copy(theUnit);
+
+  // Accept both "KB" and "KiB" style units
+  if (unit.size() > 1 && unit.back() == 'B')
+  {
+    unit.resize(unit.size() - 1);
+    if (unit.size() > 1 && unit.back() == 'I')
+      unit.resize(unit.size() - 1);
+  }
+
+  if (unit.empty())
+    return 1UL;
+
+  if (unit.size() == 1)
+  {
+    switch (unit[0])
+    {
+      case 'B':
+        return 1UL;
+      case 'K':
+        return 1024UL;
+      case 'M':
+        return 1024UL * 1024UL;
+      case 'G':
+        return 1024UL * 1024UL * 1024UL;
+      case 'T':
+        return 1024UL * 1024UL * 1024UL * 1024UL;
+      case 'P':
+        return 1024UL * 1024UL * 1024UL * 1024UL * 1024UL;
+      default:
+        break;
+    }
+  }
+
+  throw Fmi::Exception(BCP, "Unknown size unit for number of bytes").addParameter("unit", theUnit);
+}
+
+}  // anonymous namespace
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Convert a string to a size in bytes
+ *
+ * Accepted forms are for example
+ *
+ *     34359738368    34359738368L    32G    32GB    32 GiB    1.5G    0
+ *
+ * The unit is optional and case insensitive, and B, K, M, G, T and P
+ * are all accepted both alone and followed by "B" or "iB". All units
+ * are binary multiples, so "1KB", "1kB" and "1KiB" all mean 1024 bytes.
+ * A trailing 'L' is allowed so that libconfig style long integers can
+ * be given as strings too.
+ */
+// ----------------------------------------------------------------------
+
 std::size_t stosz(const std::string& str)
 {
   try
   {
-    if (str.size() < 2)
-      throw Fmi::Exception(BCP, "Too few letters in size string");
+    auto value = Fmi::trim_copy(str);
 
-    auto unit = str.back();
-    auto snum = str.substr(0, str.size() - 1);
-    auto base = Fmi::stoul(snum);
+    if (value.empty())
+      throw Fmi::Exception(BCP, "Empty size string");
 
-    switch (unit)
+    // Allow libconfig style long integers such as "34359738368L"
+    if (value.size() > 1 && (value.back() == 'L' || value.back() == 'l') &&
+        isdigit(static_cast<unsigned char>(value[value.size() - 2])) != 0)
+      value.resize(value.size() - 1);
+
+    // Split the number from the unit
+    std::size_t pos = 0;
+    while (pos < value.size() &&
+           (isdigit(static_cast<unsigned char>(value[pos])) != 0 || value[pos] == '.'))
+      ++pos;
+
+    const auto number = value.substr(0, pos);
+    const auto multiplier = size_multiplier(Fmi::trim_copy(value.substr(pos)));
+
+    if (number.empty())
+      throw Fmi::Exception(BCP, "Size must start with a nonnegative number");
+
+    // Integral sizes must be exact
+    if (number.find('.') == std::string::npos)
     {
-      case 'B':
-        return base;
-      case 'K':
-        return 1024UL * base;
-      case 'M':
-        return 1024UL * 1024UL * base;
-      case 'G':
-        return 1024UL * 1024UL * 1024UL * base;
-      case 'T':
-        return 1024UL * 1024UL * 1024UL * 1024UL * base;
-      case 'P':
-        return 1024UL * 1024UL * 1024UL * 1024UL * 1024UL * base;
-      default:
-        throw Fmi::Exception(BCP, "Unknown size unit for number of bytes");
+      const auto base = Fmi::stoul(number);
+      if (base > std::numeric_limits<std::size_t>::max() / multiplier)
+        throw Fmi::Exception(BCP, "Size is too large to be represented");
+      return base * multiplier;
     }
+
+    // Fractional sizes such as "1.5G" are rounded to the nearest byte
+    const auto bytes = Fmi::stod(number) * static_cast<double>(multiplier);
+    if (bytes > static_cast<double>(std::numeric_limits<std::size_t>::max()))
+      throw Fmi::Exception(BCP, "Size is too large to be represented");
+    return static_cast<std::size_t>(std::round(bytes));
   }
   catch (...)
   {
