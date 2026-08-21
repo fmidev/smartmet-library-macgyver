@@ -49,7 +49,12 @@ std::optional<unsigned long> stoul_opt(const std::string& str);
 std::optional<float> stof_opt(const std::string& str);
 std::optional<double> stod_opt(const std::string& str);
 
-std::size_t stosz(const std::string& str);  // B,K,M,G,T,P suffixes allowed
+// Convert a string to a size in bytes. The unit is optional and case insensitive,
+// and B,K,M,G,T,P are accepted both alone and followed by "B" or "iB". All units are
+// binary multiples, so "1KB", "1kB" and "1KiB" all mean 1024 bytes. A trailing 'L' is
+// allowed for libconfig style long integers, and fractions such as "1.5G" are rounded
+// to the nearest byte. Examples: 34359738368  34359738368L  32G  32GB  32 GiB  1.5G  0
+std::size_t stosz(const std::string& str);
 
 std::string to_iso_string(const std::time_t time);
 std::string to_iso_string(const TimeDuration& duration);
