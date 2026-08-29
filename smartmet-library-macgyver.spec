@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.8.19
+Version: 26.8.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,33 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Aug 29 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.29-1.fmi
+- Fmi::Cache::Cache::find() now takes a shared lock instead of an upgradeable one.
+  A shared_mutex permits only one upgrade owner at a time, so every lookup in a
+  shard excluded every other lookup in the same shard -- including plain hits on an
+  entry already at the MRU end, where no splice happens at all, and including
+  misses. Striping spreads that cost only when the keys spread, so a workload
+  dominated by a few hot keys, such as spatial reference lookups, landed on a few
+  shards and serialised there. Lookups now run concurrently with each other and
+  with statistics() and size(). The shard is re-locked exclusively only to splice
+  an entry that is not already at the MRU end, and because that entry may be
+  evicted or promoted by another thread while no lock is held, it is looked up
+  again before splicing; the value found under the shared lock is returned either
+  way, so a hit is never turned into a miss. No API change.
+- Measured with the gis library's SpatialReferenceCloneBench on a 24-core host,
+  building gis twice against sources differing only in this header, medians of
+  three alternating rounds. Fmi::SpatialReference(string), which performs one
+  find() per call, in acquisitions/s: 4.40M -> 4.54M on one thread, 3.02M -> 2.46M
+  on two, 1.33M -> 1.52M on four, 520k -> 774k on eight and 73.0k -> 222k on
+  sixteen. At sixteen threads that is 3.0x, or 219 us per call before against
+  72 us after, next to 0.23 us uncontended. The 19% loss at two threads
+  reproduced in every round and is the price of letting readers genuinely
+  overlap: they now contend for the hit counter cache lines instead of taking
+  turns behind the lock. Note that the path still degrades roughly 20x from one
+  thread to sixteen even after this change, because a shared lock is still an
+  atomic write to one word per shard -- this reduces the convoy rather than
+  removing it.
+
 * Wed Aug 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.19-1.fmi
 - Fmi::stosz() now accepts sizes in a far more readable form. The unit is optional
   and case insensitive, B/K/M/G/T/P are accepted both alone and followed by "B" or

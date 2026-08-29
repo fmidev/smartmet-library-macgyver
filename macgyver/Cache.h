@@ -68,11 +68,12 @@ struct CacheReportingObject
  * \brief LRU cache with cache striping to reduce lock contention
  *
  * Keys are distributed across NumShards independent sub-caches, each with
- * its own shared_mutex.  find() acquires an upgradeable shared lock and only
- * upgrades to exclusive when it needs to splice the LRU list (on hit), so
- * pure-read operations such as statistics() and size() can run concurrently
- * with in-progress finds.  insert(), upsert(), clear() and resize() take a
- * full exclusive lock on the affected shard.
+ * its own shared_mutex.  find() takes only a shared lock, so lookups run
+ * concurrently both with each other and with pure-read operations such as
+ * statistics() and size().  It re-locks the shard exclusively only when the
+ * entry it found is not already at the MRU end and has to be spliced there.
+ * insert(), upsert(), clear() and resize() take a full exclusive lock on the
+ * affected shard.
  */
 // ----------------------------------------------------------------------
 
@@ -215,56 +216,76 @@ class Cache
   std::optional<ValueType> find(const KeyType& key)
   {
     auto& shard = itsShards[getShardIndex(key)];
-    boost::upgrade_lock<boost::shared_mutex> lock(shard.mutex);
+    std::optional<ValueType> value;
 
-    auto mapIt = shard.map.find(key);
-    if (mapIt == shard.map.end())
     {
-      shard.missCount.fetch_add(1, std::memory_order_relaxed);
-      return {};
-    }
+      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
 
-    // If already at the back of the LRU list (MRU position), skip the
-    // exclusive lock — the splice would be a no-op anyway.
-    if (std::next(mapIt->second) == shard.list.end())
-    {
+      auto mapIt = shard.map.find(key);
+      if (mapIt == shard.map.end())
+      {
+        shard.missCount.fetch_add(1, std::memory_order_relaxed);
+        return {};
+      }
+
       mapIt->second->hits.fetch_add(1, std::memory_order_relaxed);
       shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-      return mapIt->second->value;
+
+      // Already at the back of the list (MRU position): the splice below would
+      // be a no-op, so the shared lock is all this call ever needs.
+      if (std::next(mapIt->second) == shard.list.end())
+        return mapIt->second->value;
+
+      value = mapIt->second->value;
     }
 
-    boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(lock);
-    shard.list.splice(shard.list.end(), shard.list, mapIt->second);
-    mapIt->second->hits.fetch_add(1, std::memory_order_relaxed);
-    shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-    return mapIt->second->value;
+    // Promoting the entry to MRU needs the exclusive lock. It may have been
+    // evicted, or already promoted by somebody else, while no lock was held, so
+    // look it up again -- but return the value found above either way, since
+    // that lookup did hit.
+    {
+      boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+      auto mapIt = shard.map.find(key);
+      if (mapIt != shard.map.end())
+        shard.list.splice(shard.list.end(), shard.list, mapIt->second);
+    }
+
+    return value;
   }
 
   // Find value and also return its hit count
   std::optional<ValueType> find(const KeyType& key, std::size_t& hits)
   {
     auto& shard = itsShards[getShardIndex(key)];
-    boost::upgrade_lock<boost::shared_mutex> lock(shard.mutex);
+    std::optional<ValueType> value;
 
-    auto mapIt = shard.map.find(key);
-    if (mapIt == shard.map.end())
     {
-      shard.missCount.fetch_add(1, std::memory_order_relaxed);
-      return {};
-    }
+      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
 
-    if (std::next(mapIt->second) == shard.list.end())
-    {
+      auto mapIt = shard.map.find(key);
+      if (mapIt == shard.map.end())
+      {
+        shard.missCount.fetch_add(1, std::memory_order_relaxed);
+        return {};
+      }
+
       hits = mapIt->second->hits.fetch_add(1, std::memory_order_relaxed) + 1;
       shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-      return mapIt->second->value;
+
+      if (std::next(mapIt->second) == shard.list.end())
+        return mapIt->second->value;
+
+      value = mapIt->second->value;
     }
 
-    boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(lock);
-    shard.list.splice(shard.list.end(), shard.list, mapIt->second);
-    hits = mapIt->second->hits.fetch_add(1, std::memory_order_relaxed) + 1;
-    shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-    return mapIt->second->value;
+    {
+      boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+      auto mapIt = shard.map.find(key);
+      if (mapIt != shard.map.end())
+        shard.list.splice(shard.list.end(), shard.list, mapIt->second);
+    }
+
+    return value;
   }
 
   void clear()
