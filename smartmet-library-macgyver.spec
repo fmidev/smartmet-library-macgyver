@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.8.19
+Version: 26.8.31
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,11 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Mon Aug 31 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.31-1.fmi
+- Fixed a data race in Cache: resize() modified the shard size limit without
+  synchronization against statistics(), maxSize() and insert/upsert capacity
+  checks; the limit is now atomic (found by TSan)
+
 * Wed Aug 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.19-1.fmi
 - Fmi::stosz() now accepts sizes in a far more readable form. The unit is optional
   and case insensitive, B/K/M/G/T/P are accepted both alone and followed by "B" or
