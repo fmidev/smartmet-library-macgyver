@@ -85,53 +85,67 @@ FileCache::FileCache(const fs::path& directory, std::size_t maxSize)
   }
 }
 
+// The lookup and the file read are done under a shared lock so that
+// concurrent finds do not block each other (an upgrade lock would allow only
+// one finder at a time). The LRU relocation is then done under a separate
+// exclusive lock; the entry is looked up again since it may have been
+// cleaned away in between.
 std::optional<std::string> FileCache::find(std::size_t key)
 {
   try
   {
-    UpgradeReadLock theLock(itsMutex);
-    std::error_code err;
-
-    auto it = itsContentMap.left.find(key);
-
-    if (it == itsContentMap.left.end())
-    {
-      ++itsMissCount;
-      return std::optional<std::string>();
-    }
-
-    // Found in the map, but somebody may have cleaned the file
-
-    fs::path fullPath = it->second.path;
-
-    if (!fs::exists(fullPath, err))
-    {
-      // Should we remove the entry here? It will be re-inserted anyways eventually
-      ++itsMissCount;
-      return std::optional<std::string>();
-    }
-
-    std::size_t size = it->second.fileSize;
-
-    // Read and return the file
-
-    std::ifstream file(fullPath, std::ios::in|std::ios::binary);
-    if (!file)
-    {
-      // Report file opening error
-      ++itsMissCount;
-      return std::optional<std::string>();
-    }
-
     std::string ret;
-    ret.resize(size);
-    file.read(&ret[0], size);  // Should work, c++11 guarantees strings to be contiguous
+
+    {
+      ReadLock theLock(itsMutex);
+      std::error_code err;
+
+      auto it = itsContentMap.left.find(key);
+
+      if (it == itsContentMap.left.end())
+      {
+        itsMissCount.fetch_add(1, std::memory_order_relaxed);
+        return std::optional<std::string>();
+      }
+
+      // Found in the map, but somebody may have cleaned the file
+
+      const fs::path& fullPath = it->second.path;
+
+      if (!fs::exists(fullPath, err))
+      {
+        // Should we remove the entry here? It will be re-inserted anyways eventually
+        itsMissCount.fetch_add(1, std::memory_order_relaxed);
+        return std::optional<std::string>();
+      }
+
+      std::size_t size = it->second.fileSize;
+
+      // Read the file while still holding the shared lock so that the file
+      // cannot be removed by a concurrent cleanup
+
+      std::ifstream file(fullPath, std::ios::in | std::ios::binary);
+      if (!file)
+      {
+        // Report file opening error
+        itsMissCount.fetch_add(1, std::memory_order_relaxed);
+        return std::optional<std::string>();
+      }
+
+      ret.resize(size);
+      file.read(&ret[0], size);  // Should work, c++11 guarantees strings to be contiguous
+
+      itsHitCount.fetch_add(1, std::memory_order_relaxed);
+    }
 
     // This implements LRU eviction behaviour
-    UpgradeWriteLock ugLock(theLock);
-    itsContentMap.right.relocate(itsContentMap.right.end(), itsContentMap.project_right(it));
+    {
+      WriteLock theLock(itsMutex);
+      auto it = itsContentMap.left.find(key);
+      if (it != itsContentMap.left.end())
+        itsContentMap.right.relocate(itsContentMap.right.end(), itsContentMap.project_right(it));
+    }
 
-    ++itsHitCount;
     return std::optional<std::string>(std::move(ret));
   }
   catch (...)
@@ -226,7 +240,13 @@ std::vector<std::size_t> FileCache::getContent() const
 CacheStats FileCache::statistics() const
 {
   ReadLock lock(itsMutex);
-  return CacheStats(itsStartTime, itsMaxSize, itsSize, itsInsertCount, itsHitCount, itsMissCount, itsEvictionCount);
+  return CacheStats(itsStartTime,
+                    itsMaxSize,
+                    itsSize,
+                    itsInsertCount,
+                    itsHitCount.load(std::memory_order_relaxed),
+                    itsMissCount.load(std::memory_order_relaxed),
+                    itsEvictionCount);
 }
 
 std::size_t FileCache::getSize() const
@@ -391,7 +411,7 @@ bool FileCache::writeFile(const fs::path& theDir,
     }
 
     fs::path fullPath = theDir / fileName;
-    std::ofstream file(fullPath, std::ios::out|std::ios::binary);
+    std::ofstream file(fullPath, std::ios::out | std::ios::binary);
     if (!file)
     {
 // Could not open file

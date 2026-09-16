@@ -68,11 +68,14 @@ struct CacheReportingObject
  * \brief LRU cache with cache striping to reduce lock contention
  *
  * Keys are distributed across NumShards independent sub-caches, each with
- * its own shared_mutex.  find() acquires an upgradeable shared lock and only
- * upgrades to exclusive when it needs to splice the LRU list (on hit), so
- * pure-read operations such as statistics() and size() can run concurrently
- * with in-progress finds.  insert(), upsert(), clear() and resize() take a
- * full exclusive lock on the affected shard.
+ * its own shared_mutex.  find() does the lookup under a plain shared lock so
+ * that any number of concurrent finds (and pure-read operations such as
+ * statistics() and size()) proceed in parallel.  Only when a hit needs to be
+ * promoted to the MRU position is the shared lock released and a separate
+ * exclusive lock taken for the LRU splice.  Note that boost::upgrade_lock is
+ * deliberately not used: only one thread may hold an upgrade lock at a time,
+ * which would serialize all finds on the shard.  insert(), upsert(), clear()
+ * and resize() take a full exclusive lock on the affected shard.
  */
 // ----------------------------------------------------------------------
 
@@ -94,8 +97,7 @@ class Cache
   Cache& operator=(const Cache& other) = delete;
   Cache& operator=(Cache&& other) = delete;
 
-  explicit Cache(std::size_t maxSize)
-      : itsMaxSizePerShard((maxSize + NumShards - 1) / NumShards)
+  explicit Cache(std::size_t maxSize) : itsMaxSizePerShard((maxSize + NumShards - 1) / NumShards)
   {
     static_assert(NumShards > 0, "NumShards must be greater than 0");
   }
@@ -207,64 +209,54 @@ class Cache
     return true;
   }
 
-  // Find value; returns empty optional on miss. When the entry is already the
-  // most-recently-used element no exclusive lock is needed — only the shared
-  // (upgrade) lock is held.  This matters when the same key is looked up
-  // repeatedly (e.g. 1000 Finnish stations all in Europe/Helsinki): only the
-  // first hit splices the LRU list; the rest stay in shared mode.
+  // Find value; returns empty optional on miss.
   std::optional<ValueType> find(const KeyType& key)
   {
-    auto& shard = itsShards[getShardIndex(key)];
-    boost::upgrade_lock<boost::shared_mutex> lock(shard.mutex);
-
-    auto mapIt = shard.map.find(key);
-    if (mapIt == shard.map.end())
-    {
-      shard.missCount.fetch_add(1, std::memory_order_relaxed);
-      return {};
-    }
-
-    // If already at the back of the LRU list (MRU position), skip the
-    // exclusive lock — the splice would be a no-op anyway.
-    if (std::next(mapIt->second) == shard.list.end())
-    {
-      mapIt->second->hits.fetch_add(1, std::memory_order_relaxed);
-      shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-      return mapIt->second->value;
-    }
-
-    boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(lock);
-    shard.list.splice(shard.list.end(), shard.list, mapIt->second);
-    mapIt->second->hits.fetch_add(1, std::memory_order_relaxed);
-    shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-    return mapIt->second->value;
+    std::size_t hits = 0;
+    return find(key, hits);
   }
 
-  // Find value and also return its hit count
+  // Find value and also return its hit count.
+  //
+  // The lookup is done under a shared lock, so concurrent finds never block
+  // each other. If the entry is already the most-recently-used element the
+  // LRU splice would be a no-op and no exclusive lock is needed at all. This
+  // matters when the same key is looked up repeatedly (e.g. 1000 Finnish
+  // stations all in Europe/Helsinki). Otherwise the shared lock is released
+  // and the splice is done under an exclusive lock; since another thread may
+  // have evicted or replaced the entry in between, the key is looked up again.
   std::optional<ValueType> find(const KeyType& key, std::size_t& hits)
   {
     auto& shard = itsShards[getShardIndex(key)];
-    boost::upgrade_lock<boost::shared_mutex> lock(shard.mutex);
+    std::optional<ValueType> result;
 
-    auto mapIt = shard.map.find(key);
-    if (mapIt == shard.map.end())
     {
-      shard.missCount.fetch_add(1, std::memory_order_relaxed);
-      return {};
-    }
+      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
 
-    if (std::next(mapIt->second) == shard.list.end())
-    {
-      hits = mapIt->second->hits.fetch_add(1, std::memory_order_relaxed) + 1;
+      auto mapIt = shard.map.find(key);
+      if (mapIt == shard.map.end())
+      {
+        shard.missCount.fetch_add(1, std::memory_order_relaxed);
+        return {};
+      }
+
+      const auto listIt = mapIt->second;
+      hits = listIt->hits.fetch_add(1, std::memory_order_relaxed) + 1;
       shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-      return mapIt->second->value;
+      result = listIt->value;
+
+      if (std::next(listIt) == shard.list.end())
+        return result;
     }
 
-    boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(lock);
-    shard.list.splice(shard.list.end(), shard.list, mapIt->second);
-    hits = mapIt->second->hits.fetch_add(1, std::memory_order_relaxed) + 1;
-    shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-    return mapIt->second->value;
+    {
+      boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+      auto mapIt = shard.map.find(key);
+      if (mapIt != shard.map.end())
+        shard.list.splice(shard.list.end(), shard.list, mapIt->second);
+    }
+
+    return result;
   }
 
   void clear()
@@ -351,8 +343,7 @@ class Cache
  private:
   struct Entry
   {
-    Entry(KeyType k, ValueType v, std::size_t s)
-        : key(std::move(k)), value(std::move(v)), size(s)
+    Entry(KeyType k, ValueType v, std::size_t s) : key(std::move(k)), value(std::move(v)), size(s)
     {
     }
 
@@ -363,8 +354,7 @@ class Cache
   };
 
   using ListType = std::list<Entry>;
-  using MapType =
-      std::unordered_map<KeyType, typename ListType::iterator, boost::hash<KeyType>>;
+  using MapType = std::unordered_map<KeyType, typename ListType::iterator, boost::hash<KeyType>>;
 
   struct Shard
   {
@@ -374,7 +364,7 @@ class Cache
     std::size_t size = 0;
     std::size_t insertCount = 0;
     std::size_t evictionCount = 0;
-    // hit/miss updated lock-free on the miss path (no upgrade needed)
+    // hit/miss counters are updated under a shared lock, hence atomic
     mutable std::atomic<std::size_t> hitCount{0};
     mutable std::atomic<std::size_t> missCount{0};
   };
@@ -382,7 +372,7 @@ class Cache
   std::size_t getShardIndex(const KeyType& key) const
   {
     constexpr std::size_t prime = 2654435761ULL;
-    return (boost::hash<KeyType>{}(key) * prime) % NumShards;
+    return (boost::hash<KeyType>{}(key)*prime) % NumShards;
   }
 
   // Evict LRU entries until shard is within capacity (caller holds exclusive lock)
@@ -437,13 +427,11 @@ class FileCache
   using MutexType = boost::shared_mutex;
   using ReadLock = boost::shared_lock<MutexType>;
   using WriteLock = boost::unique_lock<MutexType>;
-  using UpgradeReadLock = boost::upgrade_lock<MutexType>;
-  using UpgradeWriteLock = boost::upgrade_to_unique_lock<MutexType>;
 
   using MapType = boost::bimaps::bimap<boost::bimaps::unordered_set_of<std::size_t,
                                                                        boost::hash<std::size_t>,
-                                                                       std::equal_to<std::size_t> >,
-                                       boost::bimaps::list_of<FileCacheStruct> >;
+                                                                       std::equal_to<std::size_t>>,
+                                       boost::bimaps::list_of<FileCacheStruct>>;
 
  public:
   FileCache(const std::filesystem::path& directory, std::size_t maxSize);
@@ -475,8 +463,9 @@ class FileCache
   std::size_t itsSize = 0;
   std::size_t itsMaxSize = 0;
   std::size_t itsInsertCount = 0;
-  std::size_t itsMissCount = 0;
-  std::size_t itsHitCount = 0;
+  // Updated in find() under a shared lock, hence atomic
+  mutable std::atomic<std::size_t> itsMissCount{0};
+  mutable std::atomic<std::size_t> itsHitCount{0};
   std::size_t itsEvictionCount = 0;
   const DateTime itsStartTime = Fmi::SecondClock::universal_time();
   std::filesystem::path itsDirectory;
