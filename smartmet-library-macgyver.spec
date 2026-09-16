@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.8.19
+Version: 26.9.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,12 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.16-1.fmi
+- Cache::find() and FileCache::find() now use a shared lock for the lookup and take
+  a separate exclusive lock only when the entry must be promoted to the MRU position.
+  The previous upgrade lock allowed only one thread at a time, which effectively
+  serialized all concurrent finds on a shard. Improves throughput when the hit rate is good
+
 * Wed Aug 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.19-1.fmi
 - Fmi::stosz() now accepts sizes in a far more readable form. The unit is optional
   and case insensitive, B/K/M/G/T/P are accepted both alone and followed by "B" or
