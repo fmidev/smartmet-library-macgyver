@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <list>
@@ -37,6 +38,10 @@ namespace Fmi
      * All constructor arguments must be copy constructable as they are stored in the pool instance.
      * Note that if reference of type is provided, argument itself must be copyable as well
      * (as references are removed when storing in tuple).
+     *
+     * The pool items and all synchronization primitives live in a shared state object that is
+     * kept alive by every outstanding Pool<>::Ptr. As a result items acquired from the pool
+     * remain valid even if the pool object itself is destroyed before the items are released.
      *
      * Template parameters:
      * - InitType: Specifies the initialization type (sequential or parallel).
@@ -83,63 +88,68 @@ namespace Fmi
             ItemRec& operator=(ItemRec&&) = default;
         };
 
+        /**
+         * @brief State shared between the pool object and the deleters of all handed out items
+         *
+         * Held through std::shared_ptr both by the pool and by every Pool<>::Ptr deleter, so it
+         * outlives the pool object while items are still in use. All mutable pool state is
+         * protected by the mutex contained here. This avoids any access to destroyed memory
+         * when items are released after (or concurrently with) pool destruction.
+         */
+        struct SharedState
+        {
+            mutable boost::mutex mutex;
+            boost::condition_variable cond_var;
+
+            /**
+             * @brief False once the pool object destructor has run
+             */
+            bool alive = true;
+
+            /**
+             * @brief Current number of items in the pool
+             */
+            std::size_t current_size = 0;
+
+            /**
+             * @brief Next size of the pool when growing (used to control max_size limit)
+             *
+             * Intended to avoid growing over max_size in case of concurrent calls to acquire()
+             */
+            std::size_t next_current_size = 0;
+            std::size_t in_use_count = 0;
+
+            ItemRec* top = nullptr;
+            std::list<ItemRec> pool_data;
+        };
+
     public:
         class Ptr : private std::unique_ptr<ItemType, std::function<void(ItemType*)>>
         {
             friend class Pool;
             using base = std::unique_ptr<ItemType, std::function<void(ItemType*)>>;
 
-            std::weak_ptr<bool> alive_flag;
-            Ptr& self;
-
-            Ptr(ItemType* ptr, std::function<void(ItemType*)> release, std::shared_ptr<bool>& alive_flag)
-                : std::unique_ptr<ItemType, std::function<void(ItemType*)>>(ptr, release)
-                , alive_flag(alive_flag)
-                , self(*this)
+            Ptr(ItemType* ptr, std::function<void(ItemType*)> release)
+                : base(ptr, std::move(release))
             {
             }
 
         public:
-            Ptr(Ptr&& other)
-                : base(std::move(other))
-                , alive_flag(std::move(other.alive_flag))
-                , self(*this)
-            {
-            }
-
-            virtual ~Ptr()
-            {
-                if (!this->base::get())
-                    return;
-
-                // Release is called automatically by unique_ptr destructor
-                // We need however handle case when pool is already destroyed
-                if (alive_flag.expired())
-                {
-                    // Pool is already destroyed, do not put item back to pool
-                    // but delete the item to avoid memory leak
-
-                    std::cerr << "Warning: Pool is already destroyed, deleting item of type "
-                               << Fmi::demangle_cpp_type_name(typeid(ItemType).name())
-                               << " at " << (void*)this->base::get()
-                               << std::endl;
-                    auto* ptr = this->release();
-                    delete ptr;
-                }
-            }
+            Ptr(Ptr&& other) = default;
 
             // We do not want to expose all std::unique_ptr<> methods for example release()
             inline operator ItemType*() const { return this->base::get(); }
             inline operator bool() const { return this->base::get() != nullptr; }
             inline ItemType* operator->() const { return this->base::get(); }
             inline ItemType* get() const { return this->base::get(); }
-            inline void reset() { if (this->base::get() && !alive_flag.expired()) this->base::reset(); }
+            inline void reset() { this->base::reset(); }
         };
 
         Pool(const Pool&) = delete;
         Pool& operator=(const Pool&) = delete;
-        Pool(Pool&&) = default;
-        Pool& operator=(Pool&&) = default;
+        // Moving would leave the source pool without shared state: not supported
+        Pool(Pool&&) = delete;
+        Pool& operator=(Pool&&) = delete;
 
         /**
          * @brief Constructs a Pool with specified start and maximum sizes
@@ -156,11 +166,9 @@ namespace Fmi
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
-            , alive_flag(std::make_shared<bool>(true))
-            , current_size(0)
-            , in_use_count(0)
             , createItemCb([this]()
               { return std::make_unique<ItemType>(std::get<typename std::decay<Args>::type>(constructor_args)...); })
+            , state(std::make_shared<SharedState>())
         {
             init(args...);
         }
@@ -190,11 +198,9 @@ namespace Fmi
             : start_size(std::max(std::size_t(2), start_size))
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
-            , alive_flag(std::make_shared<bool>(true))
-            , current_size(0)
-            , in_use_count(0)
             , createItemCb([this, createItemCb_]()
               { return createItemCb_(std::get<typename std::decay<Args>::type>(constructor_args)...); })
+            , state(std::make_shared<SharedState>())
         {
             init(args...);
         }
@@ -206,37 +212,25 @@ namespace Fmi
 
         virtual ~Pool()
         {
-            // Hold mutex while resetting alive_flag to prevent race condition
-            // with get() and Ptr constructor accessing alive_flag
-            std::size_t count = 0;
             std::size_t items_in_use = 0;
             std::size_t total_size = 0;
 
             {
-                boost::unique_lock<boost::mutex> lock(mutex);
-                alive_flag.reset();
-
-                for (auto& item_rec : pool_data)
-                {
-                    if (item_rec.in_use)
-                    {
-                        // Drop the item data that is still in use. Ownership is transferred to the Pool<>::Ptr instance
-                        // As result, the item will not be returned to the pool but deleted when Ptr is destroyed
-                        // See Ptr::~Ptr() for details
-                        item_rec.data.release();
-                        count++;
-                    }
-                }
-
-                items_in_use = in_use_count;
-                total_size = current_size;
+                boost::unique_lock<boost::mutex> lock(state->mutex);
+                state->alive = false;
+                items_in_use = state->in_use_count;
+                total_size = state->current_size;
+                // Wake up all threads blocked in acquire() so that they can observe the shutdown
+                state->cond_var.notify_all();
             }
 
             if (items_in_use)
             {
-                // There are some items in use. Output message about it to stderr
-                std::cerr << "Pool of " << Fmi::demangle_cpp_type_name(typeid(ItemType).name()) << " is being destroyed while items are still in use" << std::endl;
-                std::cerr << "Items in use: " << items_in_use << " (counted: " << count << ")"  << std::endl;
+                // There are some items in use. They remain valid: the shared state (and thus the
+                // items) is kept alive by the Ptr deleters and released when the last Ptr is gone.
+                std::cerr << "Pool of " << Fmi::demangle_cpp_type_name(typeid(ItemType).name())
+                          << " is being destroyed while items are still in use" << std::endl;
+                std::cerr << "Items in use: " << items_in_use << std::endl;
                 std::cerr << "Total pool size: " << total_size << std::endl;
             }
         }
@@ -246,8 +240,7 @@ namespace Fmi
             ItemRec* rec = acquire(std::nullopt);
             return Ptr(
                 rec->data.get(),
-                [this, rec](ItemType* ptr) { this->release(rec->data.get(), rec); },
-                alive_flag);
+                [state = this->state, rec](ItemType*) { releaseItem(*state, rec); });
         }
 
         Ptr get(const Fmi::TimeDuration& timeout)
@@ -255,31 +248,30 @@ namespace Fmi
             ItemRec* rec = acquire(timeout);
             return Ptr(
                 rec->data.get(),
-                [this, rec](ItemType* ptr) { this->release(rec->data.get(), rec); },
-                alive_flag);
+                [state = this->state, rec](ItemType*) { releaseItem(*state, rec); });
         }
 
         std::size_t size() const
         {
-            boost::unique_lock<boost::mutex> lock(mutex);
-            return current_size;
+            boost::unique_lock<boost::mutex> lock(state->mutex);
+            return state->current_size;
         }
 
         std::size_t in_use() const
         {
-            boost::unique_lock<boost::mutex> lock(mutex);
-            return in_use_count;
+            boost::unique_lock<boost::mutex> lock(state->mutex);
+            return state->in_use_count;
         }
 
         void dumpInfo(std::ostream& os)
         {
             int count = 0;
-            boost::unique_lock<boost::mutex> lock(mutex);
+            boost::unique_lock<boost::mutex> lock(state->mutex);
             os << "Pool info for items of type " << Fmi::demangle_cpp_type_name(typeid(ItemType).name()) << std::endl;
-            os << "Total items: " << pool_data.size() << std::endl;
-            os << "In use items: " << in_use_count << std::endl;
-            os << "Top free item: " << (void*)top << std::endl;
-            for (const auto& item : pool_data)
+            os << "Total items: " << state->pool_data.size() << std::endl;
+            os << "In use items: " << state->in_use_count << std::endl;
+            os << "Top free item: " << (void*)state->top << std::endl;
+            for (const auto& item : state->pool_data)
             {
                 os << "Item[" << ++count << "]: " << (void*)&item
                    << ", next: " << (void*)item.next << std::endl;
@@ -292,13 +284,13 @@ namespace Fmi
         {
             const auto grow = [this]() {
                 std::unique_ptr<ItemType> new_item(createItemCb());
-                boost::unique_lock<boost::mutex> lock(mutex);
+                boost::unique_lock<boost::mutex> lock(state->mutex);
                 // Add new item to the pool. List iterators are not invalidated by growing list
-                ItemRec& item_rec = pool_data.emplace_back(ItemRec(std::move(new_item)));
-                item_rec.next = top;
-                top = &item_rec;
-                current_size++;
-                next_current_size++;
+                ItemRec& item_rec = state->pool_data.emplace_back(ItemRec(std::move(new_item)));
+                item_rec.next = state->top;
+                state->top = &item_rec;
+                state->current_size++;
+                state->next_current_size++;
             };
 
             if constexpr (InitType == PoolInitType::Sequential)
@@ -363,41 +355,40 @@ namespace Fmi
             if (timeout && timeout->is_special())
                 throw Fmi::Exception(BCP, "Special time values not supported as timeout value");
 
-            const auto fetch_top = [this]() -> ItemRec*
+            const auto fetch_top = [](SharedState& s) -> ItemRec*
             {
-                assert(top != nullptr);
-                ItemRec* item_rec = top;
-                top = top->next;
+                assert(s.top != nullptr);
+                ItemRec* item_rec = s.top;
+                s.top = s.top->next;
                 item_rec->next = nullptr;
                 item_rec->in_use = true;
-                in_use_count++;
+                s.in_use_count++;
                 return item_rec;
             };
 
-            boost::unique_lock<boost::mutex> lock(mutex);
+            boost::unique_lock<boost::mutex> lock(state->mutex);
 
-            // Check if pool is being destroyed after acquiring mutex
-            // to prevent use after destruction
-            if (!alive_flag)
+            // Check whether the pool is already destroyed
+            if (!state->alive)
             {
                 throw Fmi::Exception(BCP, "Pool is being destroyed");
             }
 
-            if (top)
+            if (state->top)
             {
                 //---------------------------------------------------------------------
                 // Item is available, use it
                 //---------------------------------------------------------------------
-                return fetch_top();
+                return fetch_top(*state);
             }
-            else if (next_current_size < max_size)
+            else if (state->next_current_size < max_size)
             {
                 //---------------------------------------------------------------------
                 // Item is not available, max limit not exceeded, create a new item
                 //---------------------------------------------------------------------
                 // Update count while mutex is still locked to avoid growing over
                 // max_size also in case of concurrent calls
-                next_current_size++;
+                state->next_current_size++;
                 // Unlock mutex while creating new item (it may take some time for example
                 // of database connection)
                 lock.unlock();
@@ -412,42 +403,56 @@ namespace Fmi
                     // the exception. This really only matters when pool expansion
                     // is attempted.
                     lock.lock();
-                    next_current_size--;
+                    state->next_current_size--;
                     throw;
                 }
                 // Update top and in_use_count while mutex is locked
                 lock.lock();
+                if (!state->alive)
+                {
+                    // Pool was destroyed while the new item was being created: discard it
+                    state->next_current_size--;
+                    throw Fmi::Exception(BCP, "Pool is being destroyed");
+                }
                 // Add new item to the pool. List iterators are not invalidated by growing list
-                ItemRec& item_rec = pool_data.emplace_back(ItemRec(std::move(new_item)));
+                ItemRec& item_rec = state->pool_data.emplace_back(ItemRec(std::move(new_item)));
                 // One could optimize this part by avoiding putting new item in free
                 // item chain, but it would complicate the logic
-                current_size++;
-                item_rec.next = top;
-                top = &item_rec;
+                state->current_size++;
+                item_rec.next = state->top;
+                state->top = &item_rec;
                 // No need to notify waiting threads as we are going to use the new item directly
-                return fetch_top();
+                return fetch_top(*state);
             }
             else
             {
+                // Also wake up when the pool is destroyed so that we do not wait forever
+                const auto wake_condition = [this] { return state->top != nullptr || !state->alive; };
+
                 if (timeout)
                 {
                     int ms = static_cast<int>(timeout->total_milliseconds());
-                    if (!cond_var.wait_for(lock, boost::chrono::milliseconds(ms), [this] { return top != nullptr; }))
+                    if (!state->cond_var.wait_for(lock, boost::chrono::milliseconds(ms), wake_condition))
                     {
                         throw Fmi::Exception(BCP, "Timeout while waiting for pool item");
                     }
                 }
                 else
                 {
-                    cond_var.wait(lock, [this] { return top != nullptr; });
+                    state->cond_var.wait(lock, wake_condition);
                 }
 
-                if (top)
+                if (!state->alive)
+                {
+                    throw Fmi::Exception(BCP, "Pool is being destroyed");
+                }
+
+                if (state->top)
                 {
                     //-----------------------------------------------------------------
                     // Item is available, use it
                     //-----------------------------------------------------------------
-                    return fetch_top();
+                    return fetch_top(*state);
                 }
 
                 // Should not be here
@@ -455,56 +460,34 @@ namespace Fmi
             }
         }
 
-        void release(ItemType* item, ItemRec* item_rec)
+        /**
+         * @brief Return an item to the pool (called by Pool<>::Ptr deleter)
+         *
+         * Static method operating on the shared state only: safe to call also when the pool
+         * object is already destroyed. In that case the item is not returned to the free item
+         * chain; it is deleted when the last Ptr drops its reference to the shared state.
+         */
+        static void releaseItem(SharedState& state, ItemRec* item_rec)
         {
-            if (!item)
-                return;
+            boost::unique_lock<boost::mutex> lock(state.mutex);
 
-            // Check if pool is still alive before accessing members
-            // If pool is destroyed, the item will be deleted by Ptr destructor
-            if (!alive_flag)
-                return;
-
-            // Cannot use Pool members directly as this is a static method
-            // Can potentially cause race condition when pool is being destroyed
-            boost::unique_lock<boost::mutex> lock(mutex);
-
-            // Double-check after acquiring lock
-            if (!alive_flag)
-                return;
-
-            item_rec->next = top;
             item_rec->in_use = false;
-            top = item_rec;
-            in_use_count--;
-            cond_var.notify_one();
+            state.in_use_count--;
+
+            if (state.alive)
+            {
+                item_rec->next = state.top;
+                state.top = item_rec;
+                state.cond_var.notify_one();
+            }
         }
 
         const std::size_t start_size;
         const std::size_t max_size;
         const std::tuple<typename std::decay<Args>::type...> constructor_args;
 
-        std::shared_ptr<bool> alive_flag;
-
-        /**
-         * @brief Current number of items in the pool
-         */
-        std::size_t current_size = 0;
-
-        /**
-         * @brief Next size of the pool when growing (used to control max_size limit)
-         *
-         * Intended to avoid growing over max_size in case of concurrent calls to acquire()
-         */
-        std::size_t next_current_size = 0;
-        std::size_t in_use_count = 0;
-
-        mutable boost::mutex mutex;
-        boost::condition_variable cond_var;
-
         std::function<std::unique_ptr<ItemType>()> createItemCb;
 
-        ItemRec* top = nullptr;
-        std::list<ItemRec> pool_data;
+        std::shared_ptr<SharedState> state;
     };
 }
