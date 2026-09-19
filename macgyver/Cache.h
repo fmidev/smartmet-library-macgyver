@@ -121,7 +121,7 @@ class Cache
       totalMisses += shard.missCount.load(std::memory_order_relaxed);
     }
     return CacheStats(itsStartTime,
-                      itsMaxSizePerShard * NumShards,
+                      itsMaxSizePerShard.load(std::memory_order_relaxed) * NumShards,
                       totalSize,
                       totalInserts,
                       totalHits,
@@ -139,7 +139,7 @@ class Cache
       return false;
 
     std::size_t valueSize = SizeFunc::getSize(value);
-    if (valueSize > itsMaxSizePerShard)
+    if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
       return false;
 
     shard.size += valueSize;
@@ -165,7 +165,7 @@ class Cache
       return false;
 
     std::size_t valueSize = SizeFunc::getSize(value);
-    if (valueSize > itsMaxSizePerShard)
+    if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
       return false;
 
     shard.size += valueSize;
@@ -195,7 +195,7 @@ class Cache
     }
 
     std::size_t valueSize = SizeFunc::getSize(value);
-    if (valueSize > itsMaxSizePerShard)
+    if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
       return false;
 
     shard.size += valueSize;
@@ -272,7 +272,7 @@ class Cache
 
   void resize(std::size_t newMaxSize)
   {
-    itsMaxSizePerShard = (newMaxSize + NumShards - 1) / NumShards;
+    itsMaxSizePerShard.store((newMaxSize + NumShards - 1) / NumShards, std::memory_order_relaxed);
     for (auto& shard : itsShards)
     {
       boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
@@ -285,7 +285,7 @@ class Cache
   void resize(std::size_t newMaxSize, ItemVector& evictedItems)
   {
     evictedItems.clear();
-    itsMaxSizePerShard = (newMaxSize + NumShards - 1) / NumShards;
+    itsMaxSizePerShard.store((newMaxSize + NumShards - 1) / NumShards, std::memory_order_relaxed);
     for (auto& shard : itsShards)
     {
       ItemVector shardEvicted;
@@ -308,7 +308,10 @@ class Cache
     return total;
   }
 
-  std::size_t maxSize() const { return itsMaxSizePerShard * NumShards; }
+  std::size_t maxSize() const
+  {
+    return itsMaxSizePerShard.load(std::memory_order_relaxed) * NumShards;
+  }
 
   std::list<CacheReportingObjectType> getContent() const
   {
@@ -375,10 +378,12 @@ class Cache
     return (boost::hash<KeyType>{}(key)*prime) % NumShards;
   }
 
-  // Evict LRU entries until shard is within capacity (caller holds exclusive lock)
+  // Evict LRU entries until shard is within capacity (caller holds exclusive lock).
+  // The limit is loaded once so a concurrent resize cannot change it mid-pass.
   void evictLRU(Shard& shard)
   {
-    while (shard.size > itsMaxSizePerShard && !shard.list.empty())
+    const std::size_t limit = itsMaxSizePerShard.load(std::memory_order_relaxed);
+    while (shard.size > limit && !shard.list.empty())
     {
       shard.size -= shard.list.front().size;
       shard.map.erase(shard.list.front().key);
@@ -388,7 +393,8 @@ class Cache
 
   void evictLRU(Shard& shard, ItemVector& evicted)
   {
-    while (shard.size > itsMaxSizePerShard && !shard.list.empty())
+    const std::size_t limit = itsMaxSizePerShard.load(std::memory_order_relaxed);
+    while (shard.size > limit && !shard.list.empty())
     {
       auto& e = shard.list.front();
       evicted.emplace_back(e.key, e.value);
@@ -399,7 +405,9 @@ class Cache
   }
 
   std::array<Shard, NumShards> itsShards;
-  std::size_t itsMaxSizePerShard = 0;
+  // Atomic since it is the only cache-wide state: resize() writes it while
+  // readers hold at most a shard lock, which cannot synchronize the access
+  std::atomic<std::size_t> itsMaxSizePerShard{0};
   const DateTime itsStartTime = Fmi::SecondClock::universal_time();
 };
 
