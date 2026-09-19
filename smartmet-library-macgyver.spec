@@ -17,7 +17,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 26.9.19
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -152,6 +152,12 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Sep 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.19-2.fmi
+- Fixed TSan-reported races and a use-after-free in Pool: the Ptr deleter could
+  lock a mutex already destroyed by ~Pool. All pool state now lives in a shared
+  state object kept alive by every outstanding Ptr, so items acquired before pool
+  destruction remain valid until released. Pool move operations are now deleted
+
 * Sat Sep 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.19-1.fmi
 - Fixed a data race in Cache: resize() modified the shard size limit without
   synchronization against statistics(), maxSize() and insert/upsert capacity
