@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.9.16
+Version: 26.9.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -152,6 +152,11 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Sep 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.19-1.fmi
+- Fixed a data race in Cache: resize() modified the shard size limit without
+  synchronization against statistics(), maxSize() and insert/upsert capacity
+  checks; the limit is now atomic (found by TSan)
+
 * Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.16-1.fmi
 - Cache::find() and FileCache::find() now use a shared lock for the lookup and take
   a separate exclusive lock only when the entry must be promoted to the MRU position.
