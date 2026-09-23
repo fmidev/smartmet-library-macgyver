@@ -10,12 +10,12 @@
 #include <boost/bimap/list_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include <array>
 #include <atomic>
 #include <filesystem>
 #include <list>
 #include <optional>
+#include <shared_mutex>
 #include <sstream>
 #include <unordered_map>
 #include <utility>
@@ -113,7 +113,7 @@ class Cache
     std::size_t totalHits = 0, totalMisses = 0;
     for (const auto& shard : itsShards)
     {
-      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
+      std::shared_lock<std::shared_mutex> lock(shard.mutex);
       totalSize += shard.size;
       totalInserts += shard.insertCount;
       totalEvictions += shard.evictionCount;
@@ -133,7 +133,7 @@ class Cache
   bool insert(const KeyType& key, const ValueType& value)
   {
     auto& shard = itsShards[getShardIndex(key)];
-    boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+    std::unique_lock<std::shared_mutex> lock(shard.mutex);
 
     if (shard.map.count(key))
       return false;
@@ -159,7 +159,7 @@ class Cache
     evictedItems.clear();
 
     auto& shard = itsShards[getShardIndex(key)];
-    boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+    std::unique_lock<std::shared_mutex> lock(shard.mutex);
 
     if (shard.map.count(key))
       return false;
@@ -183,7 +183,7 @@ class Cache
   bool upsert(const KeyType& key, const ValueType& value)
   {
     auto& shard = itsShards[getShardIndex(key)];
-    boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+    std::unique_lock<std::shared_mutex> lock(shard.mutex);
 
     // Remove existing entry without counting it as an eviction
     auto mapIt = shard.map.find(key);
@@ -231,7 +231,7 @@ class Cache
     std::optional<ValueType> result;
 
     {
-      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
+      std::shared_lock<std::shared_mutex> lock(shard.mutex);
 
       auto mapIt = shard.map.find(key);
       if (mapIt == shard.map.end())
@@ -250,7 +250,7 @@ class Cache
     }
 
     {
-      boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+      std::unique_lock<std::shared_mutex> lock(shard.mutex);
       auto mapIt = shard.map.find(key);
       if (mapIt != shard.map.end())
         shard.list.splice(shard.list.end(), shard.list, mapIt->second);
@@ -263,7 +263,7 @@ class Cache
   {
     for (auto& shard : itsShards)
     {
-      boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+      std::unique_lock<std::shared_mutex> lock(shard.mutex);
       shard.list.clear();
       shard.map.clear();
       shard.size = 0;
@@ -275,7 +275,7 @@ class Cache
     itsMaxSizePerShard.store((newMaxSize + NumShards - 1) / NumShards, std::memory_order_relaxed);
     for (auto& shard : itsShards)
     {
-      boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+      std::unique_lock<std::shared_mutex> lock(shard.mutex);
       const std::size_t sizeBefore = shard.map.size();
       evictLRU(shard);
       shard.evictionCount += sizeBefore - shard.map.size();
@@ -289,7 +289,7 @@ class Cache
     for (auto& shard : itsShards)
     {
       ItemVector shardEvicted;
-      boost::unique_lock<boost::shared_mutex> lock(shard.mutex);
+      std::unique_lock<std::shared_mutex> lock(shard.mutex);
       evictLRU(shard, shardEvicted);
       shard.evictionCount += shardEvicted.size();
       for (auto& item : shardEvicted)
@@ -302,7 +302,7 @@ class Cache
     std::size_t total = 0;
     for (const auto& shard : itsShards)
     {
-      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
+      std::shared_lock<std::shared_mutex> lock(shard.mutex);
       total += shard.size;
     }
     return total;
@@ -318,7 +318,7 @@ class Cache
     std::list<CacheReportingObjectType> result;
     for (const auto& shard : itsShards)
     {
-      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
+      std::shared_lock<std::shared_mutex> lock(shard.mutex);
       for (const auto& entry : shard.list)
         result.emplace_back(entry.key, entry.value, entry.hits, entry.size);
     }
@@ -331,7 +331,7 @@ class Cache
     bool first = true;
     for (const auto& shard : itsShards)
     {
-      boost::shared_lock<boost::shared_mutex> lock(shard.mutex);
+      std::shared_lock<std::shared_mutex> lock(shard.mutex);
       for (const auto& entry : shard.list)
       {
         if (!first)
@@ -363,7 +363,7 @@ class Cache
   {
     ListType list;  // front = LRU, back = MRU
     MapType map;
-    mutable boost::shared_mutex mutex;
+    mutable std::shared_mutex mutex;
     std::size_t size = 0;
     std::size_t insertCount = 0;
     std::size_t evictionCount = 0;
@@ -432,9 +432,9 @@ struct FileCacheStruct
 
 class FileCache
 {
-  using MutexType = boost::shared_mutex;
-  using ReadLock = boost::shared_lock<MutexType>;
-  using WriteLock = boost::unique_lock<MutexType>;
+  using MutexType = std::shared_mutex;
+  using ReadLock = std::shared_lock<MutexType>;
+  using WriteLock = std::unique_lock<MutexType>;
 
   using MapType = boost::bimaps::bimap<boost::bimaps::unordered_set_of<std::size_t,
                                                                        boost::hash<std::size_t>,

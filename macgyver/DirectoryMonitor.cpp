@@ -29,18 +29,18 @@
 #include <boost/chrono.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <atomic>
 #include <iostream>
 #include <optional>
+#include <shared_mutex>
 #include <stdexcept>
 
 // scoped read/write lock types
 
-using MutexType = boost::shared_mutex;
-using ReadLock = boost::shared_lock<MutexType>;
-using WriteLock = boost::unique_lock<MutexType>;
+using MutexType = std::shared_mutex;
+using ReadLock = std::shared_lock<MutexType>;
+using WriteLock = std::unique_lock<MutexType>;
 
 namespace fs = std::filesystem;
 
