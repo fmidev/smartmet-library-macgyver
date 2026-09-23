@@ -16,8 +16,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.9.19
-Release: 2%{?dist}.fmi
+Version: 26.9.23
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -152,6 +152,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-1.fmi
+- Use std::shared_mutex instead of boost::shared_mutex for speed
+
 * Sat Sep 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.19-2.fmi
 - Fixed TSan-reported races and a use-after-free in Pool: the Ptr deleter could
   lock a mutex already destroyed by ~Pool. All pool state now lives in a shared
