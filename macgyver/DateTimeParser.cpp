@@ -5,6 +5,7 @@
  */
 // ======================================================================
 
+#include <limits>
 #include "DateTimeParser.h"
 #include "Exception.h"
 
@@ -23,6 +24,14 @@ using namespace Fmi::TimeParser;
 
 namespace
 {
+
+// Durations are parsed from user input, the hours must fit into Fmi::Hours
+Fmi::TimeDuration checked_hours(long long hours)
+{
+  if (hours > std::numeric_limits<int>::max() || hours < std::numeric_limits<int>::min())
+    throw Fmi::Exception(BCP, "Time duration is out of range");
+  return Fmi::Hours(static_cast<int>(hours));
+}
 Fmi::DateTime bad_date;
 Fmi::TimeDuration bad_duration;
 
@@ -384,7 +393,7 @@ Fmi::TimeDuration try_parse_iso_duration(const std::string& str)
     if (boost::regex_search(str, match, iso8601_weeks))
     {
       int n = std::stoi(match[1]);
-      return Fmi::Hours(7 * 24 * n);
+      return checked_hours(168LL * n);
     }
 
     if (!boost::regex_search(str, match, iso8601_long))
@@ -410,7 +419,7 @@ Fmi::TimeDuration try_parse_iso_duration(const std::string& str)
 
     // Year length 365 and month length 30 are arbitrary choices here
 
-    return Fmi::Hours(365 * 24 * vec[0] + 30 * 24 * vec[1] + 24 * vec[2]) +
+    return checked_hours(8760LL * vec[0] + 720LL * vec[1] + 24LL * vec[2]) +
            Fmi::TimeDuration(vec[4], vec[5], vec[6], 0);
   }
   catch (...)
@@ -970,13 +979,13 @@ TimeDuration DateTimeParser::Impl::try_parse_duration(
       return Fmi::Hours(offset_value);
 
     if (theUnit == 'd' || theUnit == 'D')
-      return Fmi::Hours(offset_value * 24);
+      return checked_hours(24LL * offset_value);
 
     if (theUnit == 'w' || theUnit == 'W')
-      return Fmi::Hours(offset_value * 24 * 7);
+      return checked_hours(168LL * offset_value);
 
     if (theUnit == 'y' || theUnit == 'Y')
-      return Fmi::Hours(offset_value * 24 * 365);
+      return checked_hours(8760LL * offset_value);
 
     return Fmi::TimeDuration();
   }

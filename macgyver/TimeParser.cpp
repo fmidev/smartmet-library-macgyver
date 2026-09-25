@@ -4,6 +4,7 @@
  */
 // ======================================================================
 
+#include <limits>
 #include "TimeParser.h"
 #include "Exception.h"
 #include "TimeParserDefinitions.h"
@@ -22,6 +23,14 @@ static Fmi::TimeDuration bad_duration;
 
 namespace
 {
+
+// Durations are parsed from user input, the hours must fit into Fmi::Hours
+Fmi::TimeDuration checked_hours(long long hours)
+{
+  if (hours > std::numeric_limits<int>::max() || hours < std::numeric_limits<int>::min())
+    throw Fmi::Exception(BCP, "Time duration is out of range");
+  return Fmi::Hours(static_cast<int>(hours));
+}
 boost::regex iso8601_weeks{"^P(\\d+)W$"};
 boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
 #if 0
@@ -837,13 +846,13 @@ TimeDuration try_parse_duration(const std::string& str)
       return Fmi::Hours(offset_value);
 
     if (theUnit == 'd' || theUnit == 'D')
-      return Fmi::Hours(offset_value * 24);
+      return checked_hours(24LL * offset_value);
 
     if (theUnit == 'w' || theUnit == 'W')
-      return Fmi::Hours(offset_value * 24 * 7);
+      return checked_hours(168LL * offset_value);
 
     if (theUnit == 'y' || theUnit == 'Y')
-      return Fmi::Hours(offset_value * 24 * 365);
+      return checked_hours(8760LL * offset_value);
 
     return bad_duration;
   }
@@ -897,7 +906,7 @@ TimeDuration try_parse_iso_duration(const std::string& str)
     if (boost::regex_search(str, match, iso8601_weeks))
     {
       int n = std::stoi(match[1]);
-      return Fmi::Hours(7 * 24 * n);
+      return checked_hours(168LL * n);
     }
 
     if (!boost::regex_search(str, match, iso8601_long))
@@ -923,7 +932,7 @@ TimeDuration try_parse_iso_duration(const std::string& str)
 
     // Year length 365 and month length 30 are arbitrary choices here
 
-    return Fmi::Hours(365 * 24 * vec[0] + 30 * 24 * vec[1] + 24 * vec[2]) +
+    return checked_hours(8760LL * vec[0] + 720LL * vec[1] + 24LL * vec[2]) +
            TimeDuration(vec[4], vec[5], vec[6], 0);
   }
   catch (...)
