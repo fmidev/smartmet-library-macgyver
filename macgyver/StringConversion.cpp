@@ -716,7 +716,8 @@ std::string to_iso_string(const std::time_t time)
   try
   {
     struct tm tt;
-    gmtime_r(&time, &tt);
+    if (gmtime_r(&time, &tt) == nullptr)
+      throw Fmi::Exception(BCP, "Time " + std::to_string(time) + " cannot be formatted");
 
     std::array<char, 16> buffer;
     char* ptr = buffer.data() + buffer.size();
@@ -738,6 +739,7 @@ std::string to_iso_string(const std::time_t time)
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     auto yy = tt.tm_year + 1900;
+    check_year(yy);
     index = (yy % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
