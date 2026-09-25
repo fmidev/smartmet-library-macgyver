@@ -12,7 +12,7 @@ namespace
 {
     std::string maybe_discard_seconds_part(std::string&& src)
     {
-        const std::size_t pos = src.find_last_not_of("0");
+        const std::size_t pos = src.find_last_not_of('0');
         if (pos == std::string::npos) {
             return src;
         } else if (src[pos] == '.') {
@@ -472,7 +472,7 @@ namespace
         const std::string& str,
         const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
         const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
-        const rule<iterator> date_time_separator)
+        const rule<iterator>& date_time_separator)
     {
         namespace p = boost::phoenix;
         const std::string input = Fmi::trim_copy(str);
@@ -546,7 +546,7 @@ namespace
         const std::string& str,
         const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
         const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
-        const rule<iterator> date_time_separator,
+        const rule<iterator>& date_time_separator,
         bool *have_tz)
     {
         const std::string input = Fmi::trim_copy(str);
@@ -577,7 +577,7 @@ namespace
         const std::string& str,
         const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
         const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
-        const rule<iterator> date_time_separator)
+        const rule<iterator>& date_time_separator)
     {
         try
         {

@@ -1,4 +1,5 @@
 #include "Exception.h"
+#include <utility>
 #include "AnsiEscapeCodes.h"
 #include "DateTime.h"
 #include "StringConversion.h"
@@ -234,7 +235,7 @@ void Exception::setTimeStamp(ExceptionTimeStamp _timestamp)
 
 Exception& Exception::addDetail(std::string _detailStr)
 {
-  detailVector.emplace_back(_detailStr);
+  detailVector.emplace_back(std::move(_detailStr));
   return *this;
 }
 
@@ -251,7 +252,7 @@ Exception& Exception::addDetails(const DetailList& _detailList)
 
 Exception& Exception::addParameter(const char* _name, std::string _value)
 {
-  parameterVector.push_back(std::make_pair(std::string(_name), _value));
+  parameterVector.emplace_back(std::string(_name), std::move(_value));
   return *this;
 }
 

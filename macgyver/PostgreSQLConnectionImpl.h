@@ -59,13 +59,13 @@ namespace Database
 
         void exec(bool require_transaction, const std::string& sql);
 
-        pqxx::result execute(bool require_transaction, const std::string& sql, pqxx::params params);
+        pqxx::result execute(bool require_transaction, const std::string& sql, const pqxx::params& params);
 
-        pqxx::result executeNonTransaction(const std::string& sql, pqxx::params params);
+        pqxx::result executeNonTransaction(const std::string& sql, const pqxx::params& params);
 
-        pqxx::result exec_prepared(bool require_transaction, const std::string& name, pqxx::params params);
+        pqxx::result exec_prepared(bool require_transaction, const std::string& name, const pqxx::params& params);
 
-        pqxx::result exec_params(bool require_transaction, const std::string& sql, pqxx::params params);
+        pqxx::result exec_params(bool require_transaction, const std::string& sql, const pqxx::params& params);
 
 
         std::string quote(const std::string& theString);
@@ -124,9 +124,9 @@ namespace Database
 
         std::shared_ptr<pqxx::work> try_create_transaction();
 
-        pqxx::result try_execute(bool require_transaction, const std::string& sql, pqxx::params params);
+        pqxx::result try_execute(bool require_transaction, const std::string& sql, const pqxx::params& params);
 
-        pqxx::result try_execute_non_transaction(const std::string& sql, pqxx::params params);
+        pqxx::result try_execute_non_transaction(const std::string& sql, const pqxx::params& params);
 
         std::string try_quote(const std::string& theString);
 
@@ -138,7 +138,7 @@ namespace Database
 
         std::string get_prepared_sql_string(const std::string& name) const;
 
-        pqxx::result try_exec_prepared(bool require_transaction, const std::string& name, pqxx::params params);
+        pqxx::result try_exec_prepared(bool require_transaction, const std::string& name, const pqxx::params& params);
 
         std::shared_ptr<pqxx::transaction_base> try_get_transaction_impl();
     };
