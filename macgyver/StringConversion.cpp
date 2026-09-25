@@ -21,6 +21,13 @@ const std::array<char, 201> digits{
     "6061626364656667686970717273747576777879"
     "8081828384858687888990919293949596979899"};
 
+// The digit table formatting handles four digit years only
+void check_year(int year)
+{
+  if (year < 0 || year > 9999)
+    throw Fmi::Exception(BCP, "Year " + std::to_string(year) + " cannot be formatted");
+}
+
 }  // namespace
 
 namespace Fmi
@@ -543,6 +550,7 @@ std::string to_simple_string(const Fmi::Date& date)
   {
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -578,6 +586,7 @@ std::string to_iso_string(const Fmi::Date& date)
   {
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -611,6 +620,7 @@ std::string to_iso_extended_string(const Fmi::Date& date)
   {
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -649,6 +659,7 @@ std::string to_iso_string(const Fmi::DateTime& time)
 
     const date::year_month_day ymd(time.date().get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -755,6 +766,7 @@ std::string to_timestamp_string(const DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -804,6 +816,7 @@ std::string to_iso_extended_string(const DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -942,6 +955,7 @@ std::string to_simple_string(const Fmi::date_time::DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -1011,6 +1025,7 @@ std::string to_http_string(const Fmi::date_time::DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
