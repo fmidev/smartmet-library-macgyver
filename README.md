@@ -21,6 +21,10 @@ The macgyver library is the general-purpose utility library of SmartMet Server. 
 
 Macgyver is a foundational dependency of most SmartMet Server libraries and components, including [smartmet-library-spine](https://github.com/fmidev/smartmet-library-spine).
 
+## Documentation
+
+- [Developer guide](docs/developer-guide.md): internals, pitfalls and usage notes for developers
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
