@@ -21,15 +21,10 @@ class TimeZoneFactory
 
   Fmi::TimeZonePtr time_zone_from_string(const std::string& desc);
   Fmi::TimeZonePtr time_zone_from_region(const std::string& id);
-  Fmi::TimeZonePtr time_zone_from_coordinate(float lon, float lat);
-  std::string zone_name_from_coordinate(float lon, float lat);
 
   static TimeZoneFactory& instance();
 
   // NO LONGER SUPPORTED, THESE JUST PRINT WARNINGS!
-  void set_region_file(const std::string& file);
-  void set_coordinate_file(const std::string& file);
-
  private:
   // Implementation hiding
   class Impl;

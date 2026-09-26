@@ -2,6 +2,10 @@
 /*!
  * \brief Interface of class WorldTimeZones
  *
+ * A reader for rasters packed with shapepack (smartmet-shapetools). Despite
+ * the name, this is no longer used for timezones: coordinate to timezone
+ * resolution is done by Fmi::TimeZoneFinder in smartmet-library-gis.
+ *
  * Constructed objects are immutable and hence thread safe
  */
 // ======================================================================

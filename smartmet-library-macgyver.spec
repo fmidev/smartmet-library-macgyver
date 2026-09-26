@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.9.23
+Version: 26.9.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -32,7 +32,6 @@ BuildRequires: libicu-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: double-conversion-devel
-BuildRequires: smartmet-timezones >= 24.5.27
 BuildRequires: smartmet-utils-devel >= 26.5.22
 %if %{with tests}
 BuildRequires: smartmet-library-regression
@@ -76,7 +75,6 @@ BuildRequires: libpqxx-devel
 #TestRequires: make
 #TestRequires: postgresql15-libs
 #TestRequires: smartmet-library-regression
-#TestRequires: smartmet-timezones >= 24.5.27
 #TestRequires: smartmet-utils-devel >= 26.5.22
 #TestRequires: smartmet-test-db
 
@@ -152,6 +150,11 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.26-1.fmi
+- Removed coordinate to timezone functions from TimeZones and TimeZoneFactory, use Fmi::TimeZoneFinder in smartmet-library-gis instead
+- TimeZones and TimeZoneFactory no longer read timezone.shz or date_time_zonespec.csv
+- Removed the deprecated TimeZoneFactory::set_region_file and set_coordinate_file
+
 * Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-1.fmi
 - Use std::shared_mutex instead of boost::shared_mutex for speed
 

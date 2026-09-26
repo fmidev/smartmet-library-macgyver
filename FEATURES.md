@@ -38,8 +38,11 @@ top-level helpers:
 - **`Fmi::TimeParser`** — flexible parser accepting ISO 8601,
   partial timestamps, relative (`now-12h`), `data` keyword, etc.
 - **`Fmi::DateTimeParser`** — higher-level wrapper over `TimeParser`.
-- **`Fmi::TimeZoneFactory`** / **`Fmi::TimeZones`** /
-  **`WorldTimeZones`** — timezone lookup and listing.
+- **`Fmi::TimeZoneFactory`** / **`Fmi::TimeZones`** — timezone lookup
+  by name and listing, using the system tzdata. Coordinate to timezone
+  resolution is done by `Fmi::TimeZoneFinder` in smartmet-library-gis.
+- **`WorldTimeZones`** — reader for generic shapepack rasters (used by
+  `shapepick` in smartmet-shapetools); no longer used for timezones.
 
 ## 2. Caching
 

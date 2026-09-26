@@ -122,85 +122,6 @@ void time_zone_from_string()
 }
 
 // ----------------------------------------------------------------------
-/*
- * Test time_zone_from_coordinate
- */
-// ----------------------------------------------------------------------
-
-void time_zone_from_coordinate()
-{
-  using boost::lexical_cast;
-  using namespace Fmi::date_time;
-
-  string ok1 = "CET";
-  Fmi::TimeZonePtr tz1 = Fmi::TimeZoneFactory::instance().time_zone_from_coordinate(17, 60);
-  LocalDateTime ldt1(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz1);
-  if (ldt1.abbrev() != ok1)
-    TEST_FAILED("17,60 string should be " + ok1 + ", not " + ldt1.abbrev());
-
-  string ok2 = "EET";
-  Fmi::TimeZonePtr tz2 = Fmi::TimeZoneFactory::instance().time_zone_from_coordinate(25, 60);
-  LocalDateTime ldt2(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz2);
-  if (ldt2.abbrev() != ok2)
-    TEST_FAILED("25,60 string should be " + ok2 + ", not " + ldt2.abbrev());
-
-  string ok3 = "EET";
-  Fmi::TimeZonePtr tz3 = Fmi::TimeZoneFactory::instance().time_zone_from_coordinate(21.3705, 59.7811);
-  LocalDateTime ldt3(DateTime(Date(2024, Feb, 7), TimeDuration(0, 0, 0)), tz3);
-  if (ldt3.abbrev() != ok3)
-    TEST_FAILED("21.3705,59.7811 string should be " + ok3 + ", not " + ldt3.abbrev());
-
-  TEST_PASSED();
-}
-
-// ----------------------------------------------------------------------
-/*
- * Test zone_name_from_coordinate
- */
-// ----------------------------------------------------------------------
-
-void zone_name_from_coordinate()
-{
-  using boost::lexical_cast;
-  using Fmi::TimeZonePtr;
-
-  string ok1 = "Europe/Stockholm";
-  string tz1 = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(17, 60);
-  if (tz1 != ok1)
-    TEST_FAILED("17,60 string should be " + ok1 + ", not " + tz1);
-
-  string ok2 = "Europe/Helsinki";
-  string tz2 = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(25, 60);
-  if (tz2 != ok2)
-    TEST_FAILED("25,60 string should be " + ok2 + ", not " + tz2);
-
-  string ok3 = "Europe/Helsinki";
-  string tz3 = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(21.3705, 59.7811);
-  if (tz3 != ok3)
-    TEST_FAILED("21.3705,59.7811 string should be " + ok3 + ", not " + tz3);
-
-  TEST_PASSED();
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Test a coordinate in the Atlantic ocean
- */
-// ----------------------------------------------------------------------
-
-void ocean()
-{
-  using boost::lexical_cast;
-  using Fmi::TimeZonePtr;
-
-  string tz = Fmi::TimeZoneFactory::instance().zone_name_from_coordinate(-47, 30);
-  if (tz != "Etc/GMT-3")
-    TEST_FAILED("-46,30 string should be Etc/GMT-3, not " + tz);
-
-  TEST_PASSED();
-}
-
-// ----------------------------------------------------------------------
 /*!
  * The actual test suite
  */
@@ -213,11 +134,7 @@ class tests : public tframe::tests
   {
     TEST(region_list);
     TEST(time_zone_from_region);
-    TEST(time_zone_from_coordinate);
     TEST(time_zone_from_string);
-    TEST(zone_name_from_coordinate);
-    // Disabled: waiting for fix to brainstorm-912
-    // TEST(ocean);
   }
 };
 

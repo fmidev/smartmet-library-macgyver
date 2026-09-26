@@ -13,33 +13,11 @@
 #include <algorithm>
 #include <random>
 
-#include <boost/date_time/local_time/local_time.hpp>
-
 using namespace boost::unit_test;
 using namespace std::string_literals;
-namespace g = boost::gregorian;
 
 #define DEBUG(x) SHOW_EXCEPTIONS(x)
 //#define DEBUG(x) x
-
-static const char* default_regions = "/usr/share/smartmet/timezones/date_time_zonespec.csv";
-
-namespace g = boost::gregorian;
-namespace pt = boost::posix_time;
-namespace lt = boost::local_time;
-
-namespace
-{
-    boost::local_time::tz_database itsRegions;
-
-    lt::time_zone_ptr get_boost_tz(const std::string& name)
-    {
-        auto ptr = itsRegions.time_zone_from_region(name);
-        if (!ptr)
-            throw Fmi::Exception(BCP, "Unknown timezone").addParameter("Name", name);
-        return ptr;
-    }
-}
 
 test_suite* init_unit_test_suite(int argc, char* argv[])
 {
@@ -50,15 +28,6 @@ test_suite* init_unit_test_suite(int argc, char* argv[])
   BOOST_TEST_MESSAGE("");
   BOOST_TEST_MESSAGE(name);
   BOOST_TEST_MESSAGE(std::string(std::strlen(name), '='));
-  try
-  {
-    itsRegions.load_from_file(default_regions);
-  }
-  catch (const std::exception& e)
-  {
-    std::cerr << "Failed to load time zone database: " << e.what() << std::endl;
-    throw;
-  }
   std::setlocale(LC_ALL, "C");
   return nullptr;
 }
@@ -244,139 +213,6 @@ BOOST_AUTO_TEST_CASE(advance_1)
   BOOST_CHECK_EQUAL(ldt3.is_special(), false);
   // NOTE: we prefer DST instead of ambiguity
   BOOST_CHECK_EQUAL(ldt3.local_time(), dt1 + Fmi::date_time::seconds(3601));
-}
-
-BOOST_AUTO_TEST_CASE(advance_comparision_with_boost_1)
-{
-    using namespace Fmi::date_time;
-    namespace pt = boost::posix_time;
-    namespace lt = boost::local_time;
-
-    BOOST_TEST_MESSAGE("Fmi::date_time::DateTime: advance and comparision with boost (1)");
-
-    const auto s_dt1 = "2024-Jan-01 00:00:01"s;
-    const auto s_dt2 = "2025-Jan-01 00:00:01"s;
-    const auto s_inc = "00:37:34.654789"s;
-
-    TimeZonePtr tz1("Europe/Helsinki");
-    lt::time_zone_ptr b_tz1 = get_boost_tz(tz1->name());
-
-    const auto inc1 = duration_from_string(s_inc);
-    const auto b_inc = boost::posix_time::duration_from_string(s_inc);
-
-    DateTime dt1 = time_from_string(s_dt1);
-    pt::ptime b_pt1 = pt::time_from_string(s_dt1);
-
-    LocalDateTime ldt1(time_from_string(s_dt1), tz1);
-    LocalDateTime ldt2(time_from_string(s_dt2), tz1);
-    LocalDateTime ldt_start = ldt1;
-
-    lt::local_date_time b_ldt1(b_pt1, b_tz1);
-
-    while (ldt1 < ldt2)
-    {
-        ldt1.advance(inc1);
-        b_ldt1 += b_inc;
-        const std::string s1 = ldt1.local_time().to_simple_string();
-        const std::string s2 = pt::to_simple_string(b_ldt1.local_time());
-        //std::cout << s1 << " == " << s2 << std::endl;
-        BOOST_REQUIRE_EQUAL(s1, s2);
-    }
-
-    while (ldt1 > ldt_start)
-    {
-        ldt1.advance(-inc1);
-        b_ldt1 -= b_inc;
-        const std::string s1 = ldt1.local_time().to_simple_string();
-        const std::string s2 = pt::to_simple_string(b_ldt1.local_time());
-        //std::cout << s1 << " == " << s2 << std::endl;
-        BOOST_REQUIRE_EQUAL(s1, s2);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(comparison_with_boost_2)
-{
-    namespace g = boost::gregorian;
-    namespace pt = boost::posix_time;
-    namespace lt = boost::local_time;
-
-    const auto s_tz = "Europe/Helsinki"s;
-    const auto s_dt1 = "2024-Feb-20 08:48:57"s;
-
-    Fmi::date_time::TimeZonePtr tz1(s_tz);
-    Fmi::date_time::DateTime dt1 = Fmi::date_time::time_from_string(s_dt1);
-    Fmi::date_time::LocalDateTime ldt1(dt1, tz1);
-
-    const auto b_tz = get_boost_tz(s_tz);
-    const auto b_pt1 = pt::time_from_string(s_dt1);
-    const auto b_ldt1 = lt::local_date_time(b_pt1, b_tz);
-
-    std::ostringstream str1, str2;
-    str1 << ldt1;
-    str2 << b_ldt1;
-    BOOST_CHECK_EQUAL(str1.str(), str2.str());
-    BOOST_CHECK_EQUAL(ldt1.local_time().to_simple_string(), pt::to_simple_string(b_ldt1.local_time()));
-
-    BOOST_CHECK_EQUAL(
-        ldt1.local_time().to_iso_string(),
-        pt::to_iso_string(b_ldt1.local_time()));
-
-    BOOST_CHECK_EQUAL(
-        ldt1.utc_time().to_iso_string(),
-        pt::to_iso_string(b_ldt1.utc_time()));
-
-    BOOST_CHECK_EQUAL(
-        ldt1.date().to_iso_string(),
-        g::to_iso_string(b_ldt1.date()));
-
-    BOOST_CHECK_EQUAL(
-        ldt1.time_of_day().to_iso_string(),
-        pt::to_iso_string(b_ldt1.time_of_day()));
-
-    BOOST_CHECK_EQUAL(
-        ldt1.local_time().to_simple_string(),
-        "2024-Feb-20 10:48:57"s);
-
-    BOOST_CHECK_EQUAL(
-        ldt1.utc_time().to_simple_string(),
-        s_dt1);
-
-    Fmi::date_time::LocalDateTime ldt2(
-        dt1.date(),
-        dt1.time_of_day() + Fmi::date_time::hours(2),
-        tz1);
-
-    lt::local_date_time b_ldt2(
-        b_pt1.date(),
-        b_pt1.time_of_day() + pt::hours(2),
-        b_tz,
-        lt::local_date_time::NOT_DATE_TIME_ON_ERROR);
-
-    BOOST_CHECK_EQUAL(ldt1, ldt2);
-
-    BOOST_CHECK_EQUAL(b_ldt1, b_ldt2);
-}
-
-BOOST_AUTO_TEST_CASE(comparison_with_boost_3)
-{
-    namespace g = boost::gregorian;
-    namespace pt = boost::posix_time;
-    namespace lt = boost::local_time;
-
-    const auto s_dt1 = "2024-Feb-20 08:48:57"s;
-
-    Fmi::date_time::DateTime dt1 = Fmi::date_time::time_from_string(s_dt1);
-    Fmi::date_time::LocalDateTime ldt1(dt1);
-
-    const auto b_pt1 = pt::time_from_string(s_dt1);
-    const auto b_ldt1 = lt::local_date_time(b_pt1, lt::time_zone_ptr());
-
-    std::ostringstream tmp;
-    tmp << b_ldt1;
-
-    BOOST_CHECK_EQUAL(
-        Fmi::date_time::to_simple_string(ldt1),
-        tmp.str());
 }
 
 BOOST_AUTO_TEST_CASE(test_make_date_1)
