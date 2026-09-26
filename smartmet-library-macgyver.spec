@@ -17,7 +17,7 @@
 Summary: macgyver library
 Name: %{SPECNAME}
 Version: 26.9.26
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -150,6 +150,11 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+=======
+* Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.24-2.fmi
+- Added Fmi::Cache::ClockCache, a drop-in alternative to Fmi::Cache::Cache using the CLOCK
+  (second chance) eviction algorithm. find() never takes an exclusive lock.
+
 * Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.26-1.fmi
 - Removed coordinate to timezone functions from TimeZones and TimeZoneFactory, use Fmi::TimeZoneFinder in smartmet-library-gis instead
 - TimeZones and TimeZoneFactory no longer read timezone.shz or date_time_zonespec.csv
