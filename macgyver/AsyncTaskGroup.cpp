@@ -186,10 +186,13 @@ bool Fmi::AsyncTaskGroup::handle_finished()
   {
     some_failed = true;
     num_failed++;
-    while (exception_info.size() >= MAX_EXCEPTIONS) {
-      exception_info.pop_front();
+    {
+      // get_exception_info() and friends read the list under the same mutex
+      std::unique_lock<std::mutex> lock3(m1);
+      while (exception_info.size() >= MAX_EXCEPTIONS)
+        exception_info.pop_front();
+      exception_info.emplace_back(task->get_name(), std::current_exception());
     }
-    exception_info.emplace_back(task->get_name(), std::current_exception());
     signal_task_failed(task->get_name());
   }
 
