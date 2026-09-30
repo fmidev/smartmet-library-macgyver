@@ -1079,8 +1079,10 @@ Fmi::LocalDateTime parse(const std::string& str,
   {
     Fmi::DateTime t = parse(str, format);
 
-    // epoch is always in UTC
-    if (format == "epoch")
+    // Epochs and offsets are always in UTC, and so are ISO times with a Z or
+    // an explicit UTC offset. Only times without zone information are local.
+    const bool is_iso = (format == "iso" || format == "xml" || format == "timestamp");
+    if (format == "epoch" || format == "offset" || (is_iso && looks_utc(str)))
       return Fmi::LocalDateTime(t, tz);
 
     // timestamps are local
@@ -1107,8 +1109,9 @@ Fmi::LocalDateTime parse(const std::string& str,
 
     Fmi::DateTime t = match_and_parse(str, matched);
 
-    // epoch is always in UTC
-    if (matched == EPOCH)
+    // Epochs and offsets are always in UTC, and so are ISO times with a Z or
+    // an explicit UTC offset. Only times without zone information are local.
+    if (matched == EPOCH || matched == OFFSET || (matched == ISO && looks_utc(str)))
       return Fmi::LocalDateTime(t, tz);
 
     // timestamps are local
