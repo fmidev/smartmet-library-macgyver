@@ -178,6 +178,41 @@ Fmi::DateTime buildFromOffset(Fmi::TimeDuration offset)
   }
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Parse an ISO 8601 basic format calendar date YYYYMMDD
+ *
+ * Without this check eight digit dates would be taken for epoch seconds.
+ * Returns not_a_date_time if the string is not a valid date.
+ */
+// ----------------------------------------------------------------------
+
+Fmi::DateTime try_parse_basic_date(const std::string& str)
+{
+  if (str.size() != 8)
+    return Fmi::DateTime();
+  for (char ch : str)
+    if (ch < '0' || ch > '9')
+      return Fmi::DateTime();
+
+  const int year = std::stoi(str.substr(0, 4));
+  const int month = std::stoi(str.substr(4, 2));
+  const int day = std::stoi(str.substr(6, 2));
+
+  // Same sanity limits as in the ISO parser
+  if (year < 1582 || year > 5000)
+    return Fmi::DateTime();
+
+  try
+  {
+    return Fmi::DateTime(Fmi::Date(year, month, day));
+  }
+  catch (...)
+  {
+    return Fmi::DateTime();
+  }
+}
+
 }  // namespace
 
 namespace Fmi
@@ -574,7 +609,8 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     }
     else
     {
-      *isutc = true;
+      t = try_parse_basic_date(str);
+      *isutc = t.is_not_a_date_time();
     }
     return t;
   }
@@ -973,6 +1009,15 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
         {
           // Simply pass to the next parser
         }
+      }
+    }
+
+    {
+      auto ret = try_parse_basic_date(str);
+      if (!ret.is_not_a_date_time())
+      {
+        matchedParser = ISO;
+        return ret;
       }
     }
 

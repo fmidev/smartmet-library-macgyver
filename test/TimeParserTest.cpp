@@ -796,6 +796,25 @@ void parse_summertime()
 }
 
 // ----------------------------------------------------------------------
+// Eight digit strings which are valid dates are ISO basic format dates, not epoch seconds
+
+void parse_basic_date()
+{
+  using namespace Fmi;
+
+  auto res = TimeParser::parse("20260925");
+  if (res != DateTime(Date(2026, 9, 25)))
+    TEST_FAILED("20260925: expected 2026-09-25 00:00, got " + tostring(res));
+
+  // Not a valid date, hence epoch seconds
+  res = TimeParser::parse("99999999");
+  if (res != DateTime(Date(1973, 3, 3), Hours(9) + Minutes(46) + Seconds(39)))
+    TEST_FAILED("99999999: expected 1973-03-03 09:46:39, got " + tostring(res));
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
 // Times with explicit zone information, epochs and offsets are UTC even when
 // a time zone is given; only times without zone information are local.
 
@@ -887,6 +906,7 @@ class tests : public tframe::tests
     TEST(parse_duration);
     TEST(parse_iso_duration);
     TEST(parse_utc_in_zone);
+    TEST(parse_basic_date);
     TEST(parse_errors);
   }
 };
