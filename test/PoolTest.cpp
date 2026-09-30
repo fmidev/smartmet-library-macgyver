@@ -92,6 +92,12 @@ namespace
     int value = 42;
   };
 
+  struct TestObj4
+  {
+    TestObj4(const std::string& a, const std::string& b) : value(a + b) {}
+    std::string value;
+  };
+
   struct TestObj3
   {
     TestObj3() = default;
@@ -114,6 +120,25 @@ BOOST_AUTO_TEST_CASE(constructor_with_2_arguments)
   Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj2, std::string, int> pool(2, 4, "foobar"s, 12);
   decltype(pool.get()) ptr = pool.get();
   BOOST_CHECK_EQUAL(ptr->value, 42);
+}
+
+BOOST_AUTO_TEST_CASE(constructor_with_2_arguments_of_same_type)
+{
+  BOOST_TEST_MESSAGE("Constructor with 2 arguments of the same type test");
+  Fmi::Pool<Fmi::PoolInitType::Sequential, TestObj4, std::string, std::string> pool(
+      2, 4, "foo"s, "bar"s);
+  decltype(pool.get()) ptr = pool.get();
+  BOOST_CHECK_EQUAL(ptr->value, "foobar"s);
+}
+
+BOOST_AUTO_TEST_CASE(factory_method_with_2_arguments_of_same_type)
+{
+  BOOST_TEST_MESSAGE("Factory method with 2 arguments of the same type test");
+  Fmi::Pool<Fmi::PoolInitType::Sequential, std::string, std::string, std::string> pool(
+      [](const std::string& a, const std::string& b) { return std::make_unique<std::string>(a + b); },
+      2, 4, "foo"s, "bar"s);
+  auto ptr = pool.get();
+  BOOST_CHECK_EQUAL(*ptr.get(), "foobar"s);
 }
 
 BOOST_AUTO_TEST_CASE(parallel_use)

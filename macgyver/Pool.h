@@ -167,7 +167,10 @@ namespace Fmi
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
             , createItemCb([this]()
-              { return std::make_unique<ItemType>(std::get<typename std::decay<Args>::type>(constructor_args)...); })
+              {
+                  return std::apply([](const auto&... cargs)
+                      { return std::make_unique<ItemType>(cargs...); }, constructor_args);
+              })
             , state(std::make_shared<SharedState>())
         {
             init(args...);
@@ -199,7 +202,7 @@ namespace Fmi
             , max_size(std::max(start_size, max_size))
             , constructor_args(typename std::decay<Args>::type(args)...)
             , createItemCb([this, createItemCb_]()
-              { return createItemCb_(std::get<typename std::decay<Args>::type>(constructor_args)...); })
+              { return std::apply(createItemCb_, constructor_args); })
             , state(std::make_shared<SharedState>())
         {
             init(args...);
