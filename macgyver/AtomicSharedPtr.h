@@ -19,7 +19,7 @@ namespace Fmi
         }
 
         AtomicSharedPtr(const AtomicSharedPtr<Type>& ptr)
-            : content(std::shared_ptr<Type>(std::atomic_load(ptr)))
+            : content(ptr.load())
         {
         }
 
