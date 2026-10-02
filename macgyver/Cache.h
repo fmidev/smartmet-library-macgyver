@@ -1,6 +1,6 @@
 // ======================================================================
 /*!
- * \brief LRU caching with optional custom size function and cache striping
+ * \brief CLOCK caching with optional custom size function and cache striping
  */
 // ======================================================================
 #pragma once
@@ -19,6 +19,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "CacheStats.h"
 #include "DateTime.h"
@@ -65,17 +66,30 @@ struct CacheReportingObject
 
 // ----------------------------------------------------------------------
 /*!
- * \brief LRU cache with cache striping to reduce lock contention
+ * \brief CLOCK (second chance) cache with cache striping to reduce lock contention
  *
- * Keys are distributed across NumShards independent sub-caches, each with
- * its own shared_mutex.  find() does the lookup under a plain shared lock so
- * that any number of concurrent finds (and pure-read operations such as
- * statistics() and size()) proceed in parallel.  Only when a hit needs to be
- * promoted to the MRU position is the shared lock released and a separate
- * exclusive lock taken for the LRU splice.  Note that boost::upgrade_lock is
- * deliberately not used: only one thread may hold an upgrade lock at a time,
- * which would serialize all finds on the shard.  insert(), upsert(), clear()
- * and resize() take a full exclusive lock on the affected shard.
+ * Keys are distributed across NumShards independent sub-caches, each with its own
+ * shared_mutex.
+ *
+ * Eviction uses the CLOCK algorithm, an approximation of LRU. The entries of a shard
+ * form a ring with a "hand". A find() hit only increments the hit counter of the entry,
+ * which doubles as the CLOCK reference bit: an entry counts as referenced if its hit
+ * count has changed since the hand last passed it. find() therefore never takes an
+ * exclusive lock, unlike an exact LRU cache which must move every hit to the MRU
+ * position under an exclusive lock, serializing finds with many threads and many keys.
+ *
+ * On eviction the hand sweeps the ring: a referenced entry gets a second chance (its
+ * current hit count is recorded and the hand moves on), an unreferenced entry is
+ * evicted. New entries are placed just behind the hand, so they survive almost a full
+ * revolution of the hand before they are examined for the first time. An entry which
+ * is never found again is evicted the first time the hand reaches it, which makes the
+ * cache more resistant to one-off lookups than LRU.
+ *
+ * insert(), upsert(), clear() and resize() take a full exclusive lock on the affected
+ * shard.
+ *
+ * Readers still write shared memory: the shard lock word (std::shared_mutex), the hit
+ * counter of the entry and the hit counter of the shard.
  */
 // ----------------------------------------------------------------------
 
@@ -97,7 +111,8 @@ class Cache
   Cache& operator=(const Cache& other) = delete;
   Cache& operator=(Cache&& other) = delete;
 
-  explicit Cache(std::size_t maxSize) : itsMaxSizePerShard((maxSize + NumShards - 1) / NumShards)
+  explicit Cache(std::size_t maxSize)
+      : itsMaxSizePerShard((maxSize + NumShards - 1) / NumShards)
   {
     static_assert(NumShards > 0, "NumShards must be greater than 0");
   }
@@ -142,14 +157,7 @@ class Cache
     if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
       return false;
 
-    shard.size += valueSize;
-    const std::size_t mapSizeBefore = shard.map.size();
-    evictLRU(shard);
-    shard.evictionCount += mapSizeBefore - shard.map.size();
-
-    shard.list.emplace_back(key, value, valueSize);
-    shard.map.emplace(key, std::prev(shard.list.end()));
-    ++shard.insertCount;
+    addEntry(shard, key, value, valueSize, nullptr);
     return true;
   }
 
@@ -168,13 +176,7 @@ class Cache
     if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
       return false;
 
-    shard.size += valueSize;
-    evictLRU(shard, evictedItems);
-    shard.evictionCount += evictedItems.size();
-
-    shard.list.emplace_back(key, value, valueSize);
-    shard.map.emplace(key, std::prev(shard.list.end()));
-    ++shard.insertCount;
+    addEntry(shard, key, value, valueSize, &evictedItems);
     return true;
   }
 
@@ -188,24 +190,13 @@ class Cache
     // Remove existing entry without counting it as an eviction
     auto mapIt = shard.map.find(key);
     if (mapIt != shard.map.end())
-    {
-      shard.size -= mapIt->second->size;
-      shard.list.erase(mapIt->second);
-      shard.map.erase(mapIt);
-    }
+      removeEntry(shard, mapIt);
 
     std::size_t valueSize = SizeFunc::getSize(value);
     if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
       return false;
 
-    shard.size += valueSize;
-    const std::size_t mapSizeBefore = shard.map.size();
-    evictLRU(shard);
-    shard.evictionCount += mapSizeBefore - shard.map.size();
-
-    shard.list.emplace_back(key, value, valueSize);
-    shard.map.emplace(key, std::prev(shard.list.end()));
-    ++shard.insertCount;
+    addEntry(shard, key, value, valueSize, nullptr);
     return true;
   }
 
@@ -216,47 +207,24 @@ class Cache
     return find(key, hits);
   }
 
-  // Find value and also return its hit count.
-  //
-  // The lookup is done under a shared lock, so concurrent finds never block
-  // each other. If the entry is already the most-recently-used element the
-  // LRU splice would be a no-op and no exclusive lock is needed at all. This
-  // matters when the same key is looked up repeatedly (e.g. 1000 Finnish
-  // stations all in Europe/Helsinki). Otherwise the shared lock is released
-  // and the splice is done under an exclusive lock; since another thread may
-  // have evicted or replaced the entry in between, the key is looked up again.
+  // Find value and also return its hit count. Only a shared lock is taken, the hit
+  // counter of the entry serves as the CLOCK reference bit.
   std::optional<ValueType> find(const KeyType& key, std::size_t& hits)
   {
     auto& shard = itsShards[getShardIndex(key)];
-    std::optional<ValueType> result;
+    std::shared_lock<std::shared_mutex> lock(shard.mutex);
 
+    auto mapIt = shard.map.find(key);
+    if (mapIt == shard.map.end())
     {
-      std::shared_lock<std::shared_mutex> lock(shard.mutex);
-
-      auto mapIt = shard.map.find(key);
-      if (mapIt == shard.map.end())
-      {
-        shard.missCount.fetch_add(1, std::memory_order_relaxed);
-        return {};
-      }
-
-      const auto listIt = mapIt->second;
-      hits = listIt->hits.fetch_add(1, std::memory_order_relaxed) + 1;
-      shard.hitCount.fetch_add(1, std::memory_order_relaxed);
-      result = listIt->value;
-
-      if (std::next(listIt) == shard.list.end())
-        return result;
+      shard.missCount.fetch_add(1, std::memory_order_relaxed);
+      return {};
     }
 
-    {
-      std::unique_lock<std::shared_mutex> lock(shard.mutex);
-      auto mapIt = shard.map.find(key);
-      if (mapIt != shard.map.end())
-        shard.list.splice(shard.list.end(), shard.list, mapIt->second);
-    }
-
-    return result;
+    const auto& entry = *mapIt->second;
+    hits = entry.hits.fetch_add(1, std::memory_order_relaxed) + 1;
+    shard.hitCount.fetch_add(1, std::memory_order_relaxed);
+    return entry.value;
   }
 
   void clear()
@@ -264,8 +232,9 @@ class Cache
     for (auto& shard : itsShards)
     {
       std::unique_lock<std::shared_mutex> lock(shard.mutex);
-      shard.list.clear();
       shard.map.clear();
+      shard.list.clear();
+      shard.hand = shard.list.end();
       shard.size = 0;
     }
   }
@@ -276,9 +245,7 @@ class Cache
     for (auto& shard : itsShards)
     {
       std::unique_lock<std::shared_mutex> lock(shard.mutex);
-      const std::size_t sizeBefore = shard.map.size();
-      evictLRU(shard);
-      shard.evictionCount += sizeBefore - shard.map.size();
+      evict(shard, nullptr);
     }
   }
 
@@ -288,12 +255,8 @@ class Cache
     itsMaxSizePerShard.store((newMaxSize + NumShards - 1) / NumShards, std::memory_order_relaxed);
     for (auto& shard : itsShards)
     {
-      ItemVector shardEvicted;
       std::unique_lock<std::shared_mutex> lock(shard.mutex);
-      evictLRU(shard, shardEvicted);
-      shard.evictionCount += shardEvicted.size();
-      for (auto& item : shardEvicted)
-        evictedItems.push_back(std::move(item));
+      evict(shard, &evictedItems);
     }
   }
 
@@ -313,14 +276,22 @@ class Cache
     return itsMaxSizePerShard.load(std::memory_order_relaxed) * NumShards;
   }
 
+  // The entries of each shard are listed in the order the hand will examine them,
+  // i.e. the next eviction candidate first.
   std::list<CacheReportingObjectType> getContent() const
   {
     std::list<CacheReportingObjectType> result;
     for (const auto& shard : itsShards)
     {
       std::shared_lock<std::shared_mutex> lock(shard.mutex);
-      for (const auto& entry : shard.list)
-        result.emplace_back(entry.key, entry.value, entry.hits, entry.size);
+      forEachInClockOrder(shard,
+                          [&result](const Entry& entry)
+                          {
+                            result.emplace_back(entry.key,
+                                                entry.value,
+                                                entry.hits.load(std::memory_order_relaxed),
+                                                entry.size);
+                          });
     }
     return result;
   }
@@ -332,13 +303,14 @@ class Cache
     for (const auto& shard : itsShards)
     {
       std::shared_lock<std::shared_mutex> lock(shard.mutex);
-      for (const auto& entry : shard.list)
-      {
-        if (!first)
-          output << ',';
-        first = false;
-        output << entry.value;
-      }
+      forEachInClockOrder(shard,
+                          [&output, &first](const Entry& entry)
+                          {
+                            if (!first)
+                              output << ',';
+                            first = false;
+                            output << entry.value;
+                          });
     }
     return output.str();
   }
@@ -352,8 +324,9 @@ class Cache
 
     KeyType key;
     ValueType value;
-    std::atomic<std::size_t> hits{0};
+    mutable std::atomic<std::size_t> hits{0};  // updated by find() under a shared lock
     std::size_t size = 0;
+    std::size_t seenHits = 0;  // hits when the hand last passed, accessed under exclusive lock
   };
 
   using ListType = std::list<Entry>;
@@ -361,7 +334,8 @@ class Cache
 
   struct Shard
   {
-    ListType list;  // front = LRU, back = MRU
+    ListType list;  // the ring, end() wraps to begin()
+    typename ListType::iterator hand = list.end();
     MapType map;
     mutable std::shared_mutex mutex;
     std::size_t size = 0;
@@ -378,30 +352,70 @@ class Cache
     return (boost::hash<KeyType>{}(key)*prime) % NumShards;
   }
 
-  // Evict LRU entries until shard is within capacity (caller holds exclusive lock).
+  // Make room for and add a new entry just behind the hand (caller holds exclusive lock)
+  void addEntry(Shard& shard,
+                const KeyType& key,
+                const ValueType& value,
+                std::size_t valueSize,
+                ItemVector* evictedItems)
+  {
+    shard.size += valueSize;
+    evict(shard, evictedItems);
+
+    auto it = shard.list.emplace(shard.hand, key, value, valueSize);
+    shard.map.emplace(key, it);
+    ++shard.insertCount;
+  }
+
+  // Remove an entry without counting it as an eviction (caller holds exclusive lock)
+  void removeEntry(Shard& shard, typename MapType::iterator mapIt)
+  {
+    auto listIt = mapIt->second;
+    if (shard.hand == listIt)
+      ++shard.hand;
+    shard.size -= listIt->size;
+    shard.map.erase(mapIt);
+    shard.list.erase(listIt);
+  }
+
+  // Sweep the hand until the shard is within capacity (caller holds exclusive lock).
+  // Referenced entries get a second chance, so the loop ends within two revolutions.
   // The limit is loaded once so a concurrent resize cannot change it mid-pass.
-  void evictLRU(Shard& shard)
+  void evict(Shard& shard, ItemVector* evictedItems)
   {
     const std::size_t limit = itsMaxSizePerShard.load(std::memory_order_relaxed);
     while (shard.size > limit && !shard.list.empty())
     {
-      shard.size -= shard.list.front().size;
-      shard.map.erase(shard.list.front().key);
-      shard.list.pop_front();
+      if (shard.hand == shard.list.end())
+        shard.hand = shard.list.begin();
+
+      Entry& entry = *shard.hand;
+      const std::size_t hits = entry.hits.load(std::memory_order_relaxed);
+      if (hits != entry.seenHits)
+      {
+        entry.seenHits = hits;
+        ++shard.hand;
+        continue;
+      }
+
+      if (evictedItems != nullptr)
+        evictedItems->emplace_back(entry.key, entry.value);
+      shard.size -= entry.size;
+      shard.map.erase(entry.key);
+      shard.hand = shard.list.erase(shard.hand);
+      ++shard.evictionCount;
     }
   }
 
-  void evictLRU(Shard& shard, ItemVector& evicted)
+  // Visit the entries starting from the hand (caller holds at least a shared lock)
+  template <typename Visitor>
+  static void forEachInClockOrder(const Shard& shard, Visitor visitor)
   {
-    const std::size_t limit = itsMaxSizePerShard.load(std::memory_order_relaxed);
-    while (shard.size > limit && !shard.list.empty())
-    {
-      auto& e = shard.list.front();
-      evicted.emplace_back(e.key, e.value);
-      shard.size -= e.size;
-      shard.map.erase(e.key);
-      shard.list.pop_front();
-    }
+    typename ListType::const_iterator start = shard.hand;
+    for (auto it = start; it != shard.list.end(); ++it)
+      visitor(*it);
+    for (auto it = shard.list.begin(); it != start; ++it)
+      visitor(*it);
   }
 
   std::array<Shard, NumShards> itsShards;

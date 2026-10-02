@@ -16,8 +16,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.9.26
-Release: 2%{?dist}.fmi
+Version: 26.10.2
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -150,7 +150,14 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
-* Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.24-2.fmi
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-1.fmi
+- Fmi::Cache::Cache now uses the CLOCK (second chance) eviction algorithm instead of exact LRU.
+  CLOCK is faster than LRU: find() only takes a shared lock, while LRU had to take an exclusive
+  lock to move each hit to the MRU position. It is also more resistant to one-off lookups.
+- Removed Fmi::Cache::ClockCache, Fmi::Cache::Cache now has the same implementation
+- ABI change: dependent packages must be recompiled
+
+* Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.26-2.fmi
 - Added Fmi::Cache::ClockCache, a drop-in alternative to Fmi::Cache::Cache using the CLOCK
   (second chance) eviction algorithm. find() never takes an exclusive lock.
 

@@ -9,7 +9,7 @@ The macgyver library is the general-purpose utility library of SmartMet Server. 
 ## Features
 
 - **Astronomy** — solar and lunar position calculations, lunar phase
-- **Caching** — LRU cache with configurable size and statistics
+- **Caching** — CLOCK (approximate LRU) cache with configurable size and statistics
 - **Date and time** — flexible datetime parsing and formatting, timezone support
 - **Filesystem** — directory monitoring, file utilities
 - **String utilities** — charset conversion, Base64 encoding/decoding, CSV reading

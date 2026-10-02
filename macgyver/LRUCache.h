@@ -1,4 +1,4 @@
-// Thin wrapper around Fmi::Cache::Cache providing the LRUCache API
+// Thin wrapper around Fmi::Cache::Cache (CLOCK eviction) providing the LRUCache API
 // (put/get/getStats) for backward compatibility with existing call sites.
 
 #pragma once
