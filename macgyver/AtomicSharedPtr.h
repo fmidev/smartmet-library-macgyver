@@ -7,7 +7,7 @@
 namespace Fmi
 {
     template <typename Type>
-    class AtomicSharedPtr : private std::shared_ptr<Type>
+    class AtomicSharedPtr
     {
         std::shared_ptr<Type> content;
     public:
@@ -19,7 +19,7 @@ namespace Fmi
         }
 
         AtomicSharedPtr(const AtomicSharedPtr<Type>& ptr)
-            : content(std::shared_ptr<Type>(std::atomic_load(ptr)))
+            : content(ptr.load())
         {
         }
 

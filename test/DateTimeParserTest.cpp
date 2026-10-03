@@ -685,6 +685,63 @@ void parse_iso_duration()
 
 // ----------------------------------------------------------------------
 
+// ----------------------------------------------------------------------
+// Eight digit strings which are valid dates are ISO basic format dates, not epoch seconds
+
+void parse_basic_date()
+{
+  using namespace Fmi;
+  DateTimeParser parser;
+
+  auto res = parser.parse("20260925");
+  if (res != DateTime(Date(2026, 9, 25)))
+    TEST_FAILED("20260925: expected 2026-09-25 00:00, got " + tostring(res));
+
+  // Not a valid date, hence epoch seconds
+  res = parser.parse("99999999");
+  if (res != DateTime(Date(1973, 3, 3), Hours(9) + Minutes(46) + Seconds(39)))
+    TEST_FAILED("99999999: expected 1973-03-03 09:46:39, got " + tostring(res));
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+// Times with explicit zone information, epochs and offsets are UTC even when
+// a time zone is given; only times without zone information are local.
+
+void parse_utc_in_zone()
+{
+  using namespace Fmi;
+  DateTimeParser parser;
+
+  auto zone = TimeZoneFactory::instance().time_zone_from_string("Europe/Helsinki");
+
+  auto res = parser.parse("2026-09-25T12:00:00Z", zone);
+  if (res.utc_time() != DateTime(Date(2026, 9, 25), Hours(12)))
+    TEST_FAILED("Z time: expected 12:00 UTC, got " + tostring(res.utc_time()));
+
+  res = parser.parse("2026-09-25T12:00:00+01:00", zone);
+  if (res.utc_time() != DateTime(Date(2026, 9, 25), Hours(11)))
+    TEST_FAILED("+01:00 time: expected 11:00 UTC, got " + tostring(res.utc_time()));
+
+  res = parser.parse("2026-09-25T12:00:00Z", "iso", zone);
+  if (res.utc_time() != DateTime(Date(2026, 9, 25), Hours(12)))
+    TEST_FAILED("iso Z time: expected 12:00 UTC, got " + tostring(res.utc_time()));
+
+  res = parser.parse("2026-09-25T12:00:00", zone);
+  if (res.utc_time() != DateTime(Date(2026, 9, 25), Hours(9)))
+    TEST_FAILED("Local time: expected 09:00 UTC, got " + tostring(res.utc_time()));
+
+  auto now = SecondClock::universal_time();
+  res = parser.parse("0", zone);
+  auto diff = res.utc_time() - now;
+  if (diff > Minutes(1) || diff < Minutes(-1))
+    TEST_FAILED("Offset 0: expected the current UTC time " + tostring(now) + ", got " +
+                tostring(res.utc_time()));
+
+  TEST_PASSED();
+}
+
 void parse_wintertime()
 {
   using namespace Fmi;
@@ -769,6 +826,8 @@ class tests : public tframe::tests
     TEST(parse_offset);
     TEST(parse_duration);
     TEST(parse_iso_duration);
+    TEST(parse_utc_in_zone);
+    TEST(parse_basic_date);
   }
 };
 

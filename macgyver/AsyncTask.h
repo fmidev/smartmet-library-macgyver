@@ -60,7 +60,7 @@ class AsyncTask
   static void interruption_point();
 
  private:
-  void run(std::function<void()> task);
+  void run(const std::function<void()>& task);
   void handle_result(Status stat, std::exception_ptr exc = nullptr);
   std::exception_ptr get_exception() const;
   static void log_event_time(const AsyncTask* task, const std::string& desc);

@@ -145,21 +145,8 @@ class Cache
   }
 
   // Insert value; returns false if key already present or value exceeds shard capacity
-  bool insert(const KeyType& key, const ValueType& value)
-  {
-    auto& shard = itsShards[getShardIndex(key)];
-    std::unique_lock<std::shared_mutex> lock(shard.mutex);
-
-    if (shard.map.count(key))
-      return false;
-
-    std::size_t valueSize = SizeFunc::getSize(value);
-    if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
-      return false;
-
-    addEntry(shard, key, value, valueSize, nullptr);
-    return true;
-  }
+  bool insert(const KeyType& key, const ValueType& value) { return insertImpl(key, value); }
+  bool insert(const KeyType& key, ValueType&& value) { return insertImpl(key, std::move(value)); }
 
   // Insert value; fills evictedItems with any entries that were displaced
   bool insert(const KeyType& key, const ValueType& value, ItemVector& evictedItems)
@@ -182,23 +169,8 @@ class Cache
 
   // Upsert: insert or replace existing entry. Always counts as an insert.
   // Returns false only if value exceeds shard capacity.
-  bool upsert(const KeyType& key, const ValueType& value)
-  {
-    auto& shard = itsShards[getShardIndex(key)];
-    std::unique_lock<std::shared_mutex> lock(shard.mutex);
-
-    // Remove existing entry without counting it as an eviction
-    auto mapIt = shard.map.find(key);
-    if (mapIt != shard.map.end())
-      removeEntry(shard, mapIt);
-
-    std::size_t valueSize = SizeFunc::getSize(value);
-    if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
-      return false;
-
-    addEntry(shard, key, value, valueSize, nullptr);
-    return true;
-  }
+  bool upsert(const KeyType& key, const ValueType& value) { return upsertImpl(key, value); }
+  bool upsert(const KeyType& key, ValueType&& value) { return upsertImpl(key, std::move(value)); }
 
   // Find value; returns empty optional on miss.
   std::optional<ValueType> find(const KeyType& key)
@@ -316,6 +288,42 @@ class Cache
   }
 
  private:
+  template <typename V>
+  bool insertImpl(const KeyType& key, V&& value)
+  {
+    auto& shard = itsShards[getShardIndex(key)];
+    std::unique_lock<std::shared_mutex> lock(shard.mutex);
+
+    if (shard.map.count(key))
+      return false;
+
+    std::size_t valueSize = SizeFunc::getSize(value);
+    if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
+      return false;
+
+    addEntry(shard, key, std::forward<V>(value), valueSize, nullptr);
+    return true;
+  }
+
+  template <typename V>
+  bool upsertImpl(const KeyType& key, V&& value)
+  {
+    auto& shard = itsShards[getShardIndex(key)];
+    std::unique_lock<std::shared_mutex> lock(shard.mutex);
+
+    // Remove existing entry without counting it as an eviction
+    auto mapIt = shard.map.find(key);
+    if (mapIt != shard.map.end())
+      removeEntry(shard, mapIt);
+
+    std::size_t valueSize = SizeFunc::getSize(value);
+    if (valueSize > itsMaxSizePerShard.load(std::memory_order_relaxed))
+      return false;
+
+    addEntry(shard, key, std::forward<V>(value), valueSize, nullptr);
+    return true;
+  }
+
   struct Entry
   {
     Entry(KeyType k, ValueType v, std::size_t s) : key(std::move(k)), value(std::move(v)), size(s)
@@ -353,16 +361,17 @@ class Cache
   }
 
   // Make room for and add a new entry just behind the hand (caller holds exclusive lock)
+  template <typename V>
   void addEntry(Shard& shard,
                 const KeyType& key,
-                const ValueType& value,
+                V&& value,
                 std::size_t valueSize,
                 ItemVector* evictedItems)
   {
     shard.size += valueSize;
     evict(shard, evictedItems);
 
-    auto it = shard.list.emplace(shard.hand, key, value, valueSize);
+    auto it = shard.list.emplace(shard.hand, key, std::forward<V>(value), valueSize);
     shard.map.emplace(key, it);
     ++shard.insertCount;
   }

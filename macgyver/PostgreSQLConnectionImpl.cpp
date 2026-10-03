@@ -15,7 +15,7 @@ namespace
     pqxx::result transaction_exec_params(
         pqxx::transaction_base& transaction,
         const std::string& sql,
-        pqxx::params params)
+        const pqxx::params& params)
     {
         #if PQXX_VERSION_MAJOR >= 8 || PQXX_VERSION_MINOR >= 10
             return transaction.exec(sql, params);
@@ -27,7 +27,7 @@ namespace
     pqxx::result transaction_exec_prepared(
         pqxx::transaction_base& transaction,
         const std::string& name,
-        pqxx::params params)
+        const pqxx::params& params)
     {
         #if PQXX_VERSION_MAJOR >= 8 || PQXX_VERSION_MINOR >= 10
             return transaction.exec(pqxx::prepped(name), params);
@@ -137,18 +137,18 @@ void PostgreSQLConnection::Impl::exec(bool require_transaction, const std::strin
 }
 
 
-pqxx::result PostgreSQLConnection::Impl::execute(bool require_transaction, const std::string& sql, pqxx::params params)
+pqxx::result PostgreSQLConnection::Impl::execute(bool require_transaction, const std::string& sql, const pqxx::params& params)
 try
 {
     if (itsTransaction)
     {
-        return retry_on_failure<pqxx::result, bool, const std::string&, pqxx::params>(
+        return retry_on_failure<pqxx::result, bool, const std::string&, const pqxx::params&>(
             PostgreSQLConnection::queryRetryLimit, &Impl::try_execute, require_transaction, sql, params);
     }
 
     if (require_transaction) throw Fmi::Exception(BCP, "Not in transaction");
 
-    return retry_on_failure<pqxx::result, const std::string&, pqxx::params>(1, &Impl::try_execute_non_transaction, sql, params);
+    return retry_on_failure<pqxx::result, const std::string&, const pqxx::params&>(1, &Impl::try_execute_non_transaction, sql, params);
 }
 catch (const pqxx::failure& e)
 {
@@ -157,10 +157,10 @@ catch (const pqxx::failure& e)
 }
 
 
-pqxx::result PostgreSQLConnection::Impl::executeNonTransaction(const std::string& sql, pqxx::params params)
+pqxx::result PostgreSQLConnection::Impl::executeNonTransaction(const std::string& sql, const pqxx::params& params)
 try
 {
-    return retry_on_failure<pqxx::result, const std::string&, pqxx::params>(
+    return retry_on_failure<pqxx::result, const std::string&, const pqxx::params&>(
         queryRetryLimit,
         &Impl::try_execute_non_transaction,
         sql,
@@ -401,7 +401,7 @@ std::shared_ptr<pqxx::work> PostgreSQLConnection::Impl::try_create_transaction()
 pqxx::result PostgreSQLConnection::Impl::try_execute(
     bool require_transaction,
     const std::string& sql,
-    pqxx::params params)
+    const pqxx::params& params)
 {
     if (itsTransaction)
     {
@@ -425,7 +425,7 @@ pqxx::result PostgreSQLConnection::Impl::try_execute(
 }
 
 
-pqxx::result PostgreSQLConnection::Impl::try_execute_non_transaction(const std::string& sql, pqxx::params params)
+pqxx::result PostgreSQLConnection::Impl::try_execute_non_transaction(const std::string& sql, const pqxx::params& params)
 {
     pqxx::nontransaction nitsTransaction(*itsConnection);
     const auto start = std::chrono::high_resolution_clock::now();
@@ -441,10 +441,10 @@ pqxx::result PostgreSQLConnection::Impl::try_execute_non_transaction(const std::
 pqxx::result PostgreSQLConnection::Impl::exec_prepared(
     bool require_transaction,
     const std::string& name,
-    pqxx::params params)
+    const pqxx::params& params)
 try
 {
-    return retry_on_failure<pqxx::result, bool, const std::string&, pqxx::params>(
+    return retry_on_failure<pqxx::result, bool, const std::string&, const pqxx::params&>(
         1, &Impl::try_exec_prepared, require_transaction, name, params);
 }
 catch (const pqxx::failure& e)
@@ -458,18 +458,18 @@ catch (const pqxx::failure& e)
 pqxx::result PostgreSQLConnection::Impl::exec_params(
     bool require_transaction,
     const std::string& sql,
-    pqxx::params params)
+    const pqxx::params& params)
 try
 {
     if (itsTransaction)
     {
-        return retry_on_failure<pqxx::result, bool, const std::string&, pqxx::params>(
+        return retry_on_failure<pqxx::result, bool, const std::string&, const pqxx::params&>(
             1, &Impl::try_execute, require_transaction, sql, params);
     }
 
     if (require_transaction) throw Fmi::Exception(BCP, "Not in transaction");
 
-    return retry_on_failure<pqxx::result, const std::string&, pqxx::params>(
+    return retry_on_failure<pqxx::result, const std::string&, const pqxx::params&>(
         1, &Impl::try_execute_non_transaction, sql, params);
 }
 catch (const pqxx::failure& e)
@@ -484,7 +484,7 @@ catch (const pqxx::failure& e)
 pqxx::result PostgreSQLConnection::Impl::try_exec_prepared(
     bool require_transaction,
     const std::string& name,
-    pqxx::params params)
+    const pqxx::params& params)
 {
     const std::string prepared_sql = get_prepared_sql_string(name);
     if (itsTransaction)

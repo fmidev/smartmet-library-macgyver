@@ -54,3 +54,14 @@ BOOST_AUTO_TEST_CASE(atomic_shared_ptr_test_2)
   std::shared_ptr<std::string> p2 = ptr.load();
   BOOST_CHECK(!p2);
 }
+
+BOOST_AUTO_TEST_CASE(atomic_shared_ptr_copy)
+{
+  std::shared_ptr<std::string> foo = std::make_shared<std::string>("copied");
+  const Fmi::AtomicSharedPtr<std::string> ptr(foo);
+  Fmi::AtomicSharedPtr<std::string> copy(ptr);
+  BOOST_CHECK_EQUAL(copy.load(), foo);
+  Fmi::AtomicSharedPtr<std::string> assigned;
+  assigned = ptr;
+  BOOST_CHECK_EQUAL(assigned.load(), foo);
+}

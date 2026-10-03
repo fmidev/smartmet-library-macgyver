@@ -1,6 +1,5 @@
 #include "StringConversion.h"
 #include "Exception.h"
-#include "NumericCast.h"
 #include <boost/spirit/include/qi.hpp>
 #include <fmt/format.h>
 #include <fmt/printf.h>
@@ -21,6 +20,13 @@ const std::array<char, 201> digits{
     "4041424344454647484950515253545556575859"
     "6061626364656667686970717273747576777879"
     "8081828384858687888990919293949596979899"};
+
+// The digit table formatting handles four digit years only
+void check_year(int year)
+{
+  if (year < 0 || year > 9999)
+    throw Fmi::Exception(BCP, "Year " + std::to_string(year) + " cannot be formatted");
+}
 
 }  // namespace
 
@@ -230,8 +236,9 @@ std::optional<int> stoi_opt(const std::string& str)
     auto begin = str.cbegin();
     auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
-      if (begin == end)
-        return Fmi::numeric_cast<int>(result);
+      if (begin == end && result >= std::numeric_limits<int>::min() &&
+          result <= std::numeric_limits<int>::max())
+        return static_cast<int>(result);
     return {};
   }
   catch (...)
@@ -338,10 +345,12 @@ std::optional<float> stof_opt(const std::string& str)
     {
       if (begin == end)
       {
-        if (std::isfinite(result))
-          return Fmi::numeric_cast<float>(result);
+        if (!std::isfinite(result))
+          throw Fmi::Exception(BCP, "Infinite numbers are not allowed: '" + str + "' in Fmi::stof");
 
-        throw Fmi::Exception(BCP, "Infinite numbers are not allowed: '" + str + "' in Fmi::stof");
+        // Values outside the float range are not valid floats
+        if (std::abs(result) <= std::numeric_limits<float>::max())
+          return static_cast<float>(result);
       }
     }
     return {};
@@ -541,6 +550,7 @@ std::string to_simple_string(const Fmi::Date& date)
   {
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -576,6 +586,7 @@ std::string to_iso_string(const Fmi::Date& date)
   {
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -609,6 +620,7 @@ std::string to_iso_extended_string(const Fmi::Date& date)
   {
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -647,6 +659,7 @@ std::string to_iso_string(const Fmi::DateTime& time)
 
     const date::year_month_day ymd(time.date().get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -703,7 +716,8 @@ std::string to_iso_string(const std::time_t time)
   try
   {
     struct tm tt;
-    gmtime_r(&time, &tt);
+    if (gmtime_r(&time, &tt) == nullptr)
+      throw Fmi::Exception(BCP, "Time " + std::to_string(time) + " cannot be formatted");
 
     std::array<char, 16> buffer;
     char* ptr = buffer.data() + buffer.size();
@@ -725,6 +739,7 @@ std::string to_iso_string(const std::time_t time)
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
     auto yy = tt.tm_year + 1900;
+    check_year(yy);
     index = (yy % 100) * 2;
     *--ptr = digits[index + 1];
     *--ptr = digits[index];
@@ -753,6 +768,7 @@ std::string to_timestamp_string(const DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -802,6 +818,7 @@ std::string to_iso_extended_string(const DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -940,6 +957,7 @@ std::string to_simple_string(const Fmi::date_time::DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
@@ -1009,6 +1027,7 @@ std::string to_http_string(const Fmi::date_time::DateTime& time)
 
     const date::year_month_day ymd(date.get_impl());
     const int year = int(ymd.year());
+    check_year(year);
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 

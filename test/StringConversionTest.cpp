@@ -156,6 +156,8 @@ BOOST_AUTO_TEST_CASE(stoi_opt)
   BOOST_CHECK(!Fmi::stoi_opt("12 "));
   BOOST_CHECK(!Fmi::stoi_opt(" 12"));
   BOOST_CHECK(!Fmi::stoi_opt(" 12 "));
+  BOOST_CHECK(!Fmi::stoi_opt("123456789012"));
+  BOOST_CHECK(!Fmi::stoi_opt("-123456789012"));
 }
 
 BOOST_AUTO_TEST_CASE(stol_opt)
@@ -484,3 +486,15 @@ BOOST_AUTO_TEST_CASE(stdsz)
 }
 
 // ======================================================================
+
+BOOST_AUTO_TEST_CASE(opt_out_of_range)
+{
+  BOOST_TEST_MESSAGE(" + Fmi::sto*_opt() with out of range values");
+  BOOST_CHECK(!Fmi::stol_opt("99999999999999999999"));
+  BOOST_CHECK(!Fmi::stoul_opt("99999999999999999999"));
+  BOOST_CHECK(!Fmi::stof_opt("1e50"));
+  BOOST_CHECK(!Fmi::stof_opt("-1e50"));
+  BOOST_CHECK(!Fmi::stof_opt("1e999"));
+  BOOST_CHECK(!Fmi::stod_opt("1e999"));
+  BOOST_CHECK_THROW(Fmi::stof("1e50"), Fmi::Exception);
+}

@@ -35,6 +35,7 @@
 #include <optional>
 #include <shared_mutex>
 #include <stdexcept>
+#include <utility>
 
 // scoped read/write lock types
 
@@ -296,8 +297,8 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
     mon.pattern = pattern;
     mon.interval = interval;
     mon.mask = mask;
-    mon.callback = callback;
-    mon.errorhandler = errorhandler;
+    mon.callback = std::move(callback);
+    mon.errorhandler = std::move(errorhandler);
     mon.id = impl->nextid;
     mon.lastmodified = 0;
     mon.hasregex = true;
@@ -331,7 +332,8 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(const fs::path& path,
 {
   try
   {
-    return watch(path, boost::regex{pattern}, callback, errorhandler, interval, mask);
+    return watch(
+        path, boost::regex{pattern}, std::move(callback), std::move(errorhandler), interval, mask);
   }
   catch (...)
   {
@@ -368,8 +370,8 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(
     mon.path = path;
     mon.interval = interval;
     mon.mask = mask;
-    mon.callback = callback;
-    mon.errorhandler = errorhandler;
+    mon.callback = std::move(callback);
+    mon.errorhandler = std::move(errorhandler);
     mon.id = impl->nextid;
     mon.lastmodified = 0;
     mon.hasregex = false;

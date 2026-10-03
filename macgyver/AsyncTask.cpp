@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fmt/format.h>
 #include <boost/chrono.hpp>
+#include <utility>
 
 
 
@@ -23,9 +24,9 @@ Fmi::AsyncTask::AsyncTask(const std::string& name,
     : name(name),
       status(none),
       done(false),
-      notify(notify),
+      notify(std::move(notify)),
       ex(nullptr),
-      task_thread([this, task]() { run(task); })
+      task_thread([this, task = std::move(task)]() { run(task); })
 {
     LOG_TIME("created");
 }
@@ -120,7 +121,7 @@ void Fmi::AsyncTask::interruption_point()
   boost::this_thread::interruption_point();
 }
 
-void Fmi::AsyncTask::run(std::function<void()> task)
+void Fmi::AsyncTask::run(const std::function<void()>& task)
 {
   try
   {
@@ -148,7 +149,7 @@ void Fmi::AsyncTask::handle_result(Status stat, std::exception_ptr exc)
   std::unique_lock<std::mutex> lock(m1);
   this->done = true;
   this->status = stat;
-  this->ex = exc;
+  this->ex = std::move(exc);
   lock.unlock();
   if (notify)
   {

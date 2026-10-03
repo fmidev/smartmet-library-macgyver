@@ -4,6 +4,7 @@
  */
 // ======================================================================
 
+#include <limits>
 #include "TimeParser.h"
 #include "Exception.h"
 #include "TimeParserDefinitions.h"
@@ -22,6 +23,14 @@ static Fmi::TimeDuration bad_duration;
 
 namespace
 {
+
+// Durations are parsed from user input, the hours must fit into Fmi::Hours
+Fmi::TimeDuration checked_hours(long long hours)
+{
+  if (hours > std::numeric_limits<int>::max() || hours < std::numeric_limits<int>::min())
+    throw Fmi::Exception(BCP, "Time duration is out of range");
+  return Fmi::Hours(static_cast<int>(hours));
+}
 boost::regex iso8601_weeks{"^P(\\d+)W$"};
 boost::regex iso8601_short{"^P([[:d:]]+Y)?([[:d:]]+M)?([[:d:]]+D)?$"};
 #if 0
@@ -175,6 +184,41 @@ Fmi::DateTime buildFromOffset(Fmi::TimeDuration offset)
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Parse an ISO 8601 basic format calendar date YYYYMMDD
+ *
+ * Without this check eight digit dates would be taken for epoch seconds.
+ * Returns not_a_date_time if the string is not a valid date.
+ */
+// ----------------------------------------------------------------------
+
+Fmi::DateTime try_parse_basic_date(const std::string& str)
+{
+  if (str.size() != 8)
+    return Fmi::DateTime();
+  for (char ch : str)
+    if (ch < '0' || ch > '9')
+      return Fmi::DateTime();
+
+  const int year = std::stoi(str.substr(0, 4));
+  const int month = std::stoi(str.substr(4, 2));
+  const int day = std::stoi(str.substr(6, 2));
+
+  // Same sanity limits as in the ISO parser
+  if (year < 1582 || year > 5000)
+    return Fmi::DateTime();
+
+  try
+  {
+    return Fmi::DateTime(Fmi::Date(year, month, day));
+  }
+  catch (...)
+  {
+    return Fmi::DateTime();
   }
 }
 
@@ -574,7 +618,8 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
     }
     else
     {
-      *isutc = true;
+      t = try_parse_basic_date(str);
+      *isutc = t.is_not_a_date_time();
     }
     return t;
   }
@@ -801,13 +846,13 @@ TimeDuration try_parse_duration(const std::string& str)
       return Fmi::Hours(offset_value);
 
     if (theUnit == 'd' || theUnit == 'D')
-      return Fmi::Hours(offset_value * 24);
+      return checked_hours(24LL * offset_value);
 
     if (theUnit == 'w' || theUnit == 'W')
-      return Fmi::Hours(offset_value * 24 * 7);
+      return checked_hours(168LL * offset_value);
 
     if (theUnit == 'y' || theUnit == 'Y')
-      return Fmi::Hours(offset_value * 24 * 365);
+      return checked_hours(8760LL * offset_value);
 
     return bad_duration;
   }
@@ -861,7 +906,7 @@ TimeDuration try_parse_iso_duration(const std::string& str)
     if (boost::regex_search(str, match, iso8601_weeks))
     {
       int n = std::stoi(match[1]);
-      return Fmi::Hours(7 * 24 * n);
+      return checked_hours(168LL * n);
     }
 
     if (!boost::regex_search(str, match, iso8601_long))
@@ -887,7 +932,7 @@ TimeDuration try_parse_iso_duration(const std::string& str)
 
     // Year length 365 and month length 30 are arbitrary choices here
 
-    return Fmi::Hours(365 * 24 * vec[0] + 30 * 24 * vec[1] + 24 * vec[2]) +
+    return checked_hours(8760LL * vec[0] + 720LL * vec[1] + 24LL * vec[2]) +
            TimeDuration(vec[4], vec[5], vec[6], 0);
   }
   catch (...)
@@ -973,6 +1018,15 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
         {
           // Simply pass to the next parser
         }
+      }
+    }
+
+    {
+      auto ret = try_parse_basic_date(str);
+      if (!ret.is_not_a_date_time())
+      {
+        matchedParser = ISO;
+        return ret;
       }
     }
 
@@ -1079,8 +1133,10 @@ Fmi::LocalDateTime parse(const std::string& str,
   {
     Fmi::DateTime t = parse(str, format);
 
-    // epoch is always in UTC
-    if (format == "epoch")
+    // Epochs and offsets are always in UTC, and so are ISO times with a Z or
+    // an explicit UTC offset. Only times without zone information are local.
+    const bool is_iso = (format == "iso" || format == "xml" || format == "timestamp");
+    if (format == "epoch" || format == "offset" || (is_iso && looks_utc(str)))
       return Fmi::LocalDateTime(t, tz);
 
     // timestamps are local
@@ -1107,8 +1163,9 @@ Fmi::LocalDateTime parse(const std::string& str,
 
     Fmi::DateTime t = match_and_parse(str, matched);
 
-    // epoch is always in UTC
-    if (matched == EPOCH)
+    // Epochs and offsets are always in UTC, and so are ISO times with a Z or
+    // an explicit UTC offset. Only times without zone information are local.
+    if (matched == EPOCH || matched == OFFSET || (matched == ISO && looks_utc(str)))
       return Fmi::LocalDateTime(t, tz);
 
     // timestamps are local
