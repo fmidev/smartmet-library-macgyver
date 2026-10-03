@@ -126,6 +126,7 @@ functions in `Fmi::TimeParser` are deprecated, but they are still used, and they
 |--------|----------|--------|
 | ISO 8601 | `2026-09-25T12:00:00Z`, `2026-09-25T12:00:00+03:00`, `20260925T1200` | UTC; an offset is applied. |
 | FMI timestamp | `202609251200` | as written |
+| ISO 8601 basic date | `20260925` | midnight of that date (an eight-digit string that is not a valid date is epoch seconds) |
 | SQL | `2026-09-25 12:00:00` | as written |
 | epoch | `1790000000` | UTC |
 | offset | `0`, `+1h`, `-30m`, `+2d`, `PT6H` | now + offset, UTC, rounded down to the minute |
@@ -136,19 +137,17 @@ functions in `Fmi::TimeParser` are deprecated, but they are still used, and they
 `parse_duration()` accepts FMI durations (`+30m`, `-6h`) and ISO 8601 durations
 (`PT6H`); `parse_iso_duration()` accepts only the latter.
 
-**Local times.** The overloads that take a `TimeZonePtr` return a `LocalDateTime`: epoch
-values are UTC, and **everything else is taken as wall-clock time in that zone**. This
-includes strings with `Z` or an offset, and relative offsets, which are already UTC (see
-the pitfalls). Code that must handle both, like `TimeSeriesGeneratorOptions` in the
-timeseries library, first calls `Fmi::TimeParser::looks_utc(str)`. If it returns true,
-the code uses `parse(str)` as UTC; otherwise it treats the result as local time.
+**Local times.** The overloads that take a `TimeZonePtr` return a `LocalDateTime`.
+Epochs, relative offsets and ISO times with a `Z` or an explicit offset are UTC
+instants; only times without zone information are taken as wall-clock time in that
+zone. `Fmi::TimeParser::looks_utc(str)` tells the two cases apart.
 
 ## 5. Caches
 
 ### 5.1 `Fmi::Cache::Cache<Key, Value, SizeFunc, NumShards = 16>`
 
-A thread-safe LRU cache split into `NumShards` shards. Each shard has its own
-`std::shared_mutex`, list and hash map.
+A thread-safe cache with CLOCK eviction, split into `NumShards` shards. Each shard has
+its own `std::shared_mutex`, a ring of entries with a "hand", and a hash map.
 
 * The maximum size is divided evenly between the shards
   (`ceil(maxSize / NumShards)` each), and each shard evicts on its own. With few, large
@@ -159,8 +158,10 @@ A thread-safe LRU cache split into `NumShards` shards. Each shard has its own
 * `insert()` does not replace an existing key; it returns false. `upsert()` replaces it.
 * `find()` returns `std::optional<Value>`: a **copy** of the value. Store
   `std::shared_ptr`s for anything that is not small.
-* `find()` takes the shared lock, then takes the exclusive lock briefly to move the
-  entry to the MRU end, unless it already is there.
+* `find()` takes only the shared lock and increments the entry's hit counter. On
+  eviction the hand gives entries hit since its last pass a second chance.
+* `insert()` and `upsert()` also take the value as an rvalue, which is moved into the
+  cache.
 * `statistics()` returns `CacheStats` (hits, misses, inserts, evictions, size), which
   engines and plugins report through spine's `getCacheStats()`.
 * `resize()` changes the limit at runtime and evicts at once.
@@ -231,8 +232,8 @@ auto conn = pool.get(Fmi::Seconds(5));            // or throws after the timeout
 * Items are created with `Item(args...)` or a factory callback. The arguments are copied
   into the pool. If an argument is a reference or pointer, what it refers to must live
   as long as the pool, because new items can be created later.
-* The arguments are looked up by **type**, so two arguments of the same type (for
-  example two `std::string`s) do not compile. Wrap them in a struct.
+* The arguments are passed in their original order, so several arguments may have
+  the same type.
 * `get()` returns a `Pool::Ptr`, a `unique_ptr` that returns the item to the pool when it
   is destroyed. The pool's state is shared with the outstanding `Ptr`s, so an item stays
   valid even if the pool is destroyed first.
@@ -311,8 +312,8 @@ between threads.
   `to_string(fmt, value)` overloads for a fixed format.
 * **String to number.** `Fmi::stoi`, `stol`, `stoul`, `stof`, `stod` require the whole
   string to be a number, and throw otherwise; the `_opt` variants return
-  `std::nullopt`. A value out of the target type's range still throws in the `_opt`
-  variants (`Fmi::numeric_cast`).
+  `std::nullopt`, also for values out of the target type's range. Infinities and NaNs
+  throw in `stof_opt` and `stod_opt`.
 * **`Fmi::numeric_cast<T>()`** throws on overflow or loss of range.
 * **Hashes.** `Fmi::hash_value()` covers the built-in types, strings and the time types,
   and `Fmi::hash_combine(seed, value)` merges them. They are the basis of ETags and cache
@@ -354,20 +355,11 @@ together.
   `Fmi::ignore_exceptions()` instead of an empty `catch (...)`.
 * **`std::` sleeps and condition variables are not interruption points** for
   `AsyncTask::cancel()`.
-* **The time zone overloads of the parsers treat UTC strings as local.** With a
-  `TimeZonePtr`, `2026-09-25T12:00:00Z` in `Europe/Helsinki` becomes 12:00 local
-  (09:00 UTC); an explicit offset and relative times (`0`, `+1h`) are shifted the same
-  way. Check `Fmi::TimeParser::looks_utc()` first (§4).
 * **Unsigned offsets are errors.** `30m` is neither a time nor a duration; write `+30m`.
-* **An eight-digit date parses as epoch seconds.** `20260925` is not a date for the
-  parser: it becomes `1970-08-23 12:02:05`. Use `2026-09-25` or `20260925T0000`.
 * **A default-constructed `Cache` has size 0** and stores nothing.
 * **Items larger than one shard's share are never cached**, and a cache of few large
   items holds less than its nominal size (§5.1).
 * **`Cache::find()` copies the value.** Store `shared_ptr`s.
-* **`Pool` constructor arguments must have distinct types** (§7).
-* **`AtomicSharedPtr` cannot be copied.** Its copy constructor does not compile; share
-  it by reference, or copy the `load()`ed `shared_ptr`.
 * **`DirectoryMonitor` without `MODIFY` misses in-place rewrites** (§8.1).
 * **`MappedFile::open()` defaults to read-write**, unlike the constructor.
 * **`Fmi::to_string(double)` rounds to six significant digits.**
