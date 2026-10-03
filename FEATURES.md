@@ -61,7 +61,7 @@ top-level helpers:
   - Stack traces.
   - Chained causes (`addDetail`, `addParameter`).
   - Source file / line / function via `BCP` macro
-    (`__FILE__, __LINE__, __FUNCTION__`).
+    (`__FILE__, __LINE__, __PRETTY_FUNCTION__`).
 - **`Fmi::Exception::Trace(BCP, msg)`** — idiomatic creation used
   across the SmartMet ecosystem.
 
@@ -97,7 +97,7 @@ top-level helpers:
 
 - **`Fmi::CsvReader`** — streaming CSV parser.
 - **`Fmi::FileSystem`** — path / directory helpers.
-- **`Fmi::DirectoryMonitor`** — inotify-based directory watch (used
+- **`Fmi::DirectoryMonitor`** — polling (modification time based) directory watch (used
   for hot-reloading config / Lua / mapping files across the
   ecosystem). Demo program in `examples/monitor.cpp`.
 - **`Fmi::MappedFile`** — RAII wrapper over mmap.
@@ -118,7 +118,7 @@ top-level helpers:
 - **`Fmi::ReferenceEllipsoid`** — WGS84 / GRS80 / spherical earth
   constants and conversions.
 - **`Fmi::Matrix<T>`** — fixed-size matrix template.
-- **`Fmi::DistanceParser`** — parse `25km` / `12mi` / `8nm` etc.
+- **`Fmi::DistanceParser`** — parse `25km` / `12mi` / `8nmi` etc.
 - **`Fmi::FastMath`** — fast approximations of trig / log / exp.
 
 ## 9. Spatial indexes
@@ -164,7 +164,7 @@ top-level helpers:
 
 - **`Fmi::DebugTools`** — printing / breakpoint / assertion
   helpers used during development.
-- **`BCP`** macro — `__FILE__, __LINE__, __FUNCTION__` triple.
+- **`BCP`** macro — `__FILE__, __LINE__, __PRETTY_FUNCTION__` triple.
 - **Stack traces** are attached automatically by `Fmi::Exception`.
 
 ## 15. Examples

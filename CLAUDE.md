@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
+Full developer documentation: `docs/developer-guide.md`.
+
 `smartmet-library-macgyver` — the foundational C++ utility library for SmartMet Server (FMI). Everything in the SmartMet ecosystem depends on this. All code lives under the `Fmi` namespace, with sub-namespaces like `Fmi::Cache`, `Fmi::Astronomy`, `Fmi::date_time`.
 
 ## Build commands
@@ -44,7 +46,7 @@ Tests use FMI's own `regression/tframe.h` framework (from `smartmet-library-regr
 
 **Cache**: `Fmi::Cache::Cache<K,V>` is a striped LRU cache using `shared_mutex` per stripe. `Fmi::Cache::FileCache` is a bimap-based variant. Both track hit/miss statistics via `CacheStats`.
 
-**Exception**: `Fmi::Exception` wraps `std::exception` with stack traces and chained causes. Created via `Fmi::Exception::Trace(BCP, msg)` where `BCP` is a macro expanding to `__FILE__, __LINE__, __FUNCTION__`.
+**Exception**: `Fmi::Exception` wraps `std::exception` with stack traces and chained causes. Created via `Fmi::Exception::Trace(BCP, msg)` where `BCP` is a macro expanding to `__FILE__, __LINE__, __PRETTY_FUNCTION__`. Note that the plain constructor `Fmi::Exception(BCP, msg)` does not chain the exception being handled; `Trace` does.
 
 **PostgreSQL**: `PostgreSQLConnection` uses the pimpl pattern (`PostgreSQLConnectionImpl`). Tests require a geonames database — in CI this is created locally; otherwise it connects to `smartmet-test:5444`.
 
