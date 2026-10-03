@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.10.2
+Version: 26.10.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -150,6 +150,20 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Oct 03 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
+- Add move-aware Cache insert/upsert and avoid copies in PostgreSQL wrapper
+- Check gmtime_r and the year range when formatting time_t values
+- Check the range of parsed time offsets and durations
+- Reject years outside 0-9999 in the fast date formatters
+- Guard AsyncTaskGroup exception_info with its mutex
+- Return nullopt from stoi_opt and stof_opt for out of range values
+- Pass Pool constructor arguments by position, not by type
+- Remove the unused std::shared_ptr base of AtomicSharedPtr
+- ABI change: sizeof(Fmi::AtomicSharedPtr) changed, dependent packages must be recompiled
+- Fix the AtomicSharedPtr copy constructor
+- Parse eight digit dates as dates, not as epoch seconds
+- Treat UTC times as UTC when parsing in a time zone
+
 * Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-1.fmi
 - Fmi::Cache::Cache now uses the CLOCK (second chance) eviction algorithm instead of exact LRU.
   CLOCK is faster than LRU: find() only takes a shared lock, while LRU had to take an exclusive
