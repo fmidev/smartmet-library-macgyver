@@ -3,6 +3,7 @@
 #include "ParserDefinitions.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
+#include <fmt/format.h>
 
 const Fmi::date_time::Date Fmi::date_time::Date::epoch(1970, 1, 1);
 
@@ -223,6 +224,12 @@ std::string Fmi::date_time::Date::to_iso_string() const
     if (is_special())
         return special_time_as_string();
 
+    // date::format creates an output string stream and a locale on every call
+    const date::year_month_day ymd(date);
+    const int y = int(ymd.year());
+    if (y >= 1000 && y <= 9999)
+        return fmt::format("{:04d}{:02d}{:02d}", y, unsigned(ymd.month()), unsigned(ymd.day()));
+
     return format_time("%Y%m%d", *this);
 }
 
@@ -230,6 +237,12 @@ std::string Fmi::date_time::Date::to_iso_extended_string() const
 {
     if (is_special())
         return special_time_as_string();
+
+    // date::format creates an output string stream and a locale on every call
+    const date::year_month_day ymd(date);
+    const int y = int(ymd.year());
+    if (y >= 1000 && y <= 9999)
+        return fmt::format("{:04d}-{:02d}-{:02d}", y, unsigned(ymd.month()), unsigned(ymd.day()));
 
     return format_time("%Y-%m-%d", *this);
 }

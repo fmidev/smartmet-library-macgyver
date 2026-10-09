@@ -4,8 +4,33 @@
 #include "../Exception.h"
 #include "../StringConversion.h"
 #include <boost/regex.hpp>
+#include <fmt/format.h>
 
 namespace internal = Fmi::date_time::internal;
+
+namespace
+{
+// date::format creates an output string stream and imbues a locale on every call, which makes
+// it a bottleneck when large numbers of times are formatted. The common case of a time of day in
+// whole seconds is formatted directly; anything else (negative, a day or longer, fractional
+// seconds whose decimal separator follows the global locale) still goes through date::format.
+
+constexpr int64_t microseconds_per_second = 1000000;
+constexpr int64_t seconds_per_day = 86400;
+
+bool is_whole_seconds_of_day(const Fmi::date_time::TimeDuration& theDuration, int64_t& theSeconds)
+{
+  if (theDuration.is_special())
+    return false;
+  const int64_t us = theDuration.total_microseconds();
+  if (us < 0 || us >= seconds_per_day * microseconds_per_second)
+    return false;
+  if (us % microseconds_per_second != 0)
+    return false;
+  theSeconds = us / microseconds_per_second;
+  return true;
+}
+}  // namespace
 
 Fmi::date_time::TimeDuration::TimeDuration(const detail::duration_t& duration)
     : Fmi::date_time::Base(Fmi::date_time::Base::NORMAL)
@@ -90,6 +115,10 @@ int64_t Fmi::date_time::TimeDuration::total_microseconds() const
 
 std::string Fmi::date_time::TimeDuration::to_simple_string() const
 {
+  int64_t secs = 0;
+  if (is_whole_seconds_of_day(*this, secs))
+    return fmt::format("{:02d}:{:02d}:{:02d}", secs / 3600, secs / 60 % 60, secs % 60);
+
   const std::string str = format_time("%H:%M:%S", *this);
   const std::size_t pos = str.find_last_of(".,");
   if (pos != std::string::npos && str.substr(pos + 1) == "000000")
@@ -100,6 +129,10 @@ std::string Fmi::date_time::TimeDuration::to_simple_string() const
 
 std::string Fmi::date_time::TimeDuration::to_iso_string() const
 {
+  int64_t secs = 0;
+  if (is_whole_seconds_of_day(*this, secs))
+    return fmt::format("{:02d}{:02d}{:02d}", secs / 3600, secs / 60 % 60, secs % 60);
+
   const std::string str = format_time("%H%M%S", *this);
   const std::size_t pos = str.find_last_of(".,");
   if (pos != std::string::npos && str.substr(pos + 1) == "000000")
@@ -109,6 +142,10 @@ std::string Fmi::date_time::TimeDuration::to_iso_string() const
 
 std::string Fmi::date_time::TimeDuration::to_iso_extended_string() const
 {
+  int64_t secs = 0;
+  if (is_whole_seconds_of_day(*this, secs))
+    return fmt::format("{:02d}:{:02d}:{:02d}", secs / 3600, secs / 60 % 60, secs % 60);
+
   const std::string str = format_time("%H:%M:%S", *this);
   const std::size_t pos = str.find_last_of(".,");
   if (pos != std::string::npos && str.substr(pos + 1) == "000000")

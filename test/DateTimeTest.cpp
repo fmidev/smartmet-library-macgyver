@@ -425,3 +425,78 @@ BOOST_AUTO_TEST_CASE(timing_1)
         BOOST_TEST_MESSAGE("Map access time: " + std::to_string(duration) + " ms");
     }
 }
+
+namespace
+{
+// The formatting of DateTime, Date and TimeDuration used to be done with date::format only.
+// The common cases are now formatted directly; these build the old results for comparison.
+
+std::string strip_zero_fraction(const std::string& str)
+{
+  const std::size_t pos = str.find_last_of(".,");
+  if (pos != std::string::npos && str.substr(pos + 1) == "000000")
+    return str.substr(0, pos);
+  return str;
+}
+
+std::string old_time(const char* fmt, const Fmi::date_time::TimeDuration& td)
+{
+  return strip_zero_fraction(Fmi::date_time::format_time(fmt, td));
+}
+
+std::string old_date_time(const char* datefmt,
+                          const char* timefmt,
+                          const Fmi::date_time::DateTime& t)
+{
+  return Fmi::date_time::format_time(datefmt, t.date()) + "T" +
+         old_time(timefmt, t.time_of_day());
+}
+}  // namespace
+
+BOOST_AUTO_TEST_CASE(direct_formatting_matches_date_format)
+{
+  BOOST_TEST_MESSAGE("Fmi::date_time: direct ISO formatting matches date::format");
+
+  std::mt19937 gen(3483);
+  std::uniform_int_distribution<int> years(1, 12000);
+  std::uniform_int_distribution<int> months(1, 12);
+  std::uniform_int_distribution<int> days(1, 28);
+  std::uniform_int_distribution<int64_t> seconds(0, 86399);
+  std::uniform_int_distribution<int> micros(0, 999999);
+  std::uniform_int_distribution<int64_t> any_duration(-200LL * 3600 * 1000000,
+                                                      200LL * 3600 * 1000000);
+
+  std::vector<int> edge_years{1, 999, 1000, 1970, 2000, 9999, 10000};
+
+  for (int i = 0; i < 20000; i++)
+  {
+    const int year = (i < static_cast<int>(edge_years.size()) ? edge_years[i] : years(gen));
+    const Fmi::date_time::Date d(year, months(gen), days(gen));
+    BOOST_CHECK_EQUAL(d.to_iso_string(), Fmi::date_time::format_time("%Y%m%d", d));
+    BOOST_CHECK_EQUAL(d.to_iso_extended_string(), Fmi::date_time::format_time("%Y-%m-%d", d));
+
+    const auto secs = seconds(gen);
+    const int us = (i % 3 == 0 ? micros(gen) : 0);
+    const Fmi::date_time::TimeDuration td(int(secs / 3600), int(secs / 60 % 60), int(secs % 60), us);
+    BOOST_CHECK_EQUAL(td.to_simple_string(), old_time("%H:%M:%S", td));
+    BOOST_CHECK_EQUAL(td.to_iso_string(), old_time("%H%M%S", td));
+    BOOST_CHECK_EQUAL(td.to_iso_extended_string(), old_time("%H:%M:%S", td));
+
+    const Fmi::date_time::DateTime t(d, td);
+    BOOST_CHECK_EQUAL(t.to_iso_string(), old_date_time("%Y%m%d", "%H%M%S", t));
+    BOOST_CHECK_EQUAL(t.to_iso_extended_string(), old_date_time("%Y-%m-%d", "%H:%M:%S", t));
+
+    // Negative and multi-day durations are not times of day and are still formatted the old way
+    const Fmi::date_time::TimeDuration any(Fmi::detail::microsec_t(any_duration(gen)));
+    BOOST_CHECK_EQUAL(any.to_iso_extended_string(), old_time("%H:%M:%S", any));
+  }
+
+  // Midnight and the last second of the day
+  const Fmi::date_time::DateTime midnight(Fmi::date_time::Date(2026, 10, 9),
+                                          Fmi::date_time::TimeDuration(0, 0, 0));
+  BOOST_CHECK_EQUAL(midnight.to_iso_extended_string(), "2026-10-09T00:00:00");
+  BOOST_CHECK_EQUAL(midnight.to_iso_string(), "20261009T000000");
+  const Fmi::date_time::DateTime last(Fmi::date_time::Date(2026, 12, 31),
+                                      Fmi::date_time::TimeDuration(23, 59, 59));
+  BOOST_CHECK_EQUAL(last.to_iso_extended_string(), "2026-12-31T23:59:59");
+}
