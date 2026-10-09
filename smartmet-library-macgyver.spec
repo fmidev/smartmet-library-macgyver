@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.10.3
+Version: 26.10.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -150,6 +150,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Fri Oct 09 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.9-1.fmi
+- ISO and simple time formatting of whole seconds avoids date::format, which is about 4x slower (BRAINSTORM-3483)
+
 * Sat Oct 03 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
 - Add move-aware Cache insert/upsert and avoid copies in PostgreSQL wrapper
 - Check gmtime_r and the year range when formatting time_t values

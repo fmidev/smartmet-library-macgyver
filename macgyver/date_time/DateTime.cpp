@@ -3,6 +3,7 @@
 #include "ParserDefinitions.h"
 #include "../Exception.h"
 #include "../StringConversion.h"
+#include <fmt/format.h>
 
 namespace internal = Fmi::date_time::internal;
 
@@ -10,6 +11,29 @@ namespace internal = Fmi::date_time::internal;
 
 namespace
 {
+    // Formats the common case of a 4 digit year and whole seconds with a single call instead of
+    // going through date::format, which creates an output string stream and a locale for each
+    // part of the time. Returns an empty string if the time must be formatted the slow way.
+    std::string fast_format(const Fmi::date_time::DateTime& t, bool extended)
+    {
+        constexpr int64_t us_per_second = 1000000;
+        const auto us = t.time_of_day().total_microseconds();
+        if (us % us_per_second != 0)
+            return {};
+        const auto ymd = t.date().year_month_day();
+        if (ymd.year < 1000 || ymd.year > 9999)
+            return {};
+        const auto secs = us / us_per_second;
+        const auto hh = secs / 3600;
+        const auto mm = secs / 60 % 60;
+        const auto ss = secs % 60;
+        if (extended)
+            return fmt::format("{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+                               ymd.year, ymd.month, ymd.day, hh, mm, ss);
+        return fmt::format("{:04d}{:02d}{:02d}T{:02d}{:02d}{:02d}",
+                           ymd.year, ymd.month, ymd.day, hh, mm, ss);
+    }
+
     std::string maybe_discard_seconds_part(std::string&& src)
     {
         const std::size_t pos = src.find_last_not_of('0');
@@ -444,6 +468,9 @@ std::string Fmi::date_time::DateTime::to_iso_string() const
 {
     if (is_special())
         return Base::special_time_as_string();
+    auto fast = fast_format(*this, false);
+    if (!fast.empty())
+        return fast;
     return date().to_iso_string() + "T" + maybe_discard_seconds_part(time_of_day().to_iso_string());
 }
 
@@ -451,6 +478,9 @@ std::string Fmi::date_time::DateTime::to_iso_extended_string() const
 {
     if (is_special())
         return Base::special_time_as_string();
+    auto fast = fast_format(*this, true);
+    if (!fast.empty())
+        return fast;
     return date().to_iso_extended_string() + "T" + maybe_discard_seconds_part(time_of_day().to_iso_extended_string());
 }
 
