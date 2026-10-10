@@ -1234,9 +1234,9 @@ std::string xmlescape(const std::string& input)
 
     // https://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string
 
-    for (size_t pos = 0; pos != input.size(); ++pos)
+    for (char pos : input)
     {
-      switch (input[pos])
+      switch (pos)
       {
         case '&':
           output += "&amp;";
@@ -1254,15 +1254,15 @@ std::string xmlescape(const std::string& input)
           output += "&gt;";
           break;
         default:
-          if (input[pos] < 32 || input[pos] > 126)
+          if (pos < 32 || pos > 126)
           {
             // Numeric character reference for non-printable ASCII characters
             output += "&#";
-            output += Fmi::to_string(static_cast<int>(input[pos]));
+            output += Fmi::to_string(static_cast<int>(pos));
             output += ";";
           }
           else
-            output += input[pos];
+            output += pos;
           break;
       }
     }
