@@ -108,7 +108,7 @@ void read(const string& filename, Callback callback, char delimiter)
           else if (ch == delimiter)
           {
             state = ExpectingField;
-            row.push_back("");
+            row.emplace_back("");
           }
           else if (isspace(ch))
             ;  // ignore whitespace before field

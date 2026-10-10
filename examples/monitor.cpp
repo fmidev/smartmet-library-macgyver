@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-#include <signal.h>
+#include <csignal>
 
 using namespace std;
 using namespace Fmi;
