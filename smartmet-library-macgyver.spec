@@ -154,6 +154,7 @@ FMI MacGyver library static files
 - Use auto and return {} where clang-tidy suggests it, no functional changes
 - Mark overriding methods override and use nullptr, no functional changes
 - Use emplace and C++ standard library headers where clang-tidy suggests it, no functional changes
+- Use raw string literals and std::make_shared where clang-tidy suggests it, no functional changes
 
 * Fri Oct 09 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.9-1.fmi
 - ISO and simple time formatting of whole seconds avoids date::format, which is about 4x slower (BRAINSTORM-3483)
