@@ -13,7 +13,7 @@ namespace
 
 std::mutex& mutex()
 {
-  static std::mutex* instance = new std::mutex;
+  static auto* instance = new std::mutex;
   return *instance;
 }
 
@@ -25,7 +25,7 @@ std::list<std::function<void()>>& cleanup_functions()
 
 unsigned& instance_count()
 {
-  static unsigned* instance = new unsigned(0);
+  static auto* instance = new unsigned(0);
   return *instance;
 }
 }  // namespace

@@ -457,7 +457,7 @@ TimeDuration Fmi::date_time::operator - (const LocalDateTime& to, const LocalDat
 {
     if (from.is_special() || to.is_special())
     {
-        return TimeDuration();
+      return {};
     }
 
     const auto sys_from = from.get_impl().get_sys_time();

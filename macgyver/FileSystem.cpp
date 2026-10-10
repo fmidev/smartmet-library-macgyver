@@ -153,7 +153,7 @@ std::optional<std::string> Fmi::lookup_file(const std::string& theFileName)
         }
     }
 
-    return std::optional<std::string>();
+    return {};
 }
 
 Fmi::IStream::IStream(std::istream& raw_input, const std::string& name)

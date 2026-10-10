@@ -105,7 +105,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
       if (it == itsContentMap.left.end())
       {
         itsMissCount.fetch_add(1, std::memory_order_relaxed);
-        return std::optional<std::string>();
+        return {};
       }
 
       // Found in the map, but somebody may have cleaned the file
@@ -116,7 +116,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
       {
         // Should we remove the entry here? It will be re-inserted anyways eventually
         itsMissCount.fetch_add(1, std::memory_order_relaxed);
-        return std::optional<std::string>();
+        return {};
       }
 
       std::size_t size = it->second.fileSize;
@@ -129,7 +129,7 @@ std::optional<std::string> FileCache::find(std::size_t key)
       {
         // Report file opening error
         itsMissCount.fetch_add(1, std::memory_order_relaxed);
-        return std::optional<std::string>();
+        return {};
       }
 
       ret.resize(size);

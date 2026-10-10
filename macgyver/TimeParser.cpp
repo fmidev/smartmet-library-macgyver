@@ -199,10 +199,10 @@ Fmi::DateTime buildFromOffset(Fmi::TimeDuration offset)
 Fmi::DateTime try_parse_basic_date(const std::string& str)
 {
   if (str.size() != 8)
-    return Fmi::DateTime();
+    return {};
   for (char ch : str)
     if (ch < '0' || ch > '9')
-      return Fmi::DateTime();
+      return {};
 
   const int year = std::stoi(str.substr(0, 4));
   const int month = std::stoi(str.substr(4, 2));
@@ -210,7 +210,7 @@ Fmi::DateTime try_parse_basic_date(const std::string& str)
 
   // Same sanity limits as in the ISO parser
   if (year < 1582 || year > 5000)
-    return Fmi::DateTime();
+    return {};
 
   try
   {
@@ -218,7 +218,7 @@ Fmi::DateTime try_parse_basic_date(const std::string& str)
   }
   catch (...)
   {
-    return Fmi::DateTime();
+    return {};
   }
 }
 

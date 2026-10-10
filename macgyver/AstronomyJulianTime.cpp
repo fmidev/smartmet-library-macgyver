@@ -58,7 +58,7 @@ Fmi::DateTime JulianTime::ptime_utc() const
   try
   {
     if (jd == 0.0)
-      return Fmi::DateTime();
+      return {};
 
     int z = lround(jd);
     double f = (jd + 0.5) - z;
@@ -421,7 +421,7 @@ JulianTime Sunrise_or_set_UTC(const JulianTime& noon, double lon_e, double lat, 
     double solarDec = noon.SunDeclination();
     double hourAngle = HourAngleSunrise_or_set(lat, solarDec, rise);
     if (isnan(hourAngle))
-      return JulianTime();
+      return {};
 
     double delta = -lon_e - rad2deg(hourAngle);
     double timeDiff = 4 * delta;                   // minutes of time
@@ -458,7 +458,7 @@ JulianTime Sunrise_or_set_UTC(const JulianTime& noon, double lon_e, double lat, 
      */
     hourAngle = HourAngleSunrise_or_set(lat, solarDec, rise);
     if (isnan(hourAngle))
-      return JulianTime();
+      return {};
 
     assert(!isnan(hourAngle));
 

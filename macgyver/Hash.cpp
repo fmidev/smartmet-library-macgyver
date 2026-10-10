@@ -91,7 +91,7 @@ inline uint64_t load_le64(const unsigned char* p) noexcept
 
 std::size_t hash_mix(std::size_t n) noexcept
 {
-  uint64_t x = static_cast<uint64_t>(n);
+  auto x = static_cast<uint64_t>(n);
   x = mulmix64(x ^ K0, x ^ K1);
   x = avalanche64(x);
   return static_cast<std::size_t>(x);
@@ -235,7 +235,7 @@ std::size_t hash_value(long double v)
   else
   {
     // Endian-stable hashing of the raw bytes (works for 80- and 128-bit)
-    const unsigned char* p = reinterpret_cast<const unsigned char*>(&v);
+    const auto* p = reinterpret_cast<const unsigned char*>(&v);
     size_t len = sizeof(long double);
     uint64_t acc = 0x27d4eb2f165667c5ULL;
     while (len >= 8)
@@ -260,8 +260,8 @@ void hash_combine(std::size_t& seed, std::size_t value)
     seed = bad_hash;
   else
   {
-    uint64_t s = static_cast<uint64_t>(seed);
-    uint64_t v = static_cast<uint64_t>(value);
+    auto s = static_cast<uint64_t>(seed);
+    auto v = static_cast<uint64_t>(value);
     s = mix2(s, v);
     seed = static_cast<std::size_t>(s);
   }
