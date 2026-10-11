@@ -58,11 +58,11 @@ void errorhandler(DirectoryMonitor::Watcher id,
 
 int main()
 {
-  signal(SIGINT, &sighandler);
-  signal(SIGQUIT, &sighandler);
-  signal(SIGHUP, &sighandler);
-  signal(SIGABRT, &sighandler);
-  signal(SIGTERM, &sighandler);
+  (void)signal(SIGINT, &sighandler);
+  (void)signal(SIGQUIT, &sighandler);
+  (void)signal(SIGHUP, &sighandler);
+  (void)signal(SIGABRT, &sighandler);
+  (void)signal(SIGTERM, &sighandler);
 
   std::filesystem::create_directories(p);
 

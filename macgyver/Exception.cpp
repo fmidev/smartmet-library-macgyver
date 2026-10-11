@@ -362,7 +362,7 @@ std::string Exception::getTimeStampString() const
   struct std::tm tExpanded;
   char result[80];
   localtime_r(&timestamp, &tExpanded);
-  std::strftime(result, sizeof(result), "%Y-%m-%dT%H:%M:%S", &tExpanded);
+  (void)std::strftime(result, sizeof(result), "%Y-%m-%dT%H:%M:%S", &tExpanded);
   return result;
 }
 

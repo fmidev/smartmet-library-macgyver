@@ -23,7 +23,7 @@ Fmi::ScopedTimer::ScopedTimer(const std::string& theName) : name(theName)
   gettimeofday(&tv, nullptr);
   start = tv.tv_sec + 0.000001 * tv.tv_usec;
   localtime_r(&tv.tv_sec, &t2);
-  strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &t2);
+  (void)strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &t2);
   time_str = buffer;
   snprintf(buffer, sizeof(buffer), ".%06u", static_cast<unsigned>(tv.tv_usec));
   time_str += buffer;

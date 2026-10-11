@@ -120,12 +120,12 @@ int main()
 	  signal(SIGINT, boost::bind(&Handler::sighandler,&handler,_1));
 	  signal(SIGINT ,boost::bind(&sighandler2,boost::cref(handler),_1));
 #else
-    signal(SIGINT, &sighandler);
+    (void)signal(SIGINT, &sighandler);
 #endif
-    signal(SIGQUIT, &sighandler);
-    signal(SIGHUP, &sighandler);
-    signal(SIGABRT, &sighandler);
-    signal(SIGTERM, &sighandler);
+    (void)signal(SIGQUIT, &sighandler);
+    (void)signal(SIGHUP, &sighandler);
+    (void)signal(SIGABRT, &sighandler);
+    (void)signal(SIGTERM, &sighandler);
 
     cout << endl
          << "\tThis program will monitor the triggers for a while." << endl
