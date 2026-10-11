@@ -1,4 +1,5 @@
 #include "DebugTools.h"
+#include "StringConversion.h"
 #include <cstdio>
 #include <ctime>
 #include <iostream>
@@ -71,7 +72,7 @@ int Fmi::tracerPid()
         std::vector<std::string> parts;
         split(parts, line, is_any_of(" \t\r\n"), token_compress_on);
         if (parts.size() == 2 && parts[0] == "TracerPid:") {
-            return atoi(parts[1].c_str());
+            return Fmi::stoi(parts[1]);
         }
     }
 #endif
