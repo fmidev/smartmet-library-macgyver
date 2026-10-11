@@ -152,8 +152,6 @@ FMI MacGyver library static files
 %changelog
 * Sun Oct 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.11-1.fmi
 - Invalid numbers are now detected instead of silently becoming 0 or a numeric prefix
-
-* Sat Oct 10 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.10-1.fmi
 - Use auto and return {} where clang-tidy suggests it, no functional changes
 - Mark overriding methods override and use nullptr, no functional changes
 - Use emplace and C++ standard library headers where clang-tidy suggests it, no functional changes
