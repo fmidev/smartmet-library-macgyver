@@ -63,7 +63,7 @@ inline void clamp_to(double& v, double a, double b)
  * Check 'lon' and 'lat' parameters for validity; clamp to (-180,180] and
  * [-89.8,89.9] range before calculations.
  */
-inline void check_lonlat(double& lon, double& lat)
+inline void check_lonlat(const double& lon, double& lat)
 {
   if (fabs(lon) > 180.0)
     throw Fmi::Exception(BCP, "Longitude must be in range [-180,180]");
