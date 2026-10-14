@@ -49,10 +49,9 @@ bool PostgreSQLConnection::Impl::open(const PostgreSQLConnectionOptions& theConn
 try
 {
     itsConnectionOptions = theConnectionOptions;
-    std::size_t numReconnectAttempts =
-        reconnectDisabled.load()
-            ? 0
-            : (last_failed ? 9 : 2); // If last connection attempt failed, try less times
+    std::size_t numReconnectAttempts = 0;
+    if (!reconnectDisabled.load())
+        numReconnectAttempts = (last_failed ? 9 : 2); // If last connection attempt failed, try less times
     itsConnection = open_internal(numReconnectAttempts);
     return bool(itsConnection);
 }
@@ -66,10 +65,9 @@ catch (const std::exception& e)
 bool PostgreSQLConnection::Impl::reopen()
 try
 {
-    std::size_t numReconnectAttempts =
-        reconnectDisabled.load()
-            ? 0
-            : (last_failed ? 9 : 2); // If last connection attempt failed, try less times
+    std::size_t numReconnectAttempts = 0;
+    if (!reconnectDisabled.load())
+        numReconnectAttempts = (last_failed ? 9 : 2); // If last connection attempt failed, try less times
     itsConnection = open_internal(numReconnectAttempts);
     return bool(itsConnection);
 }

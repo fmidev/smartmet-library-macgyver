@@ -103,7 +103,7 @@ class Handler
 
 namespace
 {
-void sighandler(int)
+void sighandler(int /*unused*/)
 {
   cout << "exiting after signal catch" << endl;
   exit(0);

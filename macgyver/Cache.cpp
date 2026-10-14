@@ -500,13 +500,13 @@ std::pair<std::string, std::string> FileCache::getFileDirAndName(std::size_t has
 
     out << std::hex;
 
-    out << (hashValue & 0xffu);
+    out << (hashValue & 0xffU);
 
     subDirectory = out.str();
 
     out.str("");
 
-    out << (hashValue >> 0x8u);
+    out << (hashValue >> 0x8U);
 
     fileName = out.str();
 
@@ -536,7 +536,7 @@ bool FileCache::getKey(const std::string& directory,
     if (!res)
       return false;
 
-    key = (second << 0x8u) | first;
+    key = (second << 0x8U) | first;
 
     return true;
   }

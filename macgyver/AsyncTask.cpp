@@ -95,10 +95,8 @@ bool Fmi::AsyncTask::wait_for(double sec)
     }
     return is_done;
   }
-  else
-  {
-    return false;
-  }
+
+  return false;
 }
 
 void Fmi::AsyncTask::cancel()

@@ -28,11 +28,9 @@ Fmi::last_write_time(const fs::path& path, std::error_code& ec) throw()
         ec = std::error_code();
         return st.st_mtime;
     }
-    else
-    {
-        ec = std::error_code(errno, std::system_category());
-        return 0;
-    }
+
+    ec = std::error_code(errno, std::system_category());
+    return 0;
 }
 
 std::time_t Fmi::last_write_time(const fs::path& path)
@@ -78,7 +76,7 @@ fs::path Fmi::unique_path(const fs::path& model)
         return charset[distribution(generator)];
     };
 
-    do {
+    for (bool more = true; more; more = fs::exists(result)) {
         result.clear();
         for (const char c : model.string()) {
             if (c == '%') {
@@ -92,7 +90,7 @@ fs::path Fmi::unique_path(const fs::path& model)
         {
             throw Fmi::Exception(BCP, "Failed to generate unique path - too many tries");
         }
-    } while (fs::exists(result));
+    }
 
     return fs::path(result);
 }

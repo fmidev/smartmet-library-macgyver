@@ -385,83 +385,81 @@ namespace Fmi
                 //---------------------------------------------------------------------
                 return fetch_top(*state);
             }
-            else if (state->next_current_size < max_size)
+            if (state->next_current_size < max_size)
             {
-                //---------------------------------------------------------------------
-                // Item is not available, max limit not exceeded, create a new item
-                //---------------------------------------------------------------------
-                // Update count while mutex is still locked to avoid growing over
-                // max_size also in case of concurrent calls
-                state->next_current_size++;
-                // Unlock mutex while creating new item (it may take some time for example
-                // of database connection)
-                lock.unlock();
-                std::unique_ptr<ItemType> new_item;
-                try
-                {
-                    new_item = createItemCb();
-                }
-                catch (...)
-                {
-                    // Creating new item failed. Decrement count and rethrow
-                    // the exception. This really only matters when pool expansion
-                    // is attempted.
-                    lock.lock();
-                    state->next_current_size--;
-                    throw;
-                }
-                // Update top and in_use_count while mutex is locked
+              //---------------------------------------------------------------------
+              // Item is not available, max limit not exceeded, create a new item
+              //---------------------------------------------------------------------
+              // Update count while mutex is still locked to avoid growing over
+              // max_size also in case of concurrent calls
+              state->next_current_size++;
+              // Unlock mutex while creating new item (it may take some time for example
+              // of database connection)
+              lock.unlock();
+              std::unique_ptr<ItemType> new_item;
+              try
+              {
+                new_item = createItemCb();
+              }
+              catch (...)
+              {
+                // Creating new item failed. Decrement count and rethrow
+                // the exception. This really only matters when pool expansion
+                // is attempted.
                 lock.lock();
-                if (!state->alive)
-                {
-                    // Pool was destroyed while the new item was being created: discard it
-                    state->next_current_size--;
-                    throw Fmi::Exception(BCP, "Pool is being destroyed");
-                }
-                // Add new item to the pool. List iterators are not invalidated by growing list
-                ItemRec& item_rec = state->pool_data.emplace_back(ItemRec(std::move(new_item)));
-                // One could optimize this part by avoiding putting new item in free
-                // item chain, but it would complicate the logic
-                state->current_size++;
-                item_rec.next = state->top;
-                state->top = &item_rec;
-                // No need to notify waiting threads as we are going to use the new item directly
-                return fetch_top(*state);
+                state->next_current_size--;
+                throw;
+              }
+              // Update top and in_use_count while mutex is locked
+              lock.lock();
+              if (!state->alive)
+              {
+                // Pool was destroyed while the new item was being created: discard it
+                state->next_current_size--;
+                throw Fmi::Exception(BCP, "Pool is being destroyed");
+              }
+              // Add new item to the pool. List iterators are not invalidated by growing list
+              ItemRec& item_rec = state->pool_data.emplace_back(ItemRec(std::move(new_item)));
+              // One could optimize this part by avoiding putting new item in free
+              // item chain, but it would complicate the logic
+              state->current_size++;
+              item_rec.next = state->top;
+              state->top = &item_rec;
+              // No need to notify waiting threads as we are going to use the new item directly
+              return fetch_top(*state);
+            }
+
+            // Also wake up when the pool is destroyed so that we do not wait forever
+            const auto wake_condition = [this] { return state->top != nullptr || !state->alive; };
+
+            if (timeout)
+            {
+              int ms = static_cast<int>(timeout->total_milliseconds());
+              if (!state->cond_var.wait_for(lock, boost::chrono::milliseconds(ms), wake_condition))
+              {
+                throw Fmi::Exception(BCP, "Timeout while waiting for pool item");
+              }
             }
             else
             {
-                // Also wake up when the pool is destroyed so that we do not wait forever
-                const auto wake_condition = [this] { return state->top != nullptr || !state->alive; };
-
-                if (timeout)
-                {
-                    int ms = static_cast<int>(timeout->total_milliseconds());
-                    if (!state->cond_var.wait_for(lock, boost::chrono::milliseconds(ms), wake_condition))
-                    {
-                        throw Fmi::Exception(BCP, "Timeout while waiting for pool item");
-                    }
-                }
-                else
-                {
-                    state->cond_var.wait(lock, wake_condition);
-                }
-
-                if (!state->alive)
-                {
-                    throw Fmi::Exception(BCP, "Pool is being destroyed");
-                }
-
-                if (state->top)
-                {
-                    //-----------------------------------------------------------------
-                    // Item is available, use it
-                    //-----------------------------------------------------------------
-                    return fetch_top(*state);
-                }
-
-                // Should not be here
-                throw Fmi::Exception(BCP, "Internal error");
+              state->cond_var.wait(lock, wake_condition);
             }
+
+            if (!state->alive)
+            {
+              throw Fmi::Exception(BCP, "Pool is being destroyed");
+            }
+
+            if (state->top)
+            {
+              //-----------------------------------------------------------------
+              // Item is available, use it
+              //-----------------------------------------------------------------
+              return fetch_top(*state);
+            }
+
+            // Should not be here
+            throw Fmi::Exception(BCP, "Internal error");
         }
 
         /**

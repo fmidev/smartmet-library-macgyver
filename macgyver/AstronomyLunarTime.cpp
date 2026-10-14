@@ -229,11 +229,7 @@ std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
   {
     std::stringstream ss;
 
-    bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
-
-    const Fmi::LocalDateTime& occ_ldt =
-        (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
-                        : (occ == FIRST_SET ? moonset : moonset2));
+    const Fmi::LocalDateTime& occ_ldt = risesettime(occ);
 
     if (!occ_ldt.is_not_a_date_time())
     {
@@ -254,13 +250,7 @@ std::string lunar_time_t::as_string_long(SetAndRiseOccurence occ) const
   {
     std::stringstream ss;
 
-    bool rise_occurence(occ == FIRST_RISE || occ == SECOND_RISE);
-
-    const Fmi::LocalDateTime& occ_ldt =
-        (rise_occurence ? (occ == FIRST_RISE ? moonrise : moonrise2)
-                        : (occ == FIRST_SET ? moonset : moonset2));
-
-    std::cout << occ_ldt;
+    const Fmi::LocalDateTime& occ_ldt = risesettime(occ);
 
     if (occ_ldt.is_not_a_date_time())
       ss << occ_ldt;
@@ -323,18 +313,6 @@ std::ostream& operator<<(std::ostream& ostream, const lunar_time_t& lt)
 
 namespace
 {
-bool dst_on(const DateTime& /*theTime*/, const Fmi::LocalDateTime& ldt)
-{
-  try
-  {
-    return ldt.dst_on();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 double timezone_offset(const Fmi::LocalDateTime& ldt)
 {
   try

@@ -24,7 +24,7 @@ const int timeout = 30;
 
 namespace
 {
-void sighandler(int)
+void sighandler(int /*unused*/)
 {
   cout << "Removing " << p << " after signal catch" << endl;
   std::filesystem::remove_all(p);

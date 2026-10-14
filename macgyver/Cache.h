@@ -124,8 +124,11 @@ class Cache
   // ----------------------------------------------------------------------
   CacheStats statistics() const
   {
-    std::size_t totalSize = 0, totalInserts = 0, totalEvictions = 0;
-    std::size_t totalHits = 0, totalMisses = 0;
+    std::size_t totalSize = 0;
+    std::size_t totalInserts = 0;
+    std::size_t totalEvictions = 0;
+    std::size_t totalHits = 0;
+    std::size_t totalMisses = 0;
     for (const auto& shard : itsShards)
     {
       std::shared_lock<std::shared_mutex> lock(shard.mutex);

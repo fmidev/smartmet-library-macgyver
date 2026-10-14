@@ -230,10 +230,8 @@ namespace Fmi
                     DateTimeType end = m_end > period.m_end ? m_end : period.m_end;
                     return TimePeriod(start, end);
                 }
-                else
-                {
-                    return TimePeriod();
-                }
+
+                return TimePeriod();
             }
 
             /**

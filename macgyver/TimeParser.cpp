@@ -314,56 +314,11 @@ bool is_long_weekday(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
-bool parse_uint16(const char** str, unsigned int length, std::uint16_t* value)
-{
-  try
-  {
-    const char* ptr = *str;
-
-    std::uint16_t tmp = 0;
-    for (unsigned int i = 0; i < length; i++)
-    {
-      if (!isdigit(*ptr))
-        return false;
-
-      tmp *= 10;
-      tmp += static_cast<unsigned int>(*ptr - '0');
-      ++ptr;
-    }
-    *value = tmp;
-    *str = ptr;
-    return true;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief ISO 8601 dates use "-" as a date separator and ":" as a time separator
  */
 // ----------------------------------------------------------------------
-
-bool skip_separator(const char** str, char separator, bool extended_format)
-{
-  try
-  {
-    if (!extended_format)
-      return true;
-
-    if (**str != separator)
-      return false;
-
-    ++*str;
-    return true;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
 
 // ----------------------------------------------------------------------
 /*!
@@ -1227,8 +1182,12 @@ Fmi::DateTime parse_http(const std::string& str)
       std::vector<std::string> parts;
       boost::algorithm::split(parts, s, boost::algorithm::is_any_of(" "));
 
-      std::uint16_t dd = 0, yy = 0, mm = 0;
-      std::uint16_t hh = 0, mi = 0, ss = 0;
+      std::uint16_t dd = 0;
+      std::uint16_t yy = 0;
+      std::uint16_t mm = 0;
+      std::uint16_t hh = 0;
+      std::uint16_t mi = 0;
+      std::uint16_t ss = 0;
       std::string hms;
 
       switch (parts.size())

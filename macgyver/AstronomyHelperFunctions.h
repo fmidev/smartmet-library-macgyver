@@ -24,6 +24,7 @@
 #include "Exception.h"
 #include "DateTime.h"
 #include "LocalDateTime.h"
+#include <algorithm>
 #include <cmath>
 
 #include <boost/math/constants/constants.hpp>
@@ -57,7 +58,7 @@ inline double tan_deg(double deg)
 /* Clamp to range [a,b] */
 inline void clamp_to(double& v, double a, double b)
 {
-  v = (v < a) ? a : (v > b) ? b : v;
+  v = std::clamp(v, a, b);
 }
 /*
  * Check 'lon' and 'lat' parameters for validity; clamp to (-180,180] and

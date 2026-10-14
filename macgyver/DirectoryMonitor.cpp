@@ -407,7 +407,6 @@ void DirectoryMonitor::run()
     {
       // Do not start if already running
 
-      do
       {
         boost::unique_lock<boost::mutex> lock(impl->m_ready);
         if (impl->running)
@@ -415,7 +414,7 @@ void DirectoryMonitor::run()
 
         impl->running = true;
         impl->has_ended = false;
-      } while (false);
+      }
 
       while (!impl->stop && !impl->schedule.empty())
       {

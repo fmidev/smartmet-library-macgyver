@@ -39,11 +39,13 @@ namespace
         const std::size_t pos = src.find_last_not_of('0');
         if (pos == std::string::npos) {
             return src;
-        } else if (src[pos] == '.') {
-            return std::string(src.begin(), src.begin() + pos);
-        } else {
-            return src;
         }
+        if (src[pos] == '.')
+        {
+          return std::string(src.begin(), src.begin() + pos);
+        }
+
+        return src;
     }
 }
 

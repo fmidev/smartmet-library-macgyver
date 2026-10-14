@@ -35,13 +35,13 @@ void Fmi::ReferenceEllipsoid::to_geodetic(const std::array<double, 3> &x,
   double h = 0;
   *lat = atan2(x[2], xy);
 
-  do
+  for (bool more = true; more; more = std::abs(*lat - prev_lat) > 1e-10)
   {
     prev_lat = *lat;
     v = transverse_curvature_radius(*lat);
     *lat = atan2(x[2] + v * e2 * sin(*lat), xy);
     h = std::abs(*lat) < 1 ? xy / cos(*lat) - v : x[2] / sin(*lat) - v * (1 - e2);
-  } while (std::abs(*lat - prev_lat) > 1e-10);
+  }
 
   if (height)
   {
