@@ -43,7 +43,7 @@ namespace Fmi
 
             static const Date epoch;
 
-            inline bool is_not_a_date() const { return is_not_a_date_time(); }
+            bool is_not_a_date() const { return is_not_a_date_time(); }
 
             int year() const;
             unsigned month() const;
@@ -111,7 +111,7 @@ namespace Fmi
         Date from_tm(const struct tm& tm);
 
         template <typename ArchiveType>
-        void Date::save(ArchiveType& archive, const unsigned int version) const
+        void Date::save(ArchiveType& archive, const unsigned int /*version*/) const
         {
             const auto date_type = type();
             archive & BOOST_SERIALIZATION_NVP(date_type);
@@ -123,16 +123,16 @@ namespace Fmi
         }
 
         template <typename ArchiveType>
-        void Date::load(ArchiveType& archive, const unsigned int version)
+        void Date::load(ArchiveType& archive, const unsigned int /*version*/)
         {
             Type date_type;
             archive & BOOST_SERIALIZATION_NVP(date_type);
             set_type(date_type);
             if (date_type == NORMAL)
             {
-                date::local_days::rep days;
-                archive & BOOST_SERIALIZATION_NVP(days);
-                date = date::local_days(date::days(days));
+              date::local_days::rep days = 0;
+              archive& BOOST_SERIALIZATION_NVP(days);
+              date = date::local_days(date::days(days));
             }
         }
     }

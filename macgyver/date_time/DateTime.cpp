@@ -494,11 +494,7 @@ namespace
     using namespace boost::spirit::qi;
     using iterator = std::string::const_iterator;
 
-    std::optional<Fmi::date_time::parser::date_time_members_t>
-    try_parse_impl(
-        const char* filename,     // We are not interested about this location
-        int line,                 // in backtrace. Therefore
-        const char* function,
+    std::optional<Fmi::date_time::parser::date_time_members_t> try_parse_impl(
         const std::string& str,
         const rule<iterator, Fmi::date_time::parser::date_members_t()>& date_grammar,
         const rule<iterator, Fmi::date_time::parser::duration_members_t()>& time_grammar,
@@ -542,12 +538,7 @@ namespace
         return tmp;
     }
 
-    Fmi::date_time::DateTime as_date_time(
-        const char* filename,     // We are not interested about this location
-        int line,                 // in backtrace. Therefore
-        const char* function,
-        const Fmi::date_time::parser::date_time_members_t& tmp,
-        bool throw_on_error)
+    Fmi::date_time::DateTime as_date_time(const Fmi::date_time::parser::date_time_members_t& tmp)
     {
         Fmi::date_time::Date date(
             tmp.date.year,
@@ -580,7 +571,7 @@ namespace
         bool *have_tz)
     {
         const std::string input = Fmi::trim_copy(str);
-        const auto members = try_parse_impl(filename, line, function, input, date_grammar, time_grammar, date_time_separator);
+        const auto members = try_parse_impl(input, date_grammar, time_grammar, date_time_separator);
         if (!members)
         {
             return std::nullopt;
@@ -588,10 +579,10 @@ namespace
 
         try
         {
-            const auto result = as_date_time(filename, line, function, *members, true);
-            if (have_tz)
-                *have_tz = bool(members->tz_offset);
-            return result;
+          const auto result = as_date_time(*members);
+          if (have_tz)
+            *have_tz = bool(members->tz_offset);
+          return result;
         }
         catch (...)
         {
@@ -612,7 +603,8 @@ namespace
         try
         {
             const std::string input = Fmi::trim_copy(str);
-            const auto members = try_parse_impl(filename, line, function, input, date_grammar, time_grammar, date_time_separator);
+            const auto members =
+                try_parse_impl(input, date_grammar, time_grammar, date_time_separator);
             if (!members)
             {
                 auto err = Fmi::Exception::Trace(filename, line, function,
@@ -620,7 +612,7 @@ namespace
                 throw err;
             }
 
-            const auto result = as_date_time(filename, line, function, *members, true);
+            const auto result = as_date_time(*members);
             return result;
         }
         catch (...)

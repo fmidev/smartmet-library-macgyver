@@ -63,7 +63,7 @@ Fmi::DateTime JulianTime::ptime_utc() const
     int z = lround(jd);
     double f = (jd + 0.5) - z;
 
-    int A;
+    int A = 0;
     if (z < 2299161)
     {
       A = z;

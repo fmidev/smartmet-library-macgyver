@@ -595,14 +595,17 @@ static const std::array<unsigned char, 256> iso_8859_1_nordic{
  */
 // ----------------------------------------------------------------------
 
+namespace
+{
 // Map from the most-significant 6 bits of the first byte to the total number of bytes in a UTF-8
 // character.
-static unsigned char UTF8_2_ISO_8859_1_len[] = {
+unsigned char UTF8_2_ISO_8859_1_len[] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* erroneous */
     2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5, 6};
 
-static unsigned char UTF8_2_ISO_8859_1_mask[] = {0x3F, 0x7F, 0x1F, 0x0F, 0x07, 0x03, 0x01};
+unsigned char UTF8_2_ISO_8859_1_mask[] = {0x3F, 0x7F, 0x1F, 0x0F, 0x07, 0x03, 0x01};
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!
@@ -612,7 +615,7 @@ static unsigned char UTF8_2_ISO_8859_1_mask[] = {0x3F, 0x7F, 0x1F, 0x0F, 0x07, 0
 
 unsigned char toupper(unsigned char theChar)
 {
-  return iso_8859_1_upper[static_cast<unsigned char>(theChar)];
+  return iso_8859_1_upper[theChar];
 }
 
 // ----------------------------------------------------------------------
@@ -623,7 +626,7 @@ unsigned char toupper(unsigned char theChar)
 
 unsigned char tolower(unsigned char theChar)
 {
-  return iso_8859_1_lower[static_cast<unsigned char>(theChar)];
+  return iso_8859_1_lower[theChar];
 }
 
 // ----------------------------------------------------------------------
@@ -634,7 +637,7 @@ unsigned char tolower(unsigned char theChar)
 
 unsigned char tonordic(unsigned char theChar)
 {
-  return iso_8859_1_nordic[static_cast<unsigned char>(theChar)];
+  return iso_8859_1_nordic[theChar];
 }
 
 // ----------------------------------------------------------------------
@@ -645,7 +648,7 @@ unsigned char tonordic(unsigned char theChar)
 
 unsigned char tolowernordic(unsigned char theChar)
 {
-  return iso_8859_1_nordic[iso_8859_1_lower[static_cast<unsigned char>(theChar)]];
+  return iso_8859_1_nordic[iso_8859_1_lower[theChar]];
 }
 
 // ----------------------------------------------------------------------
@@ -883,9 +886,9 @@ bool is_utf8(const std::string& src)
   {
     const auto* str = reinterpret_cast<const unsigned char*>(src.c_str());
     const unsigned char* end = str + src.length();
-    unsigned char byte;
-    unsigned int code_length;
-    uint32_t ch;
+    unsigned char byte = 0;
+    unsigned int code_length = 0;
+    uint32_t ch = 0;
     while (str != end)
     {
       byte = *str;

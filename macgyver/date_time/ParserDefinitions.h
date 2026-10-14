@@ -318,7 +318,7 @@ namespace parser
         {
             using namespace qi;
             m_hours %= r_uint22() [_pass = (_1 >= 0 && _1 <= 14)];
-            m_opt_sep %= -omit[char(':')];
+            m_opt_sep %= -omit[':'];
             m_minutes %= r_uint22() [_pass = (_1 >= 0 && _1 <= 59)];
             m_sign %= (char_('+') | char_('-'));
 

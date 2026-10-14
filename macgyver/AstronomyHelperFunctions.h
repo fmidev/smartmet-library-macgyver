@@ -139,7 +139,7 @@ inline double modifiedJulianDate(short month, short day, short year)
   double b = 0.0;
   if (a <= 15821004.1)
   {
-    b = -2 * (int)((year + 4716) / 4) - 1179;
+    b = -2 * ((year + 4716) / 4) - 1179;
   }
   else
   {

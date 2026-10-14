@@ -143,7 +143,7 @@ bool PostgreSQLConnection::open(const PostgreSQLConnectionOptions& theConnection
 {
   try
   {
-    return bool(impl->open(theConnectionOptions));
+    return impl->open(theConnectionOptions);
   }
   catch (...)
   {
@@ -155,7 +155,7 @@ bool PostgreSQLConnection::reopen() const
 {
   try
   {
-    return bool(impl->reopen());
+    return impl->reopen();
   }
   catch (...)
   {

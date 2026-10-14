@@ -27,7 +27,7 @@ namespace Fmi
 
             TimeDuration& operator=(const TimeDuration& other) = default;
 
-            inline bool is_not_a_duration() const { return is_not_a_date_time(); }
+            bool is_not_a_duration() const { return is_not_a_date_time(); }
 
             int64_t hours() const;
             int64_t minutes() const;
@@ -40,7 +40,7 @@ namespace Fmi
             int64_t total_seconds() const;
             int64_t total_milliseconds() const;
             int64_t total_microseconds() const;
-            inline int64_t total_nanoseconds() const { return 1000L * total_microseconds(); }
+            int64_t total_nanoseconds() const { return 1000L * total_microseconds(); }
 
             constexpr int64_t ticks_per_second() const { return detail::period_t::den; }
 
@@ -109,7 +109,6 @@ namespace Fmi
         private:
             void assert_special() const;
 
-        private:
             detail::duration_t m_duration;
         };
 
@@ -125,7 +124,7 @@ namespace Fmi
         struct std::tm to_tm(const TimeDuration& td);
 
         template <typename ArchiveType>
-        void TimeDuration::save(ArchiveType& archive, const unsigned int version) const
+        void TimeDuration::save(ArchiveType& archive, const unsigned int /*version*/) const
         {
             const auto duration_type = type();
             archive & BOOST_SERIALIZATION_NVP(duration_type);
@@ -137,16 +136,16 @@ namespace Fmi
         }
 
         template <typename ArchiveType>
-        void TimeDuration::load(ArchiveType& archive, const unsigned int version)
+        void TimeDuration::load(ArchiveType& archive, const unsigned int /*version*/)
         {
             Type duration_type;
             archive & BOOST_SERIALIZATION_NVP(duration_type);
             set_type(duration_type);
             if (duration_type == NORMAL)
             {
-                detail::duration_t::rep cnt;
-                archive & BOOST_SERIALIZATION_NVP(cnt);
-                m_duration = detail::duration_t(cnt);
+              detail::duration_t::rep cnt = 0;
+              archive& BOOST_SERIALIZATION_NVP(cnt);
+              m_duration = detail::duration_t(cnt);
             }
         }
     }

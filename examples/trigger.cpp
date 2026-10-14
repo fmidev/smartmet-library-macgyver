@@ -33,15 +33,15 @@ class Handler
   void run() { mon.run(); }
 
   // Can't get this to work:
-  void sighandler(int x) const
+  void sighandler(int /*x*/) const
   {
     cout << "Exiting after signal catch" << endl;
     exit(0);
   }
 
   void errorhandler(DirectoryMonitor::Watcher id,
-                    std::filesystem::path dir,
-                    boost::regex pattern,
+                    std::filesystem::path /*dir*/,
+                    boost::regex /*pattern*/,
                     std::string message) const
   {
     cout << "Monitor " << id << " errored: " << message << endl;
@@ -49,7 +49,7 @@ class Handler
 
   void listener(DirectoryMonitor::Watcher id,
                 std::filesystem::path dir,
-                boost::regex pattern,
+                boost::regex /*pattern*/,
                 DirectoryMonitor::Status status) const
   {
     cout << "Trigger " << id << " on " << dir << ":" << endl;
@@ -101,6 +101,8 @@ class Handler
   }
 };
 
+namespace
+{
 void sighandler(int)
 {
   cout << "exiting after signal catch" << endl;
@@ -108,6 +110,7 @@ void sighandler(int)
 }
 
 void sighandler2(const Handler& handler, int x) { handler.sighandler(x); }
+}  // namespace
 
 int main()
 {

@@ -1,4 +1,5 @@
 #include "ReferenceEllipsoid.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -29,8 +30,8 @@ void Fmi::ReferenceEllipsoid::to_geodetic(const std::array<double, 3> &x,
   *lon = atan2(x[1], x[0]);
 
   const double xy = hypot(x[0], x[1]);
-  double v;
-  double prev_lat;
+  double v = NAN;
+  double prev_lat = NAN;
   double h = 0;
   *lat = atan2(x[2], xy);
 

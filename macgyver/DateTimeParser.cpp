@@ -606,7 +606,7 @@ bool looks_iso(const std::string& str)
 {
   try
   {
-    bool utc;
+    bool utc = false;
     Fmi::DateTime t = try_parse_iso(str, &utc);
     return !t.is_not_a_date_time();
   }
@@ -664,10 +664,10 @@ namespace Fmi
 struct DateTimeParser::Impl
 {
   using const_iterator = std::string::const_iterator;
-  TimeParser::ISOParser<const_iterator> itsISOParser{};
-  TimeParser::FMIParser<const_iterator> itsFMIParser{};
-  TimeParser::SQLParser<const_iterator> itsSQLParser{};
-  TimeParser::OffsetParser<const_iterator> itsOffsetParser{};
+  TimeParser::ISOParser<const_iterator> itsISOParser;
+  TimeParser::FMIParser<const_iterator> itsFMIParser;
+  TimeParser::SQLParser<const_iterator> itsSQLParser;
+  TimeParser::OffsetParser<const_iterator> itsOffsetParser;
   TimeParser::EpochParser itsEpochParser{};
 
   DateTime parse(const std::string& str) const;
@@ -786,7 +786,7 @@ DateTime DateTimeParser::Impl::parse_epoch(const std::string& str) const
   {
     using iterator = std::string::const_iterator;
 
-    UnixTime target;
+    UnixTime target = 0;
 
     iterator start = str.begin();
     iterator finish = str.end();
@@ -874,7 +874,7 @@ bool DateTimeParser::Impl::looks_utc(const std::string& str) const
     if (looks_offset(str))  // offsets are always relative to the time now
       return true;
 
-    bool utc;
+    bool utc = false;
     DateTime t = try_parse_iso(str, &utc);
     if (!t.is_not_a_date_time())
       return utc;
@@ -955,7 +955,7 @@ TimeDuration DateTimeParser::Impl::try_parse_duration(
     if (!success)
       return {};
 
-    int offset_value;
+    int offset_value = 0;
 
     // Handle the sign
     if (target.sign == '-')
@@ -1092,7 +1092,7 @@ DateTime DateTimeParser::Impl::match_and_parse(const std::string& str,
     }
 
     {
-      UnixTime target;
+      UnixTime target = 0;
 
       iterator start = str.begin();
       iterator finish = str.end();
@@ -1305,12 +1305,12 @@ DateTime DateTimeParser::parse_http(const std::string& str) const
       std::vector<std::string> parts;
       boost::algorithm::split(parts, s, boost::algorithm::is_any_of(" "));
 
-      std::uint16_t dd;
-      std::uint16_t yy;
-      std::uint16_t mm;
-      std::uint16_t hh;
-      std::uint16_t mi;
-      std::uint16_t ss;
+      std::uint16_t dd = 0;
+      std::uint16_t yy = 0;
+      std::uint16_t mm = 0;
+      std::uint16_t hh = 0;
+      std::uint16_t mi = 0;
+      std::uint16_t ss = 0;
       std::string hms;
 
       switch (parts.size())

@@ -61,6 +61,8 @@ using Contents = std::map<fs::path, std::time_t>;
  */
 // ----------------------------------------------------------------------
 
+namespace
+{
 Contents directory_contents(const fs::path& path, bool hasregex, const boost::regex& pattern)
 {
   try
@@ -180,6 +182,7 @@ std::pair<DirectoryMonitor::Status, DirectoryMonitor::Change> directory_change(
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*
@@ -440,7 +443,7 @@ void DirectoryMonitor::run()
 
             // establish nature of changes
 
-            Change changes;
+            Change changes = 0;
             Status newstatus(new DirectoryMonitor::StatusMap);
 
             try

@@ -123,7 +123,7 @@ namespace Fmi
                 return m_type == NOT_A_DATE_TIME;
             }
 
-            inline Type type() const noexcept { return m_type; }
+            Type type() const noexcept { return m_type; }
 
             virtual std::string to_simple_string() const = 0;
 
@@ -140,10 +140,7 @@ namespace Fmi
 
             static Type sub_impl(Type a, Type b);
 
-            inline void set_type(Type type) noexcept
-            {
-                m_type = type;
-            }
+            void set_type(Type type) noexcept { m_type = type; }
 
             bool operator == (const Base& other) const;
             bool operator != (const Base& other) const;
@@ -156,7 +153,6 @@ namespace Fmi
             void assert_supported() const;
             void assert_supported(const Base& other) const;
 
-        private:
             Type m_type;
         };
 

@@ -22,6 +22,7 @@
 #include "AstronomyJulianTime.h"
 #include "Exception.h"
 
+
 #include <cmath>
 #include <vector>
 
@@ -82,7 +83,7 @@ solar_position_t solar_position(const Fmi::DateTime& utc, double lon_e, double l
     double zenith = rad2deg(acos(csz));
 
     double azDenom = cos_deg(lat) * sin_deg(zenith);
-    double azimuth;
+    double azimuth = NAN;
 
     if (fabs(azDenom) <= 0.001)
     {
@@ -102,7 +103,7 @@ solar_position_t solar_position(const Fmi::DateTime& utc, double lon_e, double l
         azimuth += 360.0;
     }
 
-    double refractionCorrection;
+    double refractionCorrection = NAN;
 
     double exoatmElevation = 90.0 - zenith;
     if (exoatmElevation <= 85.0)

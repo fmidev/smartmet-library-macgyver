@@ -47,25 +47,25 @@ namespace Fmi
             size_type length = max_length,
             boost::intmax_t offset = 0 );
 
-        inline bool is_open() const { return boost::iostreams::mapped_file::is_open(); }
+        bool is_open() const { return boost::iostreams::mapped_file::is_open(); }
 
-        inline mapmode flags() const { return boost::iostreams::mapped_file::flags(); }
+        mapmode flags() const { return boost::iostreams::mapped_file::flags(); }
 
         void close();
 
-        inline size_type size() const { return boost::iostreams::mapped_file::size(); }
+        size_type size() const { return boost::iostreams::mapped_file::size(); }
 
-        inline char* data() const { return boost::iostreams::mapped_file::data(); }
+        char* data() const { return boost::iostreams::mapped_file::data(); }
 
-        inline const char* const_data() const { return boost::iostreams::mapped_file::const_data(); }
+        const char* const_data() const { return boost::iostreams::mapped_file::const_data(); }
 
-        inline iterator begin() const { return boost::iostreams::mapped_file::begin(); }
+        iterator begin() const { return boost::iostreams::mapped_file::begin(); }
 
-        inline const_iterator const_begin() const { return boost::iostreams::mapped_file::const_begin(); }
+        const_iterator const_begin() const { return boost::iostreams::mapped_file::const_begin(); }
 
-        inline iterator end() const { return boost::iostreams::mapped_file::end(); }
+        iterator end() const { return boost::iostreams::mapped_file::end(); }
 
-        inline const_iterator const_end() const { return boost::iostreams::mapped_file::const_end(); }
+        const_iterator const_end() const { return boost::iostreams::mapped_file::const_end(); }
 
         static int alignment() { return boost::iostreams::mapped_file::alignment(); }
 

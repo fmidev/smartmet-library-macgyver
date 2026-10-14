@@ -35,7 +35,7 @@ uint32_t read_pos(std::size_t thePos, char *theData)
   try
   {
     std::size_t offset = thePos * (sizeof(uint32_t) + sizeof(uint16_t));
-    uint32_t tmp;
+    uint32_t tmp = 0;
     memcpy(&tmp, theData + offset, sizeof(uint32_t));
     return tmp;
   }
@@ -56,7 +56,7 @@ uint16_t read_attr(std::size_t thePos, char *theData)
   try
   {
     std::size_t offset = thePos * (sizeof(uint32_t) + sizeof(uint16_t)) + sizeof(uint32_t);
-    uint16_t tmp;
+    uint16_t tmp = 0;
     memcpy(&tmp, theData + offset, sizeof(uint16_t));
     return tmp;
   }
@@ -146,7 +146,7 @@ const std::string &WorldTimeZones::zone_name(float lon, float lat) const
  */
 // ----------------------------------------------------------------------
 
-WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData(nullptr)
+WorldTimeZones::WorldTimeZones(const std::string &theFile)
 {
   try
   {
@@ -159,7 +159,7 @@ WorldTimeZones::WorldTimeZones(const std::string &theFile) : itsSize(0), itsData
     if (token != "SHAPEPACK")
       throw Fmi::Exception(BCP, "File '" + theFile + "' is not a shapepack file");
 
-    int zonecount;
+    int zonecount = 0;
     in >> itsWidth >> itsHeight >> itsLon1 >> itsLat1 >> itsLon2 >> itsLat2 >> zonecount;
     // Skip the remaining line
     std::getline(in, token);

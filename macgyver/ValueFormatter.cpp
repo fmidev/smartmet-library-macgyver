@@ -14,7 +14,10 @@
 
 #include <double-conversion/double-conversion.h>
 
-static int powers_of_ten[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000};
+namespace
+{
+int powers_of_ten[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000};
+}  // namespace
 
 namespace Fmi
 {
@@ -134,7 +137,7 @@ std::string ValueFormatter::format_double_conversion_fixed(double theValue, int 
     bool negativeValue = (theValue < 0);
     if (thePrecision == 0)
     {
-      double ipart;
+      double ipart = NAN;
       double fractional = modf(theValue, &ipart);
       // Halfway rounding
       if (std::abs(fractional) == 0.5)

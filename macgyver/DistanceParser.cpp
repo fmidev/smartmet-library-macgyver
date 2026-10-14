@@ -6,25 +6,27 @@ namespace Fmi
 {
 namespace DistanceParser
 {
-static const char* KM = "km";
-static const char* M = "m";
-static const char* CM = "cm";
-static const char* MM = "mm";
-static const char* MI = "mi";
-static const char* NMI = "nmi";
-static const char* YD = "yd";
-static const char* FT = "ft";
-static const char* IN = "in";
-static const char* KILOMETER = "kilometer";
-static const char* METER = "meter";
-static const char* CENTIMETER = "centimeter";
-static const char* MILLIMETER = "millimeter";
-static const char* MILE = "mile";
-static const char* NAUTICAL_MILE = "nautical_mile";
-static const char* YARD = "yard";
-static const char* FOOT = "foot";
-static const char* INCH = "inch";
-static const char* NUMBER_SIGNS = "+-. 1234567890";
+namespace
+{
+const char* KM = "km";
+const char* M = "m";
+const char* CM = "cm";
+const char* MM = "mm";
+const char* MI = "mi";
+const char* NMI = "nmi";
+const char* YD = "yd";
+const char* FT = "ft";
+const char* IN = "in";
+const char* KILOMETER = "kilometer";
+const char* METER = "meter";
+const char* CENTIMETER = "centimeter";
+const char* MILLIMETER = "millimeter";
+const char* MILE = "mile";
+const char* NAUTICAL_MILE = "nautical_mile";
+const char* YARD = "yard";
+const char* FOOT = "foot";
+const char* INCH = "inch";
+const char* NUMBER_SIGNS = "+-. 1234567890";
 
 double convert(double value, const std::string& unit, const std::string& format)
 {
@@ -207,6 +209,7 @@ double convert(double value, const std::string& unit, const std::string& format)
 
   return value;
 }
+}  // namespace
 
 double parse_kilometer(const std::string& str)
 {

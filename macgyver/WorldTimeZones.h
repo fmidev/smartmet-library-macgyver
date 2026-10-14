@@ -37,8 +37,8 @@ class WorldTimeZones
 
   std::vector<std::string> itsZones;
 
-  uint32_t itsSize;
-  char* itsData;
+  uint32_t itsSize = 0;
+  char* itsData = nullptr;
 
 };  // class WorldTimeZones
 }  // namespace Fmi

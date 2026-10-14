@@ -101,7 +101,7 @@ inline TernarySearchTree<T>::~TernarySearchTree()
 // ----------------------------------------------------------------------
 
 template <typename T>
-inline TernarySearchTree<T>::TernarySearchTree() : root(nullptr), count(0)
+inline TernarySearchTree<T>::TernarySearchTree() : root(nullptr)
 {
 }
 

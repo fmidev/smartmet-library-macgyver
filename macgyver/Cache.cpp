@@ -19,7 +19,7 @@ bool parse_size_t(const std::string& input, std::size_t& result)
     auto end = input.end();
 
     SizeTParser parser;
-    std::size_t res;
+    std::size_t res = 0;
 
     bool ret = boost::spirit::qi::parse(begin, end, parser, res);
 
@@ -37,7 +37,7 @@ bool parse_size_t(const std::string& input, std::size_t& result)
 }
 
 FileCache::FileCache(const fs::path& directory, std::size_t maxSize)
-    : itsSize(0), itsMaxSize(maxSize), itsDirectory(directory)
+    : itsMaxSize(maxSize), itsDirectory(directory)
 {
   try
   {
@@ -341,7 +341,7 @@ void FileCache::update()
 
         std::string fileName = path.filename().string();  // Key in the map is filename itself
 
-        std::size_t key;
+        std::size_t key = 0;
 
         bool valid = getKey(subDir, fileName, key);
 
@@ -524,9 +524,9 @@ bool FileCache::getKey(const std::string& directory,
 {
   try
   {
-    std::size_t first;
-    std::size_t second;
-    bool res;
+    std::size_t first = 0;
+    std::size_t second = 0;
+    bool res = false;
 
     res = parse_size_t(directory, first);
     if (!res)

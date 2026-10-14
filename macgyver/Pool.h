@@ -138,11 +138,11 @@ namespace Fmi
             Ptr(Ptr&& other) = default;
 
             // We do not want to expose all std::unique_ptr<> methods for example release()
-            inline operator ItemType*() const { return this->base::get(); }
-            inline operator bool() const { return this->base::get() != nullptr; }
-            inline ItemType* operator->() const { return this->base::get(); }
-            inline ItemType* get() const { return this->base::get(); }
-            inline void reset() { this->base::reset(); }
+            operator ItemType*() const { return this->base::get(); }
+            operator bool() const { return this->base::get() != nullptr; }
+            ItemType* operator->() const { return this->base::get(); }
+            ItemType* get() const { return this->base::get(); }
+            void reset() { this->base::reset(); }
         };
 
         Pool(const Pool&) = delete;
@@ -282,75 +282,76 @@ namespace Fmi
         }
 
     private:
+     void init(Args... /*args*/)
+     {
+       const auto grow = [this]()
+       {
+         std::unique_ptr<ItemType> new_item(createItemCb());
+         boost::unique_lock<boost::mutex> lock(state->mutex);
+         // Add new item to the pool. List iterators are not invalidated by growing list
+         ItemRec& item_rec = state->pool_data.emplace_back(ItemRec(std::move(new_item)));
+         item_rec.next = state->top;
+         state->top = &item_rec;
+         state->current_size++;
+         state->next_current_size++;
+       };
 
-        void init(Args... args)
-        {
-            const auto grow = [this]() {
-                std::unique_ptr<ItemType> new_item(createItemCb());
-                boost::unique_lock<boost::mutex> lock(state->mutex);
-                // Add new item to the pool. List iterators are not invalidated by growing list
-                ItemRec& item_rec = state->pool_data.emplace_back(ItemRec(std::move(new_item)));
-                item_rec.next = state->top;
-                state->top = &item_rec;
-                state->current_size++;
-                state->next_current_size++;
-            };
+       if constexpr (InitType == PoolInitType::Sequential)
+       {
+         for (std::size_t i = 0; i < start_size; ++i)
+         {
+           grow();
+         }
+       }
+       else if constexpr (InitType == PoolInitType::Parallel)
+       {
+         std::atomic<bool> have_errors = false;
+         std::atomic<int> num_errors = 0;
 
-            if constexpr (InitType == PoolInitType::Sequential)
-            {
-                for (std::size_t i = 0; i < start_size; ++i)
-                {
-                    grow();
-                }
-            }
-            else if constexpr (InitType == PoolInitType::Parallel)
-            {
-                std::atomic<bool> have_errors = false;
-                std::atomic<int> num_errors = 0;
+         const auto init_task_error = [this, &have_errors, &num_errors](const std::string& name)
+         {
+           bool trueVal = true;
+           num_errors++;
 
-                const auto init_task_error = [this, &have_errors, &num_errors]
-                    (const std::string& name)
-                {
-                    bool trueVal = true;
-                    num_errors++;
+           // Report only the first error in details
+           if (have_errors.exchange(trueVal))
+             return;
 
-                    // Report only the first error in details
-                    if (have_errors.exchange(trueVal))
-                        return;
+           std::exception_ptr eptr = std::current_exception();
+           if (!eptr)
+             return;
 
-                    std::exception_ptr eptr = std::current_exception();
-                    if (!eptr)
-                        return;
+           try
+           {
+             rethrow_exception(eptr);
+           }
+           catch (...)
+           {
+             auto error =
+                 Fmi::Exception::Trace(BCP,
+                                       "Error initializing pool item of type " +
+                                           Fmi::demangle_cpp_type_name(typeid(ItemType).name()))
+                     .addParameter("Task name", name);
+             // std::cout << error << std::endl;
+             throw error;
+           }
+         };
 
-                    try
-                    {
-                        rethrow_exception(eptr);
-                    }
-                    catch(...)
-                    {
-                        auto error = Fmi::Exception::Trace(BCP, "Error initializing pool item of type " +
-                                Fmi::demangle_cpp_type_name(typeid(ItemType).name()))
-                            .addParameter("Task name", name);
-                        //std::cout << error << std::endl;
-                        throw error;
-                    }
-                };
+         AsyncTaskGroup task_group;
+         task_group.stop_on_error(true);
 
-                AsyncTaskGroup task_group;
-                task_group.stop_on_error(true);
+         for (std::size_t i = 0; i < start_size; ++i)
+         {
+           task_group.add("ini-pool-" + Fmi::to_string(i + 1), grow);
+         }
 
-                for (std::size_t i = 0; i < start_size; ++i)
-                {
-                    task_group.add("ini-pool-" + Fmi::to_string(i+1), grow);
-                }
-
-                task_group.on_task_error(init_task_error);
-                task_group.wait();
-            }
-            else
-            {
-                throw Fmi::Exception(BCP, "Unsupported PoolInitType value");
-            }
+         task_group.on_task_error(init_task_error);
+         task_group.wait();
+       }
+       else
+       {
+         throw Fmi::Exception(BCP, "Unsupported PoolInitType value");
+       }
         }
 
         ItemRec* acquire(std::optional<Fmi::TimeDuration> timeout)

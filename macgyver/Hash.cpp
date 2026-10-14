@@ -69,13 +69,13 @@ inline uint64_t to_u64_integral(T v) noexcept
 
 inline uint32_t bits_float(float v) noexcept
 {
-  uint32_t u;
+  uint32_t u = 0;
   std::memcpy(&u, &v, sizeof(u));
   return u;
 }
 inline uint64_t bits_double(double v) noexcept
 {
-  uint64_t u;
+  uint64_t u = 0;
   std::memcpy(&u, &v, sizeof(u));
   return u;
 }

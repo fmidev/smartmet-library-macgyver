@@ -15,10 +15,15 @@
 using namespace std;
 using namespace Fmi;
 
+namespace
+{
 std::filesystem::path p("tmp");
+}  // namespace
 
 const int timeout = 30;
 
+namespace
+{
 void sighandler(int)
 {
   cout << "Removing " << p << " after signal catch" << endl;
@@ -26,9 +31,9 @@ void sighandler(int)
   exit(0);
 }
 
-void listener(DirectoryMonitor::Watcher id,
-              std::filesystem::path dir,
-              boost::regex pattern,
+void listener(DirectoryMonitor::Watcher /*id*/,
+              std::filesystem::path /*dir*/,
+              boost::regex /*pattern*/,
               DirectoryMonitor::Status status)
 {
   for (const DirectoryMonitor::StatusMap::value_type& it : *status)
@@ -48,13 +53,14 @@ void listener(DirectoryMonitor::Watcher id,
   }
 }
 
-void errorhandler(DirectoryMonitor::Watcher id,
-                  std::filesystem::path dir,
-                  boost::regex pattern,
+void errorhandler(DirectoryMonitor::Watcher /*id*/,
+                  std::filesystem::path /*dir*/,
+                  boost::regex /*pattern*/,
                   std::string message)
 {
   cout << "Error: " << message << endl;
 }
+}  // namespace
 
 int main()
 {

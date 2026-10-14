@@ -18,8 +18,11 @@
 #include <cctype>
 #include <stdexcept>
 
-static Fmi::DateTime bad_time;
-static Fmi::TimeDuration bad_duration;
+namespace
+{
+Fmi::DateTime bad_time;
+Fmi::TimeDuration bad_duration;
+}  // namespace
 
 namespace
 {
@@ -228,6 +231,8 @@ namespace Fmi
 {
 namespace TimeParser
 {
+namespace
+{
 std::uint16_t get_short_month(const std::string& str)
 {
   try
@@ -427,7 +432,7 @@ bool looks_iso(const std::string& str)
 {
   try
   {
-    bool utc;
+    bool utc = false;
     Fmi::DateTime t = try_parse_iso(str, &utc);
     return !t.is_not_a_date_time();
   }
@@ -458,6 +463,7 @@ bool looks_offset(const std::string& str)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!
@@ -502,7 +508,7 @@ bool looks_utc(const std::string& str)
     if (looks_offset(str))  // offsets are always relative to the time now
       return true;
 
-    bool utc;
+    bool utc = false;
     Fmi::DateTime t = try_parse_iso(str, &utc);
     if (!t.is_not_a_date_time())
       return utc;
@@ -528,7 +534,7 @@ Fmi::DateTime parse_epoch(const std::string& str)
     using iterator = std::string::const_iterator;
 
     EpochParser theParser;
-    UnixTime target;
+    UnixTime target = 0;
 
     iterator start = str.begin();
     iterator finish = str.end();
@@ -822,7 +828,7 @@ TimeDuration try_parse_duration(const std::string& str)
     if (!success)
       return bad_duration;
 
-    int offset_value;
+    int offset_value = 0;
 
     // Handle the sign
     if (target.sign == '-')
@@ -941,6 +947,8 @@ TimeDuration try_parse_iso_duration(const std::string& str)
   }
 }
 
+namespace
+{
 // ----------------------------------------------------------------------
 /*!
  * \brief Parse a time string and return the matched parser
@@ -1041,7 +1049,7 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
 
     {
       EpochParser theParser;
-      UnixTime target;
+      UnixTime target = 0;
 
       iterator start = str.begin();
       iterator finish = str.end();
@@ -1070,6 +1078,7 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!
@@ -1218,8 +1227,8 @@ Fmi::DateTime parse_http(const std::string& str)
       std::vector<std::string> parts;
       boost::algorithm::split(parts, s, boost::algorithm::is_any_of(" "));
 
-      std::uint16_t dd, yy, mm;
-      std::uint16_t hh, mi, ss;
+      std::uint16_t dd = 0, yy = 0, mm = 0;
+      std::uint16_t hh = 0, mi = 0, ss = 0;
       std::string hms;
 
       switch (parts.size())

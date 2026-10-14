@@ -168,7 +168,7 @@ namespace Fmi
         }
 
         template <typename Archive>
-        void DateTime::save(Archive& archive, const unsigned int version) const
+        void DateTime::save(Archive& archive, const unsigned int /*version*/) const
         {
             Type date_type = type();
             archive & BOOST_SERIALIZATION_NVP(date_type);
@@ -181,17 +181,17 @@ namespace Fmi
         }
 
         template <typename Archive>
-        void DateTime::load(Archive& archive, const unsigned int version)
+        void DateTime::load(Archive& archive, const unsigned int /*version*/)
         {
             Type date_type;
             archive & BOOST_SERIALIZATION_NVP(date_type);
             set_type(date_type);
             if (date_type == NORMAL)
             {
-                int64_t value;
-                archive & BOOST_SERIALIZATION_NVP(value);
-                const detail::duration_t duration(value);
-                m_time_point = epoch.m_time_point + duration;
+              int64_t value = 0;
+              archive& BOOST_SERIALIZATION_NVP(value);
+              const detail::duration_t duration(value);
+              m_time_point = epoch.m_time_point + duration;
             }
         }
     }

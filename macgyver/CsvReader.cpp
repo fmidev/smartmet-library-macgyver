@@ -29,6 +29,8 @@ enum CsvState
 const char doublequote = '"';
 const char comment = '#';
 
+namespace
+{
 // test end of record characters
 bool isnewline(int ch)
 {
@@ -48,6 +50,7 @@ void myerror(const string& prefix, const string& filename, ifstream& file)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!

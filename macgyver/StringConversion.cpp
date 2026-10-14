@@ -232,7 +232,7 @@ std::optional<int> stoi_opt(const std::string& str)
 {
   try
   {
-    long result;
+    long result = 0;
     auto begin = str.cbegin();
     auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
@@ -267,7 +267,7 @@ std::optional<long> stol_opt(const std::string& str)
 {
   try
   {
-    long result;
+    long result = 0;
     auto begin = str.cbegin();
     auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::long_, result))
@@ -301,7 +301,7 @@ std::optional<unsigned long> stoul_opt(const std::string& str)
 {
   try
   {
-    unsigned long result;
+    unsigned long result = 0;
     auto begin = str.cbegin();
     auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::ulong_, result))
@@ -338,7 +338,7 @@ std::optional<float> stof_opt(const std::string& str)
     // We parse as double because of this:
     // http://stackoverflow.com/questions/17391348/boost-spirit-floating-number-parser-precision
 
-    double result;
+    double result = NAN;
     auto begin = str.cbegin();
     auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))
@@ -380,7 +380,7 @@ std::optional<double> stod_opt(const std::string& str)
 {
   try
   {
-    double result;
+    double result = NAN;
     auto begin = str.cbegin();
     auto end = str.cend();
     if (boost::spirit::qi::parse(begin, end, boost::spirit::qi::double_, result))

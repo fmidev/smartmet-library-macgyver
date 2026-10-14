@@ -11,10 +11,7 @@ using Fmi::date_time::LocalDateTime;
 
 namespace detail = Fmi::detail;
 
-LocalDateTime::LocalDateTime() noexcept
-    : Base()
-{
-}
+LocalDateTime::LocalDateTime() noexcept {}
 
 LocalDateTime::LocalDateTime(Type type) noexcept
     : Base(type)
@@ -85,7 +82,6 @@ LocalDateTime::LocalDateTime(
     enum ErrorHandling err_handling,
     enum Choose choose)
 
-    : Base()
 {
     try
     {

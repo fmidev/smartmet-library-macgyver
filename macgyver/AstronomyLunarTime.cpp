@@ -321,7 +321,9 @@ std::ostream& operator<<(std::ostream& ostream, const lunar_time_t& lt)
   }
 }
 
-bool dst_on(const DateTime& theTime, const Fmi::LocalDateTime& ldt)
+namespace
+{
+bool dst_on(const DateTime& /*theTime*/, const Fmi::LocalDateTime& ldt)
 {
   try
   {
@@ -632,6 +634,7 @@ lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 lunar_time_t lunar_time(const Fmi::LocalDateTime& ldt,
                         double lon,
