@@ -29,10 +29,9 @@ namespace TimeParser
 
 Fmi::LocalDateTime parse(const std::string& str,
                                          const std::string& format,
-                                         Fmi::TimeZonePtr tz);
+                                         const Fmi::TimeZonePtr& tz);
 
-Fmi::LocalDateTime parse(const std::string& str,
-                                         Fmi::TimeZonePtr tz);
+Fmi::LocalDateTime parse(const std::string& str, const Fmi::TimeZonePtr& tz);
 
 DateTime parse(const std::string& str, const std::string& format);
 

@@ -45,7 +45,7 @@ class Exception : public std::exception
   static Exception Trace(const char* _filename,
                         int _line,
                         const char* _function,
-                        std::exception_ptr eptr,
+                        const std::exception_ptr& eptr,
                         std::string _message);
 
   /**

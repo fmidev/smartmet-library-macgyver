@@ -122,7 +122,7 @@ std::string PostgreSQLConnectionOptions::toString(bool hidePassword) const
 #if 0
   ss << " client_encoding=" << encoding
 #endif
-       ;
+
   // clang-format on
 
   if (connect_timeout > 0)
@@ -257,8 +257,8 @@ PostgreSQLConnection::PreparedSQL::Ptr PostgreSQLConnection::prepare(
   return std::make_shared<PreparedSQL>(*this, name, theSQLStatement);
 }
 
-
-pqxx::result PostgreSQLConnection::exec_prepared(const std::string& name, pqxx::params params) const
+pqxx::result PostgreSQLConnection::exec_prepared(const std::string& name,
+const pqxx::params& params) const
 try
 {
   return impl->exec_prepared(false, name, params);

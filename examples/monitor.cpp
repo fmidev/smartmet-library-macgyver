@@ -33,9 +33,9 @@ namespace
 }
 
 void listener(DirectoryMonitor::Watcher /*id*/,
-              std::filesystem::path /*dir*/,
-              boost::regex /*pattern*/,
-              DirectoryMonitor::Status status)
+              const std::filesystem::path& /*dir*/,
+              const boost::regex& /*pattern*/,
+              const DirectoryMonitor::Status& status)
 {
   for (const DirectoryMonitor::StatusMap::value_type& it : *status)
   {
@@ -57,9 +57,9 @@ void listener(DirectoryMonitor::Watcher /*id*/,
 }
 
 void errorhandler(DirectoryMonitor::Watcher /*id*/,
-                  std::filesystem::path /*dir*/,
-                  boost::regex /*pattern*/,
-                  std::string message)
+                  const std::filesystem::path& /*dir*/,
+                  const boost::regex& /*pattern*/,
+                  const std::string& message)
 {
   cout << "Error: " << message << endl;
 }

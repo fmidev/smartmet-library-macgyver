@@ -41,17 +41,17 @@ class Handler
   }
 
   void errorhandler(DirectoryMonitor::Watcher id,
-                    std::filesystem::path /*dir*/,
-                    boost::regex /*pattern*/,
-                    std::string message) const
+                    const std::filesystem::path& /*dir*/,
+                    const boost::regex& /*pattern*/,
+                    const std::string& message) const
   {
     cout << "Monitor " << id << " errored: " << message << endl;
   }
 
   void listener(DirectoryMonitor::Watcher id,
-                std::filesystem::path dir,
-                boost::regex /*pattern*/,
-                DirectoryMonitor::Status status) const
+                const std::filesystem::path& dir,
+                const boost::regex& /*pattern*/,
+                const DirectoryMonitor::Status& status) const
   {
     cout << "Trigger " << id << " on " << dir << ":" << endl;
 

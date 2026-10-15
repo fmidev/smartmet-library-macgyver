@@ -1169,7 +1169,7 @@ DateTimeParser::DateTimeParser() : impl(new DateTimeParser::Impl) {}
 
 Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
                                                          const std::string& format,
-                                                         Fmi::TimeZonePtr tz) const
+                                                         const Fmi::TimeZonePtr& tz) const
 {
   try
   {
@@ -1196,8 +1196,7 @@ Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
  */
 // ----------------------------------------------------------------------
 
-Fmi::LocalDateTime DateTimeParser::parse(const std::string& str,
-                                                         Fmi::TimeZonePtr tz) const
+Fmi::LocalDateTime DateTimeParser::parse(const std::string& str, const Fmi::TimeZonePtr& tz) const
 {
   try
   {

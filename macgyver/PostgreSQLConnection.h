@@ -187,7 +187,7 @@ class PostgreSQLConnection
       const Container& container,
       int requested_size =  -1) const;
 
-  pqxx::result exec_prepared(const std::string& name, pqxx::params params) const;
+  pqxx::result exec_prepared(const std::string& name, const pqxx::params& params) const;
 
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;

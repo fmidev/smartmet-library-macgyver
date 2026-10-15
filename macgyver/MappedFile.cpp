@@ -59,8 +59,8 @@ catch (...)
 
 Fmi::MappedFile::~MappedFile() = default;
 
-void
-Fmi::MappedFile::open(Params params)  try
+void Fmi::MappedFile::open(const Params& params)
+try
 {
     m_path = params.path;
     boost::iostreams::mapped_file::open(params);

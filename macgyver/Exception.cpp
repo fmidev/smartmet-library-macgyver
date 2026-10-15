@@ -60,7 +60,7 @@ Exception Exception::Trace(const char* _filename,
 Exception Exception::Trace(const char* _filename,
                           int _line,
                           const char* _function,
-                          std::exception_ptr eptr,
+                          const std::exception_ptr& eptr,
                           std::string _message)
 {
   if (!eptr)
@@ -557,9 +557,8 @@ std::ostream& operator<<(std::ostream& out, const Exception& e)
   return out;
 }
 
-Exception::ForceStackTrace::ForceStackTrace()
+Exception::ForceStackTrace::ForceStackTrace() : prev(true)
 {
-  prev = true;
   std::swap(force_stack_trace, prev);
 }
 
