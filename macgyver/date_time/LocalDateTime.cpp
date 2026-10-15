@@ -501,7 +501,6 @@ Fmi::date_time::LocalDateTime::make_zoned_time(
 
         case Choose::LATEST:
             return detail::zoned_time_t(tz, time, date::choose::latest);
-            break;
 
         case Choose::AUTO:
             try {

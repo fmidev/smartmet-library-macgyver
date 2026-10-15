@@ -59,7 +59,6 @@ catch (const std::exception& e)
 {
     throw Fmi::Exception::Trace(BCP, "Error opening PostgreSQL connection to "
         + fmt::format("{}", getId()) + ": " + e.what());
-    return false;
 }
 
 bool PostgreSQLConnection::Impl::reopen()
@@ -75,7 +74,6 @@ catch (const std::exception& e)
 {
     throw Fmi::Exception::Trace(BCP, "Error reopening PostgreSQL connection to "
         + fmt::format("{}", getId()) + ": " + e.what());
-    return false;
 }
 
 
