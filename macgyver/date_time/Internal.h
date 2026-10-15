@@ -28,8 +28,8 @@ struct StreamExceptionState final
       // Ignore
     }
   }
-  StreamExceptionState(const StreamExceptionState&) = default;
-  StreamExceptionState& operator=(const StreamExceptionState&) = default;
+  StreamExceptionState(const StreamExceptionState&) = delete;
+  StreamExceptionState& operator=(const StreamExceptionState&) = delete;
 
   std::istream& is;
   std::ios::iostate state;
