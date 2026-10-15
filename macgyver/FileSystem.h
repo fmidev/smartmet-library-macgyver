@@ -37,7 +37,8 @@ namespace Fmi
     /**
      *   Returns file last write time or provided default time in case of an error
      */
-    std::time_t last_write_time_or(const std::filesystem::path& path, const std::time_t default_time) throw();
+    std::time_t last_write_time_or(const std::filesystem::path& path,
+                                   std::time_t default_time) throw();
 
     /**
      *   Replacement of boost::filesystem::unique_path (not found in std::filesystem)

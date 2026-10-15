@@ -21,7 +21,7 @@ void set_thread_name(const std::string& name)
   {
     static std::mutex warned_mutex;
     static std::set<std::string> warned;
-    const std::lock_guard<std::mutex> lock(warned_mutex);
+    const std::scoped_lock lock(warned_mutex);
     if (warned.insert(name).second)
     {
       std::cerr << fmt::format(

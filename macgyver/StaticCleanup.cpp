@@ -32,7 +32,7 @@ unsigned& instance_count()
 
 StaticCleanup::StaticCleanup(std::function<void()> cleanup_function)
 {
-  std::lock_guard<std::mutex> lock(mutex());
+  std::scoped_lock lock(mutex());
   cleanup_functions().push_front(std::move(cleanup_function));
 }
 
@@ -40,7 +40,7 @@ StaticCleanup::~StaticCleanup() = default;
 
 StaticCleanup::AtExit::AtExit()
 {
-  std::lock_guard<std::mutex> lock(mutex());
+  std::scoped_lock lock(mutex());
   ++instance_count();
 }
 
@@ -53,7 +53,7 @@ StaticCleanup::AtExit::~AtExit()
   // new StaticCleanup.
   std::list<std::function<void()>> functions;
   {
-    std::lock_guard<std::mutex> lock(mutex());
+    std::scoped_lock lock(mutex());
     if (--instance_count() != 0)
       return;
     functions.swap(cleanup_functions());

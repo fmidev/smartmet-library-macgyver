@@ -56,7 +56,7 @@ std::optional<double> stod_opt(const std::string& str);
 // to the nearest byte. Examples: 34359738368  34359738368L  32G  32GB  32 GiB  1.5G  0
 std::size_t stosz(const std::string& str);
 
-std::string to_iso_string(const std::time_t time);
+std::string to_iso_string(std::time_t time);
 std::string to_iso_string(const TimeDuration& duration);
 std::string to_iso_string(const Fmi::Date& date);
 std::string to_iso_string(const DateTime& time);
