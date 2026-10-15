@@ -15,7 +15,9 @@
 bool Fmi::AsyncTask::silent = false;
 bool Fmi::AsyncTask::log_time = false;
 
-#define LOG_TIME(desc) if (Fmi::AsyncTask::log_time) { Fmi::AsyncTask::log_event_time(this, desc); }
+// An expression, so that the terminating ';' of a call is part of the statement
+#define LOG_TIME(desc) \
+  (Fmi::AsyncTask::log_time ? Fmi::AsyncTask::log_event_time(this, desc) : void())
 
 Fmi::AsyncTask::AsyncTask(const std::string& name,
                           std::function<void()> task,
