@@ -24,10 +24,11 @@ const int timeout = 30;
 
 namespace
 {
-void sighandler(int /*unused*/)
+[[noreturn]] void sighandler(int /*unused*/)
 {
   cout << "Removing " << p << " after signal catch" << endl;
   std::filesystem::remove_all(p);
+  // NOLINTNEXTLINE(concurrency-mt-unsafe): single-threaded example program
   exit(0);
 }
 
@@ -48,6 +49,8 @@ void listener(DirectoryMonitor::Watcher /*id*/,
         break;
       case DirectoryMonitor::MODIFY:
         cout << it.first << " modified" << endl;
+        break;
+      default:
         break;
     }
   }

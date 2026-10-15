@@ -109,7 +109,7 @@ namespace Fmi
         private:
             void assert_special() const;
 
-            detail::duration_t m_duration;
+            detail::duration_t m_duration{};
         };
 
         TimeDuration Days(int days);

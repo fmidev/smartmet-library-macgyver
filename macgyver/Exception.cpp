@@ -359,7 +359,7 @@ std::string Exception::getTimeStampString() const
 {
   // Fmi::Exception must not depend on other macgyver parts or external libraries
   // except for libstdc++ and libc
-  struct std::tm tExpanded;
+  struct std::tm tExpanded{};
   char result[80];
   localtime_r(&timestamp, &tExpanded);
   (void)std::strftime(result, sizeof(result), "%Y-%m-%dT%H:%M:%S", &tExpanded);

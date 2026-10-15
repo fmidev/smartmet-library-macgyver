@@ -116,6 +116,7 @@ class Cache
   {
     static_assert(NumShards > 0, "NumShards must be greater than 0");
   }
+  ~Cache() = default;
 
   // ----------------------------------------------------------------------
   /*!
@@ -474,6 +475,7 @@ class FileCache
   FileCache(FileCache&& other) = delete;
   FileCache& operator=(const FileCache& other) = delete;
   FileCache& operator=(FileCache&& other) = delete;
+  ~FileCache() = default;
 
   std::optional<std::string> find(std::size_t key);
   bool insert(std::size_t key, const std::string& value, bool performCleanup = true);

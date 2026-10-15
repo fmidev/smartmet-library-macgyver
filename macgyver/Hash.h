@@ -29,6 +29,7 @@ struct HashValue
   operator std::size_t() const { return value; }
   HashValue(const HashValue& other) = default;
   HashValue& operator = (const HashValue& other) = default;
+  ~HashValue() = default;
 };
 
 std::size_t hash_value(const std::string& str);

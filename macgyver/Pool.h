@@ -86,6 +86,7 @@ namespace Fmi
             ItemRec& operator=(const ItemRec&) = delete;
             ItemRec(ItemRec&&) = default;
             ItemRec& operator=(ItemRec&&) = default;
+            ~ItemRec() = default;
         };
 
         /**
@@ -136,6 +137,10 @@ namespace Fmi
 
         public:
             Ptr(Ptr&& other) = default;
+            Ptr& operator=(Ptr&& other) = default;
+            Ptr(const Ptr&) = delete;
+            Ptr& operator=(const Ptr&) = delete;
+            ~Ptr() = default;
 
             // We do not want to expose all std::unique_ptr<> methods for example release()
             operator ItemType*() const { return this->base::get(); }

@@ -22,7 +22,7 @@ std::time_t
 Fmi::last_write_time(const fs::path& path, std::error_code& ec) throw()
 {
     const char* fn = path.c_str();
-    struct stat st;
+    struct stat st{};
     if (stat(fn, &st) == 0)
     {
         ec = std::error_code();

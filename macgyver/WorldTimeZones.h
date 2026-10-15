@@ -23,17 +23,19 @@ class WorldTimeZones
  public:
   WorldTimeZones(const std::string& file);
   ~WorldTimeZones();
+  WorldTimeZones(const WorldTimeZones&) = delete;
+  WorldTimeZones& operator=(const WorldTimeZones&) = delete;
 
   const std::string& zone_name(float lon, float lat) const;
   const std::vector<std::string> zones() const { return itsZones; }
 
  private:
-  unsigned int itsWidth;
-  unsigned int itsHeight;
-  float itsLon1;
-  float itsLat1;
-  float itsLon2;
-  float itsLat2;
+  unsigned int itsWidth = 0;
+  unsigned int itsHeight = 0;
+  float itsLon1 = 0.0F;
+  float itsLat1 = 0.0F;
+  float itsLon2 = 0.0F;
+  float itsLat2 = 0.0F;
 
   std::vector<std::string> itsZones;
 

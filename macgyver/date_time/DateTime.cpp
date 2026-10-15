@@ -446,7 +446,7 @@ struct std::tm Fmi::date_time::DateTime::as_tm() const
     const auto date_ = date();
     const auto ymd = date_.year_month_day();
     const auto time = time_of_day();
-    struct tm result;
+    struct tm result{};
     result.tm_year = ymd.year - 1900;
     result.tm_mon = ymd.month - 1;
     result.tm_mday = ymd.day;

@@ -28,6 +28,8 @@ class TernarySearchTree
   {
     Node(char c);
     ~Node();
+    Node(const Node&) = delete;
+    Node& operator=(const Node&) = delete;
 
     char chr;            // the char that splits the sort
     Node* left;          // the ones earlier in alphabet

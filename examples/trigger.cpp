@@ -33,9 +33,10 @@ class Handler
   void run() { mon.run(); }
 
   // Can't get this to work:
-  void sighandler(int /*x*/) const
+  [[noreturn]] void sighandler(int /*x*/) const
   {
     cout << "Exiting after signal catch" << endl;
+    // NOLINTNEXTLINE(concurrency-mt-unsafe): single-threaded example program
     exit(0);
   }
 
@@ -66,6 +67,8 @@ class Handler
           break;
         case DirectoryMonitor::MODIFY:
           cout << it.first << " modified" << endl;
+          break;
+        default:
           break;
       }
     }
@@ -103,9 +106,10 @@ class Handler
 
 namespace
 {
-void sighandler(int /*unused*/)
+[[noreturn]] void sighandler(int /*unused*/)
 {
   cout << "exiting after signal catch" << endl;
+  // NOLINTNEXTLINE(concurrency-mt-unsafe): single-threaded example program
   exit(0);
 }
 

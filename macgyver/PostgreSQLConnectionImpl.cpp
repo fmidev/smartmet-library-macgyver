@@ -288,7 +288,7 @@ std::shared_ptr<pqxx::connection> PostgreSQLConnection::Impl::open_internal(std:
             last_failed = false;
             return connection;
         }
-        catch (const pqxx::broken_connection& e)
+        catch (const pqxx::broken_connection&)
         {
             last_exception = std::current_exception();
             last_failed = true;

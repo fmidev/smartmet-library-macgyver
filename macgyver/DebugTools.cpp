@@ -18,8 +18,8 @@ Fmi::ScopedTimer::ScopedTimer(const std::string& theName) : name(theName)
 {
 #ifndef _MSC_VER
   char buffer[80];
-  struct tm t2;
-  struct timeval tv;
+  struct tm t2{};
+  struct timeval tv{};
   gettimeofday(&tv, nullptr);
   start = tv.tv_sec + 0.000001 * tv.tv_usec;
   localtime_r(&tv.tv_sec, &t2);
@@ -35,7 +35,7 @@ Fmi::ScopedTimer::ScopedTimer(const std::string& theName) : name(theName)
 Fmi::ScopedTimer::~ScopedTimer()
 {
 #ifndef _MSC_VER
-  struct timeval tv;
+  struct timeval tv{};
   gettimeofday(&tv, nullptr);
   double end = tv.tv_sec + 0.000001 * tv.tv_usec;
   double dt = end - start;

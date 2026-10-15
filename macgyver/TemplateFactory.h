@@ -25,6 +25,7 @@ class TemplateFactory
   TemplateFactory(TemplateFactory&& other) = delete;
   TemplateFactory& operator=(const TemplateFactory& other) = delete;
   TemplateFactory& operator=(TemplateFactory&& other) = delete;
+  ~TemplateFactory() = default;
 
 };  // class TemplateFactory
 

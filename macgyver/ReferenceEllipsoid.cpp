@@ -14,7 +14,7 @@ std::array<double, 3> Fmi::ReferenceEllipsoid::to_geocentric(double lat,
                                                                double lon,
                                                                double h) const
 {
-  std::array<double, 3> x;
+  std::array<double, 3> x{};
   double N = transverse_curvature_radius(lat);
   x[0] = (N + h) * cos(lat) * cos(lon);
   x[1] = (N + h) * cos(lat) * sin(lon);

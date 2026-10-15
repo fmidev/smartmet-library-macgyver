@@ -104,6 +104,8 @@ class PostgreSQLConnection
    public:
       PreparedSQL(const PostgreSQLConnection& theConnection, const std::string& name, const std::string& sql);
       ~PreparedSQL();
+      PreparedSQL(const PreparedSQL&) = delete;
+      PreparedSQL& operator=(const PreparedSQL&) = delete;
 
       /**
        *   @brief execute prepared SQL statement with parameters provided in a container

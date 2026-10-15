@@ -75,6 +75,7 @@ class Exception : public std::exception
 
   // Destructor
   ~Exception() override;
+  Exception& operator=(const Exception&) = default;
 
   // The following methods can be used for adding some additional information
   // related to the current exception.

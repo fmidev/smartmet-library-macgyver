@@ -46,20 +46,20 @@ using UnixTime = unsigned int;
 
 struct TimeOffset
 {
-  char sign;
+  char sign = 0;
 
-  unsigned int value;
+  unsigned int value = 0;
 
   OptionalChar unit;
 };
 
 struct TimeStamp
 {
-  unsigned short year;
+  unsigned short year = 0;
 
-  unsigned short month;
+  unsigned short month = 0;
 
-  unsigned short day;
+  unsigned short day = 0;
 
   OptionalInt hour;
 
@@ -67,7 +67,7 @@ struct TimeStamp
 
   OptionalInt second;
 
-  TimeZoneOffset tz;
+  TimeZoneOffset tz{};
 };
 }  // namespace TimeParser
 }  // namespace Fmi

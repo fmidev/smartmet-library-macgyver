@@ -28,6 +28,8 @@ class ScopedTimer
  public:
   ScopedTimer(const std::string& theName);
   virtual ~ScopedTimer();
+  ScopedTimer(const ScopedTimer&) = delete;
+  ScopedTimer& operator=(const ScopedTimer&) = delete;
 
  private:
   const std::string name;

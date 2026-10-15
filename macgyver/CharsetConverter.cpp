@@ -23,6 +23,8 @@ struct Fmi::CharsetConverter::Impl
       iconv_close(itsIconv);
     }
   }
+  Impl(const Impl&) = delete;
+  Impl& operator=(const Impl&) = delete;
 
   iconv_t itsIconv;
   std::mutex m;

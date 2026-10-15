@@ -22,6 +22,8 @@ struct ValueFormatterParam
   // and this is needed because above is needed
   ValueFormatterParam() = default;
   ValueFormatterParam(const ValueFormatterParam& theOther) = default;
+  ValueFormatterParam& operator=(const ValueFormatterParam& theOther) = default;
+  ~ValueFormatterParam() = default;
 };
 
 class ValueFormatter

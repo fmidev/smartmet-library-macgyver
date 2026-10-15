@@ -86,7 +86,7 @@ Fmi::date_time::YMD Fmi::date_time::Date::year_month_day() const
 
     date::year_month_day ymd(date);
 
-    YMD result;
+    YMD result{};
     result.year = int(ymd.year());
     result.month = unsigned(ymd.month());
     result.day = unsigned(ymd.day());
@@ -108,7 +108,7 @@ std::tm Fmi::date_time::Date::as_tm() const
     if (is_special())
         throw Fmi::Exception(BCP, "Operation not supported for special values");
 
-    std::tm tm;
+    std::tm tm{};
     date::year_month_day ymd(date);
     tm.tm_year = int(ymd.year()) - 1900;
     tm.tm_mon = unsigned(ymd.month()) - 1;
@@ -396,7 +396,7 @@ Fmi::date_time::Date Fmi::date_time::Date::from_iso_string(const std::string& st
     using iterator = std::string::const_iterator;
     // Date parser: No separator (separator=0), numeric month (true)
     Fmi::date_time::parser::DateParser<iterator, char> parser(0, true);
-    Fmi::date_time::parser::date_members_t members;
+    Fmi::date_time::parser::date_members_t members{};
     iterator begin = str.begin();
     iterator end = str.end();
     if (!qi::parse(begin, end,
@@ -415,7 +415,7 @@ Fmi::date_time::Date Fmi::date_time::Date::from_iso_extended_string(const std::s
     using iterator = std::string::const_iterator;
     // Date parser: Separator is '-' (separator='-'), numeric month (true)
     Fmi::date_time::parser::DateParser<iterator, char> parser('-', true);
-    Fmi::date_time::parser::date_members_t members;
+    Fmi::date_time::parser::date_members_t members{};
     iterator begin = str.begin();
     iterator end = str.end();
     if (!qi::parse(begin, end,
@@ -440,7 +440,7 @@ Fmi::date_time::Date Fmi::date_time::Date::from_string(const std::string& str)
     // Date parser: Separator is '-' (separator='-'), alphabetic month (false) - abbrev only supported
     Fmi::date_time::parser::DateParser<iterator, char> parser3('-', false);
 
-    Fmi::date_time::parser::date_members_t members;
+    Fmi::date_time::parser::date_members_t members{};
 
     iterator begin = str.begin();
     iterator end = str.end();

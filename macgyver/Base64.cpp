@@ -137,8 +137,8 @@ std::string decode(const std::string& str)
     std::size_t i = 0;
     std::size_t j = 0;
     std::size_t in_ = 0;
-    std::array<unsigned char, 4> char_array_4;
-    std::array<unsigned char, 3> char_array_3;
+    std::array<unsigned char, 4> char_array_4{};
+    std::array<unsigned char, 3> char_array_3{};
     std::string ret;
 
     while (in_len-- && (str[in_] != '=') && is_base64(str[in_]))

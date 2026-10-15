@@ -455,7 +455,7 @@ struct std::tm Fmi::date_time::to_tm(const date_time::TimeDuration& t)
   if (t.is_special())
     throw Fmi::Exception(BCP, "Cannot convert special time to tm");
 
-  struct std::tm result;
+  struct std::tm result{};
   result.tm_year = 0;
   result.tm_mon = 0;
   result.tm_mday = 0;

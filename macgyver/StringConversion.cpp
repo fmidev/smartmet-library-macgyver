@@ -441,7 +441,7 @@ std::string to_iso_string(const TimeDuration& duration)
     int seconds = hms.seconds().count();
     int sub_sec = hms.subseconds().count();
 
-    std::array<char, 8> buffer;
+    std::array<char, 8> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = seconds * 2;
@@ -485,7 +485,7 @@ std::string to_simple_string(const TimeDuration& duration)
     int seconds = hms.seconds().count();
     int sub_sec = hms.subseconds().count();
 
-    std::array<char, 40> buffer;
+    std::array<char, 40> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = seconds * 2;
@@ -554,7 +554,7 @@ std::string to_simple_string(const Fmi::Date& date)
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    std::array<char, 12> buffer;
+    std::array<char, 12> buffer{};
     char* ptr = buffer.data() + buffer.size();
     unsigned index = day * 2;
     *--ptr = digits[index + 1];
@@ -590,7 +590,7 @@ std::string to_iso_string(const Fmi::Date& date)
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    std::array<char, 9> buffer;
+    std::array<char, 9> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = day * 2;
@@ -624,7 +624,7 @@ std::string to_iso_extended_string(const Fmi::Date& date)
     const unsigned month = unsigned(ymd.month());
     const unsigned day = unsigned(ymd.day());
 
-    std::array<char, 11> buffer;
+    std::array<char, 11> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = day * 2;
@@ -670,7 +670,7 @@ std::string to_iso_string(const Fmi::DateTime& time)
     int seconds = hms.seconds().count();
     int sub_sec = hms.subseconds().count();
 
-    std::array<char, 16> buffer;
+    std::array<char, 16> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = seconds * 2;
@@ -715,11 +715,11 @@ std::string to_iso_string(const std::time_t time)
 {
   try
   {
-    struct tm tt;
+    struct tm tt{};
     if (gmtime_r(&time, &tt) == nullptr)
       throw Fmi::Exception(BCP, "Time " + std::to_string(time) + " cannot be formatted");
 
-    std::array<char, 16> buffer;
+    std::array<char, 16> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = tt.tm_sec * 2;
@@ -776,7 +776,7 @@ std::string to_timestamp_string(const DateTime& time)
     int hours = hms.hours().count();
     int minutes = hms.minutes().count();
 
-    std::array<char, 13> buffer;
+    std::array<char, 13> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     auto index = minutes * 2;
@@ -828,7 +828,7 @@ std::string to_iso_extended_string(const DateTime& time)
     int seconds = hms.seconds().count();
     int sub_sec = hms.subseconds().count();
 
-    std::array<char, 20> buffer;
+    std::array<char, 20> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = seconds * 2;
@@ -967,7 +967,7 @@ std::string to_simple_string(const Fmi::date_time::DateTime& time)
     int seconds = hms.seconds().count();
     int sub_sec = hms.subseconds().count();
 
-    std::array<char, 30> buffer;
+    std::array<char, 30> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     unsigned index = seconds * 2;
@@ -1036,7 +1036,7 @@ std::string to_http_string(const Fmi::date_time::DateTime& time)
     int minutes = hms.minutes().count();
     int seconds = hms.seconds().count();
 
-    std::array<char, 30> buffer;
+    std::array<char, 30> buffer{};
     char* ptr = buffer.data() + buffer.size();
     *--ptr = '\0';
     *--ptr = 'T';

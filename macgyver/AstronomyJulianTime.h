@@ -66,6 +66,7 @@ class JulianTime
    *       Julian day.
    */
   JulianTime(const DateTime& utc);
+  ~JulianTime() = default;
 
   double JulianDay() const { return jd; }
   bool valid() const { return jd != 0.0; }

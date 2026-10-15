@@ -22,7 +22,7 @@ namespace parser
 
     struct seconds_members_t
     {
-        unsigned seconds;
+        unsigned seconds = 0;
         std::string frac_sec;
 
         operator double() const
@@ -33,9 +33,9 @@ namespace parser
 
     struct duration_members_t
     {
-        int sign;
-        unsigned hours;
-        unsigned minutes;
+        int sign = 0;
+        unsigned hours = 0;
+        unsigned minutes = 0;
         std::optional<seconds_members_t> seconds;
 
         int get_hours() const
@@ -81,7 +81,7 @@ namespace parser
 
     struct date_time_members_t
     {
-        date_members_t date;
+        date_members_t date{};
         std::optional<duration_members_t> time;
         std::optional<time_zone_offset_members_t> tz_offset;
 

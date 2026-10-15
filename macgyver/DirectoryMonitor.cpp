@@ -195,15 +195,15 @@ struct Monitor
   // static info:
   fs::path path;
   boost::regex pattern;
-  bool hasregex;
-  int interval;
-  DirectoryMonitor::Watcher id;
-  DirectoryMonitor::Change mask;
+  bool hasregex = false;
+  int interval = 0;
+  DirectoryMonitor::Watcher id = 0;
+  DirectoryMonitor::Change mask = 0;
   DirectoryMonitor::Listener callback;
   DirectoryMonitor::ErrorHandler errorhandler;
 
   // generated data:
-  time_t lastmodified;
+  time_t lastmodified = 0;
   Contents contents;
 };
 
