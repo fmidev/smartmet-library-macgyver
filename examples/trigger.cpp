@@ -113,7 +113,7 @@ namespace
   exit(0);
 }
 
-void sighandler2(const Handler& handler, int x) { handler.sighandler(x); }
+[[noreturn]] void sighandler2(const Handler& handler, int x) { handler.sighandler(x); }
 }  // namespace
 
 int main()
