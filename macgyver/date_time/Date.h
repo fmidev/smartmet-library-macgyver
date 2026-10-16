@@ -109,7 +109,6 @@ namespace Fmi
 
         inline std::tm to_tm(const Date& date) { return date.as_tm(); }
 
-        struct tm to_tm(const Date& date);
         Date from_tm(const struct tm& tm);
 
         template <typename ArchiveType>
