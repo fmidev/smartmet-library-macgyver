@@ -35,6 +35,20 @@ double round(double theValue, int thePrecision, const std::string& theMode)
   return (std::round(theValue * powers_of_ten[thePrecision]) /
           static_cast<double>(powers_of_ten[thePrecision]));
 }
+
+// Round values exactly halfway between integers to the nearest even integer
+double round_halfway_to_even(double theValue)
+{
+  double ipart = NAN;
+  double fractional = modf(theValue, &ipart);
+  if (std::abs(fractional) == 0.5)
+  {
+    if (static_cast<int>(ipart) % 2 == 0)
+      return (theValue < 0 ? std::ceil(theValue) : std::floor(theValue));
+    return (theValue < 0 ? std::floor(theValue) : std::ceil(theValue));
+  }
+  return theValue;
+}
 }  // namespace
 
 // c++14 would not need this
@@ -137,16 +151,8 @@ std::string ValueFormatter::format_double_conversion_fixed(double theValue, int 
     bool negativeValue = (theValue < 0);
     if (thePrecision == 0)
     {
-      double ipart = NAN;
-      double fractional = modf(theValue, &ipart);
       // Halfway rounding
-      if (std::abs(fractional) == 0.5)
-      {
-        if (static_cast<int>(ipart) % 2 == 0)
-          theValue = (theValue < 0 ? std::ceil(theValue) : std::floor(theValue));
-        else
-          theValue = (theValue < 0 ? std::floor(theValue) : std::ceil(theValue));
-      }
+      theValue = round_halfway_to_even(theValue);
 
       // If negative value is rounded up to zero, return here
       if (theValue == 0 && negativeValue)
