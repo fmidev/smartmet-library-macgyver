@@ -11,7 +11,12 @@ using Fmi::date_time::LocalDateTime;
 
 namespace detail = Fmi::detail;
 
-LocalDateTime::LocalDateTime() noexcept = default;
+// Not "= default": GCC 8 (RHEL 8) rejects a defaulted definition whose noexcept differs
+// from the implicit exception specification
+LocalDateTime::LocalDateTime() noexcept  // NOLINT(modernize-use-equals-default)
+    : Base()
+{
+}
 
 LocalDateTime::LocalDateTime(Type type) noexcept
     : Base(type)
