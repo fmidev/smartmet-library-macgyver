@@ -448,19 +448,127 @@ Fmi::TimeDuration try_parse_iso_duration(const std::string& str)
  */
 // ----------------------------------------------------------------------
 
+// The parts of an ISO timestamp
+struct IsoParts
+{
+  std::uint16_t year = 0;
+  std::uint16_t month = 1;
+  std::uint16_t day = 1;
+  std::uint16_t hour = 0;
+  std::uint16_t minute = 0;
+  std::uint16_t second = 0;
+  std::uint16_t houroffset = 0;
+  std::uint16_t minuteoffset = 0;
+  bool positiveoffset = false;
+};
+
+// True if the character starts a time zone
+bool is_zone_start(char ch)
+{
+  return (ch == 'Z' || ch == '+' || ch == '-');
+}
+
+// Parse the time zone: Z, +HH, +HH:MI or the same with '-'
+bool parse_iso_zone(const char** ptr, bool extended_format, IsoParts& p, bool* isutc)
+{
+  *isutc = true;
+  if (**ptr == 'Z')
+  {
+    ++*ptr;
+    return (**ptr == '\0');
+  }
+
+  p.positiveoffset = (**ptr == '+');
+  ++*ptr;
+
+  if (!parse_ushort(ptr, 2, &p.houroffset))
+    return false;
+  if (p.houroffset >= 14)
+    return false;  // some offsets are > 12
+
+  if (**ptr == '\0')
+    return true;
+
+  if (!skip_separator(ptr, ':', extended_format))
+    return false;
+  if (!parse_ushort(ptr, 2, &p.minuteoffset))
+    return false;
+  return (**ptr == '\0');
+}
+
+// Parse a two digit time component and its separator, false on failure
+bool parse_iso_component(const char** ptr,
+                         bool extended_format,
+                         std::uint16_t* value,
+                         std::uint16_t maxvalue)
+{
+  if (!skip_separator(ptr, ':', extended_format))
+    return false;
+  if (!parse_ushort(ptr, 2, value))
+    return false;
+  return (*value <= maxvalue);
+}
+
+// Parse the time starting from the hours, followed by an optional time zone
+bool parse_iso_time(const char** ptr, bool extended_format, IsoParts& p, bool* isutc)
+{
+  // We permit omitting 'T' to enable old YYYYMMDDHHMI timestamp format
+
+  if (**ptr == 'T')
+    ++*ptr;
+  if (!parse_ushort(ptr, 2, &p.hour))
+    return false;
+  if (p.hour > 23)
+    return false;
+  if (**ptr == '\0')
+    return true;  // YYYY-MM-DDTHH is allowed
+
+  if (is_zone_start(**ptr))
+    return parse_iso_zone(ptr, extended_format, p, isutc);
+
+  if (!parse_iso_component(ptr, extended_format, &p.minute, 59))
+    return false;
+  if (**ptr == '\0')
+    return true;  // YYYY-MM-DDTHH:MI is allowed
+
+  if (is_zone_start(**ptr))
+    return parse_iso_zone(ptr, extended_format, p, isutc);
+
+  if (!parse_iso_component(ptr, extended_format, &p.second, 59))
+    return false;
+  if (**ptr == '\0')
+    return true;  // YYYY-MM-DDTHH:MI:SS is allowed
+
+  if (!is_zone_start(**ptr))
+    return false;
+
+  return parse_iso_zone(ptr, extended_format, p, isutc);
+}
+
+// Build the time from the parsed parts
+Fmi::DateTime build_iso(const IsoParts& p)
+{
+  Fmi::DateTime t(Fmi::Date(p.year, p.month, p.day),
+                  Fmi::TimeDuration(p.hour, p.minute, p.second));
+
+  // Adjust if necessary
+
+  if (p.houroffset != 0 || p.minuteoffset != 0)
+  {
+    if (p.positiveoffset)
+      t -= (Fmi::Hours(p.houroffset) + Fmi::Minutes(p.minuteoffset));
+    else
+      t += (Fmi::Hours(p.houroffset) + Fmi::Minutes(p.minuteoffset));
+  }
+
+  return t;
+}
+
 Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
 {
   try
   {
-    std::uint16_t year = 0;
-    std::uint16_t month = 1;
-    std::uint16_t day = 1;
-    std::uint16_t hour = 0;
-    std::uint16_t minute = 0;
-    std::uint16_t second = 0;
-    std::uint16_t houroffset = 0;
-    std::uint16_t minuteoffset = 0;
-    bool positiveoffset = false;
+    IsoParts p;
 
     const char* ptr = str.c_str();
 
@@ -469,14 +577,14 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
 
     // Year
 
-    if (!parse_ushort(&ptr, 4, &year))
+    if (!parse_ushort(&ptr, 4, &p.year))
       return {};
 
     // Quick sanity check to prevent further useless parsing
     // - boost library version 1.34 or greater support dates
     //   at least in the range 1400-Jan-01 to 9999-Dec-31
     // - Dates prior to 1582 using the Julian Calendar
-    if (year < 1582 || year > 5000)
+    if (p.year < 1582 || p.year > 5000)
       return {};
 
     // Establish whether we have basic or extended format
@@ -487,112 +595,33 @@ Fmi::DateTime try_parse_iso(const std::string& str, bool* isutc)
 
     if (!skip_separator(&ptr, '-', extended_format))
       return {};  // should never happen though
-    if (!parse_ushort(&ptr, 2, &month))
+    if (!parse_ushort(&ptr, 2, &p.month))
       return {};  // YYYY is not allowed
-    if (month == 0 || month > 12)
+    if (p.month == 0 || p.month > 12)
       return {};
 
     if (*ptr == '\0')
     {
       if (!extended_format)
-        return {};        // YYYYMM is not allowed
-      goto build_iso;     // YYYY-MM is allowed
+        return {};         // YYYYMM is not allowed
+      return build_iso(p);  // YYYY-MM is allowed
     }
 
     // Day
 
     if (!skip_separator(&ptr, '-', extended_format))
       return {};
-    if (!parse_ushort(&ptr, 2, &day))
+    if (!parse_ushort(&ptr, 2, &p.day))
       return {};
-    if (day == 0 || day > 31)
-      return {};
-    if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DD is allowed
-
-    // We permit omitting 'T' to enable old YYYYMMDDHHMI timestamp format
-
-    if (*ptr == 'T')
-      ++ptr;
-    if (!parse_ushort(&ptr, 2, &hour))
-      return {};
-    if (hour > 23)
+    if (p.day == 0 || p.day > 31)
       return {};
     if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DDTHH is allowed
+      return build_iso(p);  // YYYY-MM-DD is allowed
 
-    if (*ptr == 'Z' || *ptr == '+' || *ptr == '-')
-      goto zone_began;
-
-    if (!skip_separator(&ptr, ':', extended_format))
-      return {};
-    if (!parse_ushort(&ptr, 2, &minute))
-      return {};
-    if (minute > 59)
-      return {};
-    if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DDTHH:MI is allowed
-
-    if (*ptr == 'Z' || *ptr == '+' || *ptr == '-')
-      goto zone_began;
-
-    if (!skip_separator(&ptr, ':', extended_format))
-      return {};
-    if (!parse_ushort(&ptr, 2, &second))
-      return {};
-    if (second > 59)
-      return {};
-    if (*ptr == '\0')
-      goto build_iso;  // YYYY-MM-DDTHH:MI:SS is allowed
-
-    if (*ptr != 'Z' && *ptr != '+' && *ptr != '-')
+    if (!parse_iso_time(&ptr, extended_format, p, isutc))
       return {};
 
-  zone_began:
-
-    *isutc = true;
-    if (*ptr == 'Z')
-    {
-      ++ptr;
-      if (*ptr != '\0')
-        return {};
-      goto build_iso;
-    }
-
-    positiveoffset = (*ptr == '+');
-    ptr++;
-
-    if (!parse_ushort(&ptr, 2, &houroffset))
-      return {};
-    if (houroffset >= 14)
-      return {};  // some offsets are > 12
-
-    if (*ptr == '\0')
-      goto build_iso;
-
-    if (!skip_separator(&ptr, ':', extended_format))
-      return {};
-    if (!parse_ushort(&ptr, 2, &minuteoffset))
-      return {};
-    if (*ptr != '\0')
-      return {};
-
-  build_iso:
-
-    Fmi::DateTime t(Fmi::Date(year, month, day),
-                               Fmi::TimeDuration(hour, minute, second));
-
-    // Adjust if necessary
-
-    if (houroffset != 0 || minuteoffset != 0)
-    {
-      if (positiveoffset)
-        t -= (Fmi::Hours(houroffset) + Fmi::Minutes(minuteoffset));
-      else
-        t += (Fmi::Hours(houroffset) + Fmi::Minutes(minuteoffset));
-    }
-
-    return t;
+    return build_iso(p);
   }
   catch (...)
   {
