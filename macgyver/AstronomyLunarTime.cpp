@@ -373,6 +373,81 @@ Fmi::LocalDateTime parse_local_date_time(
 /*
  * Calculate moonrise, moonset for given location
  */
+// The moon rise and set times found during a day
+struct LunarEvents
+{
+  double utrise = 0.0;
+  double utset = 0.0;
+  double utrise2 = 0.0;
+  double utset2 = 0.0;
+  bool rise = false;
+  bool set = false;
+  bool rise2 = false;
+  bool set2 = false;
+};
+
+// Record a single horizon crossing found at the given time
+void record_single_crossing(LunarEvents& ev, double ym, double t)
+{
+  if (ym < 0)
+  {
+    if (!ev.set || !ev.rise)
+    {
+      ev.utrise = t;
+      ev.rise = true;
+    }
+    else
+    {
+      ev.utrise2 = t;
+      ev.rise2 = true;
+    }
+  }
+  else
+  {
+    if (!ev.set || !ev.rise)
+    {
+      ev.utset = t;
+      ev.set = true;
+    }
+    else
+    {
+      ev.utset2 = t;
+      ev.set2 = true;
+    }
+  }
+}
+
+// Record a rise and a set found at the given times
+void record_double_crossing(LunarEvents& ev, double trise, double tset)
+{
+  if (!ev.set || !ev.rise)
+  {
+    ev.utrise = trise;
+    ev.utset = tset;
+  }
+  else
+  {
+    ev.utrise2 = trise;
+    ev.utset2 = tset;
+  }
+}
+
+// Record the horizon crossings found by quadratic interpolation around the hour
+void record_crossings(
+    LunarEvents& ev, double nz, double z1, double z2, double ym, double ye, double hour)
+{
+  if (nz == 1)
+    record_single_crossing(ev, ym, hour + z1);
+
+  if (nz == 2)
+  {
+    if (ye < 0)
+      record_double_crossing(ev, hour + z2, hour + z1);
+    else
+      record_double_crossing(ev, hour + z1, hour + z2);
+  }
+}
+
 lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
                                     double offset,
                                     double lon,
@@ -380,10 +455,7 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
 {
   try
   {
-    double utrise(0.0);
-    double utset(0.0);
-    double utrise2(0.0);
-    double utset2(0.0);
+    LunarEvents ev;
 
     // beginning of the day
     Fmi::LocalDateTime ldt_beg(
@@ -401,10 +473,6 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
     double sglat = sin(latRad);
     double cglat = cos(latRad);
 
-    bool rise = false;
-    bool set = false;
-    bool rise2 = false;
-    bool set2 = false;
     bool above = false;
     double hour = 1.0;
 
@@ -423,79 +491,22 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
       // double xe = quadout[3];
       double ye = quadout[4];
 
-      if (nz == 1)
-      {
-        if (ym < 0)
-        {
-          if (!set || !rise)
-          {
-            utrise = hour + z1;
-            rise = true;
-          }
-          else
-          {
-            utrise2 = hour + z1;
-            rise2 = true;
-          }
-        }
-        else
-        {
-          if (!set || !rise)
-          {
-            utset = hour + z1;
-            set = true;
-          }
-          else
-          {
-            utset2 = hour + z1;
-            set2 = true;
-          }
-        }
-      }
+      record_crossings(ev, nz, z1, z2, ym, ye, hour);
 
-      if (nz == 2)
-      {
-        if (ye < 0)
-        {
-          if (!set || !rise)
-          {
-            utrise = hour + z2;
-            utset = hour + z1;
-          }
-          else
-          {
-            utrise2 = hour + z2;
-            utset2 = hour + z1;
-          }
-        }
-        else
-        {
-          if (!set || !rise)
-          {
-            utrise = hour + z1;
-            utset = hour + z2;
-          }
-          else
-          {
-            utrise2 = hour + z1;
-            utset2 = hour + z2;
-          }
-        }
-      }
 #ifdef MYDEBUG
       std::cout << "nz: " << nz << std::endl;
       std::cout << "z1: " << z1 << std::endl;
       std::cout << "z2: " << z2 << std::endl;
       // std::cout << "xe: " << xe << std::endl;
       std::cout << "ye: " << ye << std::endl;
-      std::cout << "utrise: " << utrise << std::endl;
-      std::cout << "utset: " << utset << std::endl;
-      std::cout << "utrise2: " << utrise2 << std::endl;
-      std::cout << "utset2: " << utset2 << std::endl;
-      std::cout << "rise: " << rise << std::endl;
-      std::cout << "rise2: " << rise2 << std::endl;
-      std::cout << "set: " << set << std::endl;
-      std::cout << "set2: " << set2 << std::endl << std::endl;
+      std::cout << "utrise: " << ev.utrise << std::endl;
+      std::cout << "utset: " << ev.utset << std::endl;
+      std::cout << "utrise2: " << ev.utrise2 << std::endl;
+      std::cout << "utset2: " << ev.utset2 << std::endl;
+      std::cout << "rise: " << ev.rise << std::endl;
+      std::cout << "rise2: " << ev.rise2 << std::endl;
+      std::cout << "set: " << ev.set << std::endl;
+      std::cout << "set2: " << ev.set2 << std::endl << std::endl;
 #endif
 
       ym = yp;
@@ -504,14 +515,14 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
 
 #ifdef MYDEBUG
     std::cout << "\noffset: " << offset << std::endl;
-    std::cout << "rise: " << rise << std::endl;
-    std::cout << "rise2: " << rise2 << std::endl;
-    std::cout << "utrise: " << utrise << std::endl;
-    std::cout << "utrise2: " << utrise2 << std::endl;
-    std::cout << "set: " << set << std::endl;
-    std::cout << "set2: " << set2 << std::endl;
-    std::cout << "utset: " << utset << std::endl;
-    std::cout << "utset2: " << utset2 << std::endl;
+    std::cout << "rise: " << ev.rise << std::endl;
+    std::cout << "rise2: " << ev.rise2 << std::endl;
+    std::cout << "utrise: " << ev.utrise << std::endl;
+    std::cout << "utrise2: " << ev.utrise2 << std::endl;
+    std::cout << "set: " << ev.set << std::endl;
+    std::cout << "set2: " << ev.set2 << std::endl;
+    std::cout << "utset: " << ev.utset << std::endl;
+    std::cout << "utset2: " << ev.utset2 << std::endl;
     std::cout << "julian: " << date << std::endl;
     std::cout << "ldt: " << ldt << std::endl;
     std::cout << "ldt.local_time(): " << ldt.local_time() << std::endl;
@@ -520,19 +531,19 @@ lunar_time_t lunar_time_calculation(const Fmi::LocalDateTime& ldt,
 #endif
 
     lunar_time_t retval(
-        (rise ? parse_local_date_time(ldt_beg, utrise)
+        (ev.rise ? parse_local_date_time(ldt_beg, ev.utrise)
               : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
-        (set ? parse_local_date_time(ldt_beg, utset)
+        (ev.set ? parse_local_date_time(ldt_beg, ev.utset)
              : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
-        (rise2 ? parse_local_date_time(ldt_beg, utrise2)
+        (ev.rise2 ? parse_local_date_time(ldt_beg, ev.utrise2)
               : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),  
-        (set2 ? parse_local_date_time(ldt_beg, utset2)
+        (ev.set2 ? parse_local_date_time(ldt_beg, ev.utset2)
               : Fmi::LocalDateTime(Fmi::LocalDateTime::NOT_A_DATE_TIME)),
-        rise,
-        set,
-        rise2,
-        set2,
-        (!rise && !set && above));
+        ev.rise,
+        ev.set,
+        ev.rise2,
+        ev.set2,
+        (!ev.rise && !ev.set && above));
 
     return retval;
   }
