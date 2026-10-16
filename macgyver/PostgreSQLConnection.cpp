@@ -13,7 +13,7 @@
 #include <chrono>
 #include <iostream>
 #include <optional>
-#include <regex>
+#include <boost/regex.hpp>
 #include <sstream>
 #include <variant>
 #include <vector>
@@ -90,8 +90,8 @@ PostgreSQLConnectionOptions::PostgreSQLConnectionOptions(const std::string& conn
   }
   catch (...)
   {
-    std::regex pwmask{R"(\bpassword=\S+)"};
-    const auto cstr{std::regex_replace(conn_str, pwmask, "password=***")};
+    boost::regex pwmask{R"(\bpassword=\S+)"};
+    const auto cstr{boost::regex_replace(conn_str, pwmask, "password=***")};
     throw Fmi::Exception::Trace(BCP, "Failed to parse connection string '" + cstr + "'");
   }
 }

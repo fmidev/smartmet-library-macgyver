@@ -448,8 +448,8 @@ bool parse_size_t(const std::string& input, std::size_t& result);
 // ----------------------------------------------------------------------
 struct FileCacheStruct
 {
-  FileCacheStruct(const std::filesystem::path& thePath, std::size_t theSize)
-      : path(thePath), fileSize(theSize)
+  FileCacheStruct(std::filesystem::path thePath, std::size_t theSize)
+      : path(std::move(thePath)), fileSize(theSize)
   {
   }
 
@@ -469,7 +469,7 @@ class FileCache
                                        boost::bimaps::list_of<FileCacheStruct>>;
 
  public:
-  FileCache(const std::filesystem::path& directory, std::size_t maxSize);
+  FileCache(std::filesystem::path directory, std::size_t maxSize);
 
   FileCache(const FileCache& other) = delete;
   FileCache(FileCache&& other) = delete;

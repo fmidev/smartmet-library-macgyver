@@ -17,7 +17,7 @@ struct ValueFormatterParam
   std::string floatField = "fixed";
 
   // c++14 would not need this, c++11 does because of the defaults above
-  ValueFormatterParam(const std::string& theMissingText, const std::string& theFloatField);
+  ValueFormatterParam(std::string theMissingText, std::string theFloatField);
 
   // and this is needed because above is needed
   ValueFormatterParam() = default;

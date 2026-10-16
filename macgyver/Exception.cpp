@@ -557,7 +557,7 @@ std::ostream& operator<<(std::ostream& out, const Exception& e)
   return out;
 }
 
-Exception::ForceStackTrace::ForceStackTrace() : prev(true)
+Exception::ForceStackTrace::ForceStackTrace()
 {
   std::swap(force_stack_trace, prev);
 }

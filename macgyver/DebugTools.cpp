@@ -5,16 +5,17 @@
 #include <iostream>
 #include <sstream>
 
-#include <fstream>
-#include <vector>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <fstream>
+#include <utility>
+#include <vector>
 
 #ifndef _MSC_VER
 #include <sys/time.h>
 #endif
 
-Fmi::ScopedTimer::ScopedTimer(const std::string& theName) : name(theName)
+Fmi::ScopedTimer::ScopedTimer(std::string theName) : name(std::move(theName))
 {
 #ifndef _MSC_VER
   char buffer[80];

@@ -19,11 +19,11 @@ bool Fmi::AsyncTask::log_time = false;
 #define LOG_TIME(desc) \
   (Fmi::AsyncTask::log_time ? Fmi::AsyncTask::log_event_time(this, desc) : void())
 
-Fmi::AsyncTask::AsyncTask(const std::string& name,
+Fmi::AsyncTask::AsyncTask(std::string name,
                           std::function<void()> task,
                           std::function<void()> notify)
 
-    : name(name),
+    : name(std::move(name)),
       status(none),
       done(false),
       notify(std::move(notify)),

@@ -35,7 +35,7 @@ class AsyncTask
    *
    *   Notification callback is called from task thread, so locking may be required
    */
-  AsyncTask(const std::string& name,
+  AsyncTask(std::string name,
             std::function<void()> task,
             std::function<void()> notify = std::function<void()>());
 
