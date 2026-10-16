@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <vector>
 
 /*=== Public interface =====================*/
@@ -623,6 +624,30 @@ lunar_time_t lunar_time_i(const Fmi::LocalDateTime& ldt, double lon, double lat)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+// Search the previous or the next day with the given event, nothing if not found within a year
+std::optional<lunar_time_t> find_lunar_day(const Fmi::LocalDateTime& ldt,
+                                           double lon,
+                                           double lat,
+                                           bool previous,
+                                           bool (lunar_time_t::*has_event)() const)
+{
+  const unsigned int iteration_limit(366);
+  unsigned int counter(0);  // just in case something goes wrong
+  Fmi::LocalDateTime ldt_iter(ldt);
+  lunar_time_t lt;
+  while (!(lt.*has_event)() && counter < iteration_limit)
+  {
+    if (previous)
+      ldt_iter -= Fmi::Hours(24);
+    else
+      ldt_iter += Fmi::Hours(24);
+    lt = lunar_time_i(ldt_iter, lon, lat);
+    counter++;
+  }
+  if (counter < iteration_limit)
+    return lt;
+  return {};
+}
 }  // namespace
 
 lunar_time_t lunar_time(const Fmi::LocalDateTime& ldt,
@@ -637,68 +662,21 @@ lunar_time_t lunar_time(const Fmi::LocalDateTime& ldt,
     if (allow_missing_dates)
       return lt_ret;
 
-    unsigned int iteration_limit(366);
     if (!lt_ret.moonrise_today())
     {
-      unsigned int counter(0);  // just in case something goes wrong
-      Fmi::LocalDateTime ldt_iter(ldt);
-      if (lt_ret.above_hz_24h || lt_ret.moonset_today())
-      {
-        // find the previous moonrise
-        lunar_time_t lt_prev;
-        while (!lt_prev.moonrise_today() && counter < iteration_limit)
-        {
-          ldt_iter -= Fmi::Hours(24);
-          lt_prev = lunar_time_i(ldt_iter, lon, lat);
-          counter++;
-        }
-        if (counter < iteration_limit)
-          lt_ret.moonrise = lt_prev.moonrise;
-      }
-      else
-      {
-        // find the next moonrise
-        lunar_time_t lt_next;
-        while (!lt_next.moonrise_today() && counter < iteration_limit)
-        {
-          ldt_iter += Fmi::Hours(24);
-          lt_next = lunar_time_i(ldt_iter, lon, lat);
-          counter++;
-        }
-        if (counter < iteration_limit)
-          lt_ret.moonrise = lt_next.moonrise;
-      }
+      // find the previous moonrise if the moon is up, otherwise the next one
+      const bool previous = (lt_ret.above_hz_24h || lt_ret.moonset_today());
+      auto found = find_lunar_day(ldt, lon, lat, previous, &lunar_time_t::moonrise_today);
+      if (found)
+        lt_ret.moonrise = found->moonrise;
     }
     if (!lt_ret.moonset_today())
     {
-      unsigned int counter(0);  // just in case something goes wrong
-      Fmi::LocalDateTime ldt_iter(ldt);
-      if (lt_ret.above_hz_24h || lt_ret.moonrise_today())
-      {
-        // find the next moonset
-        lunar_time_t lt_next;
-        while (!lt_next.moonset_today() && counter < iteration_limit)
-        {
-          ldt_iter += Fmi::Hours(24);
-          lt_next = lunar_time_i(ldt_iter, lon, lat);
-          counter++;
-        }
-        if (counter < iteration_limit)
-          lt_ret.moonset = lt_next.moonset;
-      }
-      else
-      {
-        // find the previous moonset
-        lunar_time_t lt_prev;
-        while (!lt_prev.moonset_today() && counter < iteration_limit)
-        {
-          ldt_iter -= Fmi::Hours(24);
-          lt_prev = lunar_time_i(ldt_iter, lon, lat);
-          counter++;
-        }
-        if (counter < iteration_limit)
-          lt_ret.moonset = lt_prev.moonset;
-      }
+      // find the next moonset if the moon is up, otherwise the previous one
+      const bool previous = !(lt_ret.above_hz_24h || lt_ret.moonrise_today());
+      auto found = find_lunar_day(ldt, lon, lat, previous, &lunar_time_t::moonset_today);
+      if (found)
+        lt_ret.moonset = found->moonset;
     }
     return lt_ret;
   }
