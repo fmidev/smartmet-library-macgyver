@@ -5,8 +5,6 @@
 #include "../StringConversion.h"
 #include <fmt/format.h>
 
-namespace internal = Fmi::date_time::internal;
-
 #define DEBUG_PARSER_DEFINITIONS 0
 
 namespace

@@ -6,8 +6,6 @@
 #include <boost/regex.hpp>
 #include <fmt/format.h>
 
-namespace internal = Fmi::date_time::internal;
-
 namespace
 {
 // date::format creates an output string stream and imbues a locale on every call, which makes

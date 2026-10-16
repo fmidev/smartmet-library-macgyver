@@ -7,8 +7,6 @@
 
 const Fmi::date_time::Date Fmi::date_time::Date::epoch(1970, 1, 1);
 
-namespace internal = Fmi::date_time::internal;
-
 Fmi::date_time::Date::Date() = default;
 
 Fmi::date_time::Date::Date(const Type& type)
