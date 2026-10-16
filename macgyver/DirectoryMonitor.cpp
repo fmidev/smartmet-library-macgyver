@@ -63,6 +63,25 @@ using Contents = std::map<fs::path, std::time_t>;
 
 namespace
 {
+// Add the file with its modification time unless it has vanished or cannot be accessed
+void add_file(Contents& contents, const fs::path& path)
+{
+  std::error_code ec;
+  const std::time_t t = Fmi::last_write_time(path, ec);
+  if (!ec)
+    contents.insert(Contents::value_type(path, t));
+}
+
+// True if the filename does not start with '.' and matches the optional pattern
+bool is_wanted_file(const fs::path& path, bool hasregex, const boost::regex& pattern)
+{
+  // Check first that the filename does not start with '.'
+  char dot = '.';
+  if (path.filename().native().at(0) == dot)
+    return false;
+  return (!hasregex || boost::regex_match(path.filename().string(), pattern));
+}
+
 Contents directory_contents(const fs::path& path, bool hasregex, const boost::regex& pattern)
 {
   try
@@ -87,36 +106,14 @@ Contents directory_contents(const fs::path& path, bool hasregex, const boost::re
       fs::directory_iterator end;
       for (fs::directory_iterator it(path); it != end; ++it)
       {
-        // Check first that the filename does not start with '.'
-        char dot = '.';
-        if (it->path().filename().native().at(0) != dot)
-        {
-          std::error_code ec;
-          if (hasregex)
-          {
-            if (boost::regex_match(it->path().filename().string(), pattern))
-            {
-              const std::time_t t = Fmi::last_write_time(it->path(), ec);
-              if (!ec)
-                contents.insert(Contents::value_type(it->path(), t));
-            }
-          }
-          else
-          {
-            const std::time_t t = Fmi::last_write_time(it->path(), ec);
-            if (!ec)
-              contents.insert(Contents::value_type(it->path(), t));
-          }
-        }
+        if (is_wanted_file(it->path(), hasregex, pattern))
+          add_file(contents, it->path());
       }
     }
     else
     {
       // No regex checking for single files
-      std::error_code ec;
-      const std::time_t t = Fmi::last_write_time(path, ec);
-      if (!ec)
-        contents.insert(Contents::value_type(path, t));
+      add_file(contents, path);
     }
     return contents;
   }
