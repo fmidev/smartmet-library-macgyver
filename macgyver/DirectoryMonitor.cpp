@@ -390,6 +390,95 @@ DirectoryMonitor::Watcher DirectoryMonitor::watch(
   }
 }
 
+namespace
+{
+// Check a monitor for changes, run its callbacks and schedule its next check
+void check_monitor(Monitor& mon, Schedule& schedule)
+{
+  // first check dir modification time
+
+  // establish nature of changes
+
+  DirectoryMonitor::Change changes = 0;
+  DirectoryMonitor::Status newstatus(new DirectoryMonitor::StatusMap);
+
+  try
+  {
+    std::optional<std::time_t> tchange;
+    if (fs::exists(mon.path))
+    {
+      tchange = Fmi::last_write_time(mon.path);
+      // Actually directory is scanned later if changes detected,
+      // but we are interested in how often changes are checked
+      if (mon.mask & DirectoryMonitor::SCAN)
+      {
+        (*newstatus)[mon.path] = DirectoryMonitor::SCAN;
+        mon.callback(mon.id, mon.path, mon.pattern, newstatus);
+        newstatus->clear();
+      }
+    }
+    else
+    {
+      tchange = std::time(nullptr);
+    }
+
+    // We cannot detect modifications simply by looking
+    // at the directory change time. In such cases we
+    // must scan the directory contents.
+
+    if (tchange <= mon.lastmodified && !((mon.mask & DirectoryMonitor::MODIFY) != 0))
+    {
+      // nothing to scan since dir timestamp did not change
+
+      std::time_t tnext = std::time(nullptr) + mon.interval;
+      schedule.insert(std::make_pair(tnext, mon));
+    }
+    else
+    {
+      // new listing must be taken since dir timestamp changed
+
+      Contents newcontents = directory_contents(mon.path, mon.hasregex, mon.pattern);
+
+      boost::tie(newstatus, changes) = directory_change(mon.contents, newcontents);
+
+      // Report all detected changes when a scan was triggered by a
+      // directory modification time change. The mask controls when to
+      // scan (the optimization at line 468), not what to report. This
+      // ensures that file modifications (MODIFY) are reported even when
+      // MODIFY is not in the mask, as long as the directory timestamp
+      // triggered the scan.
+
+      if (changes != DirectoryMonitor::NONE)
+      {
+        mon.callback(mon.id, mon.path, mon.pattern, newstatus);
+      }
+
+      // update schedule and status
+
+      mon.contents = newcontents;
+      mon.lastmodified = tchange ? *tchange : 0;
+
+      std::time_t tnext = std::time(nullptr) + mon.interval;
+      schedule.insert(std::make_pair(tnext, mon));
+    }
+  }
+  catch (std::exception& e)
+  {
+  #ifdef DEBUG
+    std::cerr << "Warning: " << e.what() << std::endl;
+  #endif
+
+    if ((mon.mask & DirectoryMonitor::ERROR) != 0)
+    {
+      mon.errorhandler(mon.id, mon.path, mon.pattern, e.what());
+    }
+
+    std::time_t tnext = std::time(nullptr) + mon.interval;
+    schedule.insert(std::make_pair(tnext, mon));
+  }
+}
+}  // namespace
+
 // ----------------------------------------------------------------------
 /*
  * \brief Start monitoring
@@ -435,87 +524,7 @@ void DirectoryMonitor::run()
             Monitor mon = impl->schedule.begin()->second;
             impl->schedule.erase(impl->schedule.begin());
 
-            // first check dir modification time
-
-            // establish nature of changes
-
-            Change changes = 0;
-            Status newstatus(new DirectoryMonitor::StatusMap);
-
-            try
-            {
-              std::optional<std::time_t> tchange;
-              if (fs::exists(mon.path))
-              {
-                tchange = Fmi::last_write_time(mon.path);
-                // Actually directory is scanned later if changes detected,
-                // but we are interested in how often changes are checked
-                if (mon.mask & DirectoryMonitor::SCAN)
-                {
-                  (*newstatus)[mon.path] = DirectoryMonitor::SCAN;
-                  mon.callback(mon.id, mon.path, mon.pattern, newstatus);
-                  newstatus->clear();
-                }
-              }
-              else
-              {
-                tchange = std::time(nullptr);
-              }
-
-              // We cannot detect modifications simply by looking
-              // at the directory change time. In such cases we
-              // must scan the directory contents.
-
-              if (tchange <= mon.lastmodified && !((mon.mask & MODIFY) != 0))
-              {
-                // nothing to scan since dir timestamp did not change
-
-                std::time_t tnext = std::time(nullptr) + mon.interval;
-                impl->schedule.insert(std::make_pair(tnext, mon));
-              }
-              else
-              {
-                // new listing must be taken since dir timestamp changed
-
-                Contents newcontents = directory_contents(mon.path, mon.hasregex, mon.pattern);
-
-                boost::tie(newstatus, changes) = directory_change(mon.contents, newcontents);
-
-                // Report all detected changes when a scan was triggered by a
-                // directory modification time change. The mask controls when to
-                // scan (the optimization at line 468), not what to report. This
-                // ensures that file modifications (MODIFY) are reported even when
-                // MODIFY is not in the mask, as long as the directory timestamp
-                // triggered the scan.
-
-                if (changes != NONE)
-                {
-                  mon.callback(mon.id, mon.path, mon.pattern, newstatus);
-                }
-
-                // update schedule and status
-
-                mon.contents = newcontents;
-                mon.lastmodified = tchange ? *tchange : 0;
-
-                std::time_t tnext = std::time(nullptr) + mon.interval;
-                impl->schedule.insert(std::make_pair(tnext, mon));
-              }
-            }
-            catch (std::exception& e)
-            {
-#ifdef DEBUG
-              std::cerr << "Warning: " << e.what() << std::endl;
-#endif
-
-              if ((mon.mask & ERROR) != 0)
-              {
-                mon.errorhandler(mon.id, mon.path, mon.pattern, e.what());
-              }
-
-              std::time_t tnext = std::time(nullptr) + mon.interval;
-              impl->schedule.insert(std::make_pair(tnext, mon));
-            }
+            check_monitor(mon, impl->schedule);
           }
         }
 
