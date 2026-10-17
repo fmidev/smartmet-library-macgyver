@@ -16,8 +16,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.10.16
-Release: 2%{?dist}.fmi
+Version: 26.10.17
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -150,6 +150,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Oct 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-1.fmi
+- Split functions with a cognitive complexity above 25 into smaller helpers, no functional changes
+
 * Fri Oct 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.16-2.fmi
 - Fixed the RHEL 8 build: the LocalDateTime default constructor is not defaulted, since its noexcept differs from the implicit exception specification
 
