@@ -44,7 +44,7 @@ Tests use FMI's own `regression/tframe.h` framework (from `smartmet-library-regr
 
 **DateTime subsystem**: `macgyver/date_time/Base.h` controls whether the library uses `std::chrono` (C++20) or the bundled Date library for timezone support. Currently `FMI_ENABLE_STD_CHRONO_ONLY` is hardcoded to 0, so the Date library is always used. The Makefile auto-detects this and sets `USE_OS_TZDB` and `TZ_CFLAGS` accordingly. The `obj/tz.o` target gets special compiler flags.
 
-**Cache**: `Fmi::Cache::Cache<K,V>` is a striped LRU cache using `shared_mutex` per stripe. `Fmi::Cache::FileCache` is a bimap-based variant. Both track hit/miss statistics via `CacheStats`.
+**Cache**: `Fmi::Cache::Cache<K,V>` is a sharded CLOCK (approximate LRU) cache using a `shared_mutex` per shard. `Fmi::Cache::FileCache` is a bimap-based disk cache. Both track hit/miss statistics via `CacheStats`.
 
 **Exception**: `Fmi::Exception` wraps `std::exception` with stack traces and chained causes. Created via `Fmi::Exception::Trace(BCP, msg)` where `BCP` is a macro expanding to `__FILE__, __LINE__, __PRETTY_FUNCTION__`. Note that the plain constructor `Fmi::Exception(BCP, msg)` does not chain the exception being handled; `Trace` does.
 

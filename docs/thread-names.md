@@ -57,6 +57,9 @@ value substituted at runtime.
 | `front-be-N` | plugins/frontend | backend ASIO IO pool |
 | `mmap-flt-N` | grid-files | memory-mapper fault processing pool |
 | `qd-fillgrid-N` | newbase | parallel grid fill (multi/single time) |
+| `qd-modgrid` | newbase | parallel per-time grid modification workers (all share one name) |
+| `qd-combine` | newbase | parallel parameter combination workers (all share one name) |
+| `sat-scan` | engines/satellite | file scan workers (all share one name) |
 | `grib2qd-N` | qdtools | GRIB→querydata conversion workers |
 | `calctopo-N` | fmitools | coastal-distance workers |
 | `sounding-N` | smarttools | sounding-index workers |
@@ -143,6 +146,7 @@ All other names are used verbatim (lowercased). Keep this map in sync with
 | `srv-run` | server | AsyncServer run task |
 | `geo-io` | engines/geonames | ASIO IO service |
 | `sputnik-io` | engines/sputnik | ASIO IO service |
+| `sat-monitor` | engines/satellite | directory monitor |
 | `q3-health` | plugins/q3 | health-check thread |
 | `q3-poll` | plugins/q3 | tracker polling thread |
 | `cs-maint` | grid-content | ContentServer corba maintenance |

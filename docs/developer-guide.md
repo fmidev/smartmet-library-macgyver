@@ -104,10 +104,10 @@ flags (`obj/tz.o` in the Makefile). Updating the system tzdata package updates t
 
 * `time_zone_from_string("Europe/Helsinki")` looks the name up in the tzdata. POSIX TZ
   strings such as `EET-2EEST` are not supported.
-* `time_zone_from_coordinate(lon, lat)` uses `/usr/share/smartmet/timezones/timezone.shz`
-  (`WorldTimeZones`) to find the zone name.
-* `set_region_file()` and `set_coordinate_file()` are deprecated and only print a
-  warning.
+* `time_zone_from_region()` is the same lookup, and `region_list()` lists the known
+  zone names.
+* macgyver does not map coordinates to time zones. Use `Fmi::TimeZoneFinder` in
+  smartmet-library-gis for that.
 
 Formatting is done with `Fmi::TimeFormatter` (a factory of named formats: `iso`, `sql`,
 `xml`, `epoch`, `timestamp`, `http`, …) and the `Fmi::to_iso_string()` family in

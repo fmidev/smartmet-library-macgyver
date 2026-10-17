@@ -46,14 +46,14 @@ top-level helpers:
 
 ## 2. Caching
 
-- **`Fmi::Cache::Cache<K, V>`** — striped LRU cache using
-  `shared_mutex` per stripe; configurable size with runtime
-  `resize()` support.
-- **`Fmi::Cache::FileCache`** — bimap-backed variant for file-keyed
-  caches.
+- **`Fmi::Cache::Cache<K, V>`** — sharded CLOCK (approximate LRU)
+  cache using a `shared_mutex` per shard; configurable size with
+  runtime `resize()` support.
+- **`Fmi::Cache::FileCache`** — bimap-backed disk cache of strings
+  with a byte limit.
 - **`Fmi::Cache::CacheStats`** — per-cache hit/miss/eviction counters.
-- **`Fmi::LRUCache<K, V>`** — simpler header-only LRU implementation
-  for in-class caches.
+- **`Fmi::LRUCache<T>`** — header-only compatibility wrapper
+  (`put`/`get`) over `Fmi::Cache::Cache` with `size_t` keys.
 
 ## 3. Exception handling
 
