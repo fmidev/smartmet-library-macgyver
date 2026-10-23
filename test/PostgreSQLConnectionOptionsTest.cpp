@@ -57,6 +57,39 @@ void parse_options_1()
   TEST_PASSED();
 }
 
+void parse_dead_connection_detection_options()
+{
+  const std::string conn_str =
+      "host=db.example.com dbname=example port=8001 user=foo password=bar"
+      " tcp_user_timeout=30000 keepalives_idle=60 keepalives_interval=10 keepalives_count=3";
+  Fmi::Database::PostgreSQLConnectionOptions opt(conn_str);
+  if (opt.tcp_user_timeout != 30000)
+    TEST_FAILED("opt.tcp_user_timeout=" + std::to_string(opt.tcp_user_timeout) +
+                " but not expected 30000");
+  if (opt.keepalives_idle != 60)
+    TEST_FAILED("opt.keepalives_idle=" + std::to_string(opt.keepalives_idle) +
+                " but not expected 60");
+  if (opt.keepalives_interval != 10)
+    TEST_FAILED("opt.keepalives_interval=" + std::to_string(opt.keepalives_interval) +
+                " but not expected 10");
+  if (opt.keepalives_count != 3)
+    TEST_FAILED("opt.keepalives_count=" + std::to_string(opt.keepalives_count) +
+                " but not expected 3");
+
+  const std::string new_conn_str = opt;
+  if (new_conn_str != conn_str)
+    TEST_FAILED("'" + new_conn_str + "' <=> '" + conn_str + "'");
+
+  // Unset (0) values are left out of the connection string, leaving libpq defaults in place
+  Fmi::Database::PostgreSQLConnectionOptions defaults(
+      "host=db.example.com dbname=example port=8001 user=foo password=bar");
+  if (defaults.tcp_user_timeout != 0 || defaults.keepalives_idle != 0 ||
+      defaults.keepalives_interval != 0 || defaults.keepalives_count != 0)
+    TEST_FAILED("dead connection detection options not 0 by default");
+
+  TEST_PASSED();
+}
+
 void hide_password_in_exception()
 {
   const std::map<std::string, std::string> testcases{
@@ -144,6 +177,7 @@ class tests : public tframe::tests
   void test(void)
   {
     TEST(parse_options_1);
+    TEST(parse_dead_connection_detection_options);
     TEST(hide_password_in_exception);
     TEST(hide_password_in_toString);
     TEST(id_format);

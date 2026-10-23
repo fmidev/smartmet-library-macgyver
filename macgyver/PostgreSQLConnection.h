@@ -42,6 +42,23 @@ struct PostgreSQLConnectionOptions
   std::string encoding = "UTF8";
   unsigned int connect_timeout = 0;
   unsigned int slow_query_limit = 0; // seconds
+
+  // Detection of a dead connection, e.g. a pooled connection silently dropped (no FIN/RST) by
+  // a firewall/NAT on the network path while idle. Passed to libpq as the connection
+  // parameters of the same name; 0 (the default) leaves them out of the connection string,
+  // i.e. libpq/OS defaults apply and behavior is unchanged unless explicitly configured.
+  //
+  // tcp_user_timeout bounds how long transmitted data (e.g. a query sent on a dead connection)
+  // may remain unacknowledged before the kernel aborts the connection; without it the kernel's
+  // retransmission timeout (tcp_retries2, typically 15-20 minutes) applies. The keepalive
+  // settings detect a peer that has gone away while no data is outstanding, e.g. while waiting
+  // for the result of a query. Neither aborts a legitimately long running query, since the
+  // peer keeps acknowledging data and keepalive probes.
+  unsigned int tcp_user_timeout = 0;     // milliseconds (TCP_USER_TIMEOUT)
+  unsigned int keepalives_idle = 0;      // seconds of inactivity before the first probe
+  unsigned int keepalives_interval = 0;  // seconds between unacknowledged probes
+  unsigned int keepalives_count = 0;     // unacknowledged probes before the connection is dead
+
   bool debug = false;
 
   PostgreSQLConnectionOptions() = default;

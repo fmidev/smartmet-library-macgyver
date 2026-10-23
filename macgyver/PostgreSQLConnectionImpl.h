@@ -5,6 +5,7 @@
 
 #include "PostgreSQLConnection.h"
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <map>
@@ -116,6 +117,11 @@ namespace Database
 
         std::shared_ptr<pqxx::connection> open_internal(std::size_t numReconnectAttempts);
 
+        // Context for the broken connection log messages: how long the failed operation ran and
+        // the configured dead connection detection settings, if any. An operation failing after
+        // about tcp_user_timeout typically means the kernel aborted a silently dropped connection.
+        std::string broken_connection_details(std::chrono::steady_clock::duration elapsed) const;
+
         void finalize_connection(pqxx::connection& connection);
 
         void checkSlowQuery(const std::string& theSQLStatement,
@@ -159,6 +165,7 @@ namespace Database
         last_failed = false;
         bool has_connection = bool(itsConnection);
         std::optional<boost::chrono::seconds> wait_duration;
+        auto start = std::chrono::steady_clock::now();
 
         for (std::size_t attempt = 0; attempt <= numTries; ++attempt)
         {
@@ -172,6 +179,8 @@ namespace Database
                     wait_duration.reset();
                 }
 
+                start = std::chrono::steady_clock::now();
+
                 if (!has_connection)
                     itsConnection = open_internal(0);
 
@@ -182,12 +191,13 @@ namespace Database
             catch(const pqxx::broken_connection& e)
             {
                 last_failed = true;
+                const auto details = broken_connection_details(std::chrono::steady_clock::now() - start);
                 const int remaining = numTries - attempt;
                 if (remaining > 0)
                 {
                     std::cout << "PostgreSQL connection to " + fmt::format("{}", getId())
                                  + " broken during operation : " + std::string(e.what())
-                              << " (attempts remaining " << numTries - attempt << ")"
+                              << " (attempts remaining " << numTries - attempt << ")" << details
                               << std::endl;
                     itsConnection.reset();
                     wait_duration = boost::chrono::seconds(10 + 3 * (attempt / 3));
@@ -198,7 +208,7 @@ namespace Database
                     std::cout << "PostgreSQL connection to " + fmt::format("{}", getId())
                                  + " broken during operation and no more retries left: "
                                  + std::string(e.what())
-                              << std::endl;
+                              << details << std::endl;
                     last_failed = true;
                     throw;
                 }

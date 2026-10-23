@@ -104,15 +104,15 @@ vpath %.h $(SRC_DIRS)
 # The files to be compiled
 
 # Headers that are only needed when building the library. These are not installed
-INTERNAL_HDRS = \
+INTERNAL_HDRS = $(addprefix $(SUBNAME)/, \
 	date_time/Internal.h \
 	date_time/ParserDefinitions.h \
 	date_time/date/tz_private.h \
 	PostgreSQLConnectionImpl.h \
-	TimeParserDefinitions.h
+	TimeParserDefinitions.h)
 
 SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
-HDRS = $(filter-out $(INTERNAL_HEADERS), $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h)))
+HDRS = $(filter-out $(INTERNAL_HDRS), $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h)))
 OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
 # All object files are put into a subdirectory obj. As result the source files

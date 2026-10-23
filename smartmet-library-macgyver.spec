@@ -16,8 +16,8 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.10.17
-Release: 2%{?dist}.fmi
+Version: 26.10.23
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-macgyver
@@ -150,6 +150,12 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Fri Oct 23 2026 Pertti Kinnia <pertti.kinnia@fmi.fi> - 26.10.23-1.fmi
+- PostgreSQLConnectionOptions: new tcp_user_timeout (ms), keepalives_idle, keepalives_interval (s) and keepalives_count settings, parsed from and passed to libpq in the connection string when nonzero, for detecting silently dropped connections. Default 0 keeps the old behaviour
+- PostgreSQLConnection: the broken connection log messages show the elapsed time of the failed operation and the configured dead connection detection settings
+- ABI change: new members in PostgreSQLConnectionOptions, dependent packages must be rebuilt
+- Makefile: internal headers (PostgreSQLConnectionImpl.h, TimeParserDefinitions.h, date_time/Internal.h, date_time/ParserDefinitions.h, date_time/date/tz_private.h) are no longer installed; the INTERNAL_HDRS filter was misnamed and lacked the directory prefix
+
 * Mon Oct 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-2.fmi
 - Repackaged: simultaneous CI runs corrupted the 26.10.17-1 RPMs
 * Sat Oct 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-1.fmi

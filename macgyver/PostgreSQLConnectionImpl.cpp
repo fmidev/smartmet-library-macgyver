@@ -262,6 +262,22 @@ std::string PostgreSQLConnection::Impl::get_prepared_sql_string(const std::strin
 
 
 
+std::string PostgreSQLConnection::Impl::broken_connection_details(
+    std::chrono::steady_clock::duration elapsed) const
+{
+    const auto& opt = itsConnectionOptions;
+    std::string details = fmt::format(" [after {:.1f} s", std::chrono::duration<double>(elapsed).count());
+    if (opt.tcp_user_timeout > 0)
+        details += fmt::format(", tcp_user_timeout {} ms", opt.tcp_user_timeout);
+    if (opt.keepalives_idle > 0)
+        details += fmt::format(", keepalives_idle {} s", opt.keepalives_idle);
+    if (opt.keepalives_interval > 0)
+        details += fmt::format(", keepalives_interval {} s", opt.keepalives_interval);
+    if (opt.keepalives_count > 0)
+        details += fmt::format(", keepalives_count {}", opt.keepalives_count);
+    return details + "]";
+}
+
 std::shared_ptr<pqxx::connection> PostgreSQLConnection::Impl::open_internal(std::size_t numReconnectAttempts)
 {
     itsCanceled.store(false);

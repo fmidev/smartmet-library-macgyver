@@ -38,7 +38,11 @@ const std::map<std::string, std::variant<std::monostate, uint_member_ptr, string
                  {"user", &PostgreSQLConnectionOptions::username},
                  {"password", &PostgreSQLConnectionOptions::password},
                  {"client_encoding", &PostgreSQLConnectionOptions::encoding},
-                 {"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout}
+                 {"connect_timeout", &PostgreSQLConnectionOptions::connect_timeout},
+                 {"tcp_user_timeout", &PostgreSQLConnectionOptions::tcp_user_timeout},
+                 {"keepalives_idle", &PostgreSQLConnectionOptions::keepalives_idle},
+                 {"keepalives_interval", &PostgreSQLConnectionOptions::keepalives_interval},
+                 {"keepalives_count", &PostgreSQLConnectionOptions::keepalives_count}
                  // FIXME: add parameters we ignore
                  ,
                  {"options", ignore}};
@@ -127,6 +131,18 @@ std::string PostgreSQLConnectionOptions::toString(bool hidePassword) const
 
   if (connect_timeout > 0)
     ss << " connect_timeout=" << connect_timeout;
+
+  if (tcp_user_timeout > 0)
+    ss << " tcp_user_timeout=" << tcp_user_timeout;
+
+  if (keepalives_idle > 0)
+    ss << " keepalives_idle=" << keepalives_idle;
+
+  if (keepalives_interval > 0)
+    ss << " keepalives_interval=" << keepalives_interval;
+
+  if (keepalives_count > 0)
+    ss << " keepalives_count=" << keepalives_count;
 
   return ss.str();
 }
