@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.10.23
+Version: 26.10.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -150,6 +150,10 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Mon Oct 26 2026 Pertti Kinnia <pertti.kinnia@fmi.fi> - 26.10.26-1.fmi
+- PostgreSQLConnection: a statement on a connection that was open before the call (e.g. an idle pooled connection dropped silently) is retried at once on a new connection when it breaks; the 10 s waits apply only if that reconnect fails too
+- PostgreSQLConnection: a connection broken during a transaction is no longer retried; the retry ran the statement through the freed connection (use after free) and outside the transaction. The transaction is aborted and the error is thrown at once
+
 * Fri Oct 23 2026 Pertti Kinnia <pertti.kinnia@fmi.fi> - 26.10.23-1.fmi
 - PostgreSQLConnectionOptions: new tcp_user_timeout (ms), keepalives_idle, keepalives_interval (s) and keepalives_count settings, parsed from and passed to libpq in the connection string when nonzero, for detecting silently dropped connections. Default 0 keeps the old behaviour
 - PostgreSQLConnection: the broken connection log messages show the elapsed time of the failed operation and the configured dead connection detection settings

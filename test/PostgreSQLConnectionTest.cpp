@@ -2,6 +2,7 @@
 #include "DebugTools.h"
 #include <boost/test/included/unit_test.hpp>
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -312,4 +313,59 @@ BOOST_AUTO_TEST_CASE(postgresql_connection_pool_test, * utf::depends_on("get_con
     BOOST_CHECK_EQUAL(id1, -16003156);
     BOOST_CHECK_EQUAL(id2, -105198);
     BOOST_CHECK_EQUAL(id3, 634963);
+}
+BOOST_AUTO_TEST_CASE(test_immediate_reconnect_after_broken_connection,
+    * utf::depends_on("get_connection_options"))
+{
+    // A connection broken while idle (here: backend terminated from another connection) is
+    // replaced at once on the next query, without the 10 s wait between retries
+    db::PostgreSQLConnection conn(env::opts);
+    db::PostgreSQLConnection killer(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+
+    const auto backend_pid = [](db::PostgreSQLConnection& c)
+    { return c.executeNonTransaction("SELECT pg_backend_pid() AS pid")[0]["pid"].as<int>(); };
+
+    const int pid1 = backend_pid(conn);
+    killer.executeNonTransaction("SELECT pg_terminate_backend(" + std::to_string(pid1) + ")");
+
+    const auto start = std::chrono::steady_clock::now();
+    int pid2 = 0;
+    BOOST_REQUIRE_NO_THROW(pid2 = backend_pid(conn));
+    const double elapsed =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+
+    BOOST_CHECK_NE(pid1, pid2);
+    BOOST_CHECK_LT(elapsed, 5.0);
+}
+
+BOOST_AUTO_TEST_CASE(test_broken_connection_in_transaction,
+    * utf::depends_on("get_connection_options"))
+{
+    // A connection broken during a transaction aborts the transaction (no retry of the single
+    // statement on a new connection); the connection itself is usable again afterwards
+    db::PostgreSQLConnection conn(env::opts);
+    db::PostgreSQLConnection killer(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+
+    const auto backend_pid = [](db::PostgreSQLConnection& c)
+    { return c.executeNonTransaction("SELECT pg_backend_pid() AS pid")[0]["pid"].as<int>(); };
+
+    const int pid1 = backend_pid(conn);
+    const auto start = std::chrono::steady_clock::now();
+    {
+        auto transaction = conn.transaction();
+        transaction->execute("CREATE TEMP TABLE broken_txn_test(i int)");
+        killer.executeNonTransaction("SELECT pg_terminate_backend(" + std::to_string(pid1) + ")");
+        BOOST_CHECK_THROW(transaction->execute("SELECT count(*) FROM broken_txn_test"),
+                          Fmi::Exception);
+        BOOST_CHECK_THROW(transaction->commit(), Fmi::Exception);
+    }
+    const double elapsed =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    BOOST_CHECK_LT(elapsed, 5.0);
+
+    int pid2 = 0;
+    BOOST_REQUIRE_NO_THROW(pid2 = backend_pid(conn));
+    BOOST_CHECK_NE(pid1, pid2);
 }

@@ -167,7 +167,12 @@ namespace Database
         std::optional<boost::chrono::seconds> wait_duration;
         auto start = std::chrono::steady_clock::now();
 
-        for (std::size_t attempt = 0; attempt <= numTries; ++attempt)
+        // A connection opened earlier (e.g. an idle pooled one) may have been dropped silently
+        // while the server is fine. Its first failure is retried at once on a new connection
+        // without using up an attempt; if that fails too, the normal waits apply.
+        bool immediate_retry = has_connection && numTries > 0;
+
+        for (std::size_t attempt = 0; attempt <= numTries;)
         {
             std::exception_ptr last_exception;
             try
@@ -193,6 +198,29 @@ namespace Database
                 last_failed = true;
                 const auto details = broken_connection_details(std::chrono::steady_clock::now() - start);
                 const int remaining = numTries - attempt;
+                if (itsTransaction)
+                {
+                    // The transaction died with the connection: retrying just this statement on a
+                    // new connection would run it without the earlier ones. Drop the transaction
+                    // before the connection it refers to, and let the caller handle the failure.
+                    std::cout << "PostgreSQL connection to " + fmt::format("{}", getId())
+                                 + " broken during transaction, transaction aborted: "
+                                 + std::string(e.what())
+                              << details << std::endl;
+                    itsTransaction.reset();
+                    itsConnection.reset();
+                    throw;
+                }
+                if (immediate_retry)
+                {
+                    std::cout << "PostgreSQL connection to " + fmt::format("{}", getId())
+                                 + " broken during operation : " + std::string(e.what())
+                              << " (reconnecting immediately)" << details << std::endl;
+                    itsConnection.reset();
+                    has_connection = false;
+                    immediate_retry = false;
+                    continue;
+                }
                 if (remaining > 0)
                 {
                     std::cout << "PostgreSQL connection to " + fmt::format("{}", getId())
@@ -202,6 +230,7 @@ namespace Database
                     itsConnection.reset();
                     wait_duration = boost::chrono::seconds(10 + 3 * (attempt / 3));
                     has_connection = false;
+                    ++attempt;
                 }
                 else
                 {

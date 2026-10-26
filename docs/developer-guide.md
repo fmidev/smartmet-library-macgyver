@@ -300,8 +300,14 @@ between threads.
 * **Reconnects.** When the connection breaks during a statement, the call waits (10 s
   at first, growing), reconnects and retries the statement, up to
   `queryRetryLimit` (2) more times. A request thread can therefore block for tens of
-  seconds while the database is down. `PostgreSQLConnection::disableReconnect()` turns
-  this off; `shutdownAll()` makes pending waits stop at shutdown.
+  seconds while the database is down. If the call started on an already open connection
+  (e.g. an idle pooled one that was dropped silently), the first retry is made at once
+  without waiting and without using up an attempt. `PostgreSQLConnection::disableReconnect()`
+  turns this off; `shutdownAll()` makes pending waits stop at shutdown.
+* **Broken transactions are not retried.** If the connection breaks while a transaction is
+  active, the transaction is lost: the statement throws at once, the transaction ends
+  (a later `commit()` throws) and the next call reconnects. Retry the whole transaction
+  in the caller if needed.
 * `cancel()` cancels the running statement from another thread.
 
 ## 10. Strings, numbers and hashes
