@@ -89,6 +89,13 @@ namespace Fmi
             static TimeZonePtr utc;
 
             /**
+             * UTC time zone pointer, never null.
+             *
+             * @exception Fmi::Exception if the time zone database could not be loaded
+            */
+            static const date::time_zone* utc_zone_ptr();
+
+            /**
              * Get a list of all time zone names.
              * 
              * @warning date library must be compiled with identical macron

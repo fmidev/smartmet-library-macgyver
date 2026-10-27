@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.10.26
+Version: 26.10.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -45,6 +45,7 @@ Requires: double-conversion
 Requires: ctpp2
 Requires: %{smartmet_fmt_devel}
 Requires: libicu >= 50.2
+Requires: tzdata
 
 %if 0%{?rhel} && 0%{rhel} == 8
 Requires: libpqxx >= 1:7.7.0, libpqxx < 1:7.8.0
@@ -150,6 +151,11 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Tue Oct 27 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.27-1.fmi
+- Require tzdata, the time zone database is read from /usr/share/zoneinfo
+- A missing or broken time zone database no longer aborts every program linked with the library at load time; uses of the UTC zone throw an Fmi::Exception instead
+- New TimeZonePtr::utc_zone_ptr(), no ABI change: dependent packages need no rebuild
+
 * Mon Oct 26 2026 Pertti Kinnia <pertti.kinnia@fmi.fi> - 26.10.26-1.fmi
 - PostgreSQLConnection: a statement on a connection that was open before the call (e.g. an idle pooled connection dropped silently) is retried at once on a new connection when it breaks; the 10 s waits apply only if that reconnect fails too
 - PostgreSQLConnection: a connection broken during a transaction is no longer retried; the retry ran the statement through the freed connection (use after free) and outside the transaction. The transaction is aborted and the error is thrown at once

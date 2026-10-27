@@ -5,7 +5,48 @@
 
 using namespace Fmi::date_time;
 
-TimeZonePtr TimeZonePtr::utc("UTC");
+namespace
+{
+// The reason the UTC zone could not be loaded, empty if it loaded fine
+std::string& utc_error()
+{
+    static std::string error;
+    return error;
+}
+
+// TimeZonePtr::utc is initialized when the library is loaded. An exception
+// thrown then cannot be caught and would abort every program linked with
+// macgyver, even ones that never use time zones. Record the error instead
+// and report it from utc_zone_ptr() when UTC is actually needed.
+const date::time_zone* load_utc() noexcept
+{
+    try
+    {
+        return date::locate_zone("UTC");
+    }
+    catch (const std::exception& e)
+    {
+        utc_error() = e.what();
+    }
+    catch (...)
+    {
+        utc_error() = "unknown error";
+    }
+    return nullptr;
+}
+}  // namespace
+
+TimeZonePtr TimeZonePtr::utc(load_utc());
+
+const date::time_zone* TimeZonePtr::utc_zone_ptr()
+{
+    if (!utc.tz)
+        throw Fmi::Exception(BCP,
+                             "UTC time zone is not available, is the tzdata package installed "
+                             "and /usr/share/zoneinfo intact?")
+            .addParameter("Reason", utc_error());
+    return utc.tz;
+}
 
 TimeZonePtr::TimeZonePtr() noexcept
     : tz(utc.zone_ptr())

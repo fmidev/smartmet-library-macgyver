@@ -48,7 +48,7 @@ LocalDateTime::LocalDateTime(
 
         if (!tz) {
             ldt = detail::zoned_time_t(
-                TimeZonePtr::utc.zone_ptr(),
+                TimeZonePtr::utc_zone_ptr(),
                 time.get_impl());
             set_type(NORMAL);
             return;
@@ -57,7 +57,7 @@ LocalDateTime::LocalDateTime(
         try
         {
             const auto ldt_utc  = detail::zoned_time_t(
-                TimeZonePtr::utc.zone_ptr(),
+                TimeZonePtr::utc_zone_ptr(),
                 detail::time_point_t(time.get_impl()) );
             const auto sys_time = ldt_utc.get_sys_time();
             ldt = detail::zoned_time_t(tz.zone_ptr(), sys_time);
@@ -105,7 +105,7 @@ LocalDateTime::LocalDateTime(
         if (!tz)
         {
             ldt = detail::zoned_time_t(
-                TimeZonePtr::utc.zone_ptr(),
+                TimeZonePtr::utc_zone_ptr(),
                 detail::time_point_t(date.get_impl() + time.get_impl()) );
             set_type(NORMAL);
             return;
@@ -144,7 +144,7 @@ LocalDateTime::LocalDateTime(
     if (!tz)
     {
         ldt = detail::zoned_time_t(
-            TimeZonePtr::utc.zone_ptr(),
+            TimeZonePtr::utc_zone_ptr(),
             time);
         set_type(NORMAL);
         return;
