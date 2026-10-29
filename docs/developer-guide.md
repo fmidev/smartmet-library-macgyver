@@ -205,7 +205,29 @@ exception; `stop()` cancels the running ones, and later `add()` calls are ignore
 kept (`get_exception_info()`), and signals `on_task_ended` / `on_task_error` report each
 task. Spine initialises engines and plugins with it.
 
-### 6.3 Other primitives
+### 6.3 `Fmi::CancellationToken`
+
+Cooperative cancellation of the work done for one request (`Cancellation.h`). The
+server creates a token for each request with the time limit of the plugin and a probe
+which notices a client that has closed the connection, and makes it current in the
+thread calling the plugin with `Fmi::CancellationScope`. Long loops call
+`Fmi::check_cancelled()`, which throws an `Fmi::Exception` recognized by
+`Fmi::is_cancellation()` once the token is cancelled, and does nothing in a thread
+without a current token.
+
+* The check costs an atomic load and a clock read, the probe is polled at most once
+  per its interval by one of the threads sharing the token.
+* `interrupted()` tells whether a check has thrown, that is, whether the response may
+  be incomplete; Spine's `HandlerView` then replaces it with a 503.
+* A thread started for the request sees the token only if it is made current there:
+  `Fmi::CancellationScope scope(token)` with `token = Fmi::current_cancellation_token()`
+  taken in the request thread.
+* Do not check where the result is shared with other requests, for example while
+  computing a cache value other requests wait for: they would fail too.
+* Unlike `boost::thread::interrupt()` the cancellation is not left pending in a pooled
+  thread for its next request.
+
+### 6.4 Other primitives
 
 * `Fmi::AtomicSharedPtr<T>`: `load()`, `store()`, `exchange()` of a `shared_ptr` with
   `std::atomic_load` / `std::atomic_store`. Engines use it to publish immutable
