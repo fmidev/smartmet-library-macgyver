@@ -36,7 +36,7 @@ DEFINES = -DUNIX -D_REENTRANT -DPQXX_HIDE_EXP_OPTIONAL
 
 REQUIRES := libpqxx icu-i18n fmt ctpp2 filesystem
 
-include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
+include $(or $(PREFIX),$(shell smartbuildcfg --prefix))/share/smartmet/devel/makefile.inc
 
 LIBS += \
 	$(PREFIX_LDFLAGS) \

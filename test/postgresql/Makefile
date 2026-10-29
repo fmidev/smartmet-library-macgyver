@@ -1,6 +1,6 @@
 REQUIRES = libpqxx
 
-include $(shell smartbuildcfg --prefix)/share/smartmet/devel/makefile.inc
+include $(or $(PREFIX),$(shell smartbuildcfg --prefix))/share/smartmet/devel/makefile.inc
 
 LIBS = -L../.. -lsmartmet-macgyver -lpqxx -lboost_chrono -lboost_thread -lpthread
 
