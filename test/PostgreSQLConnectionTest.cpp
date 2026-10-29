@@ -1,4 +1,5 @@
 #include "PostgreSQLConnection.h"
+#include "Cancellation.h"
 #include "DebugTools.h"
 #include <boost/test/included/unit_test.hpp>
 
@@ -7,6 +8,9 @@
 #include <iostream>
 #include <memory>
 #include <future>
+#include <optional>
+#include <tuple>
+#include <vector>
 
 namespace utf = boost::unit_test;
 namespace db = Fmi::Database;
@@ -368,4 +372,110 @@ BOOST_AUTO_TEST_CASE(test_broken_connection_in_transaction,
     int pid2 = 0;
     BOOST_REQUIRE_NO_THROW(pid2 = backend_pid(conn));
     BOOST_CHECK_NE(pid1, pid2);
+}
+
+BOOST_AUTO_TEST_CASE(test_stream, * utf::depends_on("get_connection_options"))
+{
+    // The streamed rows are the same as the rows of the result of execute()
+    db::PostgreSQLConnection conn(env::opts);
+    BOOST_REQUIRE(conn.isConnected());
+
+    const std::string sql =
+        "SELECT id, name, lat FROM geonames WHERE countries_iso2='FI' ORDER BY id LIMIT 1000";
+    const pqxx::result result = SHOW_EXCEPTIONS(conn.executeNonTransaction(sql));
+    BOOST_REQUIRE_GT(result.size(), 0U);
+
+    std::vector<std::tuple<int, std::string, double>> rows;
+    const std::size_t count = SHOW_EXCEPTIONS(conn.stream(
+        sql,
+        [&](int id, const std::string& name, double lat) { rows.emplace_back(id, name, lat); }));
+
+    BOOST_CHECK_EQUAL(count, rows.size());
+    BOOST_REQUIRE_EQUAL(rows.size(), std::size_t(result.size()));
+    for (std::size_t i = 0; i < rows.size(); i++)
+    {
+        BOOST_CHECK_EQUAL(std::get<0>(rows[i]), result[i]["id"].as<int>());
+        BOOST_CHECK_EQUAL(std::get<1>(rows[i]), result[i]["name"].as<std::string>());
+        BOOST_CHECK_EQUAL(std::get<2>(rows[i]), result[i]["lat"].as<double>());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_stream_null, * utf::depends_on("get_connection_options"))
+{
+    db::PostgreSQLConnection conn(env::opts);
+    std::vector<std::optional<std::string>> values;
+    SHOW_EXCEPTIONS(conn.stream("VALUES (1, 'a'), (2, NULL)",
+                                [&](int, std::optional<std::string> value)
+                                { values.push_back(std::move(value)); }));
+    BOOST_REQUIRE_EQUAL(values.size(), 2U);
+    BOOST_CHECK(values[0] == std::optional<std::string>("a"));
+    BOOST_CHECK(!values[1]);
+}
+
+BOOST_AUTO_TEST_CASE(test_stream_function_throws, * utf::depends_on("get_connection_options"))
+{
+    // A failure in the middle of the result leaves the connection unusable, the next call
+    // must reconnect
+    db::PostgreSQLConnection conn(env::opts);
+    std::size_t rows = 0;
+    BOOST_CHECK_THROW(conn.stream("SELECT generate_series(1, 1000000)",
+                                  [&](int)
+                                  {
+                                      if (++rows == 10)
+                                          throw std::runtime_error("stop");
+                                  }),
+                      Fmi::Exception);
+    BOOST_CHECK_EQUAL(rows, 10U);
+
+    pqxx::result result;
+    BOOST_REQUIRE_NO_THROW(result = conn.executeNonTransaction("SELECT 42 AS answer"));
+    BOOST_CHECK_EQUAL(result[0]["answer"].as<int>(), 42);
+
+    std::size_t count = 0;
+    BOOST_REQUIRE_NO_THROW(count = conn.stream("SELECT generate_series(1, 100)", [](int) {}));
+    BOOST_CHECK_EQUAL(count, 100U);
+}
+
+BOOST_AUTO_TEST_CASE(test_stream_cancelled, * utf::depends_on("get_connection_options"))
+{
+    // A cancelled request stops streaming at once, and the query is cancelled
+    db::PostgreSQLConnection conn(env::opts);
+    auto token = std::make_shared<Fmi::CancellationToken>();
+    std::size_t rows = 0;
+    const auto start = std::chrono::steady_clock::now();
+    try
+    {
+        Fmi::CancellationScope scope(token);
+        conn.stream("SELECT generate_series(1, 100000000)",
+                    [&](int)
+                    {
+                        if (++rows == 1000)
+                            token->cancel(Fmi::CancellationToken::Reason::Disconnected);
+                    });
+        BOOST_FAIL("Expected a cancellation");
+    }
+    catch (const Fmi::Exception& e)
+    {
+        BOOST_CHECK(Fmi::is_cancellation(e));
+    }
+    const double elapsed =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    BOOST_CHECK_EQUAL(rows, 1000U);
+    BOOST_CHECK_LT(elapsed, 5.0);
+
+    // Not cancelled outside the scope of the token
+    std::size_t count = 0;
+    BOOST_REQUIRE_NO_THROW(count = conn.stream("SELECT generate_series(1, 100)", [](int) {}));
+    BOOST_CHECK_EQUAL(count, 100U);
+}
+
+BOOST_AUTO_TEST_CASE(test_stream_in_transaction, * utf::depends_on("get_connection_options"))
+{
+    db::PostgreSQLConnection conn(env::opts);
+    auto transaction = conn.transaction();
+    transaction->execute("CREATE TEMP TABLE stream_test AS SELECT generate_series(1, 5) AS i");
+    int sum = 0;
+    SHOW_EXCEPTIONS(conn.stream("SELECT i FROM stream_test", [&](int i) { sum += i; }));
+    BOOST_CHECK_EQUAL(sum, 15);
+    BOOST_CHECK_NO_THROW(transaction->commit());
 }

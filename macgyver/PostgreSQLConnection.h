@@ -12,6 +12,7 @@
 #include <fmt/format.h>
 #include <pqxx/pqxx>
 #include <string>
+#include <tuple>
 #include "Exception.h"
 #include "Pool.h"
 #include "TypeTraits.h"
@@ -206,6 +207,29 @@ class PostgreSQLConnection
 
   pqxx::result exec_prepared(const std::string& name, const pqxx::params& params) const;
 
+  /**
+   *   @brief Execute a query and pass each row of its result to theFunction as it arrives
+   *
+   *   Unlike in the other methods, the result is never held in memory as a whole. The argument
+   *   types of theFunction (taken by value or by const reference) select the conversions of the
+   *   columns, use std::optional for a column which may be NULL. For example
+   *
+   *     conn.stream("SELECT id, name, elevation FROM stations",
+   *                 [&](int id, const std::string& name, std::optional<double> elevation) { ... });
+   *
+   *   The query is run within a COPY command: it must be a SELECT or VALUES query, and it
+   *   cannot have parameters. Streaming is slower than execute() for small results.
+   *
+   *   Fmi::check_cancelled() and boost::this_thread::interruption_point() are called for each
+   *   row. If streaming is interrupted or fails, or theFunction throws, the query is cancelled
+   *   and the connection closed, since it cannot be used while the rest of the result is
+   *   pending. The next call opens a new connection. An active transaction is lost too.
+   *
+   *   @return The number of rows
+   */
+  template <typename Function>
+  std::size_t stream(const std::string& theSQLStatement, Function&& theFunction) const;
+
   bool collateSupported() const;
   std::string quote(const std::string& theString) const;
   const std::map<unsigned int, std::string>& dataTypes() const;
@@ -233,6 +257,21 @@ class PostgreSQLConnection
   pqxx::result exec_params_impl(
       const std::string& theSQLStatement,
       const pqxx::params& params) const;
+
+  // Reads the rows of the query from the transaction, counting the rows passed on
+  using StreamReader = std::function<void(pqxx::transaction_base&, std::size_t&)>;
+
+  std::size_t stream_impl(const std::string& theSQLStatement, const StreamReader& theReader) const;
+
+  template <typename Function, typename... Types>
+  static void stream_rows(pqxx::transaction_base& theTransaction,
+                          const std::string& theSQLStatement,
+                          Function& theFunction,
+                          std::size_t& theRowCount,
+                          std::tuple<Types...>* /* selects the column types */);
+
+  // Throws if the thread has been interrupted or its request cancelled
+  static void check_interruption();
 
   std::shared_ptr<pqxx::transaction_base> get_transaction_impl() const;
 
@@ -398,6 +437,37 @@ PostgreSQLConnection::exec_params_p(
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+template <typename Function>
+std::size_t PostgreSQLConnection::stream(const std::string& theSQLStatement,
+                                         Function&& theFunction) const
+{
+  using Row = typename callable_arguments<std::decay_t<Function>>::type;
+  return stream_impl(theSQLStatement,
+                     [&](pqxx::transaction_base& theTransaction, std::size_t& theRowCount)
+                     {
+                       stream_rows(theTransaction,
+                                   theSQLStatement,
+                                   theFunction,
+                                   theRowCount,
+                                   static_cast<Row*>(nullptr));
+                     });
+}
+
+template <typename Function, typename... Types>
+void PostgreSQLConnection::stream_rows(pqxx::transaction_base& theTransaction,
+                                       const std::string& theSQLStatement,
+                                       Function& theFunction,
+                                       std::size_t& theRowCount,
+                                       std::tuple<Types...>* /* selects the column types */)
+{
+  for (auto&& row : theTransaction.stream<Types...>(theSQLStatement))
+  {
+    check_interruption();
+    std::apply(theFunction, std::move(row));
+    ++theRowCount;
   }
 }
 

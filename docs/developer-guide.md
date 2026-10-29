@@ -224,6 +224,7 @@ without a current token.
   taken in the request thread.
 * Do not check where the result is shared with other requests, for example while
   computing a cache value other requests wait for: they would fail too.
+* `PostgreSQLConnection::stream()` checks the token for each row (§9).
 * Unlike `boost::thread::interrupt()` the cancellation is not left pending in a pooled
   thread for its next request.
 
@@ -319,6 +320,15 @@ between threads.
   `commit()` and `rollback()`; it rolls back if not committed).
 * **Parameters.** Use `exec_params(sql, args...)` or prepared statements
   (`prepare()` / `exec_prepared()`) for values; `quote()` exists for building SQL text.
+* **Streaming.** `stream(sql, function)` passes each row to the function as it arrives
+  instead of reading the whole result into memory first; the argument types of the
+  function select the column conversions (`std::optional` for NULLs). The query runs
+  within `COPY`, so it must be a `SELECT` or `VALUES` without parameters, and it is slower
+  than `execute()` for small results. Each row checks `boost::this_thread::interruption_point()`
+  and `Fmi::check_cancelled()` (§6.3). If the stream stops early (cancellation, an error,
+  or an exception from the function), the query is cancelled and the connection closed,
+  since the rest of the result would still be pending; the next call reconnects and an
+  active transaction is lost. A broken connection is retried only if no row has been passed on.
 * **Reconnects.** When the connection breaks during a statement, the call waits (10 s
   at first, growing), reconnects and retries the statement, up to
   `queryRetryLimit` (2) more times. A request thread can therefore block for tens of
