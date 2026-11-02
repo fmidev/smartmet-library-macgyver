@@ -234,7 +234,9 @@ without a current token.
   `std::atomic_load` / `std::atomic_store`. Engines use it to publish immutable
   snapshots (a new repository, station list, …) that readers pick up without locking.
 * `Fmi::ThreadPool::ThreadPool<Scheduler>`: a fixed-size pool with a bounded FIFO
-  queue; the server's request pools are built on it.
+  queue; the server's request pools are built on it. `Fmi::ThreadPool::current_worker_thread()`
+  is the `boost::thread` of the worker running the calling task (nullptr elsewhere), so
+  that another thread can interrupt the task.
 * `Fmi::WorkQueue<T>`: a queue consumed by a fixed number of threads that all run the
   same function.
 

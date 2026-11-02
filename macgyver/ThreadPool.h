@@ -29,6 +29,13 @@ using MutexType = boost::mutex;
 using Lock = boost::unique_lock<MutexType>;
 using ConditionVariableType = boost::condition_variable;
 
+// The thread of the pool worker running the calling code, nullptr in other threads. Code
+// handling a task can let another thread interrupt it with boost::thread::interrupt().
+boost::thread* current_worker_thread();
+
+// Sets the thread returned by current_worker_thread(), called by the workers
+void set_current_worker_thread(boost::thread* theThread);
+
 // ======================================================================
 /*!
  * \brief Declaration of Worker class
@@ -86,6 +93,11 @@ class Worker : public std::enable_shared_from_this<Worker<Executor> >
   {
     if (!itsName.empty())
       Fmi::set_thread_name(itsName);
+    {
+      // attachThread() may not have stored the thread yet
+      Lock lock(itsThreadMutex);
+      set_current_worker_thread(itsThread.get());
+    }
     bool success = true;
     while (success)
     {
@@ -104,6 +116,7 @@ class Worker : public std::enable_shared_from_this<Worker<Executor> >
 
   void attachThread()
   {
+    Lock lock(itsThreadMutex);
     itsThread.reset(new boost::thread(boost::bind(&Worker<Executor>::run, this)));
   }
 
@@ -132,6 +145,7 @@ class Worker : public std::enable_shared_from_this<Worker<Executor> >
   ParentPtr itsParent;
 
   std::shared_ptr<boost::thread> itsThread;
+  MutexType itsThreadMutex;
 
   IteratorType itsLocation;
 
