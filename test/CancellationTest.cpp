@@ -44,6 +44,8 @@ void not_cancelled()
     TEST_FAILED("A new token must not be cancelled");
   if (token.deadline())
     TEST_FAILED("A new token must not have a deadline");
+  if (token.hasProbe())
+    TEST_FAILED("A new token must not have a probe");
   if (!check_and_catch(token).empty())
     TEST_FAILED("check() must not throw for a new token");
   if (token.interrupted())
@@ -98,6 +100,8 @@ void probe()
         return gone ? Reason::Disconnected : Reason::None;
       },
       std::chrono::hours(1));
+  if (!token.hasProbe())
+    TEST_FAILED("The token must have a probe");
 
   // The first check polls, the following ones wait for the interval
   for (int i = 0; i < 100; i++)

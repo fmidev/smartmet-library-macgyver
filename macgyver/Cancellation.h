@@ -68,6 +68,7 @@ class CancellationToken
   // Poll the probe at most once per interval. Must be set before the token is used
   // by other threads.
   void setProbe(Probe theProbe, Clock::duration theInterval);
+  bool hasProbe() const noexcept { return static_cast<bool>(itsProbe); }
 
   // Reason::None while the request may continue. Notices an expired deadline and
   // polls the probe when it is time to.
