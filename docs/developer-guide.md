@@ -208,9 +208,9 @@ task. Spine initialises engines and plugins with it.
 ### 6.3 `Fmi::CancellationToken`
 
 Cooperative cancellation of the work done for one request (`Cancellation.h`). The
-server creates a token for each request with the time limit of the plugin and a probe
-which notices a client that has closed the connection, and makes it current in the
-thread calling the plugin with `Fmi::CancellationScope`. Long loops call
+server creates a token for each request with the time limit of the plugin and, if
+enabled, a probe which notices a client that has closed the connection, and makes it
+current in the thread calling the plugin with `Fmi::CancellationScope`. Long loops call
 `Fmi::check_cancelled()`, which throws an `Fmi::Exception` recognized by
 `Fmi::is_cancellation()` once the token is cancelled, and does nothing in a thread
 without a current token.
