@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.10.27
+Version: 26.11.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -151,6 +151,10 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Tue Nov 3 2026  Andri Pavenis <andri.pavenis@fmi.fi> - 26.11.3-1.fmi
+- Add support for request cancellation
+- Add SQL response streaming for PostgreSQL connections
+
 * Tue Oct 27 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.27-1.fmi
 - Require tzdata, the time zone database is read from /usr/share/zoneinfo
 - A missing or broken time zone database no longer aborts every program linked with the library at load time; uses of the UTC zone throw an Fmi::Exception instead
