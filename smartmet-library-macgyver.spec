@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.11.3
+Version: 26.11.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -151,6 +151,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Thu Nov 5 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.5-1.fmi
+- Exception::getHtmlStackTrace() HTML-escapes the message, function, file, details and parameters it embeds
+
 * Tue Nov 3 2026  Andri Pavenis <andri.pavenis@fmi.fi> - 26.11.3-1.fmi
 - Add support for request cancellation
 - Add SQL response streaming for PostgreSQL connections

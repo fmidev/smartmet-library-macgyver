@@ -476,20 +476,45 @@ std::string Exception::getStackTrace() const
   return out;
 }
 
+namespace
+{
+// HTML-escape a value that may carry request-derived text, so the debug stack
+// trace (served as text/html by several plugins) cannot be turned into reflected
+// script injection.
+std::string html_escape(const std::string& value)
+{
+  std::string out;
+  out.reserve(value.size());
+  for (const char c : value)
+  {
+    switch (c)
+    {
+      case '&': out += "&amp;"; break;
+      case '<': out += "&lt;"; break;
+      case '>': out += "&gt;"; break;
+      case '"': out += "&quot;"; break;
+      case '\'': out += "&#39;"; break;
+      default: out += c; break;
+    }
+  }
+  return out;
+}
+}  // namespace
+
 std::string Exception::getHtmlStackTrace() const
 {
   // This is used only when debugging, hence mStackTraceDisabled is ignored
 
-  std::string out = "<html><body><h2>" + getTimeStampString() + "</h2>";
+  std::string out = "<html><body><h2>" + html_escape(getTimeStampString()) + "</h2>";
 
   const Exception* e = this;
   while (e != nullptr)
   {
     out += fmt::format(
         "<h2>{}</h2><ul><li><it>Function :</it>{}</li><li><it>Location :</it>{}:{}</li>",
-        e->message,
-        e->function,
-        e->filename,
+        html_escape(e->message),
+        html_escape(e->function),
+        html_escape(e->filename),
         e->line);
 
     std::size_t size = e->detailVector.size();
@@ -500,7 +525,7 @@ std::string Exception::getHtmlStackTrace() const
       for (std::size_t t = 0; t < size; t++)
       {
         out += "<li>";
-        out += e->detailVector.at(t);
+        out += html_escape(e->detailVector.at(t));
         out += "</li>";
       }
       out += "</ol>";
@@ -515,9 +540,9 @@ std::string Exception::getHtmlStackTrace() const
       {
         auto p = e->parameterVector.at(t);
         out += "<li>";
-        out += p.first;
+        out += html_escape(p.first);
         out += " = ";
-        out += p.second;
+        out += html_escape(p.second);
         out += "</li>";
       }
       out += "</ol></li>";
