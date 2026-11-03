@@ -68,6 +68,7 @@ namespace Database
 
         pqxx::result exec_params(bool require_transaction, const std::string& sql, const pqxx::params& params);
 
+        std::size_t stream(const std::string& sql, const StreamReader& reader);
 
         std::string quote(const std::string& theString);
 
@@ -133,6 +134,11 @@ namespace Database
         pqxx::result try_execute(bool require_transaction, const std::string& sql, const pqxx::params& params);
 
         pqxx::result try_execute_non_transaction(const std::string& sql, const pqxx::params& params);
+
+        std::size_t try_stream(const std::string& sql, const StreamReader& reader, std::size_t& rows);
+
+        // Cancels the running query and closes the connection, a new one is opened on next use
+        void discard_connection() noexcept;
 
         std::string try_quote(const std::string& theString);
 

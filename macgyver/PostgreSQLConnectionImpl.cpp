@@ -450,6 +450,69 @@ pqxx::result PostgreSQLConnection::Impl::try_execute_non_transaction(const std::
 
 
 
+std::size_t PostgreSQLConnection::Impl::stream(const std::string& sql, const StreamReader& reader)
+{
+    std::size_t rows = 0;
+    try
+    {
+        return retry_on_failure<std::size_t, const std::string&, const StreamReader&, std::size_t&>(
+            queryRetryLimit, &Impl::try_stream, sql, reader, rows);
+    }
+    catch (...)
+    {
+        // The rest of the result may still be pending, which makes the connection unusable
+        discard_connection();
+        throw;
+    }
+}
+
+
+std::size_t PostgreSQLConnection::Impl::try_stream(
+    const std::string& sql,
+    const StreamReader& reader,
+    std::size_t& rows)
+{
+    const auto start = std::chrono::high_resolution_clock::now();
+    try
+    {
+        if (itsTransaction)
+            reader(*itsTransaction, rows);
+        else
+        {
+            pqxx::nontransaction nitsTransaction(*itsConnection);
+            reader(nitsTransaction, rows);
+        }
+    }
+    catch (const pqxx::broken_connection& e)
+    {
+        // Rows already passed on cannot be taken back, so the query cannot be retried
+        if (rows > 0)
+            throw Fmi::Exception(BCP, "PostgreSQL connection to " + fmt::format("{}", getId())
+                + " broken after " + std::to_string(rows) + " rows: " + e.what());
+        throw;
+    }
+    const auto end = std::chrono::high_resolution_clock::now();
+    checkSlowQuery(sql, start, end);
+    return rows;
+}
+
+
+void PostgreSQLConnection::Impl::discard_connection() noexcept
+{
+    try
+    {
+        if (itsConnection && itsConnection->is_open())
+            itsConnection->cancel_query();
+    }
+    catch (...)
+    {
+        // The connection is closed anyway, which ends the query once the server notices it
+    }
+    itsTransaction.reset();
+    itsConnection.reset();
+}
+
+
 pqxx::result PostgreSQLConnection::Impl::exec_prepared(
     bool require_transaction,
     const std::string& name,

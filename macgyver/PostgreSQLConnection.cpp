@@ -1,6 +1,7 @@
 #include "PostgreSQLConnection.h"
 #include "PostgreSQLConnectionImpl.h"
 #include "AsyncTask.h"
+#include "Cancellation.h"
 #include "Exception.h"
 #include "NumericCast.h"
 #include "StringConversion.h"
@@ -266,6 +267,27 @@ catch (...)
 }
 
 
+
+std::size_t PostgreSQLConnection::stream_impl(const std::string& theSQLStatement,
+                                             const StreamReader& theReader) const
+try
+{
+  check_interruption();
+  return impl->stream(theSQLStatement, theReader);
+}
+catch (...)
+{
+  auto error = Fmi::Exception::Trace(BCP, "Operation failed!");
+  error.addParameter("SQL statement", theSQLStatement);
+  error.addParameter("Database address", fmt::format("{}", getId()));
+  throw error;
+}
+
+void PostgreSQLConnection::check_interruption()
+{
+  AsyncTask::interruption_point();
+  Fmi::check_cancelled();
+}
 
 PostgreSQLConnection::PreparedSQL::Ptr PostgreSQLConnection::prepare(
     const std::string& name, const std::string& theSQLStatement) const

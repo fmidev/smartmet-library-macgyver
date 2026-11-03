@@ -205,13 +205,38 @@ exception; `stop()` cancels the running ones, and later `add()` calls are ignore
 kept (`get_exception_info()`), and signals `on_task_ended` / `on_task_error` report each
 task. Spine initialises engines and plugins with it.
 
-### 6.3 Other primitives
+### 6.3 `Fmi::CancellationToken`
+
+Cooperative cancellation of the work done for one request (`Cancellation.h`). The
+server creates a token for each request with the time limit of the plugin and, if
+enabled, a probe which notices a client that has closed the connection, and makes it
+current in the thread calling the plugin with `Fmi::CancellationScope`. Long loops call
+`Fmi::check_cancelled()`, which throws an `Fmi::Exception` recognized by
+`Fmi::is_cancellation()` once the token is cancelled, and does nothing in a thread
+without a current token.
+
+* The check costs an atomic load and a clock read, the probe is polled at most once
+  per its interval by one of the threads sharing the token.
+* `interrupted()` tells whether a check has thrown, that is, whether the response may
+  be incomplete; Spine's `HandlerView` then replaces it with a 503.
+* A thread started for the request sees the token only if it is made current there:
+  `Fmi::CancellationScope scope(token)` with `token = Fmi::current_cancellation_token()`
+  taken in the request thread.
+* Do not check where the result is shared with other requests, for example while
+  computing a cache value other requests wait for: they would fail too.
+* `PostgreSQLConnection::stream()` checks the token for each row (§9).
+* Unlike `boost::thread::interrupt()` the cancellation is not left pending in a pooled
+  thread for its next request.
+
+### 6.4 Other primitives
 
 * `Fmi::AtomicSharedPtr<T>`: `load()`, `store()`, `exchange()` of a `shared_ptr` with
   `std::atomic_load` / `std::atomic_store`. Engines use it to publish immutable
   snapshots (a new repository, station list, …) that readers pick up without locking.
 * `Fmi::ThreadPool::ThreadPool<Scheduler>`: a fixed-size pool with a bounded FIFO
-  queue; the server's request pools are built on it.
+  queue; the server's request pools are built on it. `Fmi::ThreadPool::current_worker_thread()`
+  is the `boost::thread` of the worker running the calling task (nullptr elsewhere), so
+  that another thread can interrupt the task.
 * `Fmi::WorkQueue<T>`: a queue consumed by a fixed number of threads that all run the
   same function.
 
@@ -297,6 +322,15 @@ between threads.
   `commit()` and `rollback()`; it rolls back if not committed).
 * **Parameters.** Use `exec_params(sql, args...)` or prepared statements
   (`prepare()` / `exec_prepared()`) for values; `quote()` exists for building SQL text.
+* **Streaming.** `stream(sql, function)` passes each row to the function as it arrives
+  instead of reading the whole result into memory first; the argument types of the
+  function select the column conversions (`std::optional` for NULLs). The query runs
+  within `COPY`, so it must be a `SELECT` or `VALUES` without parameters, and it is slower
+  than `execute()` for small results. Each row checks `boost::this_thread::interruption_point()`
+  and `Fmi::check_cancelled()` (§6.3). If the stream stops early (cancellation, an error,
+  or an exception from the function), the query is cancelled and the connection closed,
+  since the rest of the result would still be pending; the next call reconnects and an
+  active transaction is lost. A broken connection is retried only if no row has been passed on.
 * **Reconnects.** When the connection breaks during a statement, the call waits (10 s
   at first, growing), reconnects and retries the statement, up to
   `queryRetryLimit` (2) more times. A request thread can therefore block for tens of

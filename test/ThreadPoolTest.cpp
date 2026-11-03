@@ -124,3 +124,46 @@ BOOST_AUTO_TEST_CASE(shutdown_timeout_allows_task_to_finish)
   BOOST_CHECK(completed);            // graceful shutdown let the running task finish
   BOOST_CHECK_LT(elapsed_ms, 4000);  // returned well before the timeout
 }
+
+// A task can be interrupted from another thread through current_worker_thread(), and the
+// worker goes on with the next task if the task catches the interruption.
+BOOST_AUTO_TEST_CASE(current_worker_thread_interrupts_task)
+{
+  BOOST_CHECK(Fmi::ThreadPool::current_worker_thread() == nullptr);
+
+  std::atomic<boost::thread*> thread{nullptr};
+  std::atomic<bool> interrupted{false};
+  std::atomic<bool> next_ran{false};
+
+  Fmi::ThreadPool::ThreadPool pool(1, 10);
+  pool.setGracefulShutdown(true);
+  pool.start();
+
+  BOOST_REQUIRE(pool.schedule(
+      [&thread, &interrupted]()
+      {
+        thread = Fmi::ThreadPool::current_worker_thread();
+        try
+        {
+          boost::this_thread::sleep_for(boost::chrono::seconds(10));
+        }
+        catch (const boost::thread_interrupted&)
+        {
+          interrupted = true;
+        }
+      }));
+  BOOST_REQUIRE(pool.schedule([&next_ran]() { next_ran = true; }));
+
+  const auto deadline = boost::chrono::steady_clock::now() + boost::chrono::seconds(2);
+  while (thread == nullptr && boost::chrono::steady_clock::now() < deadline)
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+  BOOST_REQUIRE_MESSAGE(thread != nullptr, "the task did not get its worker thread");
+
+  thread.load()->interrupt();
+  while (!next_ran && boost::chrono::steady_clock::now() < deadline)
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(5));
+
+  pool.shutdown();
+  BOOST_CHECK(interrupted);
+  BOOST_CHECK(next_ran);
+}

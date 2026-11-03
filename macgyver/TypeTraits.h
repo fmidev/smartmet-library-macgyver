@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <limits>
+#include <tuple>
 #include <type_traits>
 
 namespace Fmi
@@ -56,5 +57,39 @@ constexpr bool are_all_parameters_assignable()
 {
     return (std::is_copy_assignable<Args>::value && ...);
 }
+
+//=============================================================================================
+
+// The argument types of a function, a function pointer or an object with a single non-template
+// operator() (e.g. a lambda without auto parameters) as a std::tuple of decayed types
+template <typename F>
+struct callable_arguments : callable_arguments<decltype(&F::operator())> {};
+
+template <typename R, typename... Args>
+struct callable_arguments<R(Args...)>
+{
+    using type = std::tuple<std::decay_t<Args>...>;
+};
+
+template <typename R, typename... Args>
+struct callable_arguments<R(Args...) noexcept> : callable_arguments<R(Args...)> {};
+
+template <typename R, typename... Args>
+struct callable_arguments<R (*)(Args...)> : callable_arguments<R(Args...)> {};
+
+template <typename R, typename... Args>
+struct callable_arguments<R (*)(Args...) noexcept> : callable_arguments<R(Args...)> {};
+
+template <typename C, typename R, typename... Args>
+struct callable_arguments<R (C::*)(Args...)> : callable_arguments<R(Args...)> {};
+
+template <typename C, typename R, typename... Args>
+struct callable_arguments<R (C::*)(Args...) const> : callable_arguments<R(Args...)> {};
+
+template <typename C, typename R, typename... Args>
+struct callable_arguments<R (C::*)(Args...) noexcept> : callable_arguments<R(Args...)> {};
+
+template <typename C, typename R, typename... Args>
+struct callable_arguments<R (C::*)(Args...) const noexcept> : callable_arguments<R(Args...)> {};
 
 }  // namespace Fmi
