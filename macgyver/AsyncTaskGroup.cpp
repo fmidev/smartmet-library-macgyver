@@ -1,4 +1,5 @@
 #include "AsyncTaskGroup.h"
+#include "AsyncTask.h"
 #include <algorithm>
 #include <sstream>
 #include "Exception.h"
@@ -132,16 +133,28 @@ void Fmi::AsyncTaskGroup::dump_and_clear_exception_info(std::ostream& output_str
   }
 }
 
-boost::signals2::connection Fmi::AsyncTaskGroup::on_task_ended(
-    const std::function<void(const std::string&)>& callback)
+void Fmi::AsyncTaskGroup::on_task_ended(const std::function<void(const std::string&)>& callback)
 {
-  return signal_task_ended.connect(callback);
+  std::lock_guard<std::mutex> lock(callback_mutex);
+  task_ended_callbacks.push_back(callback);
 }
 
-boost::signals2::connection Fmi::AsyncTaskGroup::on_task_error(
-    const std::function<void(const std::string&)>& callback)
+void Fmi::AsyncTaskGroup::on_task_error(const std::function<void(const std::string&)>& callback)
 {
-  return signal_task_failed.connect(callback);
+  std::lock_guard<std::mutex> lock(callback_mutex);
+  task_failed_callbacks.push_back(callback);
+}
+
+void Fmi::AsyncTaskGroup::notify(const std::vector<Callback>& callbacks, const std::string& name) const
+{
+  // Call a copy so that callbacks may register further callbacks
+  std::vector<Callback> copy;
+  {
+    std::lock_guard<std::mutex> lock(callback_mutex);
+    copy = callbacks;
+  }
+  for (const auto& callback : copy)
+    callback(name);
 }
 
 bool Fmi::AsyncTaskGroup::stop_on_error(bool enable)
@@ -178,7 +191,7 @@ bool Fmi::AsyncTaskGroup::handle_finished()
     // Notify through signal only if done not interrupted
     if (task->get_status() == AsyncTask::ok)
     {
-      signal_task_ended(task->get_name());
+      notify(task_ended_callbacks, task->get_name());
       num_suceeded++;
     }
   }
@@ -193,7 +206,7 @@ bool Fmi::AsyncTaskGroup::handle_finished()
         exception_info.pop_front();
       exception_info.emplace_back(task->get_name(), std::current_exception());
     }
-    signal_task_failed(task->get_name());
+    notify(task_failed_callbacks, task->get_name());
   }
 
   if (stop_on_error_ && some_failed)

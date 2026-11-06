@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.11.5
+Version: 26.11.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -151,6 +151,11 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Fri Nov 6 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.6-1.fmi
+- AsyncTaskGroup no longer uses Boost.Signals2: the callbacks are kept in std::function lists
+  and on_task_ended/on_task_error return void (ABI change)
+- AsyncTask.h includes boost/thread/thread_only.hpp instead of boost/thread.hpp
+
 * Thu Nov 5 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.5-1.fmi
 - Exception::getHtmlStackTrace() HTML-escapes the message, function, file, details and parameters it embeds
 

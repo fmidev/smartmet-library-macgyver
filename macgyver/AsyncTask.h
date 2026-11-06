@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/thread.hpp>
+#include <boost/thread/thread_only.hpp>
 
 #include <atomic>
 #include <mutex>

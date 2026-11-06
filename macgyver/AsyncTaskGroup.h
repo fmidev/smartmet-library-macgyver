@@ -1,18 +1,24 @@
 #pragma once
 
-#include "AsyncTask.h"
-#include <boost/signals2.hpp>
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
+#include <exception>
+#include <functional>
 #include <list>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <ostream>
 #include <queue>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace Fmi
 {
+class AsyncTask;
+
 class AsyncTaskGroup
 {
  public:
@@ -98,16 +104,14 @@ class AsyncTaskGroup
    *
    *  Called from method wait()
    */
-  boost::signals2::connection on_task_ended(
-      const std::function<void(const std::string&)>& callback);
+  void on_task_ended(const std::function<void(const std::string&)>& callback);
 
   /**
    *  @brief Specifies callback to be called when task has failed (threw an exception)
    *
    *  Called from method wait() while handling the exception.
    */
-  boost::signals2::connection on_task_error(
-      const std::function<void(const std::string&)>& callback);
+  void on_task_error(const std::function<void(const std::string&)>& callback);
 
   /**
    *  @brief Specifies whether all tasks should interrupted when one or more are noticed failing
@@ -119,6 +123,9 @@ class AsyncTaskGroup
   bool wait_some();
   void on_task_completed_callback(std::size_t task_id);
 
+  using Callback = std::function<void(const std::string&)>;
+  void notify(const std::vector<Callback>& callbacks, const std::string& name) const;
+
   std::atomic_size_t counter;
   std::size_t max_paralell_tasks;
   mutable std::mutex m1;
@@ -127,8 +134,9 @@ class AsyncTaskGroup
   std::queue<std::shared_ptr<AsyncTask> > completed_tasks;
   std::atomic_size_t num_suceeded;
   std::atomic_size_t num_failed;
-  boost::signals2::signal<void(const std::string&)> signal_task_ended;
-  boost::signals2::signal<void(const std::string&)> signal_task_failed;
+  mutable std::mutex callback_mutex;
+  std::vector<Callback> task_ended_callbacks;
+  std::vector<Callback> task_failed_callbacks;
   std::atomic_bool stop_requested;
   std::atomic_bool stop_on_error_;
 
