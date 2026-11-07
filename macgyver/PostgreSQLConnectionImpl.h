@@ -23,7 +23,7 @@ namespace Database
         mutable std::shared_ptr<pqxx::work> itsTransaction;       // PostgreSQL transaction
         bool itsDebug = false;
         bool itsCollate = false;
-        std::atomic<bool> itsCanceled;
+        std::atomic<bool> itsCanceled{false};
         PostgreSQLConnectionOptions itsConnectionOptions;
         mutable std::map<unsigned int, std::string> itsDataTypes;
         mutable boost::condition_variable cond;

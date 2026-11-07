@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.11.6
+Version: 26.11.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -151,6 +151,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Sat Nov 7 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.7-1.fmi
+- Initialize member variables that some constructors left uninitialized
+
 * Fri Nov 6 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.6-1.fmi
 - AsyncTaskGroup no longer uses Boost.Signals2: the callbacks are kept in std::function lists
   and on_task_ended/on_task_error return void (ABI change)
