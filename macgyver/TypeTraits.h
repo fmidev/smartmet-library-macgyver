@@ -58,6 +58,42 @@ constexpr bool are_all_parameters_assignable()
     return (std::is_copy_assignable<Args>::value && ...);
 }
 
+/**
+ *   @brief Checks if all Args are convertible to Type.
+ *
+ *   @tparam Type The target type to check convertibility to.
+ *   @tparam Args The types to check for convertibility.
+ *
+ *   @return true if all Args are convertible to Type, false otherwise.
+ *
+ *   Example 1:
+ *   @code
+ *   static_assert(are_convertible_to<int, short, char>(), "All types are convertible to int");
+ *   @endcode
+ *
+ *   Example 2:
+ *   @code
+ *   template <typename... Args>
+ *   typename std::enable_if<are_convertible_to<std::string, Args...>(), std::vector<std::string>>::type
+ *   std::vector<std::string> create_string_vector(Args... args)
+ *   {
+ *       return {args...};
+ *   }
+ *   @endcode
+ */
+template <typename Type, typename... Args>
+constexpr bool are_convertible_to()
+{
+    return ((std::is_convertible<Args, Type>::value || std::is_same<Args, Type>::value) && ...);
+}
+
+/** @ingroup convertibility_checking */
+template <typename Type, typename... Args>
+constexpr bool are_convertible_to(Args... args)
+{
+    return ((std::is_convertible<Args, Type>::value || std::is_same<Args, Type>::value) && ...);
+}
+
 //=============================================================================================
 
 // The argument types of a function, a function pointer or an object with a single non-template
