@@ -1,10 +1,5 @@
 # Date
 
-[![Build Status](https://travis-ci.org/HowardHinnant/date.svg?branch=master)](https://travis-ci.org/HowardHinnant/date)
-[![Join the chat at https://gitter.im/HowardHinnant/date](https://badges.gitter.im/HowardHinnant/date.svg)](https://gitter.im/HowardHinnant/date?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
----
-
 **[Try it out on wandbox!](https://wandbox.org/permlink/oyXjibyF680HHoyS)**
 
 ## Summary

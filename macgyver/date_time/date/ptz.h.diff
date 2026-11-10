@@ -1,0 +1,15 @@
+Local changes against original ptz.h from Date library (https://github.com/HowardHinnant/date)
+Upstream version: master commit f498019 (v3.0.5 + 36 commits)
+
+diff --git a/include/date/ptz.h b/include/date/ptz.h
+--- a/include/date/ptz.h
++++ b/include/date/ptz.h
+@@ -81,7 +81,7 @@
+ #  define HAS_STRING_VIEW 1
+ #  include <format>
+ #else
+-#  include "date/tz.h"
++#  include "tz.h"
+    namespace chr = date;
+ #endif
+ 

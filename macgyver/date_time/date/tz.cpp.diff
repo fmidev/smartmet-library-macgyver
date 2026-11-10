@@ -1,21 +1,26 @@
-Local changes against original tz.cpp from Date library v3.0.5 (https://github.com/HowardHinnant/date)
-
-Note: date.h is v3.0.5 plus upstream commit 3c53a4e ("Add date:: qualifier to use of
-from_stream in several places"), needed to avoid ambiguity with std::chrono::from_stream in C++20.
+Local changes against original tz.cpp from Date library (https://github.com/HowardHinnant/date)
+Upstream version: master commit f498019 (v3.0.5 + 36 commits)
 
 diff --git a/src/tz.cpp b/src/tz.cpp
 --- a/src/tz.cpp
 +++ b/src/tz.cpp
-@@ -83,7 +83,7 @@
+@@ -83,13 +83,13 @@
  #  include <windows.h>
  #endif  // _WIN32
  
 -#include "date/tz_private.h"
 +#include "tz_private.h"
  
+ #if USE_OS_TZDB
+ // ptz.h has to use date's types here, not std::chrono's
+ #  undef HAS_CHRONO_20
+ #  define HAS_CHRONO_20 0
+-#  include "date/ptz.h"
++#  include "ptz.h"
+ #endif
+ 
  #ifdef __APPLE__
- #  include "date/ios.h"
-@@ -314,7 +314,11 @@
+@@ -321,7 +321,11 @@
  std::string
  get_download_folder()
  {

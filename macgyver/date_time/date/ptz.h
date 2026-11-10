@@ -69,7 +69,7 @@
 #include <string>
 
 #ifndef HAS_CHRONO_20
-#  if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION <= 200100
+#  if __cplusplus <= 201703 || defined(_LIBCPP_VERSION) && _LIBCPP_VERSION <= 200100
 #    define HAS_CHRONO_20 0
 #  else
 #    define HAS_CHRONO_20 1
@@ -81,7 +81,7 @@
 #  define HAS_STRING_VIEW 1
 #  include <format>
 #else
-#  include "date/tz.h"
+#  include "tz.h"
    namespace chr = date;
 #endif
 
@@ -106,8 +106,10 @@ class rule;
 void throw_invalid(const string_t& s, unsigned i, const string_t& message);
 unsigned read_date(const string_t& s, unsigned i, rule& r);
 unsigned read_name(const string_t& s, unsigned i, std::string& name);
-unsigned read_signed_time(const string_t& s, unsigned i, std::chrono::seconds& t);
-unsigned read_unsigned_time(const string_t& s, unsigned i, std::chrono::seconds& t);
+unsigned read_signed_time(const string_t& s, unsigned i, std::chrono::seconds& t,
+                          unsigned max_hours = 24);
+unsigned read_unsigned_time(const string_t& s, unsigned i, std::chrono::seconds& t,
+                            unsigned max_hours = 24);
 unsigned read_unsigned(const string_t& s, unsigned i,  unsigned limit, unsigned& u,
                        const string_t& message = string_t{});
 
@@ -197,6 +199,8 @@ rule::to_string() const
             {
                 chr::hh_mm_ss<seconds> offset{off};
                 nm = '/';
+                if (offset.is_negative())
+                    nm += '-';
                 nm += std::to_string(offset.hours().count());
                 if (offset.minutes() != minutes{0} || offset.seconds() != seconds{0})
                 {
@@ -694,7 +698,7 @@ time_zone::name() const
             if (std::any_of(nm.begin(), nm.end(),
                          [](char c)
                          {
-                             return !std::isalpha(c);
+                             return !std::isalpha(static_cast<unsigned char>(c));
                          }))
             {
                 return '<' + nm + '>';
@@ -821,7 +825,7 @@ read_date(const string_t& s, unsigned i, rule& r)
         r.wd_ = weekday{wd};
         r.n_ = n;
     }
-    else if (std::isdigit(s[i]))
+    else if (std::isdigit(static_cast<unsigned char>(s[i])))
     {
         unsigned n;
         i = read_unsigned(s, i, 3, n);
@@ -836,7 +840,9 @@ read_date(const string_t& s, unsigned i, rule& r)
     {
         ++i;
         std::chrono::seconds t;
-        i = read_unsigned_time(s, i, t);
+        // RFC 9636 (TZif) section 3.3.1 extends POSIX here: the hours may be
+        // signed and range from -167 through 167, e.g. M3.4.4/26 and M3.5.0/-1
+        i = read_signed_time(s, i, t, 167);
         r.time_ = t;
     }
     return i;
@@ -865,7 +871,7 @@ read_name(const string_t& s, unsigned i, std::string& name)
     }
     else
     {
-        while (i != s.size() && std::isalpha(s[i]))
+        while (i != s.size() && std::isalpha(static_cast<unsigned char>(s[i])))
         {
             name.push_back(s[i]);
             ++i;
@@ -877,7 +883,7 @@ read_name(const string_t& s, unsigned i, std::string& name)
 inline
 unsigned
 read_signed_time(const string_t& s, unsigned i,
-                                  std::chrono::seconds& t)
+                                  std::chrono::seconds& t, unsigned max_hours)
 {
     if (i == s.size())
         throw_invalid(s, i, "Expected to read signed time, but found end of string");
@@ -889,7 +895,7 @@ read_signed_time(const string_t& s, unsigned i,
     }
     else if (s[i] == '+')
         ++i;
-    i = read_unsigned_time(s, i, t);
+    i = read_unsigned_time(s, i, t, max_hours);
     if (negative)
         t = -t;
     return i;
@@ -897,7 +903,8 @@ read_signed_time(const string_t& s, unsigned i,
 
 inline
 unsigned
-read_unsigned_time(const string_t& s, unsigned i, std::chrono::seconds& t)
+read_unsigned_time(const string_t& s, unsigned i, std::chrono::seconds& t,
+                   unsigned max_hours)
 {
     using std::chrono::seconds;
     using std::chrono::minutes;
@@ -905,9 +912,18 @@ read_unsigned_time(const string_t& s, unsigned i, std::chrono::seconds& t)
     if (i == s.size())
         throw_invalid(s, i, "Expected to read unsigned time, but found end of string");
     unsigned x;
-    i = read_unsigned(s, i, 2, x, "Expected to find hours [0, 24]");
-    if (x > 24)
-        throw_invalid(s, i-1, "Expected hours to be in the range [0, 24]");
+    if (max_hours <= 24)
+    {
+        i = read_unsigned(s, i, 2, x, "Expected to find hours [0, 24]");
+        if (x > 24)
+            throw_invalid(s, i-1, "Expected hours to be in the range [0, 24]");
+    }
+    else
+    {
+        i = read_unsigned(s, i, 3, x, "Expected to find hours [0, 167]");
+        if (x > max_hours)
+            throw_invalid(s, i-1, "Expected hours to be in the range [0, 167]");
+    }
     t = hours{x};
     if (i != s.size() && s[i] == ':')
     {
@@ -933,11 +949,12 @@ unsigned
 read_unsigned(const string_t& s, unsigned i, unsigned limit, unsigned& u,
               const string_t& message)
 {
-    if (i == s.size() || !std::isdigit(s[i]))
+    if (i == s.size() || !std::isdigit(static_cast<unsigned char>(s[i])))
         throw_invalid(s, i, message);
     u = static_cast<unsigned>(s[i] - '0');
     unsigned count = 1;
-    for (++i; count < limit && i != s.size() && std::isdigit(s[i]); ++i, ++count)
+    for (++i; count < limit && i != s.size() && std::isdigit(static_cast<unsigned char>(s[i]));
+         ++i, ++count)
         u = u * 10 + static_cast<unsigned>(s[i] - '0');
     return i;
 }
