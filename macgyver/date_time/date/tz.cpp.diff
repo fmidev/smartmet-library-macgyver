@@ -1,7 +1,9 @@
-Local changes agaist original tz.cpp from Date library (https://github.com/HowardHinnant/date)
+Local changes against original tz.cpp from Date library v3.0.5 (https://github.com/HowardHinnant/date)
+
+Note: date.h is v3.0.5 plus upstream commit 3c53a4e ("Add date:: qualifier to use of
+from_stream in several places"), needed to avoid ambiguity with std::chrono::from_stream in C++20.
 
 diff --git a/src/tz.cpp b/src/tz.cpp
-index 999403e..7b6d002 100644
 --- a/src/tz.cpp
 +++ b/src/tz.cpp
 @@ -83,7 +83,7 @@
@@ -13,7 +15,7 @@ index 999403e..7b6d002 100644
  
  #ifdef __APPLE__
  #  include "date/ios.h"
-@@ -289,7 +289,11 @@ static
+@@ -314,7 +314,11 @@
  std::string
  get_download_folder()
  {
