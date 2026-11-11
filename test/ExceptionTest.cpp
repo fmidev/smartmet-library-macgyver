@@ -227,7 +227,7 @@ void throw_nested_fmi_exception_in_async_call()
 
 void test_squashing_stack_trace()
 {
-    bool catched = false;
+    bool caught = false;
     try
     {
         try
@@ -261,9 +261,9 @@ void test_squashing_stack_trace()
         {
             TEST_FAILED("parameter 'test' is expected to exist and have value '42'");
         }
-        catched = true;
+        caught = true;
     }
-    if (!catched) {
+    if (!caught) {
         TEST_FAILED("Expected to get an exception");
     }
     TEST_PASSED();

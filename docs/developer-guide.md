@@ -198,7 +198,7 @@ task.wait();        // joins; rethrows the task's exception
 
 ### 6.2 `Fmi::AsyncTaskGroup`
 
-Runs many tasks, at most `max_paralell_tasks` (default 30) at a time: `add()` blocks
+Runs many tasks, at most `max_parallel_tasks` (default 30) at a time: `add()` blocks
 while the limit is reached. `wait()` waits for all of them and rethrows the first
 exception; `stop()` cancels the running ones, and later `add()` calls are ignored.
 `stop_on_error(true)` stops the group at the first failure. The last 100 exceptions are

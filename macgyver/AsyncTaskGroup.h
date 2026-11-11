@@ -22,7 +22,7 @@ class AsyncTask;
 class AsyncTaskGroup
 {
  public:
-  explicit AsyncTaskGroup(std::size_t max_paralell_tasks = 30);
+  explicit AsyncTaskGroup(std::size_t max_parallel_tasks = 30);
   virtual ~AsyncTaskGroup();
 
   /**
@@ -65,7 +65,7 @@ class AsyncTaskGroup
   /**
    *  @brief Get number of tasks ended successfully
    */
-  std::size_t get_tasks_succeeded() const { return num_suceeded; }
+  std::size_t get_tasks_succeeded() const { return num_succeeded; }
 
   /**
    *  @brief Get list of C++ exceptions that has caused async tasks to fail
@@ -127,12 +127,12 @@ class AsyncTaskGroup
   void notify(const std::vector<Callback>& callbacks, const std::string& name) const;
 
   std::atomic_size_t counter;
-  std::size_t max_paralell_tasks;
+  std::size_t max_parallel_tasks;
   mutable std::mutex m1;
   std::condition_variable cond;
   std::map<std::size_t, std::shared_ptr<AsyncTask> > active_tasks;
   std::queue<std::shared_ptr<AsyncTask> > completed_tasks;
-  std::atomic_size_t num_suceeded;
+  std::atomic_size_t num_succeeded;
   std::atomic_size_t num_failed;
   mutable std::mutex callback_mutex;
   std::vector<Callback> task_ended_callbacks;

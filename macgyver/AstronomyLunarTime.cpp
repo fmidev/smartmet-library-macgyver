@@ -205,7 +205,7 @@ double sinAlt(double mjd, double hour, double glon, double cglat, double sglat)
 
 }  // namespace
 
-const Fmi::LocalDateTime& lunar_time_t::risesettime(SetAndRiseOccurence occ) const
+const Fmi::LocalDateTime& lunar_time_t::risesettime(SetAndRiseOccurrence occ) const
 {
   try
   {
@@ -224,7 +224,7 @@ const Fmi::LocalDateTime& lunar_time_t::risesettime(SetAndRiseOccurence occ) con
   }
 }
 
-std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
+std::string lunar_time_t::as_string(SetAndRiseOccurrence occ) const
 {
   try
   {
@@ -245,7 +245,7 @@ std::string lunar_time_t::as_string(SetAndRiseOccurence occ) const
   }
 }
 
-std::string lunar_time_t::as_string_long(SetAndRiseOccurence occ) const
+std::string lunar_time_t::as_string_long(SetAndRiseOccurrence occ) const
 {
   try
   {
