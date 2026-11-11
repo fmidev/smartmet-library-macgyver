@@ -51,7 +51,7 @@ namespace Fmi
              * @param time UTC Time
              * @param tz Time zone
              * @param err_handling Error handling policy
-             * @param choose Ambiguous/non-existant time handling policy. Default value (EARLIEST)
+             * @param choose Ambiguous/non-existent time handling policy. Default value (EARLIEST)
              *        is selected for compatibility with earlier code
              */
             LocalDateTime(
@@ -66,7 +66,7 @@ namespace Fmi
              * @param time Time of day (local time)
              * @param tz Time zone
              * @param err_handling Error handling policy
-             * @param choose Ambiguous/non-existant time handling policy
+             * @param choose Ambiguous/non-existent time handling policy
             */
             LocalDateTime(
                 const Date& date,

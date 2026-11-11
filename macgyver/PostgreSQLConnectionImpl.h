@@ -19,7 +19,7 @@ namespace Database
 {
     class PostgreSQLConnection::Impl final
     {
-        mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
+        mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connection
         mutable std::shared_ptr<pqxx::work> itsTransaction;       // PostgreSQL transaction
         bool itsDebug = false;
         bool itsCollate = false;

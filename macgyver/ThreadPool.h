@@ -386,7 +386,7 @@ class ThreadPool
   /*!
    * \brief Schedule task for processing
    *
-   * Attempts to add task to the task queue. Returnts true if succesfull.
+   * Attempts to add task to the task queue. Returnts true if successful.
    * May fail if task queue is full.
    */
   // ======================================================================

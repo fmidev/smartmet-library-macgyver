@@ -27,13 +27,13 @@ void insert()
     TEST_FAILED("Failed to insert ii");
 
   if (tree.insert("ii", foo))
-    TEST_FAILED("Succeded to insert ii twice");
+    TEST_FAILED("Succeeded to insert ii twice");
 
   if (!tree.insert("imatra", foo))
     TEST_FAILED("Failed to insert imatra");
 
   if (tree.insert("imatra", foo))
-    TEST_FAILED("Succeded to insert imatra twice");
+    TEST_FAILED("Succeeded to insert imatra twice");
 
   TEST_PASSED();
 }
@@ -50,13 +50,13 @@ void insert_copy()
     TEST_FAILED("Failed to insert ii");
 
   if (tree.insert("ii", foo))
-    TEST_FAILED("Succeded to insert ii twice");
+    TEST_FAILED("Succeeded to insert ii twice");
 
   if (!tree.insert("imatra", foo))
     TEST_FAILED("Failed to insert imatra");
 
   if (tree.insert("imatra", foo))
-    TEST_FAILED("Succeded to insert imatra twice");
+    TEST_FAILED("Succeeded to insert imatra twice");
 
   TEST_PASSED();
 }

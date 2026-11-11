@@ -383,7 +383,7 @@ between threads.
 Everything in SmartMet links against macgyver, and many classes are templates or inline
 in the headers (`Cache`, `Pool`, `AtomicSharedPtr`, `MappedFile`, the time types). A change
 to a class layout, an inline function or a template changes the code compiled into every
-dependant. Bump the spec version, and when dependants need the change, raise their
+dependent. Bump the spec version, and when dependants need the change, raise their
 `BuildRequires`/`Requires` floors. When in doubt, rebuild and release the dependants
 together.
 

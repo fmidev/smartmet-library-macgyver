@@ -2440,7 +2440,7 @@ struct return_to_sys
       >
 {};
 
-// Similiar to above
+// Similar to above
 template <class Clock, class Duration, class = void>
 struct return_from_sys
 {};
@@ -2459,7 +2459,7 @@ struct return_from_sys
       >
 {};
 
-// Similiar to above
+// Similar to above
 template <class Clock, class Duration, class = void>
 struct return_to_utc
 {};
@@ -2476,7 +2476,7 @@ struct return_to_utc
           decltype(Clock::to_utc(declval<time_point<Clock, Duration> const&>()))>
 {};
 
-// Similiar to above
+// Similar to above
 template <class Clock, class Duration, class = void>
 struct return_from_utc
 {};
@@ -2495,7 +2495,7 @@ struct return_from_utc
       >
 {};
 
-// Similiar to above
+// Similar to above
 template<typename Clock, typename Duration, typename = void>
 struct return_to_local
 {};
@@ -2514,7 +2514,7 @@ struct return_to_local
        >
 {};
 
-// Similiar to above
+// Similar to above
 template<typename Clock, typename Duration, typename = void>
 struct return_from_local
 {};

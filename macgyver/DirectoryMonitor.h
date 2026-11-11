@@ -34,7 +34,7 @@ class DirectoryMonitor
   static const Change DELETE = 0x02;  // old file deleted
   static const Change MODIFY = 0x04;  // old file modified
   static const Change SCAN = 0x08;    // directory scanned
-  static const Change ERROR = 0x10;   // error occured
+  static const Change ERROR = 0x10;   // error occurred
   static const Change ALL = 0x1F;     // any change
 
   // Directory listing with modification state

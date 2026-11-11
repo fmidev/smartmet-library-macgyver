@@ -116,7 +116,7 @@ namespace Fmi
               if (curr_pool_size > max_reached_pool_size) {
                   max_reached_pool_size = curr_pool_size;
               }
-              lock.unlock();  // No nead to keep lock while creating a new object
+              lock.unlock();  // No need to keep lock while creating a new object
               PoolItem new_item;
               new_item.next_free = items.end();
               new_item.reserved = false;

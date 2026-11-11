@@ -642,7 +642,7 @@ bool
 native_to_standard_timezone_name(const std::string& native_tz_name,
                                  std::string& standard_tz_name)
 {
-    // TOOD! Need be a case insensitive compare?
+    // TODO! Need be a case insensitive compare?
     if (native_tz_name == "UTC")
     {
         standard_tz_name = "Etc/UTC";
@@ -3252,7 +3252,7 @@ get_unzip_program()
         // Testing shows Path key value is "C:\Program Files\7-Zip\" i.e. always with trailing \.
         bool got_value = (RegQueryValueExA(hKey, "Path", nullptr, &tzi_type,
             reinterpret_cast<LPBYTE>(value_buffer), &size) == ERROR_SUCCESS);
-        RegCloseKey(hKey); // Close now incase of throw later.
+        RegCloseKey(hKey); // Close now in case of throw later.
         if (got_value)
         {
             // Function does not guarantee to null terminate.

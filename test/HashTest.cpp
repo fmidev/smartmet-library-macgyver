@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(hash_value)
 {
   BOOST_TEST_MESSAGE(" + Fmi::hash_value()");
 
-  // We excpect all results to be roughly 64 bits in size and greatly different
+  // We expect all results to be roughly 64 bits in size and greatly different
   BOOST_CHECK_EQUAL(5650585516096373764UL, Fmi::hash_value(false));
   BOOST_CHECK_EQUAL(5650585516096373764UL, Fmi::hash_value(0));
   BOOST_CHECK_EQUAL(11755695917061617349UL, Fmi::hash_value(true));

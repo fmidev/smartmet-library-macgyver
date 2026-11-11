@@ -738,7 +738,7 @@ DateTime DateTimeParser::Impl::parse_iso(const std::string& str) const
 
     bool success = qi::parse(start, finish, itsISOParser, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return buildFromISO(target);
 
     throw Fmi::Exception(BCP, "Invalid ISO-time: '" + str + "'");
@@ -767,7 +767,7 @@ DateTime DateTimeParser::Impl::parse_fmi(const std::string& str) const
 
     bool success = qi::parse(start, finish, itsFMIParser, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return buildFromISO(target);
 
     throw Fmi::Exception(BCP, "Invalid ISO-time: '" + str + "'");
@@ -796,7 +796,7 @@ DateTime DateTimeParser::Impl::parse_sql(const std::string& str) const
 
     bool success = qi::parse(start, finish, itsSQLParser, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return buildFromSQL(target);
 
     throw Fmi::Exception(BCP, "Invalid SQL-time: '" + str + "'");
@@ -826,7 +826,7 @@ DateTime DateTimeParser::Impl::parse_epoch(const std::string& str) const
 
     bool success = qi::parse(start, finish, itsEpochParser, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return buildFromEpoch(target);
 
     throw Fmi::Exception(BCP, "Invalid epoch time: '" + str + "'");
@@ -1046,7 +1046,7 @@ DateTime DateTimeParser::Impl::match_and_parse(const std::string& str,
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, itsISOParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {
@@ -1068,7 +1068,7 @@ DateTime DateTimeParser::Impl::match_and_parse(const std::string& str,
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, itsFMIParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {
@@ -1090,7 +1090,7 @@ DateTime DateTimeParser::Impl::match_and_parse(const std::string& str,
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, itsSQLParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {
@@ -1130,7 +1130,7 @@ DateTime DateTimeParser::Impl::match_and_parse(const std::string& str,
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, itsEpochParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {

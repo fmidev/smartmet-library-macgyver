@@ -30,7 +30,7 @@ namespace Fmi
             TimeZonePtr(const std::string& name);
 
             /**
-             * Construct a time zone pointer from a embeded date::time_zone pointer
+             * Construct a time zone pointer from a embedded date::time_zone pointer
             */
             TimeZonePtr(const date::time_zone* tz) noexcept;
 

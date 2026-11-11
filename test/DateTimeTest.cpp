@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(test_inf_2)
     BOOST_CHECK_EQUAL(dt_pos_inf - td_norm, dt_pos_inf);
     BOOST_CHECK_EQUAL(dt_pos_inf + td_neg_inf, ndt);
 
-    // FIXME: add misisng tests
+    // FIXME: add missing tests
 
 }
 

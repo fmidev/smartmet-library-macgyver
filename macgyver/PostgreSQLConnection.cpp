@@ -494,14 +494,14 @@ void PostgreSQLConnection::Transaction::commit()
       {
         // If we get here, transaction has been rolled back
         conn.endTransaction();
-        throw Fmi::Exception(BCP, "Commiting transaction failed").addDetail(e.what());
+        throw Fmi::Exception(BCP, "Committing transaction failed").addDetail(e.what());
       }
     }
     else
     {
       throw Fmi::Exception(BCP,
                            "[Logic error] No transaction to commit"
-                           " (already commited or rolled back)");
+                           " (already committed or rolled back)");
     }
   }
   catch (...)
@@ -522,7 +522,7 @@ void PostgreSQLConnection::Transaction::rollback()
     {
       throw Fmi::Exception(BCP,
                            "[Logic error] No transaction to roll back"
-                           " (already commited or rolled back)");
+                           " (already committed or rolled back)");
     }
   }
   catch (...)

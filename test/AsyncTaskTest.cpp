@@ -101,7 +101,7 @@ void task_throws_not_std_exception()
   }
   catch (...)
   {
-    TEST_FAILED("Unexcpected exception of type '" + Fmi::current_exception_type() + "' thrown");
+    TEST_FAILED("Unexpected exception of type '" + Fmi::current_exception_type() + "' thrown");
   }
   if (!got_expected_exception)
   {

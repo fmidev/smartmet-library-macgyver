@@ -228,7 +228,7 @@ struct OffsetParser : qi::grammar<Iterator, TimeOffset()>
 
     optional_character = -qi::char_;  // Optional single character
 
-    offset = (qi::char_('+') | qi::char_('-'))  // Preceeding plus or minus sign
+    offset = (qi::char_('+') | qi::char_('-'))  // Preceding plus or minus sign
              >> number                          // an unsigned number
              >> optional_character              // optional character for unit
              >> qi::eoi;                        // end-of-input

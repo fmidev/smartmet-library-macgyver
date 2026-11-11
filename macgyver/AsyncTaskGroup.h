@@ -28,7 +28,7 @@ class AsyncTaskGroup
   /**
    *   @brief Add a new task
    *
-   *   May block if the number of maximal paralell tasks is achieved
+   *   May block if the number of maximal parallel tasks is achieved
    *   (wait for some tasks ton complete)
    */
   void add(const std::string& name, const std::function<void()>& task);
@@ -100,7 +100,7 @@ class AsyncTaskGroup
   std::vector<std::string> active_task_names() const;
 
   /**
-   *  @brief Specifies callback to be called when task has ended succesfully
+   *  @brief Specifies callback to be called when task has ended successfully
    *
    *  Called from method wait()
    */

@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.11.10
+Version: 26.11.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -151,6 +151,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Wed Nov 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.11-1.fmi
+- Fixed typos in messages and comments
+
 * Tue Nov 10 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.11.10-1.fmi
 - 2 new template methods for checking whether all provided types can be converted to specified one
 

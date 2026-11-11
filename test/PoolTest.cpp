@@ -20,7 +20,7 @@ test_suite* init_unit_test_suite(int argc, char* argv[])
 
 BOOST_AUTO_TEST_CASE(simple_test_1)
 {
-  BOOST_TEST_MESSAGE("Simple test withput expanding pool");
+  BOOST_TEST_MESSAGE("Simple test without expanding pool");
   Fmi::Pool<Fmi::PoolInitType::Sequential, int> pool(2, 4);
   BOOST_CHECK_EQUAL(int(pool.size()), 2);
   BOOST_CHECK_EQUAL(int(pool.in_use()), 0);

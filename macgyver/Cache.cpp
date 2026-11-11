@@ -206,7 +206,7 @@ bool FileCache::insert(std::size_t key, const std::string& value, bool performCl
 
     itsContentMap.insert(MapType::value_type(key, FileCacheStruct(fullPath, fileSize)));
 
-    // Successfull insert. Update cache size information
+    // Successful insert. Update cache size information
     itsSize += fileSize;
 
     ++itsInsertCount;

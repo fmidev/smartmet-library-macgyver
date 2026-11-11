@@ -11,7 +11,7 @@
  * \brief A proxy object to enable fast NearTree searches for latlon coordinates
  *
  * The basic idea is to convert the latlon coordinate to XYZ coordinates and
- * use the regular Euclidian distance formula instead of the Haversine formula
+ * use the regular Euclidean distance formula instead of the Haversine formula
  * for distance along the surface. The actual distance along the surface is
  * easily converted to the equivalent chord length in 3D, and hence trigonometry
  * is only needed in constructing the search tree and in converting the desired

@@ -14,7 +14,7 @@ namespace Fmi
      *
      *  There are two ways to add functions to the map:
      *    - providing exact names (recommended if possible for better performance)
-     *    - providing regex patterns for matching names (in this case mached regex groups
+     *    - providing regex patterns for matching names (in this case matched regex groups
      *      ar passed to the function as argument (type std::vector<std::string>))
      */
     template <typename ValueType, class... ArgumentTypes>
