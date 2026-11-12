@@ -6,10 +6,10 @@
 #define BOOST_SPIRIT_DEBUG
 #endif
 
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/phoenix.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>  // IWYU pragma: keep
+#include <boost/phoenix.hpp>                    // IWYU pragma: keep
 #include <boost/spirit/include/qi.hpp>
-
+#include <optional>
 #include <string>
 
 namespace Fmi

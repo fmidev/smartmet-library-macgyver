@@ -3,12 +3,12 @@
 #pragma once
 
 #include "Exception.h"
-#include <algorithm>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
-#include <stdexcept>
+#include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace Fmi

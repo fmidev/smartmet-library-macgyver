@@ -6,12 +6,13 @@
 
 #pragma once
 
-#include "ReferenceEllipsoid.h"
 #include <array>
 #include <string>
 
 namespace Fmi
 {
+class ReferenceEllipsoid;
+
 /**
  *  @ref 3-dimensional Helmert transformation for near coordinate systems
  */

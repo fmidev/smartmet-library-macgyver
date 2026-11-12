@@ -1,9 +1,11 @@
 #pragma once
 
-#include <limits>
 #include "Exception.h"
 #include "StringConversion.h"
 #include "TypeTraits.h"
+#include <exception>
+#include <string>
+#include <type_traits>
 
 namespace Fmi {
 

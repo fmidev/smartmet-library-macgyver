@@ -3,15 +3,20 @@
 // directly by user code.
 #pragma once
 
+#include "Exception.h"
 #include "PostgreSQLConnection.h"
-#include <algorithm>
-#include <chrono>
-#include <iostream>
-#include <memory>
-#include <map>
-#include <optional>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
+#include <atomic>
+#include <chrono>
+#include <cstddef>
+#include <exception>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <optional>
+#include <pqxx/pqxx>
+#include <string>
 
 namespace Fmi
 {

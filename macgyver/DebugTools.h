@@ -1,8 +1,6 @@
 #pragma once
 
-#include "TypeName.h"
 #include "Exception.h"
-#include <exception>
 #include <iostream>
 #include <string>
 

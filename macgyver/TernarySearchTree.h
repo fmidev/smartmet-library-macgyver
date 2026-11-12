@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <iostream>
+#include <cstddef>
 #include <list>
 #include <memory>
 #include <string>

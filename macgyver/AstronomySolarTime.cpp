@@ -1,11 +1,12 @@
 // Ported to C++ from https://gml.noaa.gov/grad/solcalc/main.js
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
+#include "DateTime.h"
 #include "Exception.h"
 #include "LocalDateTime.h"
 #include "StringConversion.h"
-#include <array>
 #include <cmath>
+#include <string>
 #include <tuple>
 
 using JulianTime = double;

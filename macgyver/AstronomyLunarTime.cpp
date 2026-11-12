@@ -1,12 +1,12 @@
 #include "Astronomy.h"
 #include "AstronomyHelperFunctions.h"
+#include "DateTime.h"
 #include "Exception.h"
 #include "LocalDateTime.h"
-#include <boost/make_shared.hpp>
 #include <cmath>
-#include <iostream>
-#include <limits>
 #include <optional>
+#include <sstream>
+#include <string>
 #include <vector>
 
 /*=== Public interface =====================*/

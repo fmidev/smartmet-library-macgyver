@@ -1,4 +1,5 @@
 #include "HelmertTransformation.h"
+#include "ReferenceEllipsoid.h"
 #include <boost/test/included/unit_test.hpp>
 
 #include <cstdio>

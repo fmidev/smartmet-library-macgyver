@@ -5,14 +5,16 @@
 #pragma once
 
 #include <boost/scoped_ptr.hpp>
-#include <ctpp2/CDT.hpp>
 #include <ctpp2/CTPP2SyscallFactory.hpp>
+#include <iosfwd>
+#include <string>
 
 namespace CTPP
 {
+class CDT;
+class VM;
 // No need to expose details of several CTPP classes to the user
 class VMLoader;
-class VM;
 }  // namespace CTPP
 
 namespace Fmi
@@ -28,8 +30,8 @@ namespace Fmi
  */
 class TemplateFormatter
 {
-  class OutputCollector;
   class Logger;
+  class OutputCollector;
 
  public:
   TemplateFormatter(UINT_32 max_handlers = 100);

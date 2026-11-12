@@ -95,14 +95,14 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
-
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <map>
+#include <memory>
 #include <optional>
 #include <random>
+#include <utility>
 #include <vector>
 
 namespace Fmi

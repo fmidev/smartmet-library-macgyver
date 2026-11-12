@@ -2,7 +2,6 @@
 
 #include <atomic>
 #include <memory>
-#include "Exception.h"
 
 namespace Fmi
 {

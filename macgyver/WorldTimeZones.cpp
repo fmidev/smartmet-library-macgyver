@@ -11,16 +11,12 @@
 // ======================================================================
 
 #include "WorldTimeZones.h"
-
 #include "Exception.h"
 #include "StringConversion.h"
-
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
-#include <iostream>
-#include <set>
-#include <stdexcept>
 
 namespace
 {

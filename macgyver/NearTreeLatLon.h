@@ -1,9 +1,8 @@
 #pragma once
 
 #include <boost/math/constants/constants.hpp>
-
+#include <algorithm>
 #include <cmath>
-#include <cstddef>
 #include <limits>
 
 /*

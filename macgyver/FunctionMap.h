@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Exception.h"
+#include <boost/regex.hpp>
+#include <cstddef>
 #include <functional>
 #include <map>
+#include <string>
+#include <utility>
 #include <vector>
-#include <initializer_list>
-#include <boost/regex.hpp>
-#include "Exception.h"
 
 namespace Fmi
 {

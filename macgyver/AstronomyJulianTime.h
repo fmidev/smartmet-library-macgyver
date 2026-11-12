@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include "AstronomyHelperFunctions.h"
+#include "DateTime.h"
+#include "LocalDateTime.h"
 
 namespace Fmi
 {

@@ -14,7 +14,7 @@
 
 #include "Exception.h"
 #include <cassert>
-#include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace Fmi
