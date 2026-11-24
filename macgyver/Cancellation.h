@@ -173,6 +173,18 @@ const char* to_string(CancellationToken::Reason theReason);
 // request was cancelled
 bool is_cancellation(const Exception& theException);
 
+// In a catch block: rethrows the exception being handled if it was thrown because the
+// request was cancelled or the thread was interrupted (boost::thread_interrupted), and does
+// nothing otherwise. For blocks which turn exceptions into error codes or log them and
+// continue:
+//
+//   catch (...)
+//   {
+//     Fmi::rethrow_if_cancelled();
+//     return Result::UNEXPECTED_EXCEPTION;
+//   }
+void rethrow_if_cancelled();
+
 // The token current in this thread, empty if none
 std::shared_ptr<CancellationToken> current_cancellation_token();
 

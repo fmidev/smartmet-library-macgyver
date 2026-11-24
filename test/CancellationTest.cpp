@@ -7,6 +7,7 @@
 
 #include "Cancellation.h"
 #include "Exception.h"
+#include <boost/thread/exceptions.hpp>
 #include <regression/tframe.h>
 #include <atomic>
 #include <iostream>
@@ -353,6 +354,60 @@ void callback_wait()
   TEST_PASSED();
 }
 
+// Returns "rethrown" if rethrow_if_cancelled() rethrew the exception thrown by the function
+template <typename F>
+std::string rethrown(F theFunction)
+{
+  try
+  {
+    try
+    {
+      theFunction();
+    }
+    catch (...)
+    {
+      Fmi::rethrow_if_cancelled();
+      return "kept";
+    }
+  }
+  catch (...)
+  {
+    return "rethrown";
+  }
+  return "nothing thrown";
+}
+
+void rethrow_if_cancelled()
+{
+  auto token = std::make_shared<Token>();
+  token->cancel();
+
+  if (rethrown([&]() { token->check(); }) != "rethrown")
+    TEST_FAILED("A cancellation must be rethrown");
+  if (rethrown([&]()
+               {
+                 try
+                 {
+                   token->check();
+                 }
+                 catch (...)
+                 {
+                   throw Fmi::Exception::Trace(BCP, "Operation failed!");
+                 }
+               }) != "rethrown")
+    TEST_FAILED("A wrapped cancellation must be rethrown");
+  if (rethrown([]() { throw boost::thread_interrupted(); }) != "rethrown")
+    TEST_FAILED("An interruption must be rethrown");
+  if (rethrown([]() { throw Fmi::Exception(BCP, "Something else"); }) != "kept")
+    TEST_FAILED("Another Fmi::Exception must not be rethrown");
+  if (rethrown([]() { throw std::runtime_error("failed"); }) != "kept")
+    TEST_FAILED("Another exception must not be rethrown");
+
+  // Outside a catch block nothing is done
+  Fmi::rethrow_if_cancelled();
+  TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * The actual test suite
@@ -376,6 +431,7 @@ class tests : public tframe::tests
     TEST(watched);
     TEST(callback);
     TEST(callback_wait);
+    TEST(rethrow_if_cancelled);
   }
 };
 

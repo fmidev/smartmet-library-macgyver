@@ -228,6 +228,9 @@ without a current token.
   check the token after creating the callback and before the blocking call.
 * `Fmi::CancellationScope none(nullptr)` stops the checks and the callbacks, for shared
   work done in the thread of a request.
+* `Fmi::rethrow_if_cancelled()` at the start of a `catch (...)` block which turns
+  exceptions into error codes or logs them and continues lets a cancellation (and a
+  `boost::thread_interrupted`) through.
 * `interrupted()` tells whether a check has thrown, that is, whether the response may
   be incomplete; Spine's `HandlerView` then replaces it with a 503.
 * A thread started for the request sees the token only if it is made current there:

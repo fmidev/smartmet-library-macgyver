@@ -1,7 +1,9 @@
 #include "Cancellation.h"
 #include "Exception.h"
+#include <boost/thread/exceptions.hpp>
 #include <algorithm>
 #include <cstring>
+#include <exception>
 
 namespace Fmi
 {
@@ -150,6 +152,29 @@ bool is_cancellation(const Exception& theException)
       return true;
   }
   return false;
+}
+
+void rethrow_if_cancelled()
+{
+  if (!std::current_exception())
+    return;
+
+  try
+  {
+    throw;
+  }
+  catch (const boost::thread_interrupted&)
+  {
+    throw;
+  }
+  catch (const Exception& e)
+  {
+    if (is_cancellation(e))
+      throw;
+  }
+  catch (...)
+  {
+  }
 }
 
 std::shared_ptr<CancellationToken> current_cancellation_token()
