@@ -215,8 +215,19 @@ current in the thread calling the plugin with `Fmi::CancellationScope`. Long loo
 `Fmi::is_cancellation()` once the token is cancelled, and does nothing in a thread
 without a current token.
 
-* The check costs an atomic load and a clock read, the probe is polled at most once
-  per its interval by one of the threads sharing the token.
+* The check costs an atomic load and a clock read (about 20 ns), the probe is polled at
+  most once per its interval by one of the threads sharing the token. While another
+  thread watches the token (`beginWatch()` / `endWatch()`, Spine's `RequestWatcher`),
+  noticing the deadline and polling the probe with `poll()`, the check only reads the
+  state it sets (about 5 ns). Check where an iteration takes at least some
+  microseconds, or every Nth iteration.
+* `Fmi::CancellationCallback` calls a function once the token is cancelled, from the
+  thread which cancels it, to break off a blocking call such as a database query. The
+  function must be quick and must not block; the destructor waits for a call made by
+  another thread to return. It is called at once if the token is already cancelled, so
+  check the token after creating the callback and before the blocking call.
+* `Fmi::CancellationScope none(nullptr)` stops the checks and the callbacks, for shared
+  work done in the thread of a request.
 * `interrupted()` tells whether a check has thrown, that is, whether the response may
   be incomplete; Spine's `HandlerView` then replaces it with a 503.
 * A thread started for the request sees the token only if it is made current there:
@@ -224,7 +235,11 @@ without a current token.
   taken in the request thread.
 * Do not check where the result is shared with other requests, for example while
   computing a cache value other requests wait for: they would fail too.
-* `PostgreSQLConnection::stream()` checks the token for each row (§9).
+* `PostgreSQLConnection` checks the token before each query and breaks off a running
+  query when the token is cancelled: a callback sends the server a cancel request in a
+  thread of its own (it opens a new connection to the server, which may not answer), and
+  the connection is then closed so that a late cancel request cannot hit the next query.
+  `stream()` also checks the token for each row (§9).
 * Unlike `boost::thread::interrupt()` the cancellation is not left pending in a pooled
   thread for its next request.
 
