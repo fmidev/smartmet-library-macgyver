@@ -8,7 +8,7 @@
 
 #include "TemplateFormatter.h"
 #include <filesystem>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Fmi
 {

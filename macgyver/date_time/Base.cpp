@@ -189,7 +189,7 @@ Fmi::date_time::internal::handle_parse_remainder(std::istringstream& is)
 
 // Check parse status:
 // - If assume_eoi is true, then the remaining part of stream may only contain space
-// - If assume_eoi is false, then there must be at least one addional spec or EOF in the stream
+// - If assume_eoi is false, then there must be at least one additional spec or EOF in the stream
 void Fmi::date_time::internal::check_parse_status(std::istream& is, bool assume_eoi, const char* name)
 {
     int num_space = 0;

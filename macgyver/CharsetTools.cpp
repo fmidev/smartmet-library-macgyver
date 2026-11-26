@@ -6,8 +6,8 @@
 
 #include "CharsetTools.h"
 #include "Exception.h"
-#include <algorithm>
 #include <array>
+#include <cstdint>
 
 using namespace std;
 

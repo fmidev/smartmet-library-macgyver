@@ -1,8 +1,8 @@
 #include "Hash.h"
-#include "StringConversion.h"
+#include "DateTime.h"
+#include <chrono>
 #include <cstdint>
 #include <cstring>
-#include <limits>
 #include <type_traits>
 
 namespace
@@ -12,6 +12,7 @@ namespace
 
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
+
 inline uint64_t mulmix64(uint64_t a, uint64_t b) noexcept
 {
   unsigned __int64 hi, lo = _umul128(a, b, &hi);

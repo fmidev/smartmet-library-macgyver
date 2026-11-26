@@ -1,8 +1,6 @@
 #pragma once
 
-#include "TypeName.h"
 #include "Exception.h"
-#include <exception>
 #include <iostream>
 #include <string>
 
@@ -60,7 +58,7 @@ int tracerPid();
  *   @brief Debugging macro for showing exceptions thrown by a function
  *
  *   Possible use:
- *   boost test framwork do not report exceptions type and related info in case of use
+ *   boost test framework do not report exceptions type and related info in case of use
  *   of macros line BOOST_CHECK_NO_THROW(). On can use this macro to workaround this
  *   problem:
  *   @code

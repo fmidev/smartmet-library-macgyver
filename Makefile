@@ -17,7 +17,7 @@ processor := $(shell uname -p)
 # that the time zone database (source files) is already available
 TZDB_REMOTE_API := 1
 
-# [USE_OS_TZDB==1 and TBZD_REMOTE_API=0 only]: The folder where to downoad the time zone database files
+# [USE_OS_TZDB==1 and TBZD_REMOTE_API=0 only]: The folder where to download the time zone database files
 # Files are downloaded from IANA's server and extracted to the subdirectory "tznames" in the specified
 # directory. Value $(HOME)/Download is used when not specified (empty) or when TZBD_REMOTE_API==0
 TZDB_FOLDER := $(datadir)/smartmet/timezones
@@ -54,16 +54,16 @@ RPMBUILD_OPT ?=
 
 # Configuration
 
-# Detects used impementation of calendar classes implementation and
+# Detects used implementation of calendar classes implementation and
 # its parameters from macgyver/date_time/Base.h.
 TZ_CFLAGS :=
 EXTRA_SRC_DIRS :=
 CALENDAR_USES_STD_CHRONO := $(shell echo -e '\043include "date_time/Base.h"' | $(CXX) -x c++ -E -dD -Imacgyver - | awk '/^\043define FMI_CALENDAR_USES_STD_CHRONO/ {print $$3}')
 ifeq ($(CALENDAR_USES_STD_CHRONO),1)
-  # std::chrono::implemantation is sufficient and is beinf used
+  # std::chrono::implementation is sufficient and is beinf used
   $(info CALENDAR_USES_STD_CHRONO: $(CALENDAR_USES_STD_CHRONO))
 else
-  # std::chrono::implemantation is too old -> use Date libraray
+  # std::chrono::implementation is too old -> use Date library
   EXTRA_SRC_DIRS := $(SUBNAME)/date_time/date
   USE_OS_TZDB := $(shell echo -e '\043include "date_time/Base.h"' | $(CXX) -x c++ -E -dD -Imacgyver - | awk '/^\043define USE_OS_TZDB/ {print $$3}')
   $(info USE_OS_TZDB: $(USE_OS_TZDB))

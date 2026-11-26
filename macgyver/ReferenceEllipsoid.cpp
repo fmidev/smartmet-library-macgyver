@@ -1,6 +1,4 @@
 #include "ReferenceEllipsoid.h"
-
-#include <algorithm>
 #include <cmath>
 
 const Fmi::ReferenceEllipsoid Fmi::ReferenceEllipsoid::wgs84(6378137.0, 1.0 / 298.257223563);

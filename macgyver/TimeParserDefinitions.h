@@ -6,10 +6,10 @@
 #define BOOST_SPIRIT_DEBUG
 #endif
 
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/phoenix.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>  // IWYU pragma: keep
+#include <boost/phoenix.hpp>                    // IWYU pragma: keep
 #include <boost/spirit/include/qi.hpp>
-
+#include <optional>
 #include <string>
 
 namespace Fmi
@@ -228,7 +228,7 @@ struct OffsetParser : qi::grammar<Iterator, TimeOffset()>
 
     optional_character = -qi::char_;  // Optional single character
 
-    offset = (qi::char_('+') | qi::char_('-'))  // Preceeding plus or minus sign
+    offset = (qi::char_('+') | qi::char_('-'))  // Preceding plus or minus sign
              >> number                          // an unsigned number
              >> optional_character              // optional character for unit
              >> qi::eoi;                        // end-of-input

@@ -15,7 +15,7 @@
 #include <string>
 #include <thread>
 
-// FIXME: unfortunatelly no similar function to boost::filesystem::unique_pth is
+// FIXME: unfortunately no similar function to boost::filesystem::unique_pth is
 //        present in std::filesystem. As result we have to use boost::filesystem in tests
 
 using namespace std;
@@ -380,7 +380,7 @@ void testcounters()
   stats = thisCache.statistics();
 
   if (stats.hits != 1)
-    TEST_FAILED("Cache hits should be one after one succesful find call");
+    TEST_FAILED("Cache hits should be one after one successful find call");
   if (stats.misses != 1)
     TEST_FAILED("Cache misses should be one after one failed find call");
 
@@ -389,7 +389,7 @@ void testcounters()
   stats = thisCache.statistics();
 
   if (stats.hits != 2)
-    TEST_FAILED("Cache hits should be two after two succesful find calls");
+    TEST_FAILED("Cache hits should be two after two successful find calls");
   if (stats.misses != 2)
     TEST_FAILED("Cache misses should be two after two failed find calls");
 

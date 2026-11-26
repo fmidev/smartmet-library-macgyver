@@ -16,7 +16,7 @@ namespace Fmi
             /**
              * @brief Simple wrapper for use as index in std::map
              *
-             * The problem with using directly DateTime is that comparisson
+             * The problem with using directly DateTime is that comparison
              * of one of possible values (NOT_A_DATE_TIM) is not permitted.
              * That causes difficult to debug problems when std::map index is
              * DateTime.

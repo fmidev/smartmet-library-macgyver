@@ -3,8 +3,11 @@
 #include "TemplateFactory.h"
 #include "Exception.h"
 #include "FileSystem.h"
-#include <boost/filesystem/operations.hpp>
-#include <boost/make_shared.hpp>
+#include <ctime>
+#include <map>
+#include <optional>
+#include <string>
+#include <utility>
 
 namespace Fmi
 {

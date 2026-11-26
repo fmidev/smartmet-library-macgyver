@@ -1,21 +1,27 @@
 #pragma once
 
-#include <atomic>
-#include <functional>
-#include <iostream>
-#include <memory>
-#include <optional>
-#include <list>
-#include <tuple>
-#include <exception>
-#include <boost/chrono.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
 #include "AsyncTaskGroup.h"
 #include "DateTime.h"
+#include "Exception.h"
 #include "StringConversion.h"
 #include "TypeName.h"
 #include "TypeTraits.h"
+#include <boost/thread/condition_variable.hpp>
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <cstddef>
+#include <exception>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <memory>
+#include <optional>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <typeinfo>
+#include <utility>
 
 namespace Fmi
 {

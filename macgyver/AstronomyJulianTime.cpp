@@ -20,8 +20,14 @@
 // ======================================================================
 
 #include "AstronomyJulianTime.h"
+#include "AstronomyHelperFunctions.h"
+#include "DateTime.h"
 #include "Exception.h"
 #include "LocalDateTime.h"
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <string>
 
 using Fmi::Date;
 using Fmi::LocalDateTime;

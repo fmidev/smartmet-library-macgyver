@@ -26,15 +26,15 @@
 #include "Exception.h"
 #include "FileSystem.h"
 #include "StringConversion.h"
-#include <boost/chrono.hpp>
 #include <boost/thread.hpp>
-#include <boost/thread/condition_variable.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <atomic>
+#include <cstdlib>
+#include <exception>
 #include <iostream>
+#include <mutex>
 #include <optional>
 #include <shared_mutex>
-#include <stdexcept>
+#include <system_error>
 #include <utility>
 
 // scoped read/write lock types

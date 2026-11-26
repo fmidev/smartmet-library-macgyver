@@ -1,8 +1,9 @@
 #pragma once
+#include "DateTime.h"
 #include "LocalDateTime.h"
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/optional/optional_fwd.hpp>
 #include <array>
+#include <cstddef>
 #include <functional>
 #include <list>
 #include <map>
@@ -10,7 +11,15 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
+
+namespace boost
+{
+template <class T>
+class shared_ptr;
+}  // namespace boost
 
 namespace Fmi
 {

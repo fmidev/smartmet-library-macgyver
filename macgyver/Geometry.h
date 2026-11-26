@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <utility>
-
 namespace Fmi
 {
 namespace Geometry

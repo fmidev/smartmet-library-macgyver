@@ -78,7 +78,7 @@ struct solar_time_t
   TimeDuration daylength() const;
 };
 
-enum SetAndRiseOccurence
+enum SetAndRiseOccurrence
 {
   FIRST_RISE,
   SECOND_RISE,
@@ -121,15 +121,15 @@ struct lunar_time_t
 
   lunar_time_t() = default;
 
-  const Fmi::LocalDateTime& risesettime(SetAndRiseOccurence occ) const;
+  const Fmi::LocalDateTime& risesettime(SetAndRiseOccurrence occ) const;
 
   bool moonrise_today() const { return rise_today; }
   bool moonset_today() const { return set_today; }
   bool moonrise2_today() const { return rise2_today; }
   bool moonset2_today() const { return set2_today; }
   bool above_horizont_24h() const { return above_hz_24h; }
-  std::string as_string(SetAndRiseOccurence occ) const;
-  std::string as_string_long(SetAndRiseOccurence occ) const;  // date included
+  std::string as_string(SetAndRiseOccurrence occ) const;
+  std::string as_string_long(SetAndRiseOccurrence occ) const;  // date included
 };
 
 std::ostream& operator<<(std::ostream& /*ostream*/, const lunar_time_t& lt);

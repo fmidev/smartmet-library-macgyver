@@ -1,6 +1,9 @@
 #include "Cancellation.h"
 #include "Exception.h"
+#include <boost/thread/exceptions.hpp>
+#include <algorithm>
 #include <cstring>
+#include <exception>
 
 namespace Fmi
 {
@@ -15,7 +18,37 @@ thread_local std::shared_ptr<CancellationToken> current_token;
 void CancellationToken::setReason(Reason theReason) const noexcept
 {
   Reason expected = Reason::None;
-  itsReason.compare_exchange_strong(expected, theReason);
+  if (itsReason.compare_exchange_strong(expected, theReason))
+    runCallbacks();
+}
+
+// Called once, by the thread which cancelled the token
+void CancellationToken::runCallbacks() const noexcept
+{
+  std::unique_lock<std::mutex> lock(itsCallbackMutex);
+  itsCallbacksCalled = true;
+  itsCallbackThread = std::this_thread::get_id();
+  while (!itsCallbacks.empty())
+  {
+    const auto* callback = itsCallbacks.back();
+    itsCallbacks.pop_back();
+    itsRunningCallback = callback;
+    lock.unlock();
+    callback->call();
+    lock.lock();
+    itsRunningCallback = nullptr;
+    itsCallbackDone.notify_all();
+  }
+}
+
+void CancellationToken::beginWatch() noexcept
+{
+  ++itsWatchers;
+}
+
+void CancellationToken::endWatch() noexcept
+{
+  --itsWatchers;
 }
 
 void CancellationToken::cancel(Reason theReason) noexcept
@@ -45,7 +78,15 @@ void CancellationToken::setProbe(Probe theProbe, Clock::duration theInterval)
 
 CancellationToken::Reason CancellationToken::reason() const noexcept
 {
-  Reason reason = itsReason.load(std::memory_order_relaxed);
+  const Reason reason = itsReason.load(std::memory_order_relaxed);
+  if (reason != Reason::None || watched())
+    return reason;
+  return poll();
+}
+
+CancellationToken::Reason CancellationToken::poll() const noexcept
+{
+  const Reason reason = itsReason.load(std::memory_order_relaxed);
   if (reason != Reason::None)
     return reason;
 
@@ -113,6 +154,29 @@ bool is_cancellation(const Exception& theException)
   return false;
 }
 
+void rethrow_if_cancelled()
+{
+  if (!std::current_exception())
+    return;
+
+  try
+  {
+    throw;
+  }
+  catch (const boost::thread_interrupted&)
+  {
+    throw;
+  }
+  catch (const Exception& e)
+  {
+    if (is_cancellation(e))
+      throw;
+  }
+  catch (...)
+  {
+  }
+}
+
 std::shared_ptr<CancellationToken> current_cancellation_token()
 {
   return current_token;
@@ -122,6 +186,63 @@ void check_cancelled()
 {
   if (current_token)
     current_token->check();
+}
+
+CancellationCallback::CancellationCallback(std::function<void()> theFunction)
+    : CancellationCallback(current_token, std::move(theFunction))
+{
+}
+
+CancellationCallback::CancellationCallback(std::shared_ptr<CancellationToken> theToken,
+                                           std::function<void()> theFunction)
+    : itsToken(std::move(theToken)), itsFunction(std::move(theFunction))
+{
+  if (!itsToken || !itsFunction)
+    return;
+
+  {
+    std::lock_guard<std::mutex> lock(itsToken->itsCallbackMutex);
+    if (!itsToken->itsCallbacksCalled)
+    {
+      itsToken->itsCallbacks.push_back(this);
+      return;
+    }
+  }
+
+  // Already cancelled
+  call();
+}
+
+CancellationCallback::~CancellationCallback()
+{
+  if (!itsToken || !itsFunction)
+    return;
+
+  std::unique_lock<std::mutex> lock(itsToken->itsCallbackMutex);
+  auto& callbacks = itsToken->itsCallbacks;
+  const auto pos = std::find(callbacks.begin(), callbacks.end(), this);
+  if (pos != callbacks.end())
+  {
+    callbacks.erase(pos);
+    return;
+  }
+
+  // Wait if another thread is calling the function, a call from this thread is in progress
+  // only if the function destroys its own callback
+  if (itsToken->itsCallbackThread != std::this_thread::get_id())
+    itsToken->itsCallbackDone.wait(lock, [this]() { return itsToken->itsRunningCallback != this; });
+}
+
+void CancellationCallback::call() const noexcept
+{
+  try
+  {
+    itsFunction();
+  }
+  catch (...)
+  {
+    // A failure to break off the call does not change the cancellation
+  }
 }
 
 CancellationScope::CancellationScope(std::shared_ptr<CancellationToken> theToken)

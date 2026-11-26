@@ -1,9 +1,12 @@
 #include "PostgreSQLConnectionImpl.h"
+#include "DateTime.h"
 #include "Exception.h"
-#include <boost/chrono.hpp>
+#include "StringConversion.h"
 #include <boost/thread.hpp>
 #include <fmt/format.h>
+#include <algorithm>
 #include <memory>
+#include <ratio>
 #include <utility>
 
 using Fmi::Database::PostgreSQLConnection;

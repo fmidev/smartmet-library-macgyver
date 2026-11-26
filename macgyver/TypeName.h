@@ -5,8 +5,8 @@
  *
  *   Some possible uses are:
  *   - getting actual name of the C++ exception thrown when
- *       - base class exception (for example std::exception) is catched
- *       - unspecified exception is catched (catch(...))
+ *       - base class exception (for example std::exception) is caught
+ *       - unspecified exception is caught (catch(...))
  *   - getting actual derived class name from base class member function to be used in output
  * messages
  *

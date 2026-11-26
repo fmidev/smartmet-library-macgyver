@@ -1,20 +1,16 @@
 #include "PostgreSQLConnection.h"
-#include "PostgreSQLConnectionImpl.h"
 #include "AsyncTask.h"
 #include "Cancellation.h"
 #include "Exception.h"
 #include "NumericCast.h"
+#include "PostgreSQLConnectionImpl.h"
 #include "StringConversion.h"
-#include "TypeName.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/thread.hpp>
-#include <fmt/format.h>
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <iostream>
-#include <optional>
 #include <boost/regex.hpp>
+#include <fmt/format.h>
+#include <cassert>
+#include <exception>
+#include <iostream>
 #include <sstream>
 #include <variant>
 #include <vector>
@@ -494,14 +490,14 @@ void PostgreSQLConnection::Transaction::commit()
       {
         // If we get here, transaction has been rolled back
         conn.endTransaction();
-        throw Fmi::Exception(BCP, "Commiting transaction failed").addDetail(e.what());
+        throw Fmi::Exception(BCP, "Committing transaction failed").addDetail(e.what());
       }
     }
     else
     {
       throw Fmi::Exception(BCP,
                            "[Logic error] No transaction to commit"
-                           " (already commited or rolled back)");
+                           " (already committed or rolled back)");
     }
   }
   catch (...)
@@ -522,7 +518,7 @@ void PostgreSQLConnection::Transaction::rollback()
     {
       throw Fmi::Exception(BCP,
                            "[Logic error] No transaction to roll back"
-                           " (already commited or rolled back)");
+                           " (already committed or rolled back)");
     }
   }
   catch (...)

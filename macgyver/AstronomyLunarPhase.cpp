@@ -19,11 +19,12 @@
  */
 
 #include "Astronomy.h"
-#include "AstronomyJulianTime.h"
+#include "AstronomyHelperFunctions.h"
+#include "DateTime.h"
 #include "Exception.h"
-
+#include "LocalDateTime.h"
 #include <cmath>
-#include <vector>
+#include <string>
 
 using namespace std;
 using Fmi::Date;

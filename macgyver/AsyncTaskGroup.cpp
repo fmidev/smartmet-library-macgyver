@@ -5,10 +5,10 @@
 #include "Exception.h"
 #include "TypeName.h"
 
-Fmi::AsyncTaskGroup::AsyncTaskGroup(std::size_t max_paralell_tasks)
+Fmi::AsyncTaskGroup::AsyncTaskGroup(std::size_t max_parallel_tasks)
     : counter(0),
-      max_paralell_tasks(max_paralell_tasks),
-      num_suceeded(0),
+      max_parallel_tasks(max_parallel_tasks),
+      num_succeeded(0),
       num_failed(0),
       stop_requested(false),
       stop_on_error_(false)
@@ -23,7 +23,7 @@ Fmi::AsyncTaskGroup::~AsyncTaskGroup()
 
 void Fmi::AsyncTaskGroup::add(const std::string& name, const std::function<void()>& task)
 {
-  while (get_num_active_tasks() >= max_paralell_tasks)
+  while (get_num_active_tasks() >= max_parallel_tasks)
   {
     wait_some();
   }
@@ -192,7 +192,7 @@ bool Fmi::AsyncTaskGroup::handle_finished()
     if (task->get_status() == AsyncTask::ok)
     {
       notify(task_ended_callbacks, task->get_name());
-      num_suceeded++;
+      num_succeeded++;
     }
   }
   catch (...)

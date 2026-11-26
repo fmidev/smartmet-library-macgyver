@@ -7,13 +7,9 @@
 #include "ValueFormatter.h"
 #include "Exception.h"
 #include "StringConversion.h"
-#include <fmt/format.h>
-#include <fmt/printf.h>
-#include <cmath>
-#include <stdexcept>
-#include <utility>
-
 #include <double-conversion/double-conversion.h>
+#include <cmath>
+#include <utility>
 
 namespace
 {

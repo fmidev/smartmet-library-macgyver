@@ -162,7 +162,7 @@ void wait_until_ready_test_1()
       }
   } while (false);
 
-  // Timing could be extremly unreliable especially in virtual machines
+  // Timing could be extremely unreliable especially in virtual machines
   // (at least under Virtual Box)
   t3 = microsec_clock::universal_time();
   const auto dt = (t3 - t2).total_milliseconds();

@@ -3,15 +3,23 @@
 // directly by user code.
 #pragma once
 
+#include "Cancellation.h"
+#include "Exception.h"
 #include "PostgreSQLConnection.h"
-#include <algorithm>
-#include <chrono>
-#include <iostream>
-#include <memory>
-#include <map>
-#include <optional>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
+#include <atomic>
+#include <chrono>
+#include <cstddef>
+#include <exception>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <optional>
+#include <pqxx/pqxx>
+#include <string>
+#include <thread>
+#include <type_traits>
 
 namespace Fmi
 {
@@ -19,7 +27,7 @@ namespace Database
 {
     class PostgreSQLConnection::Impl final
     {
-        mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connecton
+        mutable std::shared_ptr<pqxx::connection> itsConnection;  // PostgreSQL connection
         mutable std::shared_ptr<pqxx::work> itsTransaction;       // PostgreSQL transaction
         bool itsDebug = false;
         bool itsCollate = false;
@@ -116,6 +124,9 @@ namespace Database
         template <typename ReturnType, typename... Args>
         ReturnType retry_on_failure(std::size_t numTries, MethodType<ReturnType, Args...> method, Args... args);
 
+        template <typename ReturnType, typename... Args>
+        ReturnType call_cancellable(MethodType<ReturnType, Args...> method, Args... args);
+
         std::shared_ptr<pqxx::connection> open_internal(std::size_t numReconnectAttempts);
 
         // Context for the broken connection log messages: how long the failed operation ran and
@@ -190,14 +201,15 @@ namespace Database
                     wait_duration.reset();
                 }
 
+                boost::this_thread::interruption_point();
+                Fmi::check_cancelled();
+
                 start = std::chrono::steady_clock::now();
 
                 if (!has_connection)
                     itsConnection = open_internal(0);
 
-                boost::this_thread::interruption_point();
-
-                return (this->*method)(args...);
+                return call_cancellable<ReturnType, Args...>(method, args...);
             }
             catch(const pqxx::broken_connection& e)
             {
@@ -251,6 +263,74 @@ namespace Database
         }
 
         throw Fmi::Exception(BCP, "INTERNAL ERROR: no supposed to be here (PostgreSQLConnectionImpl::retry_on_failure)");
+    }
+
+
+    // Calls the method so that the query is broken off if the request of the thread is
+    // cancelled (Fmi::CancellationToken). The cancel request is sent in a thread of its own,
+    // since it opens a new connection to the server, which may not answer. The connection is
+    // then closed, so that a cancel request arriving late cannot hit the next query.
+    template <typename ReturnType, typename... Args>
+    ReturnType PostgreSQLConnection::Impl::call_cancellable(MethodType<ReturnType, Args...> method,
+                                                            Args... args)
+    {
+        if (!Fmi::current_cancellation_token())
+            return (this->*method)(args...);
+
+        std::atomic<bool> cancel_sent{false};
+        std::optional<Fmi::CancellationCallback> breaker;
+        breaker.emplace(
+            [&cancel_sent, connection = itsConnection]()
+            {
+                cancel_sent = true;
+                std::thread(
+                    [connection]()
+                    {
+                        try
+                        {
+                            connection->cancel_query();
+                        }
+                        catch (...)
+                        {
+                            // The query then ends when the connection is closed
+                        }
+                    })
+                    .detach();
+            });
+
+        // Stop calling the breaker. If it has been called, the result may be incomplete and
+        // the connection is closed.
+        const auto stop = [&]()
+        {
+            breaker.reset();
+            if (cancel_sent)
+            {
+                itsTransaction.reset();
+                itsConnection.reset();
+                Fmi::check_cancelled();
+            }
+        };
+
+        try
+        {
+            Fmi::check_cancelled();
+            if constexpr (std::is_void_v<ReturnType>)
+            {
+                (this->*method)(args...);
+                stop();
+            }
+            else
+            {
+                ReturnType result = (this->*method)(args...);
+                stop();
+                return result;
+            }
+        }
+        catch (...)
+        {
+            stop();
+            throw;
+        }
     }
 
 } // namespace Database

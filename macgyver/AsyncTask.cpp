@@ -1,16 +1,12 @@
 #include "AsyncTask.h"
-
 #include "DateTime.h"
-#include "DebugTools.h"
 #include "ThreadName.h"
 #include "TypeName.h"
-#include <chrono>
-#include <iostream>
 #include <fmt/format.h>
-#include <boost/chrono.hpp>
+#include <cmath>
+#include <cstdint>
+#include <iostream>
 #include <utility>
-
-
 
 bool Fmi::AsyncTask::silent = false;
 bool Fmi::AsyncTask::log_time = false;

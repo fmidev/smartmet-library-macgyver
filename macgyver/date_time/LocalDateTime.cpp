@@ -577,13 +577,13 @@ Fmi::date_time::make_time(
         }
         catch (const date::ambiguous_local_time&)
         {
-            // We have ambigous local time - preffer sommertime
+            // We have ambiguous local time - prefer sommertime
             detail::zoned_time_t ldt(tz.zone_ptr(), tp, date::choose::earliest);
             return LocalDateTime(ldt);
         }
         catch (const date::nonexistent_local_time&)
         {
-            // We have non-existent local time - preffer standard time
+            // We have non-existent local time - prefer standard time
             detail::zoned_time_t ldt(tz.zone_ptr(), tp, date::choose::earliest);
             return LocalDateTime(ldt);
         }

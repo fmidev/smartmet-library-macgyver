@@ -1,16 +1,15 @@
 #pragma once
 
 #include "Exception.h"
-#include <atomic>
+#include "TypeName.h"
+#include <boost/thread/condition_variable.hpp>
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <list>
 #include <memory>
+#include <string>
 #include <type_traits>
-#include <boost/chrono.hpp>
-#include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
-#include "TypeName.h"
 
 namespace Fmi
 {
@@ -116,7 +115,7 @@ namespace Fmi
               if (curr_pool_size > max_reached_pool_size) {
                   max_reached_pool_size = curr_pool_size;
               }
-              lock.unlock();  // No nead to keep lock while creating a new object
+              lock.unlock();  // No need to keep lock while creating a new object
               PoolItem new_item;
               new_item.next_free = items.end();
               new_item.reserved = false;

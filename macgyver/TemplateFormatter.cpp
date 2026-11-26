@@ -7,17 +7,18 @@
 
 #include "TemplateFormatter.h"
 #include "Exception.h"
-
 #include <ctpp2/CTPP2Logger.hpp>
 #include <ctpp2/CTPP2OutputCollector.hpp>
 #include <ctpp2/CTPP2VM.hpp>
 #include <ctpp2/CTPP2VMFileLoader.hpp>
 #include <ctpp2/CTPP2VMSTDLib.hpp>
-
-#include <cstdarg>
-#include <cstdio>
 #include <iostream>
 #include <string>
+
+namespace CTPP
+{
+struct VMMemoryCore;
+}  // namespace CTPP
 
 class Fmi::TemplateFormatter::OutputCollector : public CTPP::OutputCollector
 {

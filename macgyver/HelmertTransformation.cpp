@@ -1,9 +1,10 @@
 #include "HelmertTransformation.h"
 #include "Exception.h"
+#include "ReferenceEllipsoid.h"
 #include <boost/math/constants/constants.hpp>
+#include <cmath>
 #include <cstdio>
 #include <sstream>
-#include <stdexcept>
 
 #ifdef _MSC_VER
 #define __PRETTY_FUNCTION__ BOOST_CURRENT_FUNCTION

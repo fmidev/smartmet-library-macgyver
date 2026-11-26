@@ -6,23 +6,25 @@
 #pragma once
 
 // bimap kept for FileCache; Cache template uses unordered_map + list
+#include "CacheStats.h"
+#include "DateTime.h"
 #include <boost/bimap.hpp>
 #include <boost/bimap/list_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
-#include <boost/functional/hash.hpp>
 #include <array>
 #include <atomic>
+#include <cstddef>
 #include <filesystem>
+#include <functional>
 #include <list>
+#include <mutex>
 #include <optional>
 #include <shared_mutex>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include "CacheStats.h"
-#include "DateTime.h"
 
 namespace Fmi
 {

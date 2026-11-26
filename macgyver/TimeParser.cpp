@@ -4,19 +4,21 @@
  */
 // ======================================================================
 
-#include <limits>
 #include "TimeParser.h"
+#include "DateTime.h"
 #include "Exception.h"
 #include "TimeParserDefinitions.h"
-
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/regex.hpp>
-
-#include <cctype>
-#include <stdexcept>
+#include <boost/spirit/include/qi.hpp>
+#include <cstddef>
+#include <cstdint>
+#include <exception>
+#include <limits>
+#include <vector>
 
 namespace
 {
@@ -496,7 +498,7 @@ Fmi::DateTime parse_epoch(const std::string& str)
 
     bool success = qi::parse(start, finish, theParser >> qi::eoi, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return ::buildFromEpoch(target);
 
     throw Fmi::Exception(BCP, "Invalid epoch time: '" + str + "'");
@@ -609,7 +611,7 @@ Fmi::DateTime parse_iso(const std::string& str)
 
     bool success = qi::parse(start, finish, theParser, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return ::buildFromISO(target);
 
     throw Fmi::Exception(BCP, "Invalid ISO-time: '" + str + "'");
@@ -639,7 +641,7 @@ Fmi::DateTime parse_fmi(const std::string& str)
 
     bool success = qi::parse(start, finish, theParser, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return ::buildFromISO(target);
 
     throw Fmi::Exception(BCP, "Invalid ISO-time: '" + str + "'");
@@ -669,7 +671,7 @@ Fmi::DateTime parse_sql(const std::string& str)
 
     bool success = qi::parse(start, finish, theParser, target);
 
-    if (success)  // parse succesful, parsers check that entire input was consumed
+    if (success)  // parse successful, parsers check that entire input was consumed
       return ::buildFromSQL(target);
 
     throw Fmi::Exception(BCP, "Invalid SQL-time: '" + str + "'");
@@ -922,7 +924,7 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, theParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {
@@ -945,7 +947,7 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, theParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {
@@ -968,7 +970,7 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, theParser, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {
@@ -1009,7 +1011,7 @@ Fmi::DateTime match_and_parse(const std::string& str, ParserId& matchedParser)
       iterator start = str.begin();
       iterator finish = str.end();
       bool success = qi::parse(start, finish, theParser >> qi::eoi, target);
-      if (success)  // parse succesful, parsers check that entire input was consumed
+      if (success)  // parse successful, parsers check that entire input was consumed
       {
         try
         {

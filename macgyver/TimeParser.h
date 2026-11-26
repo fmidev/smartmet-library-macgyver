@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "DateTime.h"
 #include "LocalDateTime.h"
 #include <string>
 

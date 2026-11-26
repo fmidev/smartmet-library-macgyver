@@ -8,16 +8,18 @@
 
 #pragma once
 #include "ThreadName.h"
-#include <boost/chrono/duration.hpp>
-#include <boost/chrono/system_clocks.hpp>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
+#include <cstddef>
+#include <exception>
 #include <functional>
 #include <iostream>
+#include <limits>
+#include <list>
 #include <memory>
 #include <queue>
-#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Fmi
@@ -386,7 +388,7 @@ class ThreadPool
   /*!
    * \brief Schedule task for processing
    *
-   * Attempts to add task to the task queue. Returnts true if succesfull.
+   * Attempts to add task to the task queue. Returnts true if successful.
    * May fail if task queue is full.
    */
   // ======================================================================

@@ -301,7 +301,7 @@ namespace fmt
  *   fmt::format("{:p}", id)    -> "5432"
  *   fmt::format("{:d}", id)    -> "example"
  *
- * Based on verson suggested by ChatGPT 5 with some simplifications
+ * Based on version suggested by ChatGPT 5 with some simplifications
  */
 template <>
 struct formatter<Fmi::Database::PostgreSQLConnectionId>
