@@ -469,6 +469,44 @@ BOOST_AUTO_TEST_CASE(test_stream_cancelled, * utf::depends_on("get_connection_op
     BOOST_CHECK_EQUAL(count, 100U);
 }
 
+BOOST_AUTO_TEST_CASE(test_execute_cancelled, * utf::depends_on("get_connection_options"))
+{
+    // A query blocked in the server is broken off when another thread cancels the request
+    db::PostgreSQLConnection conn(env::opts);
+    auto token = std::make_shared<Fmi::CancellationToken>();
+    std::thread canceller(
+        [token]()
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            token->cancel(Fmi::CancellationToken::Reason::Deadline);
+        });
+    const auto start = std::chrono::steady_clock::now();
+    try
+    {
+        Fmi::CancellationScope scope(token);
+        conn.executeNonTransaction("SELECT pg_sleep(30)");
+        BOOST_FAIL("Expected a cancellation");
+    }
+    catch (const Fmi::Exception& e)
+    {
+        BOOST_CHECK(Fmi::is_cancellation(e));
+    }
+    canceller.join();
+    const double elapsed =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    BOOST_CHECK_LT(elapsed, 5.0);
+
+    // The connection is replaced and usable outside the scope of the token
+    pqxx::result result;
+    BOOST_REQUIRE_NO_THROW(result = conn.executeNonTransaction("SELECT 42 AS answer"));
+    BOOST_CHECK_EQUAL(result[0]["answer"].as<int>(), 42);
+
+    // A cancelled request does not start a query
+    Fmi::CancellationScope scope(token);
+    BOOST_CHECK_THROW(conn.executeNonTransaction("SELECT 1"), Fmi::Exception);
+    BOOST_CHECK_THROW(conn.exec_params("SELECT $1::int", 1), Fmi::Exception);
+}
+
 BOOST_AUTO_TEST_CASE(test_stream_in_transaction, * utf::depends_on("get_connection_options"))
 {
     db::PostgreSQLConnection conn(env::opts);

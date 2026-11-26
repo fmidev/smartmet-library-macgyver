@@ -12,12 +12,25 @@
  * a value which other requests wait for in a cache. They would fail with the
  * cancelled request.
  *
+ * Shared work done in the thread of a request is protected from the cancellation with an
+ * empty scope:
+ *
+ *   Fmi::CancellationScope not_cancelled(nullptr);
+ *
  * Work moved to another thread is cancelled only if the token is made current there
  * too:
  *
  *   auto token = Fmi::current_cancellation_token();
  *   ... in the other thread:
  *   Fmi::CancellationScope scope(token);
+ *
+ * A check costs about 20 ns, in a request watched by the server (see beginWatch()) about
+ * 5 ns. Check where an iteration takes at least some microseconds, or every Nth time:
+ *
+ *   if ((++counter & 1023) == 0) Fmi::check_cancelled();
+ *
+ * A blocking call which does not return before it ends, such as a database query, is
+ * broken off with a CancellationCallback.
  */
 // ======================================================================
 
@@ -25,14 +38,19 @@
 
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <functional>
 #include <limits>
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <thread>
+#include <vector>
 
 namespace Fmi
 {
 class Exception;
+class CancellationCallback;
 
 class CancellationToken
 {
@@ -71,9 +89,19 @@ class CancellationToken
   bool hasProbe() const noexcept { return static_cast<bool>(itsProbe); }
 
   // Reason::None while the request may continue. Notices an expired deadline and
-  // polls the probe when it is time to.
+  // polls the probe when it is time to, unless the token is watched.
   Reason reason() const noexcept;
   bool cancelled() const noexcept { return reason() != Reason::None; }
+
+  // Like reason(), but notices the deadline and polls the probe also when the token is
+  // watched. For the thread which watches the token.
+  Reason poll() const noexcept;
+
+  // Another thread notices the deadline and polls the probe until endWatch(), and the
+  // other methods then only read the state it has set. Calls must be paired.
+  void beginWatch() noexcept;
+  void endWatch() noexcept;
+  bool watched() const noexcept { return itsWatchers.load(std::memory_order_relaxed) > 0; }
 
   // Throws an exception recognized by is_cancellation() if the request has been
   // cancelled
@@ -84,18 +112,58 @@ class CancellationToken
   bool interrupted() const noexcept { return itsInterrupted.load(); }
 
  private:
+  friend class CancellationCallback;
   using Rep = Clock::rep;
   void setReason(Reason theReason) const noexcept;
+  void runCallbacks() const noexcept;
 
   static constexpr Rep no_deadline = std::numeric_limits<Rep>::max();
 
   mutable std::atomic<Reason> itsReason{Reason::None};
   mutable std::atomic<bool> itsInterrupted{false};
   std::atomic<Rep> itsDeadline{no_deadline};
+  std::atomic<int> itsWatchers{0};
 
   Probe itsProbe;
   Clock::duration itsProbeInterval{};
   mutable std::atomic<Rep> itsNextProbe{0};
+
+  // Callbacks waiting for the cancellation, the one being called and the thread calling it
+  mutable std::mutex itsCallbackMutex;
+  mutable std::condition_variable itsCallbackDone;
+  mutable std::vector<CancellationCallback*> itsCallbacks;
+  mutable const CancellationCallback* itsRunningCallback = nullptr;
+  mutable std::thread::id itsCallbackThread;
+  mutable bool itsCallbacksCalled = false;
+};
+
+// Calls a function once the token is cancelled, while the callback exists. Breaks off a
+// call which does not return before it ends, such as a database query. The function is
+// called by the thread which notices the cancellation, usually the one watching all the
+// requests, so it must be thread safe and quick: anything which may block, such as a
+// network connection, belongs in another thread. The function is called at once if the
+// token has already been cancelled, so check the token after creating the callback and
+// before starting the call. The destructor waits for a call made by another thread to
+// return.
+class CancellationCallback
+{
+ public:
+  // Uses the token current in this thread, does nothing if there is none
+  explicit CancellationCallback(std::function<void()> theFunction);
+  CancellationCallback(std::shared_ptr<CancellationToken> theToken,
+                       std::function<void()> theFunction);
+  ~CancellationCallback();
+  CancellationCallback(const CancellationCallback& other) = delete;
+  CancellationCallback(CancellationCallback&& other) = delete;
+  CancellationCallback& operator=(const CancellationCallback& other) = delete;
+  CancellationCallback& operator=(CancellationCallback&& other) = delete;
+
+ private:
+  friend class CancellationToken;
+  void call() const noexcept;
+
+  std::shared_ptr<CancellationToken> itsToken;
+  std::function<void()> itsFunction;
 };
 
 // Description of the reason, for example for messages to the client
@@ -105,6 +173,18 @@ const char* to_string(CancellationToken::Reason theReason);
 // request was cancelled
 bool is_cancellation(const Exception& theException);
 
+// In a catch block: rethrows the exception being handled if it was thrown because the
+// request was cancelled or the thread was interrupted (boost::thread_interrupted), and does
+// nothing otherwise. For blocks which turn exceptions into error codes or log them and
+// continue:
+//
+//   catch (...)
+//   {
+//     Fmi::rethrow_if_cancelled();
+//     return Result::UNEXPECTED_EXCEPTION;
+//   }
+void rethrow_if_cancelled();
+
 // The token current in this thread, empty if none
 std::shared_ptr<CancellationToken> current_cancellation_token();
 
@@ -113,7 +193,7 @@ std::shared_ptr<CancellationToken> current_cancellation_token();
 void check_cancelled();
 
 // Makes a token current in this thread until destroyed, the previous token is then
-// restored
+// restored. An empty token stops the checks in the scope.
 class CancellationScope
 {
  public:

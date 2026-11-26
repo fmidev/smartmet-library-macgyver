@@ -7,6 +7,7 @@
 
 #include "Cancellation.h"
 #include "Exception.h"
+#include <boost/thread/exceptions.hpp>
 #include <regression/tframe.h>
 #include <atomic>
 #include <iostream>
@@ -236,6 +237,177 @@ void threads()
   TEST_PASSED();
 }
 
+void watched()
+{
+  // A watched token reads only the state set by the watcher
+  Token token;
+  token.setDeadline(Token::Clock::now() - std::chrono::milliseconds(1));
+  token.beginWatch();
+  if (!token.watched())
+    TEST_FAILED("The token must be watched");
+  if (token.cancelled())
+    TEST_FAILED("A watched token must not notice the deadline by itself");
+  if (token.poll() != Reason::Deadline)
+    TEST_FAILED("The watcher must notice the deadline");
+  if (token.reason() != Reason::Deadline)
+    TEST_FAILED("A watched token must see the reason set by the watcher");
+  token.endWatch();
+  if (token.watched())
+    TEST_FAILED("The token must not be watched after endWatch()");
+
+  Token token2;
+  token2.setDeadline(Token::Clock::now() - std::chrono::milliseconds(1));
+  if (token2.reason() != Reason::Deadline)
+    TEST_FAILED("An unwatched token must notice the deadline");
+  TEST_PASSED();
+}
+
+void callback()
+{
+  auto token = std::make_shared<Token>();
+  int calls = 0;
+  {
+    Fmi::CancellationCallback cb(token, [&]() { ++calls; });
+    if (calls != 0)
+      TEST_FAILED("The callback must not be called before the cancellation");
+  }
+  token->cancel();
+  if (calls != 0)
+    TEST_FAILED("A destroyed callback must not be called");
+
+  // Called at once when the token has already been cancelled
+  {
+    Fmi::CancellationCallback cb(token, [&]() { ++calls; });
+    if (calls != 1)
+      TEST_FAILED("The callback must be called at once for a cancelled token");
+  }
+
+  // Called once, by the thread which notices the deadline. A failing callback does not
+  // stop the others.
+  auto token2 = std::make_shared<Token>();
+  token2->setDeadline(Token::Clock::now() + std::chrono::milliseconds(20));
+  std::atomic<int> calls2{0};
+  std::thread::id caller;
+  std::thread::id noticer;
+  {
+    Fmi::CancellationCallback cb1(token2,
+                                  [&]()
+                                  {
+                                    ++calls2;
+                                    caller = std::this_thread::get_id();
+                                  });
+    Fmi::CancellationCallback cb2(token2, []() { throw std::runtime_error("failed"); });
+    Fmi::CancellationCallback cb3(token2, [&]() { ++calls2; });
+    std::thread(
+        [&]()
+        {
+          while (!token2->cancelled())
+            std::this_thread::yield();
+          noticer = std::this_thread::get_id();
+        })
+        .join();
+    token2->cancel();  // already cancelled, the callbacks are not called again
+  }
+  if (calls2 != 2)
+    TEST_FAILED("Both callbacks must be called once, called " + std::to_string(calls2) + " times");
+  if (caller != noticer)
+    TEST_FAILED("The callbacks must be called by the thread which noticed the deadline");
+  TEST_PASSED();
+}
+
+void callback_wait()
+{
+  // Destroying a callback waits until another thread has returned from calling it
+  auto token = std::make_shared<Token>();
+  std::atomic<bool> started{false};
+  std::atomic<bool> finished{false};
+  bool finished_when_destroyed = false;
+  std::thread canceller;
+  {
+    Fmi::CancellationCallback cb(token,
+                                 [&]()
+                                 {
+                                   started = true;
+                                   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                                   finished = true;
+                                 });
+    canceller = std::thread([&]() { token->cancel(); });
+    while (!started)
+      std::this_thread::yield();
+  }
+  finished_when_destroyed = finished;
+  canceller.join();
+  if (!finished_when_destroyed)
+    TEST_FAILED("The destructor must wait for the callback to return");
+
+  // A callback may destroy itself
+  auto token2 = std::make_shared<Token>();
+  std::unique_ptr<Fmi::CancellationCallback> self;
+  auto cb2 = std::make_unique<Fmi::CancellationCallback>(token2, [&]() { self.reset(); });
+  self = std::move(cb2);
+  token2->cancel();
+  if (self)
+    TEST_FAILED("The callback must have destroyed itself");
+
+  // Without a current token nothing is registered
+  Fmi::CancellationCallback none([]() { throw std::runtime_error("must not be called"); });
+  TEST_PASSED();
+}
+
+// Returns "rethrown" if rethrow_if_cancelled() rethrew the exception thrown by the function
+template <typename F>
+std::string rethrown(F theFunction)
+{
+  try
+  {
+    try
+    {
+      theFunction();
+    }
+    catch (...)
+    {
+      Fmi::rethrow_if_cancelled();
+      return "kept";
+    }
+  }
+  catch (...)
+  {
+    return "rethrown";
+  }
+  return "nothing thrown";
+}
+
+void rethrow_if_cancelled()
+{
+  auto token = std::make_shared<Token>();
+  token->cancel();
+
+  if (rethrown([&]() { token->check(); }) != "rethrown")
+    TEST_FAILED("A cancellation must be rethrown");
+  if (rethrown([&]()
+               {
+                 try
+                 {
+                   token->check();
+                 }
+                 catch (...)
+                 {
+                   throw Fmi::Exception::Trace(BCP, "Operation failed!");
+                 }
+               }) != "rethrown")
+    TEST_FAILED("A wrapped cancellation must be rethrown");
+  if (rethrown([]() { throw boost::thread_interrupted(); }) != "rethrown")
+    TEST_FAILED("An interruption must be rethrown");
+  if (rethrown([]() { throw Fmi::Exception(BCP, "Something else"); }) != "kept")
+    TEST_FAILED("Another Fmi::Exception must not be rethrown");
+  if (rethrown([]() { throw std::runtime_error("failed"); }) != "kept")
+    TEST_FAILED("Another exception must not be rethrown");
+
+  // Outside a catch block nothing is done
+  Fmi::rethrow_if_cancelled();
+  TEST_PASSED();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * The actual test suite
@@ -256,6 +428,10 @@ class tests : public tframe::tests
     TEST(wrapped);
     TEST(other_exception);
     TEST(threads);
+    TEST(watched);
+    TEST(callback);
+    TEST(callback_wait);
+    TEST(rethrow_if_cancelled);
   }
 };
 
