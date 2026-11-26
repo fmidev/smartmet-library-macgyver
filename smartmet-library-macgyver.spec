@@ -16,7 +16,7 @@
 
 Summary: macgyver library
 Name: %{SPECNAME}
-Version: 26.11.13
+Version: 26.11.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -151,6 +151,9 @@ FMI MacGyver library static files
 %{_libdir}/libsmartmet-%{DIRNAME}.a
 
 %changelog
+* Thu Nov 26 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.11.26-1.fmi
+- Request cancelation support update
+
 * Fri Nov 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.13-1.fmi
 - Include cleanup: headers include what they use and prefer forward declarations,
   unnecessary includes removed. No functional changes, but code using these headers may
